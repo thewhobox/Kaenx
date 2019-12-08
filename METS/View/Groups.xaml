@@ -1,0 +1,162 @@
+﻿<Page
+    x:Class="METS.View.Groups"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:METS.Classes"
+    xmlns:toolkit="using:Microsoft.Toolkit.Uwp.UI.Controls"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d"
+    Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="auto" />
+            <ColumnDefinition Width="300" />
+            <ColumnDefinition Width="auto" />
+            <ColumnDefinition />
+            <ColumnDefinition Width="auto" />
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="auto" />
+            <RowDefinition />
+        </Grid.RowDefinitions>
+
+
+        <Border Background="LightGray" BorderThickness="0 0 0 1" BorderBrush="White">
+            <StackPanel Orientation="Horizontal">
+                <AppBarButton Label="Haupt" Icon="Add" Click="ClickAddMain" />
+                <AppBarToggleButton x:Name="BtnToggleProps" Label="Filter" Icon="Filter" IsChecked="True" />
+            </StackPanel>
+        </Border>
+
+        <Border Background="LightGray" Grid.Row="1">
+            <TreeView x:Name="TreeGroups" ItemsSource="{Binding Groups}" CanReorderItems="False" ItemInvoked="TreeGroups_ItemInvoked" MinWidth="250">
+                <TreeView.ItemTemplate>
+                    <DataTemplate x:DataType="local:Line">
+                        <TreeViewItem Content="{Binding}" CanDrag="False" Margin="-20 0 0 0" ItemsSource="{Binding Subs}" IsExpanded="{Binding IsExpanded, Mode=TwoWay}" Drop="TreeViewItem_Drop" AllowDrop="True" DragOver="TreeViewItem_DragEnter" DragLeave="General_DragLeave">
+                            <TreeViewItem.ContextFlyout>
+                                <MenuFlyout>
+                                    <MenuFlyoutItem Text="Hinzufügen" Icon="Add" Click="ClickAddSub" />
+                                    <MenuFlyoutItem Text="Umbenennen" Icon="Rename" Click="ClickAddRename" />
+                                    <MenuFlyoutItem Text="Löschen" Icon="Delete" Click="ClickAddDelete" />
+                                </MenuFlyout>
+                            </TreeViewItem.ContextFlyout>
+                            <TreeViewItem.ContentTemplate>
+                                <DataTemplate x:DataType="local:Line">
+                                    <StackPanel Orientation="Horizontal">
+                                        <Viewbox Height="15">
+                                            <SymbolIcon Symbol="{Binding Icon}" />
+                                        </Viewbox>
+                                        <TextBlock Text="{Binding GroupName}" Margin="10 0 0 0" />
+                                        <TextBlock Text="{Binding Name}" Margin="10 0 5 0" />
+                                    </StackPanel>
+                                </DataTemplate>
+                            </TreeViewItem.ContentTemplate>
+                        </TreeViewItem>
+                    </DataTemplate>
+                </TreeView.ItemTemplate>
+            </TreeView>
+        </Border>
+
+
+        <TextBlock x:Name="OutGroupName" Grid.Column="1" VerticalAlignment="Center" Margin="10 0 0 0" FontSize="20">
+                <Run Text="{Binding SelectedGroup.GroupName}" />
+                <Run Text="{Binding SelectedGroup.Name}" />
+        </TextBlock>
+        
+        <toolkit:DataGrid x:Name="ListGroupComs" AllowDrop="True" Drop="ListGroupComs_Drop" DragLeave="General_DragLeave" DragOver="ListGroupComs_DragEnter" Grid.Column="1" Grid.Row="1" Margin="5 0" AutoGenerateColumns="False" ItemsSource="{Binding SelectedGroup.ComObjects}" BorderThickness="1 1 1 0" BorderBrush="LightGray" IsReadOnly="True" >
+            <toolkit:DataGrid.Background>
+                <SolidColorBrush Color="#FFE0E0E0" />
+            </toolkit:DataGrid.Background>
+            <toolkit:DataGrid.RowStyle>
+                <Style TargetType="toolkit:DataGridRow">
+                    <Setter Property="toolkit:DataGridRow.ContextFlyout">
+                        <Setter.Value>
+                            <MenuFlyout>
+                                <MenuFlyoutItem Click="ClickUnlink" Icon="Delete" Text="Trennen" />
+                            </MenuFlyout>
+                        </Setter.Value>
+                    </Setter>
+                </Style>
+            </toolkit:DataGrid.RowStyle>
+            <toolkit:DataGrid.Columns>
+                <toolkit:DataGridTextColumn Tag="number" Width="SizeToCells" Header="Nummer" Binding="{Binding Number}" />
+                <toolkit:DataGridTextColumn MinWidth="160" Tag="name" Width="SizeToCells" Header="Name" Binding="{Binding Name}" />
+                <toolkit:DataGridTextColumn MinWidth="160" Tag="func" Width="SizeToCells" Header="Funktion" Binding="{Binding Function}" />
+                <toolkit:DataGridTextColumn MinWidth="300" Tag="connections" Width="SizeToCells" Header="Verbindungen" Binding="{Binding Connections}" />
+            </toolkit:DataGrid.Columns>
+        </toolkit:DataGrid>
+
+        <toolkit:GridSplitter Grid.Column="2" Grid.RowSpan="2" Width="11" ResizeBehavior="BasedOnAlignment" ResizeDirection="Auto" Background="Gray" Foreground="White" FontSize="13">
+            <toolkit:GridSplitter.Element>
+                <Grid>
+                    <TextBlock HorizontalAlignment="Center"  IsHitTestVisible="False"
+                    VerticalAlignment="Center" Text="&#xE784;"
+                    Foreground="Black" FontFamily="Segoe MDL2 Assets"/>
+                </Grid>
+            </toolkit:GridSplitter.Element>
+        </toolkit:GridSplitter>
+
+        <TextBlock x:Name="OutDeviceName" Grid.Column="3" Text="{Binding SelectedDevice.Name}" VerticalAlignment="Center" Margin="10 0 0 0" FontSize="20" />
+        
+        <toolkit:DataGrid x:Name="ListComs" Grid.Column="3" Grid.Row="1" Margin="5 0" LoadingRow="ListComs_LoadingRow" AutoGenerateColumns="False" ItemsSource="{Binding SelectedDevice.ComObjects}" IsReadOnly="True" BorderThickness="1 1 1 0" BorderBrush="LightGray" >
+            <toolkit:DataGrid.RowStyle>
+                <Style TargetType="toolkit:DataGridRow">
+                    <Setter Property="CanDrag" Value="True" />
+                    <Setter Property="toolkit:DataGridRow.ContextFlyout">
+                        <Setter.Value>
+                            <MenuFlyout>
+                                <MenuFlyoutItem Click="ClickUnlink2" Icon="Delete" Text="Trennen" />
+                            </MenuFlyout>
+                        </Setter.Value>
+                    </Setter>
+                </Style>
+            </toolkit:DataGrid.RowStyle>
+            <toolkit:DataGrid.Background>
+                <SolidColorBrush Color="#FFE0E0E0" />
+            </toolkit:DataGrid.Background>
+            <toolkit:DataGrid.Columns>
+                <toolkit:DataGridTextColumn Tag="number" Width="SizeToCells" Header="Nummer" Binding="{Binding Number}" />
+                <toolkit:DataGridTextColumn MinWidth="160" Tag="name" Width="SizeToCells" Header="Name" Binding="{Binding Name}" />
+                <toolkit:DataGridTextColumn MinWidth="160" Tag="func" Width="SizeToCells" Header="Funktion" Binding="{Binding Function}" />
+                <toolkit:DataGridTextColumn MinWidth="300" Tag="connections" Width="SizeToCells" Header="Verbindungen" Binding="{Binding Connections}" />
+                <toolkit:DataGridTemplateColumn Header="Test">
+                    <toolkit:DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <StackPanel Orientation="Horizontal">
+                                <CheckBox MinWidth="10" Content="R" Margin="3 0 3 0" IsChecked="{Binding Flag_Read}" />
+                                <CheckBox MinWidth="10" Content="W" Margin="3 0 3 0" IsChecked="{Binding Flag_Write}" />
+                                <CheckBox MinWidth="10" Content="T" Margin="3 0 3 0" IsChecked="{Binding Flag_Transmit}" />
+                                <CheckBox MinWidth="10" Content="U" Margin="3 0 3 0" IsChecked="{Binding Flag_Update}" />
+                                <CheckBox MinWidth="10" Content="C" Margin="3 0 3 0" IsChecked="{Binding Flag_Communication}" />
+                            </StackPanel>
+                        </DataTemplate>
+                    </toolkit:DataGridTemplateColumn.CellTemplate>
+                </toolkit:DataGridTemplateColumn>
+            </toolkit:DataGrid.Columns>
+        </toolkit:DataGrid>
+
+        <Border Background="LightGray" Grid.Column="4" Grid.RowSpan="2">
+            <TreeView x:Name="TreeTopologie" CanReorderItems="False" ItemsSource="{Binding Lines}" ItemInvoked="TreeTopologie_ItemInvoked" VerticalAlignment="Stretch" Background="LightGray">
+                <TreeView.ItemTemplate>
+                    <DataTemplate x:DataType="local:Line">
+                        <TreeViewItem Margin="-20 0 0 0" Background="Transparent" BorderThickness="0" Content="{Binding}" ItemsSource="{Binding Subs}" IsExpanded="{Binding IsExpanded, Mode=TwoWay}">
+                            <TreeViewItem.ContentTemplate>
+                                <DataTemplate x:DataType="local:TopologieBase">
+                                    <StackPanel Orientation="Horizontal">
+                                        <Viewbox Height="15">
+                                            <SymbolIcon Symbol="{Binding Icon}" Foreground="{Binding CurrentBrush}" />
+                                        </Viewbox>
+                                        <TextBlock Text="{Binding LineName}" Margin="5 0 0 0" FontSize="14" VerticalAlignment="Center" />
+                                        <TextBlock Text="{Binding Name}" Margin="5 0 10 0" FontSize="14" VerticalAlignment="Center" />
+                                    </StackPanel>
+                                </DataTemplate>
+                            </TreeViewItem.ContentTemplate>
+                        </TreeViewItem>
+                    </DataTemplate>
+                </TreeView.ItemTemplate>
+            </TreeView>
+        </Border>
+    </Grid>
+</Page>

@@ -1,0 +1,192 @@
+﻿<Page
+    x:Class="METS.View.Topologie"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:METS.Classes"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:toolkit="using:Microsoft.Toolkit.Uwp.UI.Controls"
+    xmlns:animations="using:Microsoft.Toolkit.Uwp.UI.Animations"
+    xmlns:converter="using:METS.Classes.Converter"
+    mc:Ignorable="d"
+    Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+    <Page.Resources>
+        <converter:NumberConverter x:Key="NumberConverter" />
+        <converter:Checked2VisibilityConverter x:Key="CheckedConverter" />
+        <Storyboard x:Key="AniShowProps" Storyboard.TargetName="RenderPanelScale" Storyboard.TargetProperty="ScaleX">
+            <DoubleAnimation To="1" Duration="0:0:2" />
+        </Storyboard>
+        <Storyboard x:Key="AniHideProps" Storyboard.TargetName="RenderPanelScale" Storyboard.TargetProperty="ScaleX">
+            <DoubleAnimation To="0" Duration="0:0:2" />
+        </Storyboard>
+    </Page.Resources>
+
+    <Grid x:Name="GridDevices">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="auto" />
+            <ColumnDefinition />
+            <ColumnDefinition Width="auto" />
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition />
+        </Grid.RowDefinitions>
+
+        <Border Grid.RowSpan="2">
+            <Border.Background>
+                <SolidColorBrush Color="#FFE0E0E0" />
+            </Border.Background>
+        </Border>
+        
+        <Border BorderThickness="0 0 0 1" BorderBrush="White">
+            <StackPanel Orientation="Horizontal">
+                <AppBarButton Label="Bereich" Icon="Add" Click="ClickAddMain" />
+                <AppBarButton Label="Katalog" Icon="Shop" Click="ClickOpenCatalog" />
+            </StackPanel>
+        </Border>
+
+        <TreeView x:Name="TreeV" Grid.Row="1" ItemsSource="{Binding}" CanReorderItems="False" ItemInvoked="TreeV_ItemInvoked"  VerticalAlignment="Stretch" Background="LightGray">
+            <TreeView.ItemTemplate>
+                <DataTemplate x:DataType="local:Line">
+                    <TreeViewItem Margin="-20 0 0 0" Background="Transparent" BorderThickness="0" AllowDrop="True" Content="{Binding}" ItemsSource="{Binding Subs}" IsExpanded="{Binding IsExpanded, Mode=TwoWay}" DragOver="TreeViewItem_DragOver" Drop="TreeViewItem_Drop">
+                        <TreeViewItem.ContextFlyout>
+                            <MenuFlyout Opening="MenuFlyout_Opening">
+                                <MenuFlyoutItem Text="Hinzufügen" Icon="Add" Click="ClickAddSub" />
+                                <MenuFlyoutSubItem Text="Programmieren" Icon="PostUpdate">
+                                    <MenuFlyoutItem Text="Ph. Adresse" Icon="MapPin" Click="ClickProAddr" />
+                                </MenuFlyoutSubItem>
+                                <MenuFlyoutItem Text="Parameter" Icon="Bookmarks" Click="ClickOpenParas" />
+                                <MenuFlyoutItem Text="Umbenennen" Icon="Rename" Click="ClickAddRename" />
+                                <MenuFlyoutItem Text="Löschen" Icon="Delete" Click="ClickAddDelete" />
+                            </MenuFlyout>
+                        </TreeViewItem.ContextFlyout>
+                        <TreeViewItem.ContentTemplate>
+                            <DataTemplate x:DataType="local:TopologieBase">
+                                <StackPanel Orientation="Horizontal">
+                                    <Viewbox Height="15">
+                                        <SymbolIcon Symbol="{Binding Icon}" Foreground="{Binding CurrentBrush}" />
+                                    </Viewbox>
+                                    <TextBlock Text="{Binding LineName}" Margin="5 0 0 0" FontSize="14" VerticalAlignment="Center" />
+                                    <TextBlock Text="{Binding Name}" Margin="5 0 10 0" FontSize="14" VerticalAlignment="Center" />
+                                </StackPanel>
+                            </DataTemplate>
+                        </TreeViewItem.ContentTemplate>
+                    </TreeViewItem>
+                </DataTemplate>
+            </TreeView.ItemTemplate>
+        </TreeView>
+
+        <toolkit:TabView x:Name="tabView" Grid.Column="1" Grid.RowSpan="2" CanCloseTabs="True" Margin="5 0 5 0" >
+            <toolkit:TabView.Footer>
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock Margin="0 0 10 0">
+                        <Run Text="Bereiche:" />
+                        <Run x:Name="InfoAreas" />
+                    </TextBlock>
+                    <TextBlock Margin="0 0 10 0">
+                        <Run Text="Linien:" />
+                        <Run x:Name="InfoLines" />
+                    </TextBlock>
+                    <TextBlock>
+                        <Run Text="Geräte: " />
+                        <Run x:Name="InfoDevices" />
+                    </TextBlock>
+                </StackPanel>
+            </toolkit:TabView.Footer>
+        </toolkit:TabView>
+
+        
+
+
+        <toolkit:Expander Grid.Column="2" Grid.RowSpan="2" ExpandDirection="Left" VerticalContentAlignment="Stretch" IsExpanded="True">
+            <toolkit:Expander.HeaderTemplate>
+                <DataTemplate>
+                    <TextBlock Text="Eigenschaften" FontSize="20" />
+                </DataTemplate>
+            </toolkit:Expander.HeaderTemplate>
+            <Grid x:Name="PanelSettings" Grid.Column="2" Grid.RowSpan="2" Width="300" VerticalAlignment="Stretch" Visibility="{Binding ElementName=BtnToggleProps, Path=IsChecked, Converter={StaticResource CheckedConverter}}">
+                <Grid.Resources>
+                    <Style TargetType="toolkit:HeaderedContentControl">
+                        <Setter Property="Margin" Value="0 5" />
+                    </Style>
+                </Grid.Resources>
+                <Grid.Background>
+                    <SolidColorBrush Color="#FFE0E0E0" />
+                </Grid.Background>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="auto" />
+                    <RowDefinition Height="auto" />
+                    <RowDefinition Height="auto" />
+                    <RowDefinition Height="auto" />
+                </Grid.RowDefinitions>
+
+                <TextBlock Text="Eigenschaften" Margin="15 20" FontSize="25" />
+
+                <toolkit:HeaderedContentControl Grid.Row="1" Header="Name:" Margin="15 5" HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch">
+                    <TextBox Text="{Binding Name, Mode=TwoWay}" />
+                </toolkit:HeaderedContentControl>
+
+                <toolkit:HeaderedContentControl Grid.Row="2" Header="Nummer:" Margin="15 5" HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch">
+                    <TextBox x:Name="InNumber" Text="{Binding Id, Mode=TwoWay}"  />
+                </toolkit:HeaderedContentControl>
+
+
+                <Grid x:Name="InfosApplication" Grid.Row="3" Visibility="Visible" Margin="15 5">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="auto" />
+                        <RowDefinition Height="auto" />
+                        <RowDefinition Height="auto" />
+                        <RowDefinition Height="auto" />
+                    </Grid.RowDefinitions>
+
+                    <TextBlock Text="Applikation" Margin="0 20" FontSize="20" />
+                    
+                    <Grid Grid.Row="2">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="auto" />
+                            <RowDefinition Height="auto" />
+                            <RowDefinition Height="auto" />
+                        </Grid.RowDefinitions>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition />
+                            <ColumnDefinition />
+                        </Grid.ColumnDefinitions>
+
+                        <CheckBox MinWidth="10" Content="Gruppen" IsChecked="{Binding LoadedGroup}" IsEnabled="False" />
+                        <CheckBox Grid.Row="1" MinWidth="10" Content="Applikation" IsChecked="{Binding LoadedApplication}" IsEnabled="False" />
+                        <CheckBox Grid.Row="2" MinWidth="10" Content="Phy. Adresse" IsChecked="{Binding LoadedPA}" IsEnabled="False" />
+                    </Grid>
+
+                    <toolkit:HeaderedContentControl Grid.Row="1" Header="Applikation:" HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch">
+                        <TextBlock x:Name="InfoAppName" />
+                    </toolkit:HeaderedContentControl>
+                </Grid>
+
+                <Grid x:Name="InfosLineMiddle" Grid.Row="3" Visibility="Collapsed" Margin="15 5">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="auto" />
+                        <RowDefinition Height="auto" />
+                        <RowDefinition Height="auto" />
+                        <RowDefinition Height="auto" />
+                    </Grid.RowDefinitions>
+                    <TextBlock Text="Linie" Margin="0 20" FontSize="20" />
+
+                    <toolkit:HeaderedContentControl Grid.Row="1" Header="Verfügbarer Busstrom:" HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch">
+                        <TextBlock>
+                        <Run x:Name="InfoLmMaxcurrent" />
+                        <Run Text="mA" />
+                        </TextBlock>
+                    </toolkit:HeaderedContentControl>
+
+                    <toolkit:HeaderedContentControl Grid.Row="2" Header="Berechneter Busstrom:" HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch">
+                        <TextBlock>
+                        <Run x:Name="InfoLmCurrent" />
+                        <Run Text="mA" />
+                        </TextBlock>
+                    </toolkit:HeaderedContentControl>
+                </Grid>
+
+            </Grid>
+        </toolkit:Expander>
+    </Grid>
+</Page>

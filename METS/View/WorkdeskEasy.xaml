@@ -1,0 +1,96 @@
+﻿<Page
+    x:Class="METS.View.WorkdeskEasy"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:METS.View.Easy"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:toolkit="using:Microsoft.Toolkit.Uwp.UI.Controls"
+    mc:Ignorable="d"
+    Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+    <Page.Resources>
+        <Style x:Key="InfobarButton" TargetType="Button">
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="Foreground" Value="White" />
+            <Setter Property="Padding" Value="10 5" />
+            <Setter Property="BorderThickness" Value="0" />
+        </Style>
+        <Style x:Key="NotifyStyleError" TargetType="toolkit:InAppNotification">
+            <Setter Property="BorderBrush" Value="Red" />
+        </Style>
+        <Style x:Key="NotifyStyleSuccess" TargetType="toolkit:InAppNotification">
+            <Setter Property="BorderBrush" Value="Green" />
+        </Style>
+        <Style x:Key="NotifyStyleWarning" TargetType="toolkit:InAppNotification">
+            <Setter Property="BorderBrush" Value="Orange" />
+        </Style>
+        <Style x:Key="NotifyStyleInfo" TargetType="toolkit:InAppNotification">
+            <Setter Property="BorderBrush" Value="DarkCyan" />
+        </Style>
+    </Page.Resources>
+
+    <Grid>
+        <NavigationView x:Name="NavView" PaneDisplayMode="Top" SelectionChanged="ItemChanged" IsBackButtonVisible="Collapsed">
+
+            <NavigationView.MenuItems>
+                <NavigationViewItem x:Uid="/WorkDeskEasy/MenuHome" Tag="home" Icon="Home" IsSelected="True"/>
+                <NavigationViewItemSeparator/>
+                <NavigationViewItem x:Uid="/WorkDeskEasy/MenuTopologie"  Tag="topologie" Icon="AllApps" />
+                <NavigationViewItem x:Uid="/WorkDeskEasy/MenuGroups" Tag="groups" Icon="SelectAll" />
+                <NavigationViewItem x:Uid="/WorkDeskEasy/MenuBus" Tag="bus" Icon="View" />
+            </NavigationView.MenuItems>
+
+            <!--<NavigationView.AutoSuggestBox>
+                <AutoSuggestBox x:Name="NavViewSearchBox" QueryIcon="Find"/>
+            </NavigationView.AutoSuggestBox>-->
+
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition />
+                    <RowDefinition Height="auto" />
+                </Grid.RowDefinitions>
+
+                <Frame x:Name="ContentFrame" Padding="5" IsTabStop="True"  />
+
+                <Grid Grid.Row="1" Background="Green">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition />
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+
+
+
+                    <Button x:Uid="/WorkDesk/TooltipInfoBus"  Grid.Column="1" Style="{StaticResource InfobarButton}">
+                        <TextBlock>
+                            <Run x:Uid="/WorkDesk/InfoBus" />
+                            <Run x:Uid="/WorkDesk/InfoBusState" x:Name="InfoBus" Text="Getrennt" />
+                        </TextBlock>
+                    </Button>
+
+
+                    <Button x:Uid="/WorkDesk/TooltipInfoUpdate" x:Name="InfoUpdate" Grid.Column="2" Style="{StaticResource InfobarButton}" >
+                        <StackPanel Orientation="Horizontal" Margin="3 0">
+                            <Viewbox Height="12" Margin="0 0 5 0">
+                                <SymbolIcon Symbol="Upload" />
+                            </Viewbox>
+                            <TextBlock Text="{Binding Count}" />
+                        </StackPanel>
+                    </Button>
+
+                    <Button x:Uid="/WorkDesk/TooltipInfoChange" x:Name="InfoChange" Grid.Column="3" Style="{StaticResource InfobarButton}">
+                        <StackPanel Orientation="Horizontal" Margin="3 0">
+                            <Viewbox Height="12" Margin="0 0 5 0">
+                                <SymbolIcon Symbol="Edit" />
+                            </Viewbox>
+                            <TextBlock Text="{Binding Count}" />
+                        </StackPanel>
+                    </Button>
+                </Grid>
+            </Grid>
+        </NavigationView>
+
+        <toolkit:InAppNotification x:Name="Notify" />
+    </Grid>
+</Page>

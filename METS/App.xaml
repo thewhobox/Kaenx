@@ -1,0 +1,11 @@
+﻿<Application
+    x:Class="METS.App"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:METS"
+    RequestedTheme="Light">
+    <Application.Resources>
+        <SolidColorBrush x:Key="HighlightColor" Color="#6A9ABD" />
+    </Application.Resources>
+
+</Application>

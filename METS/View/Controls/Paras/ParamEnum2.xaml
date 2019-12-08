@@ -1,0 +1,29 @@
+﻿<UserControl
+    x:Class="METS.Classes.Controls.Paras.ParamEnum2"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:METS.Classes.Controls.Paras"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d"
+    d:DesignHeight="70"
+    d:DesignWidth="700">
+
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition />
+            <ColumnDefinition Width="280" />
+        </Grid.ColumnDefinitions>
+
+        <TextBlock x:Name="ParaName" Text="Platzhalter" TextWrapping="WrapWholeWords" VerticalAlignment="Center" Margin="5" FontSize="12" />
+
+        <StackPanel x:Name="ValuePanel" Grid.Column="1" ToolTipService.ToolTip="Hier steht ein Test">
+            <Viewbox Height="27" HorizontalAlignment="Left" Margin="5 0 0 0">
+                <RadioButton x:Name="ParaValue1" />
+            </Viewbox>
+            <Viewbox Height="27" HorizontalAlignment="Left" Margin="5 0 0 0">
+                <RadioButton x:Name="ParaValue2" />
+            </Viewbox>
+        </StackPanel>
+    </Grid>
+</UserControl>

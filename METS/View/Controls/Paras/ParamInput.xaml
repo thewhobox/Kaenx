@@ -1,0 +1,21 @@
+﻿<UserControl
+    x:Class="METS.Classes.Controls.Paras.ParamInput"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:METS.Classes.Controls.Paras"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d"
+    d:DesignHeight="50"
+    d:DesignWidth="700">
+
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition />
+            <ColumnDefinition Width="280" />
+        </Grid.ColumnDefinitions>
+
+        <TextBlock x:Name="ParaName" Text="Platzhalter" VerticalAlignment="Center" Margin="5" FontSize="12" TextWrapping="WrapWholeWords" />
+        <TextBox Grid.Column="1" x:Name="ParaValue" Margin="5" VerticalAlignment="Center" />
+    </Grid>
+</UserControl>

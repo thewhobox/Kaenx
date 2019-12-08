@@ -1,0 +1,236 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<xliff version="1.2" xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
+  <file datatype="xml" source-language="de-DE" target-language="de" original="METS/STRINGS/DE-DE/MAINPAGE.RESW" tool-id="MultilingualAppToolkit" product-name="n/a" product-version="n/a" build-num="n/a">
+    <header>
+      <tool tool-id="MultilingualAppToolkit" tool-name="Multilingual App Toolkit" tool-version="4.0.6914.0" tool-company="Microsoft" />
+    </header>
+    <body>
+      <group id="METS/STRINGS/DE-DE/MAINPAGE.RESW" datatype="resx">
+        <trans-unit id="BtnCatalog.Content" translate="yes" xml:space="preserve">
+          <source>Katalog öffnen</source>
+          <target state="final">Katalog öffnen</target>
+        </trans-unit>
+        <trans-unit id="BtnDelete.Text" translate="yes" xml:space="preserve">
+          <source>Löschen</source>
+          <target state="final">Löschen</target>
+        </trans-unit>
+        <trans-unit id="BtnLoadProject.Text" translate="yes" xml:space="preserve">
+          <source>Projekt laden</source>
+          <target state="final">Projekt laden</target>
+        </trans-unit>
+        <trans-unit id="BtnNewProject.Content" translate="yes" xml:space="preserve">
+          <source>Neues Fortgeschrittenes Projekt</source>
+          <target state="final">Neues Fortgeschrittenes Projekt</target>
+        </trans-unit>
+        <trans-unit id="BtnOpen.Text" translate="yes" xml:space="preserve">
+          <source>Öffnen</source>
+          <target state="final">Öffnen</target>
+        </trans-unit>
+        <trans-unit id="BtnWizProject.Content" translate="yes" xml:space="preserve">
+          <source>Projekt Wizard benutzen</source>
+          <target state="final">Projekt Wizard benutzen</target>
+        </trans-unit>
+      </group>
+    </body>
+  </file>
+  <file datatype="xml" source-language="de-DE" target-language="de" original="METS/STRINGS/DE-DE/RESOURCES.RESW" tool-id="MultilingualAppToolkit" product-name="n/a" product-version="n/a" build-num="n/a">
+    <header>
+      <tool tool-id="MultilingualAppToolkit" tool-name="Multilingual App Toolkit" tool-version="4.0.6914.0" tool-company="Microsoft" />
+    </header>
+    <body>
+      <group id="METS/STRINGS/DE-DE/RESOURCES.RESW" datatype="resx">
+        <trans-unit id="MainPage_LoadProject.Text" translate="yes" xml:space="preserve">
+          <source>Projekt laden</source>
+          <target state="final">Projekt laden</target>
+        </trans-unit>
+        <trans-unit id="MainPage_NewProject.Content" translate="yes" xml:space="preserve">
+          <source>Neues Fortgeschrittenes Projekt</source>
+          <target state="final">Neues Fortgeschrittenes Projekt</target>
+        </trans-unit>
+        <trans-unit id="MainPage_WizProject.Content" translate="yes" xml:space="preserve">
+          <source>Projekt Wizard benutzen</source>
+          <target state="final">Projekt Wizard benutzen</target>
+        </trans-unit>
+        <trans-unit id="MainPage_Catalog.Content" translate="yes" xml:space="preserve">
+          <source>Katalog öffnen</source>
+          <target state="final">Katalog öffnen</target>
+        </trans-unit>
+      </group>
+    </body>
+  </file>
+  <file datatype="xml" source-language="de-DE" target-language="de" original="METS/STRINGS/DE-DE/CATALOG.RESW" tool-id="MultilingualAppToolkit" product-name="n/a" product-version="n/a" build-num="n/a">
+    <header>
+      <tool tool-id="MultilingualAppToolkit" tool-name="Multilingual App Toolkit" tool-version="4.0.6914.0" tool-company="Microsoft" />
+    </header>
+    <body>
+      <group id="METS/STRINGS/DE-DE/CATALOG.RESW" datatype="resx">
+        <trans-unit id="BarDelete.Label" translate="yes" xml:space="preserve">
+          <source>Löschen</source>
+          <target state="final">Löschen</target>
+        </trans-unit>
+        <trans-unit id="BarExport.Label" translate="yes" xml:space="preserve">
+          <source>Exportieren</source>
+          <target state="final">Exportieren</target>
+        </trans-unit>
+        <trans-unit id="BarImport.Label" translate="yes" xml:space="preserve">
+          <source>Importieren</source>
+          <target state="final">Importieren</target>
+        </trans-unit>
+        <trans-unit id="BarSearch.PlaceholderText" translate="yes" xml:space="preserve">
+          <source>Suchen...</source>
+          <target state="final">Suchen...</target>
+        </trans-unit>
+        <trans-unit id="BarSort.Text" translate="yes" xml:space="preserve">
+          <source>Sortieren:</source>
+          <target state="final">Sortieren:</target>
+        </trans-unit>
+        <trans-unit id="MsgNotCopied" translate="yes" xml:space="preserve">
+          <source>Die Datei konnte nicht kopiert werden.</source>
+          <target state="final">Die Datei konnte nicht kopiert werden.</target>
+        </trans-unit>
+      </group>
+    </body>
+  </file>
+  <file datatype="xml" source-language="de-DE" target-language="de" original="METS/STRINGS/DE-DE/WORKDESK.RESW" tool-id="MultilingualAppToolkit" product-name="n/a" product-version="n/a" build-num="n/a">
+    <header>
+      <tool tool-id="MultilingualAppToolkit" tool-name="Multilingual App Toolkit" tool-version="4.0.6914.0" tool-company="Microsoft" />
+    </header>
+    <body>
+      <group id="METS/STRINGS/DE-DE/WORKDESK.RESW" datatype="resx">
+        <trans-unit id="BusConnFalse" translate="yes" xml:space="preserve">
+          <source>Getrennt</source>
+          <target state="final">Getrennt</target>
+        </trans-unit>
+        <trans-unit id="BusConnTrue" translate="yes" xml:space="preserve">
+          <source>Verbunden</source>
+          <target state="final">Verbunden</target>
+        </trans-unit>
+        <trans-unit id="InfoBus.Text" translate="yes" xml:space="preserve">
+          <source>Bus:</source>
+          <target state="final">Bus:</target>
+        </trans-unit>
+        <trans-unit id="MenuBuildings.Text" translate="yes" xml:space="preserve">
+          <source>Gebäude</source>
+          <target state="final">Gebäude</target>
+        </trans-unit>
+        <trans-unit id="MenuBus.Text" translate="yes" xml:space="preserve">
+          <source>Bus Aktionen</source>
+          <target state="final">Bus Aktionen</target>
+        </trans-unit>
+        <trans-unit id="MenuCatalog.Text" translate="yes" xml:space="preserve">
+          <source>Katalog</source>
+          <target state="final">Katalog</target>
+        </trans-unit>
+        <trans-unit id="MenuClose.Text" translate="yes" xml:space="preserve">
+          <source>Schließen</source>
+          <target state="final">Schließen</target>
+        </trans-unit>
+        <trans-unit id="MenuComs.Text" translate="yes" xml:space="preserve">
+          <source>Kommunikationsobjekte</source>
+          <target state="final">Kommunikationsobjekte</target>
+        </trans-unit>
+        <trans-unit id="MenuGroups.Text" translate="yes" xml:space="preserve">
+          <source>Gruppenadressen</source>
+          <target state="final">Gruppenadressen</target>
+        </trans-unit>
+        <trans-unit id="MenuProject.Title" translate="yes" xml:space="preserve">
+          <source>Projekt</source>
+          <target state="final">Projekt</target>
+        </trans-unit>
+        <trans-unit id="MenuSave.Text" translate="yes" xml:space="preserve">
+          <source>Speichern</source>
+          <target state="final">Speichern</target>
+        </trans-unit>
+        <trans-unit id="MenuTopologie.Text" translate="yes" xml:space="preserve">
+          <source>Topologie</source>
+          <target state="final">Topologie</target>
+        </trans-unit>
+        <trans-unit id="MenuWindows.Title" translate="yes" xml:space="preserve">
+          <source>Fenster</source>
+          <target state="final">Fenster</target>
+        </trans-unit>
+        <trans-unit id="MsgBusOpen" translate="yes" xml:space="preserve">
+          <source>Das Fenster 'Bus Aktionen' ist bereits offen.</source>
+          <target state="final">Das Fenster 'Bus Aktionen' ist bereits offen.</target>
+        </trans-unit>
+        <trans-unit id="MsgCatalogOpen" translate="yes" xml:space="preserve">
+          <source>Katalog ist bereits offen.</source>
+          <target state="final">Katalog ist bereits offen.</target>
+        </trans-unit>
+        <trans-unit id="MsgSave" translate="yes" xml:space="preserve">
+          <source>Projekt wurde gespeichert</source>
+          <target state="final">Projekt wurde gespeichert</target>
+        </trans-unit>
+        <trans-unit id="ViewBus" translate="yes" xml:space="preserve">
+          <source>Bus Aktionen</source>
+          <target state="final">Bus Aktionen</target>
+        </trans-unit>
+        <trans-unit id="ViewCatalog" translate="yes" xml:space="preserve">
+          <source>Katalog</source>
+          <target state="final">Katalog</target>
+        </trans-unit>
+        <trans-unit id="ViewComs" translate="yes" xml:space="preserve">
+          <source>Kommunikationsobjekte</source>
+          <target state="final">Kommunikationsobjekte</target>
+        </trans-unit>
+        <trans-unit id="ViewGroups" translate="yes" xml:space="preserve">
+          <source>Gruppenadressen</source>
+          <target state="final">Gruppenadressen</target>
+        </trans-unit>
+        <trans-unit id="ViewParameter" translate="yes" xml:space="preserve">
+          <source>Parameter</source>
+          <target state="final">Parameter</target>
+        </trans-unit>
+        <trans-unit id="ViewTopologie" translate="yes" xml:space="preserve">
+          <source>Topologie</source>
+          <target state="final">Topologie</target>
+        </trans-unit>
+      </group>
+    </body>
+  </file>
+  <file datatype="xml" source-language="de-DE" target-language="de" original="METS/STRINGS/DE-DE/IMPORT.RESW" tool-id="MultilingualAppToolkit" product-name="n/a" product-version="n/a" build-num="n/a">
+    <header>
+      <tool tool-id="MultilingualAppToolkit" tool-name="Multilingual App Toolkit" tool-version="4.0.6914.0" tool-company="Microsoft" />
+    </header>
+    <body>
+      <group id="METS/STRINGS/DE-DE/IMPORT.RESW" datatype="resx">
+        <trans-unit id="Back.Content" translate="yes" xml:space="preserve">
+          <source>Zum Katalog</source>
+          <target state="final">Zum Katalog</target>
+        </trans-unit>
+        <trans-unit id="Error.Text" translate="yes" xml:space="preserve">
+          <source>Fehler:</source>
+          <target state="final">Fehler:</target>
+        </trans-unit>
+        <trans-unit id="StateApp" translate="yes" xml:space="preserve">
+          <source>Lade Applikation...</source>
+          <target state="final">Lade Applikation...</target>
+        </trans-unit>
+        <trans-unit id="StateCat" translate="yes" xml:space="preserve">
+          <source>Lade Katalogeinträge...</source>
+          <target state="final">Lade Katalogeinträge...</target>
+        </trans-unit>
+        <trans-unit id="StateCheck" translate="yes" xml:space="preserve">
+          <source>Importierte Geräte werden überprüft...</source>
+          <target state="final">Importierte Geräte werden überprüft...</target>
+        </trans-unit>
+        <trans-unit id="StateFin" translate="yes" xml:space="preserve">
+          <source>Importieren abgeschlossen</source>
+          <target state="final">Importieren abgeschlossen</target>
+        </trans-unit>
+        <trans-unit id="StateHard" translate="yes" xml:space="preserve">
+          <source>Lade Hardware...</source>
+          <target state="final">Lade Hardware...</target>
+        </trans-unit>
+        <trans-unit id="StateManus" translate="yes" xml:space="preserve">
+          <source>Lade Herstellerdaten...</source>
+          <target state="final">Lade Herstellerdaten...</target>
+        </trans-unit>
+        <trans-unit id="StateProj" translate="yes" xml:space="preserve">
+          <source>Lade Projektdatenbank...</source>
+          <target state="final">Lade Projektdatenbank...</target>
+        </trans-unit>
+      </group>
+    </body>
+  </file>
+</xliff>
