@@ -121,7 +121,6 @@ namespace METS.Classes.Bus
                     continue;
                 }
 
-
                 IBusAction action = busActions.Dequeue();
                 if (action == null) continue;
                 CurrentAction = action;
@@ -136,6 +135,8 @@ namespace METS.Classes.Bus
             await Task.Delay(500);
             CurrentAction.Finished += CurrentAction_Finished;
             CurrentAction.Run();
+
+            CurrentAction.TodoText = "Timeout (30s)";
         }
 
         private async void CurrentAction_Finished(object sender, EventArgs e)

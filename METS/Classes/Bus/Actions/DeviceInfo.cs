@@ -39,10 +39,6 @@ namespace METS.Classes.Bus.Actions
         private void _conn_OnTunnelResponse(TunnelResponse response)
         {
             bool sendAck = true;
-            int seq = response.SequenceNumber << 2;
-            int test2 = 0xC2 | seq;
-
-            byte[] apci = { BitConverter.GetBytes(Convert.ToInt16(test2))[0] };
 
             if (_state == 1 && response.APCI == Knx.Parser.ApciTypes.DeviceDescriptorResponse)
             {

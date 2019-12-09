@@ -54,6 +54,10 @@
                                 <MenuFlyoutItem Text="Hinzufügen" Icon="Add" Click="ClickAddSub" />
                                 <MenuFlyoutSubItem Text="Programmieren" Icon="PostUpdate">
                                     <MenuFlyoutItem Text="Ph. Adresse" Icon="MapPin" Click="ClickProAddr" />
+                                    <MenuFlyoutSeparator />
+                                    <MenuFlyoutItem Text="Applikation (Komplett)" Icon="FourBars" Tag="0" Click="ClickProApp" />
+                                    <MenuFlyoutItem Text="Applikation (Partiell)" Icon="ThreeBars" Tag="1" Click="ClickProApp" />
+                                    <MenuFlyoutItem Text="Applikation (Minimal, Experimentell)" Icon="Onebar" Tag="2" Click="ClickProApp" />
                                 </MenuFlyoutSubItem>
                                 <MenuFlyoutItem Text="Parameter" Icon="Bookmarks" Click="ClickOpenParas" />
                                 <MenuFlyoutItem Text="Umbenennen" Icon="Rename" Click="ClickAddRename" />

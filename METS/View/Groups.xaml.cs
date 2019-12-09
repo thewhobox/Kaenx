@@ -138,21 +138,30 @@ namespace METS.View
 
         private void ClickAddDelete(object sender, RoutedEventArgs e)
         {
-            object dc = (Group)((MenuFlyoutItem)e.OriginalSource).DataContext;
+            object dc = ((MenuFlyoutItem)e.OriginalSource).DataContext;
 
             if (dc is Group)
             {
                 _project.Groups.Remove(dc as Group);
+                GroupMainModel model = context.GroupMain.Single(g => g.UId == (dc as Group).UId);
+                context.GroupMain.Remove(model);
+                context.SaveChanges();
             }
             if (dc is GroupMiddle)
             {
                 GroupMiddle group = dc as GroupMiddle;
                 group.Parent.Subs.Remove(group);
+                GroupMiddleModel model = context.GroupMiddle.Single(g => g.UId == group.UId);
+                context.GroupMiddle.Remove(model);
+                context.SaveChanges();
             }
             if(dc is GroupAddress)
             {
                 GroupAddress group = dc as GroupAddress;
                 group.Parent.Subs.Remove(group);
+                GroupAddressModel model = context.GroupAddress.Single(g => g.UId == group.UId);
+                context.GroupAddress.Remove(model);
+                context.SaveChanges();
             }
 
             SaveHelper.SaveGroups();
@@ -287,6 +296,9 @@ namespace METS.View
         {
             TreeViewItem tvi = sender as TreeViewItem;
             e.AcceptedOperation = Windows.ApplicationModel.DataTransfer.DataPackageOperation.Link;
+
+            if (_dragItem == null)
+                return;
 
             if (tvi.DataContext is GroupAddress)
             {

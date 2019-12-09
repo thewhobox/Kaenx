@@ -66,7 +66,19 @@ namespace METS.View
         {
             Classes.Bus.Actions.ProgPhysicalAddress action = new Classes.Bus.Actions.ProgPhysicalAddress(BusConnection.Instance);
             action.Device = (LineDevice)((MenuFlyoutItem)e.OriginalSource).DataContext;
+            BusConnection.Instance.AddAction(action);
+        }
 
+        private void ClickProApp(object sender, RoutedEventArgs e)
+        {
+            string type = ((MenuFlyoutItem)sender).Tag.ToString();
+            ViewHelper.Instance.ShowNotification($"Applikation programmieren: {type}");
+
+            int typeI;
+            int.TryParse(type, out typeI);
+
+            Classes.Bus.Actions.ProgApplication action = new Classes.Bus.Actions.ProgApplication((Classes.Bus.Actions.ProgApplication.ProgAppType)typeI);
+            action.Device = (LineDevice)((MenuFlyoutItem)e.OriginalSource).DataContext;
             BusConnection.Instance.AddAction(action);
         }
 

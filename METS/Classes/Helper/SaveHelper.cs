@@ -157,22 +157,24 @@ namespace METS.Classes.Helper
         
         public static void SaveGroups()
         {
-            foreach(Group g in _project.Groups)
+            context.SaveChanges();
+
+            foreach (Group g in _project.Groups)
             {
                 GroupMainModel gmain = context.GroupMain.Single(gm => gm.UId == g.UId);
                 gmain.Name = g.Name;
                 gmain.Id = g.Id;
                 context.GroupMain.Update(gmain);
 
-                foreach(GroupMiddle gm in g.Subs)
+                foreach (GroupMiddle gm in g.Subs)
                 {
-                    GroupMiddleModel gmiddle = new GroupMiddleModel();
+                    GroupMiddleModel gmiddle = context.GroupMiddle.Single(gm2 => gm2.UId == gm.UId);
                     gmiddle.Name = gm.Name;
                     gmiddle.Id = gm.Id;
                     gmiddle.ParentId = gmain.UId;
-                    context.GroupMiddle.Add(gmiddle);
+                    context.GroupMiddle.Update(gmiddle);
 
-                    foreach(GroupAddress ga in gm.Subs)
+                    foreach (GroupAddress ga in gm.Subs)
                     {
                         GroupAddressModel gaddress = context.GroupAddress.Single(g => g.UId == ga.UId);
                         gaddress.Name = ga.Name;

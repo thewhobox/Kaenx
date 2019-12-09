@@ -25,7 +25,7 @@
     <AppxBundlePlatforms>x86</AppxBundlePlatforms>
     <AppInstallerUpdateFrequency>0</AppInstallerUpdateFrequency>
     <AppInstallerCheckForUpdateFrequency>OnApplicationRun</AppInstallerCheckForUpdateFrequency>
-    <PackageCertificateThumbprint>6AE594930811F6DF8EDAA60CD897819599BE9AC0</PackageCertificateThumbprint>
+    <PackageCertificateThumbprint>4F900181840DEF97868C5DEB89427F77C6E44C4E</PackageCertificateThumbprint>
     <AppxPackageSigningTimestampDigestAlgorithm>SHA256</AppxPackageSigningTimestampDigestAlgorithm>
     <GenerateTestArtifacts>True</GenerateTestArtifacts>
     <HoursBetweenUpdateChecks>0</HoursBetweenUpdateChecks>
@@ -123,9 +123,10 @@
     <Compile Include="App.xaml.cs">
       <DependentUpon>App.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Classes\Bus\Actions\BusAction.cs" />
+    <Compile Include="Classes\Bus\Actions\IBusAction.cs" />
     <Compile Include="Classes\Bus\Actions\DeviceInfo.cs" />
     <Compile Include="Classes\Bus\Actions\DeviceInfoData.cs" />
+    <Compile Include="Classes\Bus\Actions\ProgApplication.cs" />
     <Compile Include="Classes\Bus\Actions\ProgPhysicalAddress.cs" />
     <Compile Include="Classes\Bus\BusConnection.cs" />
     <Compile Include="Classes\Bus\BusSettings.cs" />

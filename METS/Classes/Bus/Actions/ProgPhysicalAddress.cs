@@ -42,12 +42,17 @@ namespace METS.Classes.Bus.Actions
         {
             devices.Add(response);
 
-            switch(response.MessageCode)
+            //switch(response.MessageCode)
+            //{
+            //    case 0x29:
+            //        if(response.SourceAddress.Area != 0 && !progDevices.Contains(response.SourceAddress.ToString()))
+            //            progDevices.Add(response.SourceAddress.ToString());
+            //        break;
+            //}
+
+            if(response.APCI == Knx.Parser.ApciTypes.IndividualAddressResponse && response.SourceAddress.Area != 0 && !progDevices.Contains(response.SourceAddress.ToString()))
             {
-                case 0x29:
-                    if(response.SourceAddress.Area != 0 && !progDevices.Contains(response.SourceAddress.ToString()))
-                        progDevices.Add(response.SourceAddress.ToString());
-                    break;
+                progDevices.Add(response.SourceAddress.ToString());
             }
         }
 

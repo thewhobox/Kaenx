@@ -31,7 +31,7 @@
         </Border>
 
         <Border Background="LightGray" Grid.Row="1">
-            <TreeView x:Name="TreeGroups" ItemsSource="{Binding Groups}" CanReorderItems="False" ItemInvoked="TreeGroups_ItemInvoked" MinWidth="250">
+            <TreeView x:Name="TreeGroups" ItemsSource="{Binding Groups}" CanReorderItems="False" ItemInvoked="TreeGroups_ItemInvoked" MinWidth="250" Margin="0 0 5 0">
                 <TreeView.ItemTemplate>
                     <DataTemplate x:DataType="local:Line">
                         <TreeViewItem Content="{Binding}" CanDrag="False" Margin="-20 0 0 0" ItemsSource="{Binding Subs}" IsExpanded="{Binding IsExpanded, Mode=TwoWay}" Drop="TreeViewItem_Drop" AllowDrop="True" DragOver="TreeViewItem_DragEnter" DragLeave="General_DragLeave">

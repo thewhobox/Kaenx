@@ -21,9 +21,9 @@ namespace METS.Classes
         private ObservableCollection<DeviceComObject> _comObjects = new ObservableCollection<DeviceComObject>();
 
 
-        private bool _loadedGroups = true;
-        private bool _loadedApplication = true;
-        private bool _loadedPA = true;
+        private bool _loadedGroups = false;
+        private bool _loadedApplication = false;
+        private bool _loadedPA = false;
         public bool LoadedGroups { get { return _loadedGroups; } set { _loadedGroups = value; Changed("LoadedGroups"); } }
         public bool LoadedApplication { get { return _loadedApplication; } set { _loadedApplication = value; Changed("LoadedApplication"); } }
         public bool LoadedPA{ get { return _loadedPA; } set { _loadedPA = value; Changed("LoadedPA"); } }

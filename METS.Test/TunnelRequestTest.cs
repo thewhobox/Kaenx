@@ -18,7 +18,7 @@ namespace METS.Test
             byte[] apci = new byte[] { 0xF1, 0x00 };
             byte sequence = 0x5;
 
-            t.Build(source, destination, apci, sequence);
+            t.Build(source, destination, Knx.Parser.ApciTypes.IndividualAddressRead, sequence, 0);
             byte[] result = t.GetBytes();
 
             byte[] expected = new byte[]
