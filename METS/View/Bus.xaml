@@ -31,6 +31,10 @@
                         <TextBlock Text="{Binding TodoText}" />
                         <ProgressBar IsIndeterminate="{Binding ProgressIsIndeterminate}" IsEnabled="True" Value="{Binding ProgressValue}" Maximum="100" />
                     </StackPanel>
+                    
+                    <Button VerticalAlignment="Top" HorizontalAlignment="Right" Margin="5" Click="ClickCancel">
+                        <SymbolIcon Symbol="DisableUpdates" />
+                    </Button>
 
                     <TextBlock Grid.Row="1" Text="Ausstehen:" Margin="5 10 5 5" FontSize="17" />
 

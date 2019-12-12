@@ -12,6 +12,7 @@ using System.IO.Compression;
 using System.Linq;
 using System.Runtime.InteropServices.WindowsRuntime;
 using System.Threading.Tasks;
+using System.Xml.Linq;
 using Windows.ApplicationModel.Resources;
 using Windows.Foundation;
 using Windows.Foundation.Collections;
@@ -149,7 +150,45 @@ namespace METS.View
                 {
                     ImportState = resourceLoader.GetString("StateManus");
                     await Task.Delay(1000);
-                    await Helper.UpdateManufacturers(entry);
+
+                    XElement manXML = XDocument.Load(entry.Open()).Root;
+
+                    await Helper.UpdateManufacturers(manXML);
+
+                    StorageFile masterFile;
+
+                    try
+                    {
+                        masterFile = await ApplicationData.Current.LocalFolder.GetFileAsync("knx_master.xml");
+                    } catch
+                    {
+                        StorageFile defaultFile = await StorageFile.GetFileFromApplicationUriAsync(new Uri("ms-appx:///Data/knx_master.xml"));
+                        masterFile = await ApplicationData.Current.LocalFolder.CreateFileAsync("knx_master.xml");
+                        await FileIO.WriteTextAsync(masterFile, await FileIO.ReadTextAsync(defaultFile));
+                    }
+
+                    
+                    XDocument masterXml = XDocument.Load(await masterFile.OpenStreamForReadAsync());
+
+                    string versionO = masterXml.Root.Element(XName.Get("MasterData", masterXml.Root.Name.NamespaceName)).Attribute("Version").Value;
+                    string versionN = manXML.Element(XName.Get("MasterData", masterXml.Root.Name.NamespaceName)).Attribute("Version").Value;
+
+                    int versionNew, versionOld;
+
+                    try
+                    {
+                        versionNew = int.Parse(versionN);
+                        versionOld = int.Parse(versionO);
+
+                        bool newer = versionNew > versionOld;
+
+                        if(newer)
+                        {
+                            StreamWriter sw = new StreamWriter(await masterFile.OpenStreamForWriteAsync());
+                            sw.Write(manXML.ToString());
+                        }
+                    } catch { }
+
                     ProgSub.Value = 0;
                     ProgMain.Value += 1;
                     continue;

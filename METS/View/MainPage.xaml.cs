@@ -45,16 +45,6 @@ namespace METS.View
             App._dispatcher = Window.Current.Dispatcher;
 
             LoadProjects();
-
-
-
-
-            //Knx.Builders.TunnelRequest builder = new Knx.Builders.TunnelRequest();
-            ////apci = new byte[] { 0x43, 0x80 };
-            //builder.Build(Knx.Addresses.UnicastAddress.FromString("0.0.0"), Knx.Addresses.UnicastAddress.FromString("1.1.1"), Knx.Parser.ApciTypes.Restart, 0, null, false);
-
-
-
         }
 
         private void LoadProjects()

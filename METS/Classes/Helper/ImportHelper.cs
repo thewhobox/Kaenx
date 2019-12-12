@@ -355,10 +355,9 @@ namespace METS.Classes.Helper
 
 
 
-        public async Task UpdateManufacturers(ZipArchiveEntry manEntry)
+        public async Task UpdateManufacturers(XElement manXML)
         {
             tempManus = new List<ManufacturerViewModel>();
-            XElement manXML = XDocument.Load(manEntry.Open()).Root;
             currentNamespace = manXML.Attribute("xmlns").Value;
             XElement mans = manXML.Element(GetXName("MasterData")).Element(GetXName("Manufacturers"));
 

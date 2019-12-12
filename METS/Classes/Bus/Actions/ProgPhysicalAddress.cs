@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace METS.Classes.Bus.Actions
@@ -16,8 +17,8 @@ namespace METS.Classes.Bus.Actions
         private string _todoText;
         private BusConnection _conn;
         private byte _sequence = 0x00;
-        private bool stopCheck = false;
         private List<string> progDevices = new List<string>();
+        private CancellationToken _token;
 
         public string Type { get; } = "Physikalische Adresse";
         public LineDevice Device { get; set; }
@@ -56,8 +57,9 @@ namespace METS.Classes.Bus.Actions
             }
         }
 
-        public void Run()
+        public void Run(CancellationToken token)
         {
+            _token = token; //TODO implement cancellation
             CheckProgMode();
         }
 
@@ -69,7 +71,7 @@ namespace METS.Classes.Bus.Actions
 
             int threeshold = 0;
 
-            while(!stopCheck)
+            while(!_token.IsCancellationRequested)
             {
                 if (!_conn.IsConnected)
                 {
@@ -82,6 +84,7 @@ namespace METS.Classes.Bus.Actions
                     if(progDevices[0] == Device.LineName)
                     {
                         TodoText = "Gerät hat bereits die Adresse";
+                        Device.LoadedPA = true;
                         Finished?.Invoke(this, new EventArgs());
                         break;
                     }
@@ -141,7 +144,7 @@ namespace METS.Classes.Bus.Actions
 
             _conn.IncreaseSequence();
 
-            while (!stopCheck)
+            while (!_token.IsCancellationRequested)
             {
                 if (progDevices.Count == 1)
                 {

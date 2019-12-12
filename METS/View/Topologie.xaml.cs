@@ -72,8 +72,6 @@ namespace METS.View
         private void ClickProApp(object sender, RoutedEventArgs e)
         {
             string type = ((MenuFlyoutItem)sender).Tag.ToString();
-            ViewHelper.Instance.ShowNotification($"Applikation programmieren: {type}");
-
             int typeI;
             int.TryParse(type, out typeI);
 

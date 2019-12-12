@@ -44,6 +44,11 @@ namespace METS.View
             BusConnection.Instance.AddAction(action);
         }
 
+        private void ClickCancel(object sender, RoutedEventArgs e)
+        {
+            BusConnection.Instance.CancelCurrent();
+        }
+
         private void Action_Finished(object sender, EventArgs e)
         {
             _ = this.Dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Normal, () =>

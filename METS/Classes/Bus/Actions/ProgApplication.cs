@@ -4,7 +4,9 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
+using Windows.Storage;
 
 namespace METS.Classes.Bus.Actions
 {
@@ -17,8 +19,7 @@ namespace METS.Classes.Bus.Actions
         private string _todoText;
         private BusConnection _conn;
         private byte _sequence = 0x00;
-        private bool stopCheck = false;
-        private DeviceInfoData _data = new DeviceInfoData();
+        private CancellationToken _token;
 
         public string Type { get; } = "Geräte Info";
         public LineDevice Device { get; set; }
@@ -41,11 +42,12 @@ namespace METS.Classes.Bus.Actions
 
         }
 
-        public void Run()
+        public void Run(CancellationToken token)
         {
+            _token = token;
             _state = 0;
             TodoText = "Lese Informationen...";
-
+            //StorageFile x = await StorageFile.GetFileFromApplicationUriAsync(new Uri("ms-appx:///Data/img.jpg"));
         }
 
 

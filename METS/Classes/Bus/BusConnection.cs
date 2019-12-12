@@ -16,6 +16,7 @@ namespace METS.Classes.Bus
     {
         private Knx.Connection connection;
         private bool _isConnected = false;
+        private bool _cancelIsUser = false;
 
         public bool IsConnected { 
             get { return _isConnected; } 
@@ -69,6 +70,11 @@ namespace METS.Classes.Bus
             OnTunnelResponse?.Invoke(response);
         }
 
+        public void CancelCurrent()
+        {
+            _cancelIsUser = true;
+            _cancelTokenSource?.Cancel();
+        }
 
         public void IncreaseSequence()
         {
@@ -125,28 +131,63 @@ namespace METS.Classes.Bus
                 if (action == null) continue;
                 CurrentAction = action;
                 Changed("actions");
+                _cancelIsUser = false;
                 ExecuteAction();
             }
         }
 
+        private CancellationTokenSource _cancelTokenSource;
+
         private async void ExecuteAction()
         {
-            connection.Connect();
-            await Task.Delay(500);
+            //CurrentAction.ProgressIsIndeterminate = true;
+            //CurrentAction.TodoText = "Verbindung wird hergestellt...";
+            //int c = 0;
+            //while (!connection.IsConnected && !_cancelTokenSource.IsCancellationRequested)
+            //{
+            //    c++;
+            //    connection.Connect();
+            //    await Task.Delay(500);
+            //    if (c == 20)
+            //    {
+            //        CurrentAction.TodoText = _cancelIsUser ? "Wurde abgebrochen" : "Connect Timeout (10s)";
+            //        CurrentAction_Finished(null, null);
+            //        return;
+            //    }
+            //}
+            //CurrentAction.ProgressIsIndeterminate = false;
             CurrentAction.Finished += CurrentAction_Finished;
-            CurrentAction.Run();
 
-            CurrentAction.TodoText = "Timeout (30s)";
+            _cancelTokenSource = new CancellationTokenSource();
+            Task runner = Task.Run(() => CurrentAction.Run(_cancelTokenSource.Token), _cancelTokenSource.Token);
+            try
+            {
+                await Task.Delay(10000, _cancelTokenSource.Token);
+            } catch { }
+
+
+            if (!_cancelTokenSource.IsCancellationRequested)
+            {
+                CurrentAction.TodoText = "Process Timeout (30s)";
+                CurrentAction_Finished(null, null);
+            } else
+            {
+                if (_cancelIsUser)
+                {
+                    CurrentAction.TodoText = "Wurde abgebrochen";
+                    CurrentAction_Finished(null, null);
+                }
+            }
         }
 
         private async void CurrentAction_Finished(object sender, EventArgs e)
         {
+            _cancelTokenSource?.Cancel();
             connection.Disconnect();
             await Task.Delay(500);
             History.Insert(0, CurrentAction);
             CurrentAction.Finished -= CurrentAction_Finished;
             CurrentAction = null;
-            Changed("actions");
             Changed("CurrentAction");
         }
 
