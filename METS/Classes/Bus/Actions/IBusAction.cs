@@ -12,6 +12,7 @@ namespace METS.Classes.Bus.Actions
     {
         event EventHandler Finished;
 
+        METS.Knx.Connection Connection { get; set; }
         int ProgressValue { get; set; }
         bool ProgressIsIndeterminate { get; set; }
         string TodoText { get; set; }

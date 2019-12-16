@@ -45,7 +45,11 @@ namespace METS.Knx.Builders
             byte lengthData = 0x01;
 
             if(data != null)
-                 lengthData = BitConverter.GetBytes((ushort)(data.Count() + 1))[0];
+            {
+                lengthData = BitConverter.GetBytes((ushort)(data.Count() + 1))[0];
+                if (apciType == ApciTypes.MemoryRead || apciType == ApciTypes.MemoryWrite || apciType == ApciTypes.GroupValueWrite || apciType == ApciTypes.ADCRead)
+                    lengthData--;
+            }
             else
             {
                 switch (apciType)
@@ -63,7 +67,7 @@ namespace METS.Knx.Builders
 
             bytes.Add(lengthData);
 
-            List<ApciTypes> datatypes = new List<ApciTypes>() { ApciTypes.DeviceDescriptorRead, ApciTypes.GroupValueResponse, ApciTypes.GroupValueWrite, ApciTypes.ADCRead, ApciTypes.ADCResponse, ApciTypes.MemoryRead, ApciTypes.MemoryResponse, ApciTypes.MemoryWrite };
+            List<ApciTypes> datatypes = new List<ApciTypes>() { ApciTypes.IndividualAddressRead, ApciTypes.DeviceDescriptorRead, ApciTypes.GroupValueResponse, ApciTypes.GroupValueWrite, ApciTypes.ADCRead, ApciTypes.ADCResponse, ApciTypes.MemoryRead, ApciTypes.MemoryResponse, ApciTypes.MemoryWrite };
 
             int _apci = (int)apciType;
             if (apciType == ApciTypes.Ack)
@@ -72,6 +76,23 @@ namespace METS.Knx.Builders
             _apci = _apci | ((sCounter == 255 ? 0 : 1) << 14);
             _apci = _apci | (((data == null && !datatypes.Contains(apciType)) ? 1 : 0) << 15);
 
+            switch(apciType)
+            {
+                case ApciTypes.MemoryWrite:
+                case ApciTypes.MemoryRead:
+                    int number = BitConverter.ToInt16(new byte[] { data[0], 0, 0, 0 }, 0);
+                    if (number > 63)
+                        number = 63;
+                    _apci = _apci | number;
+                    byte[] data_temp = new byte[data.Length - 1];
+                    for (int i = 1; i < data.Length;i++)
+                    {
+                        data_temp[i - 1] = data[i];
+                    }
+                    data = data_temp;
+                    break;
+            }
+            
             byte[] _apci2 = BitConverter.GetBytes(Convert.ToUInt16(_apci));
 
             switch(apciType)

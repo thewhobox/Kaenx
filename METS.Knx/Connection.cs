@@ -12,6 +12,8 @@ using System.Reflection;
 using METS.Knx.Classes;
 using METS.Knx.Responses;
 using METS.Knx.Parser;
+using System.Net.NetworkInformation;
+using System.Linq;
 
 namespace METS.Knx
 {
@@ -25,7 +27,7 @@ namespace METS.Knx
 
         private readonly IPEndPoint _receiveEndPoint;
         private readonly IPEndPoint _sendEndPoint;
-        private readonly UdpClient _udpClient;
+        private UdpClient _udpClient;
         private readonly BlockingCollection<byte[]> _sendMessages;
         private readonly ReceiverParserDispatcher _receiveParserDispatcher;
         private byte _communicationChannel;
@@ -37,12 +39,21 @@ namespace METS.Knx
         public Connection(IPEndPoint sendEndPoint)
         {
             _sendEndPoint = sendEndPoint;
-            _receiveEndPoint = new IPEndPoint(IPAddress.Any, 45695);
+            _receiveEndPoint = new IPEndPoint(IPAddress.Any, GetFreePort());
             _udpClient = new UdpClient(_receiveEndPoint);
             _receiveParserDispatcher = new ReceiverParserDispatcher();
             _sendMessages = new BlockingCollection<byte[]>();
 
             ProcessSendMessages();
+        }
+
+        private int GetFreePort()
+        {
+            TcpListener l = new TcpListener(IPAddress.Loopback, 0);
+            l.Start();
+            int port = ((IPEndPoint)l.LocalEndpoint).Port;
+            l.Stop();
+            return port;
         }
 
 
@@ -64,6 +75,11 @@ namespace METS.Knx
             _sendMessages.Add(builder.GetBytes());
         }
 
+
+        public void Send(IRequestBuilder builder)
+        {
+            SendAsync(builder);
+        }
 
         public Task SendAsync(IRequestBuilder builder)
         {
@@ -144,6 +160,7 @@ namespace METS.Knx
 
             Task.Run(() =>
             {
+                
                 foreach (var sendMessage in _sendMessages.GetConsumingEnumerable())
                     _udpClient.SendAsync(sendMessage, sendMessage.Length, _sendEndPoint);
             });

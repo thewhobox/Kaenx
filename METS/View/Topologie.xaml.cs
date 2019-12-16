@@ -64,7 +64,7 @@ namespace METS.View
 
         private void ClickProAddr(object sender, RoutedEventArgs e)
         {
-            Classes.Bus.Actions.ProgPhysicalAddress action = new Classes.Bus.Actions.ProgPhysicalAddress(BusConnection.Instance);
+            Classes.Bus.Actions.ProgPhysicalAddress action = new Classes.Bus.Actions.ProgPhysicalAddress();
             action.Device = (LineDevice)((MenuFlyoutItem)e.OriginalSource).DataContext;
             BusConnection.Instance.AddAction(action);
         }

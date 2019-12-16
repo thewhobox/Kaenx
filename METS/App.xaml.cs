@@ -20,6 +20,8 @@ using METS.Context.Catalog;
 using METS.Context.Project;
 using Windows.UI.Core;
 using Windows.Storage;
+using System.Runtime.InteropServices;
+using METS.Classes;
 
 namespace METS
 {

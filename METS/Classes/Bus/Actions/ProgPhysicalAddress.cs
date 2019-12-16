@@ -1,4 +1,5 @@
-﻿using METS.Knx.Addresses;
+﻿using METS.Knx;
+using METS.Knx.Addresses;
 using METS.Knx.Builders;
 using System;
 using System.Collections.Generic;
@@ -15,7 +16,6 @@ namespace METS.Classes.Bus.Actions
         private int _progress;
         private bool _progressIsIndeterminate;
         private string _todoText;
-        private BusConnection _conn;
         private byte _sequence = 0x00;
         private List<string> progDevices = new List<string>();
         private CancellationToken _token;
@@ -26,15 +26,15 @@ namespace METS.Classes.Bus.Actions
         public bool ProgressIsIndeterminate { get { return _progressIsIndeterminate; } set { _progressIsIndeterminate = value; Changed("ProgressIsIndeterminate"); } }
         public string TodoText { get => _todoText; set { _todoText = value; Changed("TodoText"); } }
 
+        public Connection Connection { get; set; }
+
         public event EventHandler Finished;
         public event PropertyChangedEventHandler PropertyChanged;
 
         int sCounter = 0;
 
-        public ProgPhysicalAddress(BusConnection connection)
+        public ProgPhysicalAddress()
         {
-            _conn = connection;
-            _conn.OnTunnelResponse += _conn_OnTunnelResponse;
         }
 
         List<TunnelResponse> devices = new List<TunnelResponse>();
@@ -42,14 +42,6 @@ namespace METS.Classes.Bus.Actions
         private void _conn_OnTunnelResponse(TunnelResponse response)
         {
             devices.Add(response);
-
-            //switch(response.MessageCode)
-            //{
-            //    case 0x29:
-            //        if(response.SourceAddress.Area != 0 && !progDevices.Contains(response.SourceAddress.ToString()))
-            //            progDevices.Add(response.SourceAddress.ToString());
-            //        break;
-            //}
 
             if(response.APCI == Knx.Parser.ApciTypes.IndividualAddressResponse && response.SourceAddress.Area != 0 && !progDevices.Contains(response.SourceAddress.ToString()))
             {
@@ -59,6 +51,7 @@ namespace METS.Classes.Bus.Actions
 
         public void Run(CancellationToken token)
         {
+            Connection.OnTunnelRequest += _conn_OnTunnelResponse;
             _token = token; //TODO implement cancellation
             CheckProgMode();
         }
@@ -73,9 +66,9 @@ namespace METS.Classes.Bus.Actions
 
             while(!_token.IsCancellationRequested)
             {
-                if (!_conn.IsConnected)
+                if (!Connection.IsConnected)
                 {
-                    _conn.Connect();
+                    Connection.Connect();
                     await Task.Delay(2000);
                     continue;
                 }
@@ -108,7 +101,7 @@ namespace METS.Classes.Bus.Actions
                 progDevices.Clear();
                 TunnelRequest builder = new TunnelRequest();
                 builder.Build(UnicastAddress.FromString("0.0.0"), MulticastAddress.FromString("0/0/0"), Knx.Parser.ApciTypes.IndividualAddressRead, _sequence, 0);
-                _conn.SendAsync(builder);
+                Connection.Send(builder);
                 _sequence++;
 
                 await Task.Delay(500);
@@ -128,7 +121,7 @@ namespace METS.Classes.Bus.Actions
             byte[] apci = { 0x00, 0xc0 };
             builder.Build(MulticastAddress.FromString("0/0/0"), MulticastAddress.FromString("0/0/0"), Knx.Parser.ApciTypes.IndividualAddressWrite, _sequence, 255, newAddr.GetBytes());
             builder.SetPriority(Prios.System);
-            _conn.SendAsync(builder);
+            Connection.Send(builder);
             _sequence++;
 
             await Task.Delay(500);
@@ -142,7 +135,7 @@ namespace METS.Classes.Bus.Actions
             ProgressValue = 66;
             progDevices.Clear();
 
-            _conn.IncreaseSequence();
+            Connection.IncreaseSequence();
 
             while (!_token.IsCancellationRequested)
             {
@@ -171,7 +164,7 @@ namespace METS.Classes.Bus.Actions
                 TunnelRequest builder = new TunnelRequest();
                 byte[] apci = { 0x01, 0x00 };
                 builder.Build(UnicastAddress.FromString("0.0.0"), MulticastAddress.FromString("0/0/0"), Knx.Parser.ApciTypes.IndividualAddressRead, _sequence, 255);
-                _conn.SendAsync(builder);
+                Connection.Send(builder);
                 _sequence++;
                 await Task.Delay(500);
             }
@@ -186,21 +179,21 @@ namespace METS.Classes.Bus.Actions
             TunnelRequest builder = new TunnelRequest();
             byte[] apci = { 0x80 };
             builder.Build(UnicastAddress.FromString("0.0.0"), UnicastAddress.FromString(Device.LineName), Knx.Parser.ApciTypes.Connect, _sequence, 255);
-            _conn.SendAsync(builder);
+            Connection.Send(builder);
             _sequence++;
             await Task.Delay(200);
 
             builder = new TunnelRequest();
             apci = new byte[] { 0x43, 0x80 };
             builder.Build(UnicastAddress.FromString("0.0.0"), UnicastAddress.FromString(Device.LineName), Knx.Parser.ApciTypes.Restart, _sequence, 0);
-            _conn.SendAsync(builder);
+            Connection.Send(builder);
             _sequence++;
             await Task.Delay(200);
 
             builder = new TunnelRequest();
             apci = new byte[] { 0x81 };
             builder.Build(UnicastAddress.FromString("0.0.0"), UnicastAddress.FromString(Device.LineName), Knx.Parser.ApciTypes.IndividualAddressRead, _sequence, 2);
-            _conn.SendAsync(builder);
+            Connection.Send(builder);
             _sequence++;
             ProgressValue = 100;
             TodoText = "Abgeschlossen";

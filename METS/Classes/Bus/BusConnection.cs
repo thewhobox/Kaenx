@@ -14,7 +14,6 @@ namespace METS.Classes.Bus
 {
     public class BusConnection :INotifyPropertyChanged
     {
-        private Knx.Connection connection;
         private bool _isConnected = false;
         private bool _cancelIsUser = false;
 
@@ -59,9 +58,6 @@ namespace METS.Classes.Bus
 
         public BusConnection()
         {
-            connection = new METS.Knx.Connection(new IPEndPoint(IPAddress.Parse("192.168.0.108"), Convert.ToInt32(3671)));
-            connection.ConnectionChanged += Connection_ConnectionChanged;
-            connection.OnTunnelRequest += Connection_OnTunnelRequest;
             Run();
         }
 
@@ -76,41 +72,26 @@ namespace METS.Classes.Bus
             _cancelTokenSource?.Cancel();
         }
 
-        public void IncreaseSequence()
-        {
-            connection.IncreaseSequence();
-        }
+        //public void SendAsync(IRequestBuilder builder)
+        //{
+        //    if (!IsConnected)
+        //        throw new Exception("Not connected");
 
-        public void SendAsync(IRequestBuilder builder)
-        {
-            if (!IsConnected)
-                throw new Exception("Not connected");
+        //    _ = connection.SendAsync(builder);
+        //}
 
-            _ = connection.SendAsync(builder);
-        }
+        //public void SendAsync(byte[] bytes)
+        //{
+        //    if (!IsConnected)
+        //        throw new Exception("Not connected");
 
-        public void SendAsync(byte[] bytes)
-        {
-            if (!IsConnected)
-                throw new Exception("Not connected");
-
-            _ = connection.SendAsync(bytes);
-        }
+        //    _ = connection.SendAsync(bytes);
+        //}
 
         private void Connection_ConnectionChanged(bool isConnected)
         {
             IsConnected = isConnected;
             ConnectionChanged?.Invoke(isConnected);
-        }
-
-        public void Connect()
-        {
-            connection.Connect();
-        }
-
-        public void Disconnect()
-        {
-            connection.Disconnect();
         }
 
         private async void Run()
@@ -140,29 +121,33 @@ namespace METS.Classes.Bus
 
         private async void ExecuteAction()
         {
-            //CurrentAction.ProgressIsIndeterminate = true;
-            //CurrentAction.TodoText = "Verbindung wird hergestellt...";
-            //int c = 0;
-            //while (!connection.IsConnected && !_cancelTokenSource.IsCancellationRequested)
-            //{
-            //    c++;
-            //    connection.Connect();
-            //    await Task.Delay(500);
-            //    if (c == 20)
-            //    {
-            //        CurrentAction.TodoText = _cancelIsUser ? "Wurde abgebrochen" : "Connect Timeout (10s)";
-            //        CurrentAction_Finished(null, null);
-            //        return;
-            //    }
-            //}
-            //CurrentAction.ProgressIsIndeterminate = false;
+            CurrentAction.Connection = new METS.Knx.Connection(new IPEndPoint(IPAddress.Parse("192.168.0.108"), Convert.ToInt32(3671)));
+            CurrentAction.Connection.ConnectionChanged += Connection_ConnectionChanged;
+            
+            CurrentAction.ProgressIsIndeterminate = true;
+            CurrentAction.TodoText = "Verbindung wird hergestellt...";
+            _cancelTokenSource = new CancellationTokenSource();
+
+            int c = 0;
+            while (!CurrentAction.Connection.IsConnected && !_cancelTokenSource.IsCancellationRequested)
+            {
+                c++;
+                CurrentAction.Connection.Connect();
+                await Task.Delay(500);
+                if (c == 20)
+                {
+                    CurrentAction.TodoText = _cancelIsUser ? "Wurde abgebrochen" : "Connect Timeout (10s)";
+                    CurrentAction_Finished(null, null);
+                    return;
+                }
+            }
+            CurrentAction.ProgressIsIndeterminate = false;
             CurrentAction.Finished += CurrentAction_Finished;
 
-            _cancelTokenSource = new CancellationTokenSource();
             Task runner = Task.Run(() => CurrentAction.Run(_cancelTokenSource.Token), _cancelTokenSource.Token);
             try
             {
-                await Task.Delay(10000, _cancelTokenSource.Token);
+                await Task.Delay(30000, _cancelTokenSource.Token);
             } catch { }
 
 
@@ -183,12 +168,15 @@ namespace METS.Classes.Bus
         private async void CurrentAction_Finished(object sender, EventArgs e)
         {
             _cancelTokenSource?.Cancel();
-            connection.Disconnect();
+            //CurrentAction.Connection.Disconnect();
             await Task.Delay(500);
-            History.Insert(0, CurrentAction);
-            CurrentAction.Finished -= CurrentAction_Finished;
-            CurrentAction = null;
-            Changed("CurrentAction");
+            _ = App._dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Low, () =>
+            {
+                History.Insert(0, CurrentAction);
+                CurrentAction.Finished -= CurrentAction_Finished;
+                CurrentAction = null;
+                Changed("CurrentAction");
+            });
         }
 
         public void AddAction(IBusAction action)
@@ -206,7 +194,10 @@ namespace METS.Classes.Bus
                 PropertyChanged.Invoke(this, new PropertyChangedEventArgs(propName));
             } catch
             {
-                
+                _ = App._dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Low, () =>
+                {
+                    PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propName));
+                });
             }
         }
     }

@@ -1,4 +1,6 @@
-﻿using METS.Knx.Addresses;
+﻿using METS.Context.Catalog;
+using METS.Knx;
+using METS.Knx.Addresses;
 using METS.Knx.Builders;
 using System;
 using System.Collections.Generic;
@@ -15,9 +17,7 @@ namespace METS.Classes.Bus.Actions
         private int _progress;
         private bool _progressIsIndeterminate;
         private string _todoText;
-        private BusConnection _conn;
         private byte _sequence = 0x00;
-        private bool stopCheck = false;
         private DeviceInfoData _data = new DeviceInfoData();
         private CancellationToken _token;
 
@@ -27,18 +27,19 @@ namespace METS.Classes.Bus.Actions
         public bool ProgressIsIndeterminate { get { return _progressIsIndeterminate; } set { _progressIsIndeterminate = value; Changed("ProgressIsIndeterminate"); } }
         public string TodoText { get => _todoText; set { _todoText = value; Changed("TodoText"); } }
 
+        public Connection Connection { get; set; }
+
         public event EventHandler Finished;
         public event PropertyChangedEventHandler PropertyChanged;
 
         private int _state = 0;
+        private int GroupAddress;
 
         public DeviceInfo()
-        {
-            _conn = BusConnection.Instance;
-            _conn.OnTunnelResponse += _conn_OnTunnelResponse;
+        { 
         }
 
-        private void _conn_OnTunnelResponse(TunnelResponse response)
+        private void Conn_OnTunnelResponse(TunnelResponse response)
         {
             bool sendAck = true;
 
@@ -52,23 +53,28 @@ namespace METS.Classes.Bus.Actions
             } else if (_state == 3 && response.APCI == Knx.Parser.ApciTypes.PropertyValueResponse)
             {
                 State3(response);
-            } else if (_state == 4 && response.APCI == Knx.Parser.ApciTypes.MemoryResponse)
+            }
+            else if (_state == 4 && response.APCI == Knx.Parser.ApciTypes.MemoryResponse)
             {
                 State4(response);
-            } else {
+            } else if (_state == 5 && response.APCI == Knx.Parser.ApciTypes.MemoryResponse)
+            {
+                State5(response);
+            }
+            else {
                 sendAck = false;
             }
-
 
             if (!sendAck) return;
             _sequence++;
             TunnelRequest builder = new TunnelRequest(); //TODO ack wieder gängig machen
-            builder.Build(UnicastAddress.FromString("0.0.0"), UnicastAddress.FromString(Device.LineName), Knx.Parser.ApciTypes.Ack, _sequence, BitConverter.GetBytes(response.SequenceNumber)[1]);
-            _conn.SendAsync(builder);
+            builder.Build(UnicastAddress.FromString("0.0.0"), UnicastAddress.FromString(Device.LineName), Knx.Parser.ApciTypes.Ack, _sequence, BitConverter.GetBytes(response.SequenceNumber)[0]);
+            Connection.Send(builder);
         }
 
         public void Run(CancellationToken token)
         {
+            Connection.OnTunnelRequest += Conn_OnTunnelResponse;
             _token = token; // TODO implement cancellation
             _state = 0;
             TodoText = "Lese Geräteinfo...";
@@ -81,17 +87,15 @@ namespace METS.Classes.Bus.Actions
             TodoText = "Lese Maskenversion...";
             // Connect
             TunnelRequest builder = new TunnelRequest();
-            byte[] apci = { 0x80 };
             builder.Build(UnicastAddress.FromString("0.0.0"), UnicastAddress.FromString(Device.LineName), Knx.Parser.ApciTypes.Connect, _sequence, 255, null);
-            _conn.SendAsync(builder);
+            Connection.Send(builder);
             await Task.Delay(100);
             _sequence++;
 
             // Read Property (MaskVersion)
             builder = new TunnelRequest();
-            apci = new byte[] { 0x43, 0x00 };
             builder.Build(UnicastAddress.FromString("0.0.0"), UnicastAddress.FromString(Device.LineName), Knx.Parser.ApciTypes.DeviceDescriptorRead, _sequence, 0);
-            _conn.SendAsync(builder);
+            Connection.Send(builder);
             _state = 1;
         }
 
@@ -105,10 +109,9 @@ namespace METS.Classes.Bus.Actions
             await Task.Delay(500);
             _sequence++;
             TunnelRequest builder = new TunnelRequest();
-            byte[] apci = { 0x47, 0xd5 };
             byte[] data = { 0, 11, 0x01 << 4, 0x01 };
             builder.Build(UnicastAddress.FromString("0.0.0"), UnicastAddress.FromString(Device.LineName), Knx.Parser.ApciTypes.PropertyValueRead, _sequence, 1, data);
-            _conn.SendAsync(builder);
+            Connection.Send(builder);
             _state = 2;
         }
 
@@ -122,41 +125,46 @@ namespace METS.Classes.Bus.Actions
 
             _sequence++;
             TunnelRequest builder = new TunnelRequest();
-            byte[] apci = { 0x4B, 0xd5 };
             byte[] data = { 3, 13, 0x01 << 4, 0x01 };
             builder.Build(UnicastAddress.FromString("0.0.0"), UnicastAddress.FromString(Device.LineName), Knx.Parser.ApciTypes.PropertyValueRead, _sequence, 2, data);
-            _conn.SendAsync(builder);
+            Connection.Send(builder);
             _state = 3;
         }
 
         private async void State3(TunnelResponse response) 
         {
             ProgressValue = 30;
-            _data.ApplicationId = BitConverter.ToString(response.Data).Replace("-", "").Substring(8);
-
+            string appId = BitConverter.ToString(response.Data).Replace("-", "").Substring(8);
+            appId = "M-" + appId.Substring(0, 4) + "_A-" + appId.Substring(4, 4) + "-" + appId.Substring(8, 2) + "-";
+            _data.ApplicationId = appId + "XXXX";
 
             TodoText = "Lese Gruppentabelle...";
             await Task.Delay(500);
 
             _sequence++;
             TunnelRequest builder = new TunnelRequest();
-            byte[] address = BitConverter.GetBytes(Convert.ToInt16(16384));
-            byte[] apci = { 0x02, 0x00 }; // 0x4B, 0xd5 };
+            List<byte> data = new List<byte> { 9 };
 
-            int _count = 12;
-            int _apci = 8 << 6;
-            int _tpci = 19 << 10;
 
-            int xy = _count | _apci | _tpci;
+            CatalogContext context = new CatalogContext();
+            ApplicationViewModel appModel = context.Applications.Single(a => a.Id.StartsWith(appId));
 
-            apci = BitConverter.GetBytes(Convert.ToInt16(xy));
-            Array.Reverse(apci);
+            if (appModel.Table_Group != "" || appModel.Table_Group != null)
+            {
+                AppAbsoluteSegmentViewModel segmentModel = context.AppAbsoluteSegments.Single(s => s.Id == appModel.Table_Group);
+                GroupAddress = segmentModel.Address;
+            } else
+            {
+                //TODO hinzufügen von Adresse aus der Maske holen!
+            }
+
+
+            byte[] address = BitConverter.GetBytes(Convert.ToInt16(GroupAddress));
             Array.Reverse(address);
+            data.AddRange(address);
 
-            //TODO check needed changes
-
-            builder.Build(UnicastAddress.FromString("0.0.0"), UnicastAddress.FromString(Device.LineName), Knx.Parser.ApciTypes.MemoryRead, _sequence, 3, address);
-            _conn.SendAsync(builder);
+            builder.Build(UnicastAddress.FromString("0.0.0"), UnicastAddress.FromString(Device.LineName), Knx.Parser.ApciTypes.MemoryRead, _sequence, 3, data.ToArray());
+            Connection.Send(builder);
             _state = 4;
 
         }
@@ -165,23 +173,40 @@ namespace METS.Classes.Bus.Actions
         {
             TodoText = "Verarbeite Gruppentabelle...";
             int length = BitConverter.ToUInt16(new byte[] { response.Data[2], 0x00 }, 0);
-            UnicastAddress self = UnicastAddress.FromByteArray(new byte[] { response.Data[3], response.Data[4] });
 
+            if (length <= 1)
+            {
+                Finish();
+                return;
+            }
+
+
+
+            _sequence++;
+            TunnelRequest builder = new TunnelRequest();
+            List<byte> data = new List<byte>();
+
+            data.Add(BitConverter.GetBytes((length - 1)*2)[0]);
+
+            byte[] address = BitConverter.GetBytes(Convert.ToInt16(GroupAddress + 3));
+            Array.Reverse(address);
+            data.AddRange(address);
+
+            //TODO check needed changes
+
+            builder.Build(UnicastAddress.FromString("0.0.0"), UnicastAddress.FromString(Device.LineName), Knx.Parser.ApciTypes.MemoryRead, _sequence, 4, data.ToArray());
+            Connection.Send(builder);
+            _state = 5;
+        }
+
+        private void State5(TunnelResponse response)
+        {
             List<MulticastAddress> addresses = new List<MulticastAddress>();
 
-            for (int i = 0; i < length -1; i++)
+            for (int i = 0; i < ((response.Data.Length-2) / 2); i++)
             {
-                int offset = (i*2) + 5;
-
-                byte mm = response.Data[offset];
-                int main = mm >> 3;
-
-                int middle = mm & 7;
-
-                mm = BitConverter.GetBytes((main << 4) | middle)[0];
-
-
-                addresses.Add(MulticastAddress.FromByteArray(new byte[] { mm, response.Data[offset + 1] }));
+                int offset = (i*2)+2;
+                addresses.Add(MulticastAddress.FromByteArray(new byte[] { response.Data[offset], response.Data[offset + 1] }));
             }
 
             _data.GroupTable = addresses;
@@ -191,10 +216,10 @@ namespace METS.Classes.Bus.Actions
 
         private void Finish()
         {
-            _conn.OnTunnelResponse -= _conn_OnTunnelResponse;
+            Connection.OnTunnelRequest -= Conn_OnTunnelResponse;
 
             ProgressValue = 100;
-            TodoText = "";
+            TodoText = "Erfolgreich";
             Finished?.Invoke(_data, new EventArgs());
         }
 
@@ -203,7 +228,8 @@ namespace METS.Classes.Bus.Actions
             try
             {
                 PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
-            } catch
+            }
+            catch
             {
                 _ = App._dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Low, () =>
                 {

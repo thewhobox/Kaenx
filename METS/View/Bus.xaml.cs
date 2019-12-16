@@ -32,7 +32,7 @@ namespace METS.View
 
         private void ReadInfo(object sender, RoutedEventArgs e)
         {
-            BtnGetInfo.IsEnabled = false;
+            //BtnGetInfo.IsEnabled = false;
 
             string[] address = InAddress2.Text.Split(".");
 
@@ -42,6 +42,7 @@ namespace METS.View
             action.Device = new LineDevice { Name = "Unbekannt", Id = int.Parse(address[2]), Parent = dL };
             action.Finished += Action_Finished;
             BusConnection.Instance.AddAction(action);
+        
         }
 
         private void ClickCancel(object sender, RoutedEventArgs e)
@@ -53,7 +54,7 @@ namespace METS.View
         {
             _ = this.Dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Normal, () =>
             {
-                BtnGetInfo.IsEnabled = true;
+                //BtnGetInfo.IsEnabled = true;
                 GridOutput.DataContext = sender;
             });
         }

@@ -73,7 +73,7 @@
                     </ListView.ItemContainerStyle>
                     <ListView.ItemTemplate>
                         <DataTemplate>
-                            <StackPanel Padding="0 10" BorderThickness="0 0 0 1" BorderBrush="LightGray">
+                            <StackPanel Padding="0 10" BorderThickness="0 0 0 0.5" BorderBrush="Gray">
                                 <StackPanel.ContextFlyout>
                                     <MenuFlyout>
                                         <MenuFlyoutItem Text="Vorziehen" Icon="Upload" />

@@ -24,7 +24,7 @@ namespace METS.Knx.Addresses
 
         public static MulticastAddress FromByteArray(byte[] bytes)
         {
-            return new MulticastAddress((byte)(bytes[0] >> 4), (byte)(bytes[0] & 0x0F), bytes[1]);
+            return new MulticastAddress((byte)(bytes[0] >> 3), (byte)(bytes[0] & 0x07), bytes[1]);
         }
 
         public static MulticastAddress FromString(string address)

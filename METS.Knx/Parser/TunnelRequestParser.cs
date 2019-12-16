@@ -5,6 +5,7 @@ using METS.Knx.Responses;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Runtime.InteropServices;
 using System.Text;
 
 namespace METS.Knx.Parser
@@ -20,6 +21,7 @@ namespace METS.Knx.Parser
         {
             return Build(headerLength, protocolVersion, totalLength, responseBytes);
         }
+
 
         public Builders.TunnelResponse Build(byte headerLength, byte protocolVersion, ushort totalLength, byte[] responseBytes)
         {
