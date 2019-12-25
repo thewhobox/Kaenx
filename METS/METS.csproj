@@ -225,6 +225,7 @@
     <AppxManifest Include="Package.appxmanifest">
       <SubType>Designer</SubType>
     </AppxManifest>
+    <None Include="Data\Logos\kænx.odg" />
     <None Include="METS_TemporaryKey.pfx" />
     <PRIResource Include="Strings\en\Global.resw" />
     <PRIResource Include="Strings\en\WorkDeskEasy.resw" />
@@ -287,6 +288,10 @@
     <Content Include="Assets\Wide310x150Logo.scale-150.png" />
     <Content Include="Assets\Wide310x150Logo.scale-400.png" />
     <Content Include="Data\knx_master.xml" />
+    <Content Include="Data\Logos\full.svg" />
+    <Content Include="Data\Logos\house.svg" />
+    <Content Include="Data\Logos\small2.svg" />
+    <Content Include="Data\Logos\small3.svg" />
     <Content Include="Properties\Default.rd.xml" />
     <Content Include="Assets\LockScreenLogo.scale-200.png" />
     <Content Include="Assets\SplashScreen.scale-200.png" />
