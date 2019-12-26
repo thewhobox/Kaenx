@@ -45,6 +45,13 @@ namespace METS.View
             App._dispatcher = Window.Current.Dispatcher;
 
             LoadProjects();
+            //test.Source = new Windows.UI.Xaml.Media.Imaging.SvgImageSource(new Uri("ms-appx:///Data/Logos/full.svg", UriKind.Absolute));
+            //test.ImageFailed += Test_ImageFailed;
+        }
+
+        private void Test_ImageFailed(object sender, ExceptionRoutedEventArgs e)
+        {
+            throw new NotImplementedException();
         }
 
         private void LoadProjects()

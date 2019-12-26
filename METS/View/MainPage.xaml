@@ -14,7 +14,15 @@
     mc:Ignorable="d">
 
     <Grid>
-        <Grid MaxHeight="300" MaxWidth="600"  Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+        <Grid.RowDefinitions>
+            <RowDefinition />
+            <RowDefinition Height="auto" />
+            <RowDefinition />
+        </Grid.RowDefinitions>
+
+        <Image x:Name="test" Source="ms-appx:///Assets/Wide310x150Logo.png"  Height="200" />
+
+        <Grid Grid.Row="1" Height="300" Width="600"  Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition />
                 <ColumnDefinition />
@@ -24,6 +32,8 @@
                 <RowDefinition />
                 <RowDefinition />
             </Grid.RowDefinitions>
+
+
 
 
             <Button x:Uid="/MainPage/BtnNewProject" x:Name="newP" Click="OpenNewProjekt" Background="White" BorderThickness="0 0 1 1" BorderBrush="LightGray" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" />
@@ -59,11 +69,11 @@
             </Grid>
         </Grid>
 
-        <toolkit:Loading x:Name="LoadScreen" Background="Black" Opacity="0.4">
+        <toolkit:Loading Grid.RowSpan="3" x:Name="LoadScreen" Background="Black" Opacity="0.4">
             <ProgressRing IsActive="True" Foreground="Blue" Height="100" Width="100" />
         </toolkit:Loading>
 
-        <toolkit:InAppNotification x:Name="Notify" />
+        <toolkit:InAppNotification Grid.Row="2"  x:Name="Notify" />
     </Grid>
 
     

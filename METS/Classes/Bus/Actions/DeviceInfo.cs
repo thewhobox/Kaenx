@@ -67,7 +67,7 @@ namespace METS.Classes.Bus.Actions
 
             if (!sendAck) return;
             _sequence++;
-            TunnelRequest builder = new TunnelRequest(); //TODO ack wieder gängig machen
+            TunnelRequest builder = new TunnelRequest();
             builder.Build(UnicastAddress.FromString("0.0.0"), UnicastAddress.FromString(Device.LineName), Knx.Parser.ApciTypes.Ack, _sequence, BitConverter.GetBytes(response.SequenceNumber)[0]);
             Connection.Send(builder);
         }

@@ -132,6 +132,36 @@ namespace METS.Classes.Bus.Actions
                 //TODO hinzufügen von Adresse aus der Maske holen!
             }
 
+            XDocument master = await GetKnxMaster();
+            XElement mask = master.Descendants(XName.Get("MaskVersion", master.Root.Name.NamespaceName)).Single(m => m.Attribute("Id").Value == appModel.Mask);
+            XElement resource = mask.Descendants(XName.Get("Resource", master.Root.Name.NamespaceName)).Single(l => l.Attribute("Name").Value == "GroupAssociationTable"); // "GroupAddressTable");
+            XElement location = resource.Element(XName.Get("Location", master.Root.Name.NamespaceName));
+
+            switch (location.Attribute("AddressSpace").Value)
+            {
+                case "StandardMemory":
+                    bool flag = int.TryParse(location.Attribute("StartAddress").Value, out GroupAddress);
+                    if(!flag)
+                    {
+                        State2();
+                        return;
+                    }
+                    break;
+
+                case "Pointer":
+                    string pointer = location.Attribute("PtrResource").Value;
+                    resource = mask.Descendants(XName.Get("Resource", master.Root.Name.NamespaceName)).Single(l => l.Attribute("Name").Value == pointer);
+                    location = resource.Element(XName.Get("Location", master.Root.Name.NamespaceName));
+                    //TODO: Property auslesen
+                    break;
+
+
+                default:
+                    throw new NotImplementedException(location.Attribute("AddressSpace").Value + "; " + resource.ToString());
+
+            }
+
+
 
             TodoText = "Schreibe Gruppentabelle....";
             ProgressValue = 20;
@@ -202,7 +232,7 @@ namespace METS.Classes.Bus.Actions
 
         private async void State2()
         {
-            TodoText = "Schreibe Kommtabelle....";
+            TodoText = "Schreibe Assoziationstabelle....";
             ProgressValue = 30;
 
 
@@ -221,6 +251,9 @@ namespace METS.Classes.Bus.Actions
             {
                 
             }
+
+            
+
 
             _sequence++;
             TunnelRequest builder = new TunnelRequest();
