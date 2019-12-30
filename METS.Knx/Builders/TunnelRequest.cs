@@ -1,5 +1,4 @@
 ﻿using METS.Knx.Addresses;
-using METS.Knx.Data;
 using METS.Knx.Parser;
 using System;
 using System.Collections;

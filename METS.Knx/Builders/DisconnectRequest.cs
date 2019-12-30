@@ -15,8 +15,8 @@ namespace METS.Knx.Builders
             byte[] header = { 0x06, 0x10, 0x02, 0x09, 0x00, 0x10 }; // Length, Version, Descriptor 2x, Total length 2x
             bytes.AddRange(header);
 
-            bytes.Add(0x1f);
-            bytes.Add(0x00);
+            bytes.Add(communitycationChannel); // Channel
+            bytes.Add(0x00); //Status OK
             bytes.AddRange(new HostProtocolAddressInformation(0x01, source).GetBytes());
         }
 

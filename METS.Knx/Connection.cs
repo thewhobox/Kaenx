@@ -7,7 +7,6 @@ using System.Net;
 using System.Net.Sockets;
 using System.Text;
 using System.Threading.Tasks;
-using METS.Knx.Data;
 using System.Reflection;
 using METS.Knx.Classes;
 using METS.Knx.Responses;
@@ -71,7 +70,7 @@ namespace METS.Knx
                 return;
 
             DisconnectRequest builder = new DisconnectRequest();
-            builder.Build(_sendEndPoint, _communicationChannel);
+            builder.Build(_receiveEndPoint, _communicationChannel);
             _sendMessages.Add(builder.GetBytes());
         }
 
@@ -133,6 +132,9 @@ namespace METS.Knx
                                     _communicationChannel = connectResponse.CommunicationChannel;
                                     IsConnected = true;
                                     ConnectionChanged?.Invoke(IsConnected);
+                                } else
+                                {
+
                                 }
 
                                 break;

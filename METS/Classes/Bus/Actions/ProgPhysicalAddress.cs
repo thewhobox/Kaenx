@@ -31,8 +31,6 @@ namespace METS.Classes.Bus.Actions
         public event EventHandler Finished;
         public event PropertyChangedEventHandler PropertyChanged;
 
-        int sCounter = 0;
-
         public ProgPhysicalAddress()
         {
         }
@@ -66,12 +64,6 @@ namespace METS.Classes.Bus.Actions
 
             while(!_token.IsCancellationRequested)
             {
-                if (!Connection.IsConnected)
-                {
-                    Connection.Connect();
-                    await Task.Delay(2000);
-                    continue;
-                }
                 if (progDevices.Count == 1)
                 {
                     if(progDevices[0] == Device.LineName)
@@ -104,7 +96,7 @@ namespace METS.Classes.Bus.Actions
                 Connection.Send(builder);
                 _sequence++;
 
-                await Task.Delay(500);
+                await Task.Delay(2000);
             }
         }
 
@@ -196,10 +188,14 @@ namespace METS.Classes.Bus.Actions
             Connection.Send(builder);
             _sequence++;
             ProgressValue = 100;
-            TodoText = "Abgeschlossen";
+            TodoText = "Erfolgreich abgeschlossen";
             await Task.Delay(2000);
 
-            Device.LoadedPA = true;
+
+            _ = App._dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Low, () =>
+            {
+                Device.LoadedPA = true;
+            });
 
             Finished?.Invoke(this, new EventArgs());
         }

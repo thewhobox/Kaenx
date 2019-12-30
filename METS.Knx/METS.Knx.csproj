@@ -133,8 +133,6 @@
     <Compile Include="Classes\IReceiveParser.cs" />
     <Compile Include="Classes\ReceiverParserDispatcher.cs" />
     <Compile Include="Connection.cs" />
-    <Compile Include="Data\BooleanData.cs" />
-    <Compile Include="Data\IKnxData.cs" />
     <Compile Include="Parser\ConnectResponseParser.cs" />
     <Compile Include="Parser\DisconnectResponseParser.cs" />
     <Compile Include="Parser\TunnelAckParser.cs" />

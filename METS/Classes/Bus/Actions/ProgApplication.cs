@@ -1,5 +1,6 @@
 ﻿using METS.Classes.Project;
 using METS.Context.Catalog;
+using METS.Context.Project;
 using METS.Knx;
 using METS.Knx.Addresses;
 using METS.Knx.Builders;
@@ -27,6 +28,8 @@ namespace METS.Classes.Bus.Actions
         private CancellationToken _token;
         private byte _currentSeqNum = 0;
         private string appId;
+        private List<string> addedGroups;
+        private CatalogContext _context = new CatalogContext();
 
         public string Type { get; } = "Geräte Info";
         public LineDevice Device { get; set; }
@@ -54,7 +57,7 @@ namespace METS.Classes.Bus.Actions
             }
             else if(_state == 3 && response.APCI == Knx.Parser.ApciTypes.MemoryResponse)
             {
-
+                
             }
             else
             {
@@ -110,9 +113,18 @@ namespace METS.Classes.Bus.Actions
             }
 
 
-            if(_type == ProgAppType.Minimal && Device.LoadedGroups)
+            addedGroups = new List<string> { "" };
+            foreach (DeviceComObject com in Device.ComObjects)
+                foreach (GroupAddress group in com.Groups)
+                    if (!addedGroups.Contains(group.GroupName))
+                        addedGroups.Add(group.GroupName);
+
+            addedGroups.Sort();
+
+
+            if (_type != ProgAppType.Komplett && Device.LoadedGroups)
             {
-                State2();
+                State3();
                 return;
             }
 
@@ -130,43 +142,41 @@ namespace METS.Classes.Bus.Actions
             else
             {
                 //TODO hinzufügen von Adresse aus der Maske holen!
+                XDocument master = await GetKnxMaster();
+                XElement mask = master.Descendants(XName.Get("MaskVersion", master.Root.Name.NamespaceName)).Single(m => m.Attribute("Id").Value == appModel.Mask);
+                XElement resource = mask.Descendants(XName.Get("Resource", master.Root.Name.NamespaceName)).Single(l => l.Attribute("Name").Value == "GroupAssociationTable"); // "GroupAddressTable");
+                XElement location = resource.Element(XName.Get("Location", master.Root.Name.NamespaceName));
+
+                switch (location.Attribute("AddressSpace").Value)
+                {
+                    case "StandardMemory":
+                        bool flag = int.TryParse(location.Attribute("StartAddress").Value, out GroupAddress);
+                        if (!flag)
+                        {
+                            State2();
+                            return;
+                        }
+                        break;
+
+                    case "Pointer":
+                        string pointer = location.Attribute("PtrResource").Value;
+                        resource = mask.Descendants(XName.Get("Resource", master.Root.Name.NamespaceName)).Single(l => l.Attribute("Name").Value == pointer);
+                        location = resource.Element(XName.Get("Location", master.Root.Name.NamespaceName));
+                        //TODO: Property auslesen
+                        break;
+
+
+                    default:
+                        throw new NotImplementedException(location.Attribute("AddressSpace").Value + "; " + resource.ToString());
+
+                }
+
             }
-
-            XDocument master = await GetKnxMaster();
-            XElement mask = master.Descendants(XName.Get("MaskVersion", master.Root.Name.NamespaceName)).Single(m => m.Attribute("Id").Value == appModel.Mask);
-            XElement resource = mask.Descendants(XName.Get("Resource", master.Root.Name.NamespaceName)).Single(l => l.Attribute("Name").Value == "GroupAssociationTable"); // "GroupAddressTable");
-            XElement location = resource.Element(XName.Get("Location", master.Root.Name.NamespaceName));
-
-            switch (location.Attribute("AddressSpace").Value)
-            {
-                case "StandardMemory":
-                    bool flag = int.TryParse(location.Attribute("StartAddress").Value, out GroupAddress);
-                    if(!flag)
-                    {
-                        State2();
-                        return;
-                    }
-                    break;
-
-                case "Pointer":
-                    string pointer = location.Attribute("PtrResource").Value;
-                    resource = mask.Descendants(XName.Get("Resource", master.Root.Name.NamespaceName)).Single(l => l.Attribute("Name").Value == pointer);
-                    location = resource.Element(XName.Get("Location", master.Root.Name.NamespaceName));
-                    //TODO: Property auslesen
-                    break;
-
-
-                default:
-                    throw new NotImplementedException(location.Attribute("AddressSpace").Value + "; " + resource.ToString());
-
-            }
-
-
 
             TodoText = "Schreibe Gruppentabelle....";
             ProgressValue = 20;
 
-            //Lenge der Tabelle auf 1 stellen
+            //Länge der Tabelle auf 1 stellen
             _sequence++;
             TunnelRequest builder = new TunnelRequest();
             List<byte> data = new List<byte> { 1 };
@@ -177,7 +187,7 @@ namespace METS.Classes.Bus.Actions
             builder.Build(UnicastAddress.FromString("0.0.0"), UnicastAddress.FromString(Device.LineName), Knx.Parser.ApciTypes.MemoryWrite, _sequence, _currentSeqNum++, data.ToArray());
             Connection.Send(builder);
 
-            await Task.Delay(1000);
+            await Task.Delay(100);
 
 
             //Tabelle mit den Gruppenadressen füllen
@@ -188,18 +198,10 @@ namespace METS.Classes.Bus.Actions
             Array.Reverse(address);
             data.AddRange(address);
 
-            //Liste zusammenstelle und sortieren
-            List<string> addedGroups = new List<string>();
-            foreach (DeviceComObject com in Device.ComObjects)
-                foreach (GroupAddress group in com.Groups)
-                    if (!addedGroups.Contains(group.GroupName))
-                        addedGroups.Add(group.GroupName);
-
-            addedGroups.Sort();
-
             //Liste zum Datenpaket hinzufügen
             foreach (string group in addedGroups)
-                data.AddRange(MulticastAddress.FromString(group).GetBytes());
+                if(group != "")
+                    data.AddRange(MulticastAddress.FromString(group).GetBytes());
 
             //Datenlänge richtig setzen
             data[0] = BitConverter.GetBytes(addedGroups.Count * 2)[0];
@@ -215,7 +217,7 @@ namespace METS.Classes.Bus.Actions
             address = BitConverter.GetBytes(Convert.ToInt16(GroupAddress));
             Array.Reverse(address);
             data.AddRange(address);
-            data.Add(6);
+            data.Add(BitConverter.GetBytes(addedGroups.Count)[0]);
             builder.Build(UnicastAddress.FromString("0.0.0"), UnicastAddress.FromString(Device.LineName), Knx.Parser.ApciTypes.MemoryWrite, _sequence, _currentSeqNum++, data.ToArray());
             Connection.Send(builder);
 
@@ -238,43 +240,135 @@ namespace METS.Classes.Bus.Actions
 
             //check if table already written
 
-            CatalogContext context = new CatalogContext();
-            ApplicationViewModel appModel = context.Applications.Single(a => a.Id.StartsWith(appId));
-            int ComAddress = 0;
+            
+            ApplicationViewModel appModel = _context.Applications.Single(a => a.Id.StartsWith(appId));
+            int AssoAddress = 0;
 
             if (appModel.Table_Group != "" || appModel.Table_Group != null)
             {
-                AppAbsoluteSegmentViewModel segmentModel = context.AppAbsoluteSegments.Single(s => s.Id == appModel.Table_Object);
-                ComAddress = segmentModel.Address;
+                AppAbsoluteSegmentViewModel segmentModel = _context.AppAbsoluteSegments.Single(s => s.Id == appModel.Table_Assosiations);
+                AssoAddress = segmentModel.Address;
             }
             else
             {
                 
             }
 
-            
+
+            //_sequence++;
+            //TunnelRequest builder = new TunnelRequest();
+            //List<byte> data = new List<byte> { 12 };
+            //byte[] address = BitConverter.GetBytes(Convert.ToInt16(AssoAddress));
+            //Array.Reverse(address);
+            //data.AddRange(address);
+            //builder.Build(UnicastAddress.FromString("0.0.0"), UnicastAddress.FromString(Device.LineName), Knx.Parser.ApciTypes.MemoryRead, _sequence, _currentSeqNum++, data.ToArray());
+            //Connection.Send(builder);
+            //_state = 3;
 
 
+
+            //Länge der Tabelle auf 0 setzen.
             _sequence++;
             TunnelRequest builder = new TunnelRequest();
-            List<byte> data = new List<byte> { 12 };
-            byte[] address = BitConverter.GetBytes(Convert.ToInt16(ComAddress + 2));
+            List<byte> data = new List<byte> { 1 };
+            byte[] address = BitConverter.GetBytes(Convert.ToInt16(AssoAddress));
             Array.Reverse(address);
             data.AddRange(address);
-            builder.Build(UnicastAddress.FromString("0.0.0"), UnicastAddress.FromString(Device.LineName), Knx.Parser.ApciTypes.MemoryRead, _sequence, _currentSeqNum++, data.ToArray());
+            data.Add(0);
+            builder.Build(UnicastAddress.FromString("0.0.0"), UnicastAddress.FromString(Device.LineName), Knx.Parser.ApciTypes.MemoryWrite, _sequence, _currentSeqNum++, data.ToArray());
             Connection.Send(builder);
-            _state = 3;
+
+            await Task.Delay(100);
 
 
+            //Erstelle Assoziationstabelle
+            data = new List<byte>();
+            int sizeCounter = 0;
 
 
-            //Finish();
+            foreach (DeviceComObject com in Device.ComObjects)
+            {
+                foreach (GroupAddress group in com.Groups)
+                {
+                    int indexG = addedGroups.IndexOf(group.GroupName) + 1;
+                    int indexC = com.Number;
+
+                    byte bIndexG = BitConverter.GetBytes(indexG)[0];
+                    byte bIndexC = BitConverter.GetBytes(indexC)[0];
+                    data.Add(bIndexG);
+                    data.Add(bIndexC);
+                    sizeCounter++;
+                }
+            }
+
+            //Schreibe Tabelle
+            _sequence++;
+            builder = new TunnelRequest();
+            address = BitConverter.GetBytes(Convert.ToInt16(AssoAddress + 1));
+            Array.Reverse(address);
+            data.AddRange(address);
+            builder.Build(UnicastAddress.FromString("0.0.0"), UnicastAddress.FromString(Device.LineName), Knx.Parser.ApciTypes.MemoryWrite, _sequence, _currentSeqNum++, data.ToArray());
+            Connection.Send(builder);
+
+            //Länge der Tabelle korrekt setzen
+            _sequence++;
+            builder = new TunnelRequest();
+            data = new List<byte> { 1 };
+            address = BitConverter.GetBytes(Convert.ToInt16(AssoAddress));
+            Array.Reverse(address);
+            data.AddRange(address);
+            data.Add(BitConverter.GetBytes(sizeCounter)[0]);
+            builder.Build(UnicastAddress.FromString("0.0.0"), UnicastAddress.FromString(Device.LineName), Knx.Parser.ApciTypes.MemoryWrite, _sequence, _currentSeqNum++, data.ToArray());
+            Connection.Send(builder);
+
+
+            _ = App._dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Low, () =>
+              {
+                  Device.LoadedGroups = true;
+              });
+
+            State3();
         }
+
+
+        private async void State3()
+        {
+
+            if (_type != ProgAppType.Komplett && Device.LoadedApplication)
+            {
+                Finish();
+                return;
+            }
+
+
+            if(_type == ProgAppType.Komplett)
+            {
+                AppAbsoluteSegmentViewModel segment = _context.AppAbsoluteSegments.Single(a => a.Id == "M-0083_A-000D-11-B2F5_AS-4400");
+                byte[] data = Convert.FromBase64String(segment.Data);
+
+
+            }
+
+
+            _ = App._dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Low, () =>
+            {
+                Device.LoadedApplication = true;
+            });
+
+
+            Finish();
+        }
+
 
 
 
         private void Finish()
         {
+
+            //ProjectContext context = new ProjectContext();
+            //LineDeviceModel model = context.LineDevices.Single(d => d.UId == Device.UId);
+
+            TodoText = "Erfolgreich abgeschlossen";
             Finished(this, null);
         }
 

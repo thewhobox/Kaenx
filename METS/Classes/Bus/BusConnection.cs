@@ -168,7 +168,7 @@ namespace METS.Classes.Bus
         private async void CurrentAction_Finished(object sender, EventArgs e)
         {
             _cancelTokenSource?.Cancel();
-            //CurrentAction.Connection.Disconnect();
+            CurrentAction.Connection.Disconnect();
             await Task.Delay(500);
             _ = App._dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Low, () =>
             {
