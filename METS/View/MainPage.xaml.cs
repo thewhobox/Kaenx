@@ -3,14 +3,18 @@ using METS.Classes.Controls;
 using METS.Classes.Helper;
 using METS.Classes.Project;
 using METS.Context.Project;
+using Microsoft.AppCenter.Crashes;
+using Serilog;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices.WindowsRuntime;
 using System.Threading.Tasks;
 using System.Xml.Serialization;
+using Windows.ApplicationModel;
 using Windows.ApplicationModel.Resources;
 using Windows.Foundation;
 using Windows.Foundation.Collections;
@@ -31,39 +35,58 @@ namespace METS.View
     /// An empty page that can be used on its own or navigated to within a Frame.
     /// </summary>
     /// 
-    public sealed partial class MainPage : Page
+    public sealed partial class MainPage : Page, INotifyPropertyChanged
     {
         public ObservableCollection<ProjectModel> ProjectList { get; set; } = new ObservableCollection<ProjectModel>();
 
         private ResourceLoader loader = ResourceLoader.GetForCurrentView("MainPage");
         private ResourceLoader loaderG = ResourceLoader.GetForCurrentView("Global");
 
+        private bool _projectSelected = false;
+
+        public event PropertyChangedEventHandler PropertyChanged;
+
+        public bool ProjectSelected
+        {
+            get { return _projectSelected; }
+            set { _projectSelected = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("ProjectSelected")); }
+        }
+
         public MainPage()
         {
             this.InitializeComponent();
-            LBProjects.DataContext = ProjectList;
+            this.DataContext = this;
             App._dispatcher = Window.Current.Dispatcher;
 
+            Package package = Package.Current;
+            PackageId packageId = package.Id;
+            PackageVersion version = packageId.Version;
+
+            AppVersion.Text =  string.Format("{0}.{1}.{2}.{3}", version.Major, version.Minor, version.Build, version.Revision);
+
             LoadProjects();
-            //test.Source = new Windows.UI.Xaml.Media.Imaging.SvgImageSource(new Uri("ms-appx:///Data/Logos/full.svg", UriKind.Absolute));
-            //test.ImageFailed += Test_ImageFailed;
         }
 
-        private void Test_ImageFailed(object sender, ExceptionRoutedEventArgs e)
-        {
-            throw new NotImplementedException();
-        }
-
-        private void LoadProjects()
+        private async void LoadProjects()
         {
             foreach(ProjectModel model in SaveHelper.GetProjects())
             {
                 ProjectList.Add(model);
             }
+
+            bool didCrash = await Crashes.HasCrashedInLastSessionAsync();
+
+            if(didCrash)
+            {
+                ErrorReport report = await Crashes.GetLastSessionCrashReportAsync();
+                Log.Error("App ist in letzter Sitzung abgestürzt!", report.StackTrace);
+                Notify.Show("App ist kürzlich abgestürzt!"); //TODO veraltet
+            }
         }
 
         private void OpenCatalog(object sender, RoutedEventArgs e)
         {
+            Serilog.Log.Debug("Katalog öffnen");
             App.Navigate(typeof(Catalog), typeof(MainPage));
         }
 
@@ -91,7 +114,15 @@ namespace METS.View
 
             proj.Id = SaveHelper.SaveProject(proj).Id;
 
+            StorageFolder folder = await ApplicationData.Current.LocalFolder.CreateFolderAsync("Projects", CreationCollisionOption.OpenIfExists);
+            await folder.CreateFolderAsync(proj.Id.ToString(), CreationCollisionOption.ReplaceExisting);
+
             ChangeHandler.Instance = new ChangeHandler(proj.Id);
+
+
+
+            Serilog.Log.Debug("Neues Projekt erstellt: " + proj.Id + " - " + proj.Name);
+            Serilog.Log.Debug("Projekt wird geöffnet: " + proj.Id + " - " + proj.Name);
 
             App.AppFrame.Navigate(typeof(WorkdeskEasy), proj);
         }
@@ -109,6 +140,8 @@ namespace METS.View
 
             SaveHelper.DeleteProject(proj.Id);
             Notify.Show(loader.GetString("MsgProjectDeleted"), 3000);
+
+            Serilog.Log.Debug("Projekt wurde gelöscht: " + proj.Id + " - " + proj.Name);
         }
 
         private async void ClickOpen(object sender, RoutedEventArgs e)
@@ -126,7 +159,19 @@ namespace METS.View
             Project project = SaveHelper.LoadProject(((ProjectModel)LBProjects.SelectedItem).Id);
             ChangeHandler.Instance = new ChangeHandler(project.Id);
 
+            Serilog.Log.Debug("Neues Projekt erstellt: " + project.Id + " - " + project.Name);
+
             App.AppFrame.Navigate(typeof(WorkdeskEasy), project);
+        }
+
+        private void wizardP_Click(object sender, RoutedEventArgs e)
+        {
+            Crashes.GenerateTestCrash();
+        }
+
+        private void LBProjects_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            ProjectSelected = LBProjects.SelectedItem != null;
         }
     }
 }

@@ -73,7 +73,7 @@ namespace METS.View
             Classes.Project.UpdateManager.Instance.CountUpdates();
 
             _pages.Add("home", new Home());
-            _pages.Add("topologie", new Topologie() { DataContext = CurrentProject.Lines });
+            _pages.Add("topologie", new Topologie() { DataContext = CurrentProject.Lines, _project = CurrentProject });
             _pages.Add("groups", new Groups() { DataContext = CurrentProject });
             _pages.Add("bus", new Bus() { DataContext = Classes.Bus.BusConnection.Instance });
             _pages.Add("settings", new Settings());

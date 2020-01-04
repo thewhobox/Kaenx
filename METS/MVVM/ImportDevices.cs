@@ -26,6 +26,34 @@ namespace METS.MVVM
             }
         }
 
+        private ObservableCollection<string> languages = new ObservableCollection<string>();
+        public ObservableCollection<string> Languages
+        {
+            get
+            {
+                return languages;
+            }
+            set
+            {
+                languages = value;
+                Update("Languages");
+            }
+        }
+
+        private string selectedLang = "";
+        public string SelectedLanguage
+        {
+            get
+            {
+                return selectedLang;
+            }
+            set
+            {
+                selectedLang = value;
+                Update("SelectedLanguage");
+            }
+        }
+
         public ZipArchive Archive { get; set; }
 
         public event PropertyChangedEventHandler PropertyChanged;

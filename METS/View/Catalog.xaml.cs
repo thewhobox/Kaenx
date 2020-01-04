@@ -100,11 +100,24 @@ namespace METS.View
 
                     string ns = catXML.Root.Name.NamespaceName;
 
+
+                    List<XElement> langs = catXML.Descendants(XName.Get("Language", ns)).ToList();
+                    Import.Languages = new ObservableCollection<string>();
+
+                    foreach(XElement lang in langs)
+                    {
+                        Import.Languages.Add(lang.Attribute("Identifier").Value);
+                    }
+
+                    if (Import.Languages.Contains(System.Globalization.CultureInfo.CurrentCulture.Name))
+                        Import.SelectedLanguage = System.Globalization.CultureInfo.CurrentCulture.Name;
+                    else
+                        InSelectLang.SelectedIndex = 0;
+
+                    ImportHelper.TranslateXml(catXML.Root, System.Globalization.CultureInfo.CurrentCulture.Name);
+
                     XElement catalogXML = catXML.Descendants(XName.Get("Catalog", ns)).ElementAt<XElement>(0);
-                    XElement languagesXML = catXML.Descendants(XName.Get("Languages", ns)).ElementAt<XElement>(0);
-                    catXML = null;
-                    
-                    Import.DeviceList = CatalogHelper.GetDevicesFromCatalog(catalogXML, languagesXML);
+                    Import.DeviceList = CatalogHelper.GetDevicesFromCatalog(catalogXML);
 
                     if (Import.DeviceList.Count == 0) continue;
 
@@ -214,7 +227,7 @@ namespace METS.View
             foreach(CatalogViewModel sec in sections)
             {
                 var secNode = new Classes.TVNode();
-                secNode.Content = sec.GetName();
+                secNode.Content = sec.Name;
                 secNode.SectionId = sec.Id;
                 node.Children.Add(secNode);
                 LoadSections(sec.Id, secNode);

@@ -5,11 +5,11 @@ using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
-namespace METS.Context.Migrations.Catalog
+namespace METS.Context.Migrations
 {
     [DbContext(typeof(CatalogContext))]
-    [Migration("20191118211340_Flags")]
-    partial class Flags
+    [Migration("20200104003648_Init")]
+    partial class Init
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -198,10 +198,7 @@ namespace METS.Context.Migrations.Catalog
                     b.Property<string>("Id")
                         .ValueGeneratedOnAdd();
 
-                    b.Property<string>("Name_DE")
-                        .HasMaxLength(100);
-
-                    b.Property<string>("Name_EN")
+                    b.Property<string>("Name")
                         .HasMaxLength(100);
 
                     b.Property<string>("ParentId")

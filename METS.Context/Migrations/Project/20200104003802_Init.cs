@@ -1,8 +1,8 @@
 ﻿using Microsoft.EntityFrameworkCore.Migrations;
 
-namespace METS.Context.Migrations
+namespace METS.Context.Migrations.Project
 {
-    public partial class Init5 : Migration
+    public partial class Init : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
@@ -23,6 +23,68 @@ namespace METS.Context.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "ComObjects",
+                columns: table => new
+                {
+                    Id = table.Column<int>(nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    ComId = table.Column<string>(nullable: true),
+                    DeviceId = table.Column<int>(nullable: false),
+                    Groups = table.Column<string>(nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_ComObjects", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "GroupAddress",
+                columns: table => new
+                {
+                    UId = table.Column<int>(nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    Id = table.Column<int>(nullable: false),
+                    ProjectId = table.Column<int>(nullable: false),
+                    ParentId = table.Column<int>(nullable: false),
+                    Name = table.Column<string>(nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_GroupAddress", x => x.UId);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "GroupMain",
+                columns: table => new
+                {
+                    UId = table.Column<int>(nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    ProjectId = table.Column<int>(nullable: false),
+                    Id = table.Column<int>(nullable: false),
+                    Name = table.Column<string>(nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_GroupMain", x => x.UId);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "GroupMiddle",
+                columns: table => new
+                {
+                    UId = table.Column<int>(nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    Id = table.Column<int>(nullable: false),
+                    ProjectId = table.Column<int>(nullable: false),
+                    ParentId = table.Column<int>(nullable: false),
+                    Name = table.Column<string>(nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_GroupMiddle", x => x.UId);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "LineDevices",
                 columns: table => new
                 {
@@ -32,6 +94,7 @@ namespace METS.Context.Migrations
                     ParentId = table.Column<int>(nullable: false),
                     ProjectId = table.Column<int>(nullable: false),
                     Name = table.Column<string>(nullable: true),
+                    DeviceId = table.Column<string>(nullable: true),
                     ApplicationId = table.Column<string>(nullable: true)
                 },
                 constraints: table =>
@@ -105,6 +168,18 @@ namespace METS.Context.Migrations
         {
             migrationBuilder.DropTable(
                 name: "ChangesParam");
+
+            migrationBuilder.DropTable(
+                name: "ComObjects");
+
+            migrationBuilder.DropTable(
+                name: "GroupAddress");
+
+            migrationBuilder.DropTable(
+                name: "GroupMain");
+
+            migrationBuilder.DropTable(
+                name: "GroupMiddle");
 
             migrationBuilder.DropTable(
                 name: "LineDevices");

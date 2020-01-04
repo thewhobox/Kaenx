@@ -1,8 +1,8 @@
 ﻿using Microsoft.EntityFrameworkCore.Migrations;
 
-namespace METS.Context.Migrations.Catalog
+namespace METS.Context.Migrations
 {
-    public partial class Hardware2App : Migration
+    public partial class Init : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
@@ -37,6 +37,7 @@ namespace METS.Context.Migrations.Catalog
                     Flag_Communicate = table.Column<bool>(nullable: false),
                     Flag_Transmit = table.Column<bool>(nullable: false),
                     Flag_Update = table.Column<bool>(nullable: false),
+                    Flag_ReadOnInit = table.Column<bool>(nullable: false),
                     Number = table.Column<int>(nullable: false),
                     Size = table.Column<int>(nullable: false),
                     Datapoint = table.Column<int>(nullable: false),
@@ -52,7 +53,6 @@ namespace METS.Context.Migrations.Catalog
                 columns: table => new
                 {
                     Id = table.Column<string>(nullable: false),
-                    HardwareId = table.Column<string>(maxLength: 100, nullable: true),
                     Name = table.Column<string>(maxLength: 100, nullable: true),
                     Version = table.Column<int>(nullable: false),
                     Number = table.Column<int>(nullable: false),
@@ -151,7 +151,10 @@ namespace METS.Context.Migrations.Catalog
                     Id = table.Column<int>(nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
                     HardwareId = table.Column<string>(nullable: true),
-                    ApplicationId = table.Column<string>(nullable: true)
+                    ApplicationId = table.Column<string>(nullable: true),
+                    Name = table.Column<string>(maxLength: 100, nullable: true),
+                    Version = table.Column<int>(nullable: false),
+                    Number = table.Column<int>(nullable: false)
                 },
                 constraints: table =>
                 {
@@ -177,8 +180,7 @@ namespace METS.Context.Migrations.Catalog
                 {
                     Id = table.Column<string>(nullable: false),
                     ParentId = table.Column<string>(maxLength: 100, nullable: true),
-                    Name_DE = table.Column<string>(maxLength: 100, nullable: true),
-                    Name_EN = table.Column<string>(maxLength: 100, nullable: true)
+                    Name = table.Column<string>(maxLength: 100, nullable: true)
                 },
                 constraints: table =>
                 {

@@ -15,7 +15,7 @@
 
     <Grid>
         <Grid.RowDefinitions>
-            <RowDefinition />
+            <RowDefinition MinHeight="200" />
             <RowDefinition Height="auto" />
             <RowDefinition />
         </Grid.RowDefinitions>
@@ -37,7 +37,7 @@
 
 
             <Button x:Uid="/MainPage/BtnNewProject" x:Name="newP" Click="OpenNewProjekt" Background="White" BorderThickness="0 0 1 1" BorderBrush="LightGray" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" />
-            <Button Grid.Row="1" x:Uid="/MainPage/BtnWizProject" x:Name="wizardP" Background="White" BorderThickness="0 0 1 0" BorderBrush="LightGray" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" />
+            <Button Grid.Row="1" x:Uid="/MainPage/BtnWizProject" x:Name="wizardP" Click="wizardP_Click" Background="White" BorderThickness="0 0 1 0" BorderBrush="LightGray" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" />
             <Button Grid.Row="2" x:Uid="/MainPage/BtnCatalog" x:Name="catalog" Click="OpenCatalog" Background="White" BorderThickness="0 1 1 0" BorderBrush="LightGray" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" />
 
             <Grid Grid.RowSpan="3" Grid.Column="1">
@@ -52,23 +52,25 @@
                 </Border>
 
                 <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Left">
-                    <Button HorizontalAlignment="Center" Click="ClickOpen" Background="Transparent" BorderThickness="0">
+                    <Button HorizontalAlignment="Center" Click="ClickOpen" Background="Transparent" BorderThickness="0" IsEnabled="{Binding ProjectSelected}">
                         <StackPanel Orientation="Horizontal" Margin="5">
                             <SymbolIcon  Symbol="OpenFile" />
                             <TextBlock x:Uid="/MainPage/BtnOpen" Margin="5 0 0 0" Foreground="Gray" />
                         </StackPanel>
                     </Button>
-                    <Button HorizontalAlignment="Center" Click="ClickDelete" Background="Transparent" BorderThickness="0">
+                    <Button HorizontalAlignment="Center" Click="ClickDelete" Background="Transparent" BorderThickness="0" IsEnabled="{Binding ProjectSelected}">
                         <StackPanel Orientation="Horizontal" Margin="5">
                             <SymbolIcon  Symbol="Delete" />
                             <TextBlock x:Uid="/MainPage/BtnDelete" Margin="5 0 0 0" Foreground="Gray" />
                         </StackPanel></Button>
                 </StackPanel>
 
-                <ListBox x:Name="LBProjects" Grid.Row="2" ItemsSource="{Binding}" Background="White" DisplayMemberPath="Name" />
+                <ListBox x:Name="LBProjects" Grid.Row="2" ItemsSource="{Binding ProjectList}" SelectionChanged="LBProjects_SelectionChanged" Background="White" DisplayMemberPath="Name" />
             </Grid>
         </Grid>
 
+        <TextBlock Grid.Row="2" x:Name="AppVersion" VerticalAlignment="Bottom" HorizontalAlignment="Right" Margin="20"/>
+        
         <toolkit:Loading Grid.RowSpan="3" x:Name="LoadScreen" Background="Black" Opacity="0.4">
             <ProgressRing IsActive="True" Foreground="Blue" Height="100" Width="100" />
         </toolkit:Loading>

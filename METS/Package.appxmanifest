@@ -1,9 +1,9 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Package xmlns="http://schemas.microsoft.com/appx/manifest/foundation/windows10" xmlns:mp="http://schemas.microsoft.com/appx/2014/phone/manifest" xmlns:uap="http://schemas.microsoft.com/appx/manifest/uap/windows10" IgnorableNamespaces="uap mp">
-  <Identity Name="55505Exe-Creation.METS" Publisher="CN=92410570-9637-4D05-BB82-BCB990CF0C1C" Version="0.0.3.0" />
-  <mp:PhoneIdentity PhoneProductId="7a0d0e76-6782-4587-b70e-6073d15f10e9" PhonePublisherId="00000000-0000-0000-0000-000000000000" />
+  <Identity Name="55505Exe-Creation.KAENX" Publisher="CN=92410570-9637-4D05-BB82-BCB990CF0C1C" Version="0.0.7.0" />
+  <mp:PhoneIdentity PhoneProductId="d5ad105d-c5a0-4668-a9e1-ffdd84ab2e9f" PhonePublisherId="00000000-0000-0000-0000-000000000000" />
   <Properties>
-    <DisplayName>METS</DisplayName>
+    <DisplayName>KAENX</DisplayName>
     <PublisherDisplayName>MikeGerst</PublisherDisplayName>
     <Logo>Assets\StoreLogo.png</Logo>
   </Properties>
@@ -20,6 +20,17 @@
         </uap:DefaultTile>
         <uap:SplashScreen Image="Assets\SplashScreen.png"  BackgroundColor="#bfb4aa"/>
       </uap:VisualElements>
+      <Extensions>
+        <uap:Extension Category="windows.fileTypeAssociation">
+          <uap:FileTypeAssociation Name="knx-produktdatenbank">
+            <uap:SupportedFileTypes>
+              <uap:FileType>.knxprod</uap:FileType>
+            </uap:SupportedFileTypes>
+            <uap:DisplayName>KNX-Produktdatenbank</uap:DisplayName>
+            <uap:Logo>Assets\FileLogo.png</uap:Logo>
+          </uap:FileTypeAssociation>
+        </uap:Extension>
+      </Extensions>
     </Application>
   </Applications>
   <Capabilities>

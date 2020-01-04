@@ -22,6 +22,12 @@ using Windows.UI.Core;
 using Windows.Storage;
 using System.Runtime.InteropServices;
 using METS.Classes;
+using Serilog;
+
+using Microsoft.AppCenter;
+using Microsoft.AppCenter.Analytics;
+using Microsoft.AppCenter.Crashes;
+using Microsoft.AppCenter.Push;
 
 namespace METS
 {
@@ -49,6 +55,19 @@ namespace METS
             {
                 db.Database.Migrate();
             }
+            CreateLogger();
+            AppCenter.Start("15f6e92f-3928-4b75-a73d-6e95dc2a0ee4",
+                   typeof(Analytics), typeof(Crashes), typeof(Push));
+        }
+
+        private async void CreateLogger()
+        {
+            StorageFolder localState = await ApplicationData.Current.LocalFolder.CreateFolderAsync("Logs", CreationCollisionOption.OpenIfExists);
+
+            Log.Logger = new LoggerConfiguration()
+                .MinimumLevel.Debug()
+                .WriteTo.File(Path.Combine(localState.Path, "log-.txt"), rollingInterval: RollingInterval.Day)
+                .CreateLogger();
         }
 
         public static Frame AppFrame

@@ -123,6 +123,9 @@
   <data name="Error.Text" xml:space="preserve">
     <value>Fehler:</value>
   </data>
+  <data name="MsgMasterError" xml:space="preserve">
+    <value>Die KNX_Master Datenbank ist korrupt</value>
+  </data>
   <data name="StateApp" xml:space="preserve">
     <value>Lade Applikation...</value>
   </data>

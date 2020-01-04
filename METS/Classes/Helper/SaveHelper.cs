@@ -336,7 +336,7 @@ namespace METS.Classes.Helper
                 if (appCom.Text_DE == "Dummy") continue;
 
                 DeviceComObject comobject = new DeviceComObject(appCom);
-                comobject.Conditions = GetComConditions(xcom);
+                comobject.Conditions = GetConditions(xcom);
                 comObjects.Add(comobject);
             }
 
@@ -347,7 +347,43 @@ namespace METS.Classes.Helper
             await FileIO.WriteTextAsync(fileDEF, json);
         }
 
-        private static List<ParamCondition> GetComConditions(XElement xele)
+        public static async Task GenerateVisibleProps(string appId)
+        {
+            List<ParamVisHelper> paras = new List<ParamVisHelper>();
+
+            StorageFolder folder = await ApplicationData.Current.LocalFolder.GetFolderAsync("Dynamic");
+            //StorageFolder folderG = await ApplicationData.Current.LocalFolder.GetFolderAsync("Projects");
+            //folderG = await folderG.GetFolderAsync("P-" + _project.Id);
+            StorageFile fileAll = await folder.CreateFileAsync(appId + "-PA-All.json", CreationCollisionOption.ReplaceExisting);
+            StorageFile fileDef = await folder.CreateFileAsync(appId + "-PA-Default.json", CreationCollisionOption.ReplaceExisting);
+            StorageFile file = await folder.GetFileAsync(appId + ".xml");
+            //StorageFile file = await folderG.CreateFileAsync("Device_" + device.UId + "-PARA.json", CreationCollisionOption.ReplaceExisting);
+            //TODO bei änderungen von Parameter eruzeugen bzw bei einfügen kopieren
+
+            XDocument dynamic = XDocument.Load(await file.OpenStreamForReadAsync());
+            string xmlns = dynamic.Root.Name.NamespaceName;
+
+            IEnumerable<XElement> elements = dynamic.Root.Descendants(XName.Get("ParameterRefRef", xmlns));
+
+            foreach (XElement xpara in elements)
+            {
+                AppParameter appParam = contextC.AppParameters.Single(c => c.Id == xpara.Attribute("RefId").Value);
+                if (appParam.Text == "Dummy") continue;
+
+
+                ParamVisHelper para = new ParamVisHelper(appParam);
+                para.Conditions = GetConditions(xpara);
+                paras.Add(para);
+            }
+
+            string json = Newtonsoft.Json.JsonConvert.SerializeObject(paras);
+            await FileIO.WriteTextAsync(fileAll, json);
+
+            json = Newtonsoft.Json.JsonConvert.SerializeObject(GetDefaultParams(paras));
+            await FileIO.WriteTextAsync(fileDef, json);
+        }
+
+        private static List<ParamCondition> GetConditions(XElement xele)
         {
             List<ParamCondition> conds = new List<ParamCondition>();
             while (true)
@@ -369,6 +405,43 @@ namespace METS.Classes.Helper
                         return conds;
                 }
             }
+        }
+
+        private static List<AppParameter> GetDefaultParams(List<ParamVisHelper> paras)
+        {
+            Dictionary<string, string> tempValues = new Dictionary<string, string>();
+            ObservableCollection<AppParameter> defObjs = new ObservableCollection<AppParameter>();
+
+            foreach (ParamVisHelper obj in paras)
+            {
+                if (obj.Conditions.Count == 0)
+                {
+                    defObjs.Add(obj.Parameter);
+                    continue;
+                }
+
+                bool flag = true;
+                foreach (ParamCondition cond in obj.Conditions)
+                {
+                    string val;
+                    if (tempValues.ContainsKey(cond.SourceId))
+                        val = tempValues[cond.SourceId];
+                    else
+                    {
+                        AppParameter pbPara = contextC.AppParameters.Single(p => p.Id == cond.SourceId);
+                        val = pbPara.Value;
+                        tempValues.Add(cond.SourceId, val);
+                    }
+
+                    if (!cond.Values.Contains(val))
+                        flag = false;
+                }
+
+                if (flag)
+                    defObjs.Add(obj.Parameter);
+            }
+
+            return defObjs.ToList();
         }
 
         private static List<DeviceComObject> GetDefaultComs(List<DeviceComObject> comObjects)

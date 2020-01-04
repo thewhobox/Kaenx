@@ -2,16 +2,14 @@
 using METS.Context.Catalog;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
-using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
-namespace METS.Context.Migrations.Catalog
+namespace METS.Context.Migrations
 {
     [DbContext(typeof(CatalogContext))]
-    [Migration("20191016135738_Hard2App")]
-    partial class Hard2App
+    partial class CatalogContextModelSnapshot : ModelSnapshot
     {
-        protected override void BuildTargetModel(ModelBuilder modelBuilder)
+        protected override void BuildModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -52,6 +50,8 @@ namespace METS.Context.Migrations.Catalog
                     b.Property<bool>("Flag_Communicate");
 
                     b.Property<bool>("Flag_Read");
+
+                    b.Property<bool>("Flag_ReadOnInit");
 
                     b.Property<bool>("Flag_Transmit");
 
@@ -196,10 +196,7 @@ namespace METS.Context.Migrations.Catalog
                     b.Property<string>("Id")
                         .ValueGeneratedOnAdd();
 
-                    b.Property<string>("Name_DE")
-                        .HasMaxLength(100);
-
-                    b.Property<string>("Name_EN")
+                    b.Property<string>("Name")
                         .HasMaxLength(100);
 
                     b.Property<string>("ParentId")

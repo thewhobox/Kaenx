@@ -2,16 +2,14 @@
 using METS.Context.Project;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
-using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
-namespace METS.Context.Migrations
+namespace METS.Context.Migrations.Project
 {
     [DbContext(typeof(ProjectContext))]
-    [Migration("20191118154853_ComObjects2")]
-    partial class ComObjects2
+    partial class ProjectContextModelSnapshot : ModelSnapshot
     {
-        protected override void BuildTargetModel(ModelBuilder modelBuilder)
+        protected override void BuildModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -49,6 +47,58 @@ namespace METS.Context.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("ComObjects");
+                });
+
+            modelBuilder.Entity("METS.Context.Project.GroupAddressModel", b =>
+                {
+                    b.Property<int>("UId")
+                        .ValueGeneratedOnAdd();
+
+                    b.Property<int>("Id");
+
+                    b.Property<string>("Name");
+
+                    b.Property<int>("ParentId");
+
+                    b.Property<int>("ProjectId");
+
+                    b.HasKey("UId");
+
+                    b.ToTable("GroupAddress");
+                });
+
+            modelBuilder.Entity("METS.Context.Project.GroupMainModel", b =>
+                {
+                    b.Property<int>("UId")
+                        .ValueGeneratedOnAdd();
+
+                    b.Property<int>("Id");
+
+                    b.Property<string>("Name");
+
+                    b.Property<int>("ProjectId");
+
+                    b.HasKey("UId");
+
+                    b.ToTable("GroupMain");
+                });
+
+            modelBuilder.Entity("METS.Context.Project.GroupMiddleModel", b =>
+                {
+                    b.Property<int>("UId")
+                        .ValueGeneratedOnAdd();
+
+                    b.Property<int>("Id");
+
+                    b.Property<string>("Name");
+
+                    b.Property<int>("ParentId");
+
+                    b.Property<int>("ProjectId");
+
+                    b.HasKey("UId");
+
+                    b.ToTable("GroupMiddle");
                 });
 
             modelBuilder.Entity("METS.Context.Project.LineDeviceModel", b =>

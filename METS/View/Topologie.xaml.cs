@@ -4,6 +4,7 @@ using METS.Classes.Controls;
 using METS.Classes.Helper;
 using METS.Classes.Project;
 using METS.Context.Catalog;
+using METS.Context.Project;
 using METS.Views.Easy.Controls;
 using Microsoft.Toolkit.Uwp.UI.Controls;
 using System;
@@ -35,6 +36,7 @@ namespace METS.View
     /// </summary>
     public sealed partial class Topologie : Page
     {
+        public Project _project;
         private CatalogContext _context = new CatalogContext();
 
         public Topologie()
@@ -222,6 +224,11 @@ namespace METS.View
                 }
             }
 
+
+            StorageFolder folder = await ApplicationData.Current.LocalFolder.GetFolderAsync("Dynamic");
+            StorageFolder folderP = await ApplicationData.Current.LocalFolder.GetFolderAsync("Projects");
+            folderP = await folderP.GetFolderAsync(_project.Id.ToString());
+
             if (model.HasApplicationProgram)
             {
                 int apps = context.Hardware2App.Count(h => h.HardwareId == model.HardwareId);
@@ -239,6 +246,25 @@ namespace METS.View
                 }
             }
 
+
+
+            ProjectContext _contextP = new ProjectContext();
+
+            LineDeviceModel linedevmodel = new LineDeviceModel();
+            linedevmodel.Id = device.Id;
+            linedevmodel.ParentId = device.Id;
+            linedevmodel.Name = device.Name;
+            linedevmodel.ApplicationId = device.ApplicationId;
+            linedevmodel.DeviceId = device.DeviceId;
+            _contextP.LineDevices.Add(linedevmodel);
+            _contextP.SaveChanges();
+            device.UId = linedevmodel.UId;
+
+            StorageFile file = await folder.GetFileAsync(device.ApplicationId + "-PA-Default.json");
+            await file.CopyAsync(folderP, "Device_" + device.UId + "-PA.json");
+
+
+
             int insertOffset = line.Subs.Count(s => s.Id == -1) + device.Id;
             if (insertOffset > line.Subs.Count) insertOffset = line.Subs.Count;
             if (insertOffset < 0) insertOffset = 0;
@@ -248,19 +274,15 @@ namespace METS.View
             line.IsExpanded = true;
             e.Handled = true;
 
-
-
-            StorageFolder folder = await ApplicationData.Current.LocalFolder.GetFolderAsync("Dynamic");
             StorageFile fileJSON = await folder.GetFileAsync(device.ApplicationId + "-CO-Default.json");
 
             string json = await FileIO.ReadTextAsync(fileJSON);
             device.ComObjects = Newtonsoft.Json.JsonConvert.DeserializeObject<ObservableCollection<DeviceComObject>>(json);
 
 
-
             SaveHelper.CalculateLineCurrent(line);
             UpdateManager.Instance.CountUpdates();
-            SaveHelper.SaveProject();
+            //SaveHelper.SaveProject();
             CalcCounts();
         }
 

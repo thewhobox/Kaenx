@@ -3,6 +3,7 @@ using METS.Classes.Helper;
 using METS.Context;
 using METS.Context.Catalog;
 using METS.MVVM;
+using Serilog;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -124,9 +125,11 @@ namespace METS.View
 
         private async void StartImport()
         {
+            Log.Information("------------Import wurde gestartet------------");
+            Log.Information("Sprache: " + Imports.SelectedLanguage);
             ImportState = resourceLoader.GetString("StateProj");
             string currentMan;
-            await Task.Delay(1000);
+            //await Task.Delay(1000);
 
             List<string> prod2load = new List<string>();
             IEnumerable<Device> devices = from dev in Imports.DeviceList where dev.SlideSettings.IsSelected == true select dev;
@@ -142,12 +145,14 @@ namespace METS.View
                 if (!manwasset && entry.FullName.StartsWith("M-"))
                 {
                     Helper.currentMan = entry.FullName.Substring(0, 6);
+                    Log.Information("---- Hersteller gefunden: " + Helper.currentMan);
                     manwasset = true;
                     continue;
                 }
 
                 if (entry.Name == "knx_master.xml")
                 {
+                    Log.Information("---- Integrierte KNX_Master wird überprüft");
                     ImportState = resourceLoader.GetString("StateManus");
                     await Task.Delay(1000);
 
@@ -167,8 +172,20 @@ namespace METS.View
                         await FileIO.WriteTextAsync(masterFile, await FileIO.ReadTextAsync(defaultFile));
                     }
 
-                    
-                    XDocument masterXml = XDocument.Load(await masterFile.OpenStreamForReadAsync());
+
+                    XDocument masterXml;
+                    try
+                    {
+                        masterXml = XDocument.Load(await masterFile.OpenStreamForReadAsync());
+                    } catch(Exception e)
+                    {
+                        Log.Error(e, "KNX_Master laden Fehler!");
+                        Imports.Archive.Dispose();
+                        ImportState = resourceLoader.GetString("StateFin");
+                        ImportError.Add(resourceLoader.GetString("MsgMasterError"));
+                        BtnBack.IsEnabled = true;
+                        return;
+                    }
 
                     string versionO = masterXml.Root.Element(XName.Get("MasterData", masterXml.Root.Name.NamespaceName)).Attribute("Version").Value;
                     string versionN = manXML.Element(XName.Get("MasterData", masterXml.Root.Name.NamespaceName)).Attribute("Version").Value;
@@ -184,8 +201,8 @@ namespace METS.View
 
                         if(newer)
                         {
-                            StreamWriter sw = new StreamWriter(await masterFile.OpenStreamForWriteAsync());
-                            sw.Write(manXML.ToString());
+                            await FileIO.WriteTextAsync(masterFile, manXML.ToString());
+                            Log.Information("KNX_Master wurde aktualisiert");
                         }
                     } catch { }
 
@@ -196,32 +213,61 @@ namespace METS.View
 
                 if (entry.Name == "Catalog.xml")
                 {
-                    currentMan = entry.FullName.Substring(0, entry.FullName.IndexOf('/'));
-                    ImportState = resourceLoader.GetString("StateCat");
-                    await Task.Delay(1000);
-                    await Helper.ImportCatalog(entry);
+                    Log.Information("---- Katalog analyse gestartet");
+                    try
+                    {
+                        currentMan = entry.FullName.Substring(0, entry.FullName.IndexOf('/'));
+                        ImportState = resourceLoader.GetString("StateCat");
+                        await Task.Delay(500);
+                        XElement xml = XDocument.Load(entry.Open()).Root;
+                        ImportHelper.TranslateXml(xml, Imports.SelectedLanguage);
+                        await Helper.ImportCatalog(xml);
+                    } catch(Exception e)
+                    {
+                        Log.Error(e, "Katalog Fehler!");
+                    }
                     ProgSub.Value = 0;
                     ProgMain.Value += 1;
+                    Log.Information("Katalog wurde aktualisiert");
                     continue;
                 }
 
                 if (entry.Name == "Hardware.xml")
                 {
-                    currentMan = entry.FullName.Substring(0, entry.FullName.IndexOf('/'));
-                    ImportState = resourceLoader.GetString("StateHard");
-                    await Task.Delay(1000);
-                    await Helper.ImportHardware(entry, prod2load);
+                    Log.Information("---- Hardware wird importiert");
+                    try
+                    {
+                        currentMan = entry.FullName.Substring(0, entry.FullName.IndexOf('/'));
+                        ImportState = resourceLoader.GetString("StateHard");
+                        await Task.Delay(1000);
+                        XElement xml = XDocument.Load(entry.Open()).Root;
+                        ImportHelper.TranslateXml(xml, Imports.SelectedLanguage);
+                        await Helper.ImportHardware(xml, prod2load);
+                    } catch(Exception e)
+                    {
+                        Log.Error(e, "Hardware Fehler!");
+                    }
                     ProgSub.Value = 0;
                     ProgMain.Value += 1;
+                    Log.Information("Hardware wurde importiert");
                     continue;
                 }
             }
 
+
+            Log.Information("---- Applikationen werden importiert");
             ImportState = resourceLoader.GetString("StateApp");
             await Task.Delay(1000);
-            await Helper.ImportApplications(Imports.Archive);
+            try
+            {
+                await Helper.ImportApplications(Imports);
+            } catch(Exception e)
+            {
+                Log.Error(e, "Applikation Fehler!");
+            }
             ProgMain.Value += 1;
 
+            Log.Information("Import Applikationen abgeschlossen");
 
 
 
@@ -242,14 +288,13 @@ namespace METS.View
 
             if (AddedDevices.Count > 0)
             {
+                Log.Information("Es wurden " + AddedDevices.Count + " Geräte hinzugefügt");
                 await Task.Delay(1000);
-                string addedString = "{ \"type\": \"added\", \"list\": [   ";
+                string addedString = "";
                 foreach (DeviceViewModel device in AddedDevices)
                 {
-                    addedString += "\r\n { \"Id\": \"" + device.Id + "\", \"Text\": \"" + device.Name + "\" }, ";
+                    addedString += device.Name + " " + device.Id + Environment.NewLine;
                 }
-                addedString = addedString.Substring(0, addedString.Length - 2);
-                addedString += "\r\n ] }";
                 ImportError.Add(addedString);
             }
 
@@ -259,6 +304,7 @@ namespace METS.View
             ProgMain.Value += 1;
 
             BtnBack.IsEnabled = true;
+            Log.Information("Import abgeschlossen");
         }
 
 
