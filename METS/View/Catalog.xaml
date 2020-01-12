@@ -138,7 +138,6 @@
 
                 <Grid.RowDefinitions>
                     <RowDefinition Height="auto" />
-                    <RowDefinition Height="auto" />
                     <RowDefinition />
                     <RowDefinition Height="auto" />
                 </Grid.RowDefinitions>
@@ -152,12 +151,7 @@
                     <TextBlock FontSize="25" Padding="10" Text="Welche Geräte sollen importiert werden?" TextWrapping="WrapWholeWords" />
                 </Border>
 
-                <StackPanel Grid.Row="1" Orientation="Horizontal" Margin="65 10 10 10" Grid.ColumnSpan="3">
-                    <TextBlock Text="Sprache: " VerticalAlignment="Center" Margin="0 0 10 0" />
-                    <ComboBox x:Name="InSelectLang" Width="200" ItemsSource="{Binding Import.Languages}" SelectedItem="{Binding Import.SelectedLanguage, Mode=TwoWay}" />
-                </StackPanel>
-
-                <ListView Grid.Row="2" Grid.ColumnSpan="3" x:Name="ImportList" ItemsSource="{Binding Import.DeviceList}" SelectionMode="None" Tapped="ListView_Tapped" IsItemClickEnabled="True" >
+                <ListView Grid.Row="1" Grid.ColumnSpan="3" x:Name="ImportList" ItemsSource="{Binding Import.DeviceList}" SelectionMode="None" Tapped="ListView_Tapped" IsItemClickEnabled="True" >
                     <ListView.ItemTemplate>
                         <DataTemplate>
                             <Grid>
@@ -179,9 +173,9 @@
                     </ListView.ItemTemplate>
                 </ListView>
 
-                <Button Grid.Row="3" Content="Alle" Click="ClickSelectAll" HorizontalAlignment="Stretch" />
-                <Button x:Name="ButtonImportSelected" Grid.Row="3" Grid.Column="1" Content="Ausgewählte" Click="ClickSelected" HorizontalAlignment="Stretch" />
-                <Button Grid.Row="3" Grid.Column="2" Content="Abbrechen" Click="ClickCancel" HorizontalAlignment="Stretch" />
+                <Button Grid.Row="2" Content="Alle" Click="ClickSelectAll" HorizontalAlignment="Stretch" />
+                <Button x:Name="ButtonImportSelected" Grid.Row="2" Grid.Column="1" Content="Ausgewählte" Click="ClickSelected" HorizontalAlignment="Stretch" />
+                <Button Grid.Row="2" Grid.Column="2" Content="Abbrechen" Click="ClickCancel" HorizontalAlignment="Stretch" />
             </Grid>
         </Border>
 

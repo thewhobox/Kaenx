@@ -51,20 +51,28 @@
                     <TextBlock x:Uid="/MainPage/BtnLoadProject" x:Name="loadP" FontSize="28" Margin="20" />
                 </Border>
 
-                <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Left">
-                    <Button HorizontalAlignment="Center" Click="ClickOpen" Background="Transparent" BorderThickness="0" IsEnabled="{Binding ProjectSelected}">
+
+                <Grid Grid.Row="1">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition />
+                        <ColumnDefinition />
+                    </Grid.ColumnDefinitions>
+
+                    <Button HorizontalAlignment="Stretch" Click="ClickOpen" Background="Transparent" BorderThickness="0" IsEnabled="{Binding ProjectSelected}">
                         <StackPanel Orientation="Horizontal" Margin="5">
                             <SymbolIcon  Symbol="OpenFile" />
                             <TextBlock x:Uid="/MainPage/BtnOpen" Margin="5 0 0 0" Foreground="Gray" />
                         </StackPanel>
                     </Button>
-                    <Button HorizontalAlignment="Center" Click="ClickDelete" Background="Transparent" BorderThickness="0" IsEnabled="{Binding ProjectSelected}">
+
+                    <Button Grid.Column="1" HorizontalAlignment="Stretch" Click="ClickDelete" Background="Transparent" BorderThickness="0" IsEnabled="{Binding ProjectSelected}">
                         <StackPanel Orientation="Horizontal" Margin="5">
                             <SymbolIcon  Symbol="Delete" />
                             <TextBlock x:Uid="/MainPage/BtnDelete" Margin="5 0 0 0" Foreground="Gray" />
-                        </StackPanel></Button>
-                </StackPanel>
-
+                        </StackPanel>
+                    </Button>
+                </Grid>
+                
                 <ListBox x:Name="LBProjects" Grid.Row="2" ItemsSource="{Binding ProjectList}" SelectionChanged="LBProjects_SelectionChanged" Background="White" DisplayMemberPath="Name" />
             </Grid>
         </Grid>

@@ -23,6 +23,7 @@ using METS.Context.Catalog;
 using System.Diagnostics;
 using System.ComponentModel;
 using System.Text.RegularExpressions;
+using METS.View.Controls;
 
 // The Blank Page item template is documented at http://go.microsoft.com/fwlink/?LinkId=234238
 
@@ -97,24 +98,19 @@ namespace METS.View
                 if(entry.FullName.StartsWith("M-") && entry.FullName.EndsWith("/Catalog.xml"))
                 {
                     XDocument catXML = XDocument.Load(entry.Open());
-
                     string ns = catXML.Root.Name.NamespaceName;
-
-
                     List<XElement> langs = catXML.Descendants(XName.Get("Language", ns)).ToList();
-                    Import.Languages = new ObservableCollection<string>();
 
+                    ObservableCollection<string> tempLangs = new ObservableCollection<string>();
                     foreach(XElement lang in langs)
                     {
-                        Import.Languages.Add(lang.Attribute("Identifier").Value);
+                        tempLangs.Add(lang.Attribute("Identifier").Value);
                     }
 
-                    if (Import.Languages.Contains(System.Globalization.CultureInfo.CurrentCulture.Name))
-                        Import.SelectedLanguage = System.Globalization.CultureInfo.CurrentCulture.Name;
-                    else
-                        InSelectLang.SelectedIndex = 0;
-
-                    ImportHelper.TranslateXml(catXML.Root, System.Globalization.CultureInfo.CurrentCulture.Name);
+                    DiagLanguage diaglang = new DiagLanguage(tempLangs);
+                    await diaglang.ShowAsync();
+                    Import.SelectedLanguage = diaglang.SelectedLanguage;
+                    ImportHelper.TranslateXml(catXML.Root, diaglang.SelectedLanguage);
 
                     XElement catalogXML = catXML.Descendants(XName.Get("Catalog", ns)).ElementAt<XElement>(0);
                     Import.DeviceList = CatalogHelper.GetDevicesFromCatalog(catalogXML);

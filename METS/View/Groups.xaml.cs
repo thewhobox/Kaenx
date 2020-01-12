@@ -356,5 +356,15 @@ namespace METS.View
             com.Groups.Clear();
             SaveHelper.SaveAssociations(SelectedDevice);
         }
+
+        private void ToggleExpert(object sender, RoutedEventArgs e)
+        {
+            CheckBox box = sender as CheckBox;
+
+            if (box.IsChecked == true)
+                ListComs.RowDetailsVisibilityMode = DataGridRowDetailsVisibilityMode.VisibleWhenSelected;
+            else
+                ListComs.RowDetailsVisibilityMode = DataGridRowDetailsVisibilityMode.Collapsed;
+        }
     }
 }

@@ -312,10 +312,6 @@ namespace METS.Classes.Helper
             currentNamespace = manXML.Attribute("xmlns").Value;
             XElement mans = manXML.Element(GetXName("MasterData")).Element(GetXName("Manufacturers"));
 
-            ProgressMaxChanged(mans.Elements().Count());
-            
-            int count = 0;
-
             foreach (XElement manEle in mans.Elements())
             {
                 ManufacturerViewModel man = new ManufacturerViewModel();
@@ -324,10 +320,6 @@ namespace METS.Classes.Helper
                 man.KnxManufacturerId = int.Parse(manEle.Attribute("KnxManufacturerId").Value);
 
                 tempManus.Add(man);
-
-                count++;
-                ProgressChanged(count);
-                if(count % 4 == 0) await Task.Delay(1);
             }
         }
 

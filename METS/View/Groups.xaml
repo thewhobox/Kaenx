@@ -8,6 +8,20 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d"
     Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+    <Page.Resources>
+        <DataTemplate x:Key="RowDetailsTemplate">
+            <StackPanel>
+                <TextBlock Text="Hier steht ein mega langer text. Würde ja gerne das Lorem Ipsum kopieren, aber keine Lust lange danach zu suchen...." />
+                <StackPanel Orientation="Horizontal" Margin="10">
+                    <CheckBox MinWidth="10" Content="R" Margin="3 0 3 0" IsChecked="{Binding Flag_Read}" />
+                    <CheckBox MinWidth="10" Content="W" Margin="3 0 3 0" IsChecked="{Binding Flag_Write}" />
+                    <CheckBox MinWidth="10" Content="T" Margin="3 0 3 0" IsChecked="{Binding Flag_Transmit}" />
+                    <CheckBox MinWidth="10" Content="U" Margin="3 0 3 0" IsChecked="{Binding Flag_Update}" />
+                    <CheckBox MinWidth="10" Content="C" Margin="3 0 3 0" IsChecked="{Binding Flag_Communication}" />
+                </StackPanel>
+            </StackPanel>
+        </DataTemplate>
+    </Page.Resources>
 
     <Grid>
         <Grid.ColumnDefinitions>
@@ -65,7 +79,9 @@
                 <Run Text="{Binding SelectedGroup.Name}" />
         </TextBlock>
         
-        <toolkit:DataGrid x:Name="ListGroupComs" AllowDrop="True" Drop="ListGroupComs_Drop" DragLeave="General_DragLeave" DragOver="ListGroupComs_DragEnter" Grid.Column="1" Grid.Row="1" Margin="5 0" AutoGenerateColumns="False" ItemsSource="{Binding SelectedGroup.ComObjects}" BorderThickness="1 1 1 0" BorderBrush="LightGray" IsReadOnly="True" >
+        <toolkit:DataGrid x:Name="ListGroupComs" 
+                          AllowDrop="True" Drop="ListGroupComs_Drop" DragLeave="General_DragLeave" DragOver="ListGroupComs_DragEnter" 
+                          Grid.Column="1" Grid.Row="1" Margin="5 0" AutoGenerateColumns="False" ItemsSource="{Binding SelectedGroup.ComObjects}" BorderThickness="1 1 1 0" BorderBrush="LightGray" IsReadOnly="True">
             <toolkit:DataGrid.Background>
                 <SolidColorBrush Color="#FFE0E0E0" />
             </toolkit:DataGrid.Background>
@@ -98,9 +114,13 @@
             </toolkit:GridSplitter.Element>
         </toolkit:GridSplitter>
 
-        <TextBlock x:Name="OutDeviceName" Grid.Column="3" Text="{Binding SelectedDevice.Name}" VerticalAlignment="Center" Margin="10 0 0 0" FontSize="20" />
+        <Grid Grid.Column="3">
+            <TextBlock x:Name="OutDeviceName"  Text="{Binding SelectedDevice.Name}" VerticalAlignment="Center" Margin="10 0 0 0" FontSize="20" />
+
+            <CheckBox Content="Experten" HorizontalAlignment="Right" Checked="ToggleExpert" Unchecked="ToggleExpert" />
+        </Grid>
         
-        <toolkit:DataGrid x:Name="ListComs" Grid.Column="3" Grid.Row="1" Margin="5 0" LoadingRow="ListComs_LoadingRow" AutoGenerateColumns="False" ItemsSource="{Binding SelectedDevice.ComObjects}" IsReadOnly="True" BorderThickness="1 1 1 0" BorderBrush="LightGray" >
+        <toolkit:DataGrid x:Name="ListComs" AreRowDetailsFrozen="True" RowDetailsVisibilityMode="Collapsed" RowDetailsTemplate="{StaticResource RowDetailsTemplate}" Grid.Column="3" Grid.Row="1" Margin="5 0" LoadingRow="ListComs_LoadingRow" AutoGenerateColumns="False" ItemsSource="{Binding SelectedDevice.ComObjects}" IsReadOnly="True" BorderThickness="1 1 1 0" BorderBrush="LightGray" >
             <toolkit:DataGrid.RowStyle>
                 <Style TargetType="toolkit:DataGridRow">
                     <Setter Property="CanDrag" Value="True" />
@@ -121,19 +141,6 @@
                 <toolkit:DataGridTextColumn MinWidth="160" Tag="name" Width="SizeToCells" Header="Name" Binding="{Binding Name}" />
                 <toolkit:DataGridTextColumn MinWidth="160" Tag="func" Width="SizeToCells" Header="Funktion" Binding="{Binding Function}" />
                 <toolkit:DataGridTextColumn MinWidth="300" Tag="connections" Width="SizeToCells" Header="Verbindungen" Binding="{Binding Connections}" />
-                <toolkit:DataGridTemplateColumn Header="Test">
-                    <toolkit:DataGridTemplateColumn.CellTemplate>
-                        <DataTemplate>
-                            <StackPanel Orientation="Horizontal">
-                                <CheckBox MinWidth="10" Content="R" Margin="3 0 3 0" IsChecked="{Binding Flag_Read}" />
-                                <CheckBox MinWidth="10" Content="W" Margin="3 0 3 0" IsChecked="{Binding Flag_Write}" />
-                                <CheckBox MinWidth="10" Content="T" Margin="3 0 3 0" IsChecked="{Binding Flag_Transmit}" />
-                                <CheckBox MinWidth="10" Content="U" Margin="3 0 3 0" IsChecked="{Binding Flag_Update}" />
-                                <CheckBox MinWidth="10" Content="C" Margin="3 0 3 0" IsChecked="{Binding Flag_Communication}" />
-                            </StackPanel>
-                        </DataTemplate>
-                    </toolkit:DataGridTemplateColumn.CellTemplate>
-                </toolkit:DataGridTemplateColumn>
             </toolkit:DataGrid.Columns>
         </toolkit:DataGrid>
 
