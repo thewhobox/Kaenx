@@ -44,6 +44,7 @@ namespace METS.Classes.Helper
 
         public static void TranslateXml(XElement xml, string selectedLang)
         {
+            if (selectedLang == null) return;
             XElement lang = xml.Descendants(XName.Get("Language", xml.Name.NamespaceName)).Single(l => l.Attribute("Identifier").Value == selectedLang);
             List<XElement> trans = lang.Descendants(XName.Get("TranslationElement", xml.Name.NamespaceName)).ToList();
             
@@ -125,8 +126,6 @@ namespace METS.Classes.Helper
 
         public async Task ImportHardware(XElement hardXML, List<string> prods2load)
         {
-            ProgressMaxChanged(100);
-
             AppIds = new List<string>();
             DeviceIds = new List<string>();
             App2Hardware = new Dictionary<string, string>();
@@ -143,14 +142,10 @@ namespace METS.Classes.Helper
 
             foreach (XElement prodEle in prods)
             {
-                await Task.Delay(100);
+                await Task.Delay(1);
                 string x = prodEle.Attribute("Id").Value;
                 if (!prods2load.Contains(x))
-                {
-                    count++;
-                    ProgressChanged(count);
                     continue;
-                }
 
                 XElement parent = prodEle.Parent.Parent;
                 DeviceViewModel device = new DeviceViewModel();
@@ -196,9 +191,6 @@ namespace METS.Classes.Helper
                         _context.Hardware2App.Add(new Hardware2AppModel { HardwareId = hardId, ApplicationId = appId });
 
                 }
-
-                count++;
-                ProgressChanged(count);
             }
 
             _context.SaveChanges();
@@ -243,12 +235,12 @@ namespace METS.Classes.Helper
                 app.Mask = appele.Attribute("MaskVersion").Value;
                 app.Name = appele.Attribute("Name").Value;
 
-                Hardware2AppModel hard2App = _context.Hardware2App.Single(h => h.ApplicationId == app.Id);
-                hard2App.Name = app.Name;
-                hard2App.Version = app.Version;
-                hard2App.Number = app.Number;
-                _context.Hardware2App.Update(hard2App);
-                _context.SaveChanges();
+                //Hardware2AppModel hard2App = _context.Hardware2App.Single(h => h.ApplicationId == app.Id);
+                //hard2App.Name = app.Name;
+                //hard2App.Version = app.Version;
+                //hard2App.Number = app.Number;
+                //_context.Hardware2App.Update(hard2App);
+                //_context.SaveChanges();
 
 
                 int rest = app.Version % 16;
@@ -817,12 +809,16 @@ namespace METS.Classes.Helper
 
             Log.Information("ComObjectTable wird eingelesen");
             XElement table = doc.Descendants(GetXName("ComObjectTable")).ElementAt(0);
-
-            app.Table_Object = table.Attribute("CodeSegment").Value;
-            int offsetObject;
-            int.TryParse(table.Attribute("Offset").Value, out offsetObject);
-            app.Table_Object_Offset = offsetObject;
-
+            if(table.Attribute("CodeSegment") != null)
+            {
+                app.Table_Object = table.Attribute("CodeSegment").Value;
+                int offsetObject;
+                int.TryParse(table.Attribute("Offset").Value, out offsetObject);
+                app.Table_Object_Offset = offsetObject;
+            } else
+            {
+                Log.Information("Für ComObjectTable kein CodeSegment gefunden");
+            }
 
             Log.Information("ComObjects werden eingelesen");
             foreach (XElement com in table.Elements())
@@ -934,10 +930,16 @@ namespace METS.Classes.Helper
             {
                 Log.Information("AddressTable wird eingelesen");
                 table = doc.Descendants(GetXName("AddressTable")).ElementAt(0);
-                app.Table_Group = table.Attribute("CodeSegment").Value;
-                int offsetGroup;
-                int.TryParse(table.Attribute("Offset")?.Value, out offsetGroup);
-                app.Table_Group_Offset = offsetGroup;
+                if(table.Attribute("CodeSegment") != null)
+                {
+                    app.Table_Group = table.Attribute("CodeSegment").Value;
+                    int offsetGroup;
+                    int.TryParse(table.Attribute("Offset")?.Value, out offsetGroup);
+                    app.Table_Group_Offset = offsetGroup;
+                }
+                else
+                    Log.Information("Für AddressTable wurde kein CodeSegment gefunden.");
+
                 int maxEntries;
                 int.TryParse(table.Attribute("MaxEntries")?.Value, out maxEntries);
                 app.Table_Group_Max = maxEntries;
@@ -950,10 +952,16 @@ namespace METS.Classes.Helper
             {
                 Log.Information("AssociationTable wird eingelesen");
                 table = doc.Descendants(GetXName("AssociationTable")).ElementAt(0);
-                app.Table_Assosiations = table.Attribute("CodeSegment").Value;
-                int offsetAssoc;
-                int.TryParse(table.Attribute("Offset")?.Value, out offsetAssoc);
-                app.Table_Assosiations_Offset = offsetAssoc;
+                if (table.Attribute("CodeSegment") != null)
+                {
+                    app.Table_Assosiations = table.Attribute("CodeSegment").Value;
+                    int offsetAssoc;
+                    int.TryParse(table.Attribute("Offset")?.Value, out offsetAssoc);
+                    app.Table_Assosiations_Offset = offsetAssoc;
+                }
+                else
+                    Log.Information("Für AssociationTable wurde kein CodeSegment gefunden.");
+
                 int maxEntriesA;
                 int.TryParse(table.Attribute("MaxEntries")?.Value, out maxEntriesA);
                 app.Table_Assosiations_Max = maxEntriesA;

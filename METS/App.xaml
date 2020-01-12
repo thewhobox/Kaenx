@@ -5,7 +5,6 @@
     xmlns:local="using:METS"
     RequestedTheme="Light">
     <Application.Resources>
-        <SolidColorBrush x:Key="HighlightColor" Color="#6A9ABD" />
+        <XamlControlsResources xmlns="using:Microsoft.UI.Xaml.Controls" />
     </Application.Resources>
-
 </Application>

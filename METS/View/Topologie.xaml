@@ -6,11 +6,14 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:toolkit="using:Microsoft.Toolkit.Uwp.UI.Controls"
-    xmlns:animations="using:Microsoft.Toolkit.Uwp.UI.Animations"
+    xmlns:controls="using:Microsoft.UI.Xaml.Controls"
     xmlns:converter="using:METS.Classes.Converter"
     mc:Ignorable="d"
     Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
     <Page.Resources>
+        <CornerRadius x:Key="CornerRadius">0</CornerRadius>
+        <CornerRadius x:Key="OverlayCornerRadius">0</CornerRadius>
+        <CornerRadius x:Key="ControlCornerRadius">0</CornerRadius>
         <converter:NumberConverter x:Key="NumberConverter" />
         <converter:Checked2VisibilityConverter x:Key="CheckedConverter" />
         <Storyboard x:Key="AniShowProps" Storyboard.TargetName="RenderPanelScale" Storyboard.TargetProperty="ScaleX">
@@ -45,10 +48,10 @@
             </StackPanel>
         </Border>
 
-        <TreeView x:Name="TreeV" Grid.Row="1" ItemsSource="{Binding}" CanReorderItems="False" ItemInvoked="TreeV_ItemInvoked"  VerticalAlignment="Stretch" Background="LightGray">
+        <TreeView x:Name="TreeV" Grid.Row="1" MaxWidth="350" ItemsSource="{Binding}" CanReorderItems="False" ItemInvoked="TreeV_ItemInvoked"  VerticalAlignment="Stretch" Background="LightGray">
             <TreeView.ItemTemplate>
                 <DataTemplate x:DataType="local:Line">
-                    <TreeViewItem Margin="-20 0 0 0" Background="Transparent" BorderThickness="0" AllowDrop="True" Content="{Binding}" ItemsSource="{Binding Subs}" IsExpanded="{Binding IsExpanded, Mode=TwoWay}" DragOver="TreeViewItem_DragOver" Drop="TreeViewItem_Drop">
+                    <TreeViewItem Margin="-20 0 0 0" ToolTipService.ToolTip="{Binding Name}" DoubleTapped="TreeViewItem_DoubleTapped" Background="Transparent" BorderThickness="0" AllowDrop="True" Content="{Binding}" ItemsSource="{Binding Subs}" IsExpanded="{Binding IsExpanded, Mode=TwoWay}" DragOver="TreeViewItem_DragOver" Drop="TreeViewItem_Drop">
                         <TreeViewItem.ContextFlyout>
                             <MenuFlyout Opening="MenuFlyout_Opening">
                                 <MenuFlyoutItem Text="Hinzufügen" Icon="Add" Click="ClickAddSub" />
@@ -127,13 +130,13 @@
                 <TextBlock Text="Eigenschaften" Margin="15 20" FontSize="25" />
 
                 <toolkit:HeaderedContentControl Grid.Row="1" Header="Name:" Margin="15 5" HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch">
-                    <TextBox Text="{Binding Name, Mode=TwoWay}" />
+                    <TextBox x:Name="InName" IsEnabled="False" Text="{Binding Name, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
                 </toolkit:HeaderedContentControl>
 
                 <toolkit:HeaderedContentControl Grid.Row="2" Header="Nummer:" Margin="15 5" HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch">
-                    <TextBox x:Name="InNumber" Text="{Binding Id, Mode=TwoWay}"  />
+                    <!--<TextBox x:Name="InNumber" Text="{Binding Id, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"  />-->
+                    <controls:NumberBox x:Name="InNumber" IsEnabled="False" Grid.Row="2" SpinButtonPlacementMode="Inline" CornerRadius="30" Minimum="0" Maximum="12" Value="{Binding Id, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
                 </toolkit:HeaderedContentControl>
-
 
                 <Grid x:Name="InfosApplication" Grid.Row="3" Visibility="Visible" Margin="15 5">
                     <Grid.RowDefinitions>

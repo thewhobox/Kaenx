@@ -8,6 +8,7 @@ using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Xml.Linq;
 using Windows.Storage;
@@ -159,7 +160,7 @@ namespace METS.Classes.Helper
         {
             context.SaveChanges();
 
-            foreach (Group g in _project.Groups)
+            foreach (Project.Group g in _project.Groups)
             {
                 GroupMainModel gmain = context.GroupMain.Single(gm => gm.UId == g.UId);
                 gmain.Name = g.Name;
@@ -231,7 +232,7 @@ namespace METS.Classes.Helper
 
             foreach (GroupMainModel gmain in context.GroupMain.Where(g => g.ProjectId == project.Id))
             {
-                Group groupMain = new Group(gmain);
+                Project.Group groupMain = new Project.Group(gmain);
                 project.Groups.Add(groupMain);
 
                 foreach (GroupMiddleModel gmiddle in context.GroupMiddle.Where(g => g.ParentId == groupMain.UId))
@@ -280,6 +281,28 @@ namespace METS.Classes.Helper
                                     ga.ComObjects.Add(dcom);
                                 }
                             }
+
+                            if (dcom.Name.Contains("{{"))
+                            {
+                                Regex reg = new Regex("{{((.+):(.+))}}");
+                                Match m = reg.Match(dcom.Name);
+                                if (m.Success)
+                                {
+                                    string value = "";
+                                    try
+                                    {
+                                        ChangeParamModel changeB = context.ChangesParam.Where(c => c.DeviceId == ld.UId && c.ParamId.EndsWith("R-" + m.Groups[2].Value)).OrderByDescending(c => c.StateId).First();
+                                        value = changeB.Value;
+                                    }
+                                    catch { }
+
+                                    if (value == "")
+                                        dcom.Name = reg.Replace(dcom.Name, m.Groups[3].Value);
+                                    else
+                                        dcom.Name = reg.Replace(dcom.Name, value);
+                                }
+                            }
+
 
                             ld.ComObjects.Add(dcom);
                         }

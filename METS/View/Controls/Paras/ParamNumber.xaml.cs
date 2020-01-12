@@ -1,5 +1,4 @@
-﻿using METS.Context;
-using METS.Context.Catalog;
+﻿using METS.Context.Catalog;
 using METS.Context.Project;
 using System;
 using System.Collections.Generic;
@@ -20,49 +19,43 @@ using Windows.UI.Xaml.Navigation;
 
 namespace METS.Classes.Controls.Paras
 {
-    public sealed partial class ParamInput : UserControl, IParam
+    public sealed partial class ParamNumber : UserControl
     {
         public delegate void ParamChangedHandler(string source, string value);
         public event ParamChangedHandler ParamChanged;
 
         private string paraId;
 
-        public string Name2
-        {
-            get { return ParaName.Text; }
-            set { ParaName.Text = value; }
-        }
-
-        public ParamInput(AppParameter param, AppParameterTypeViewModel type, ChangeParamModel change)
+        public ParamNumber(AppParameter param, AppParameterTypeViewModel type, ChangeParamModel change)
         {
             this.InitializeComponent();
-            ParaName.Text = param.Text;
 
-            if(change == null)
+            if (change == null)
                 ParaValue.Text = param.Value;
             else
                 ParaValue.Text = change.Value;
 
             paraId = param.Id;
 
-            ParaValue.KeyUp += ParaValue_KeyUp;
+            ParaName.Text = param.Text;
+
+            ParaValue.ValueChanged += ParaValue_ValueChanged;
             ParaValue.LostFocus += ParaValue_LostFocus;
+
+            ParaValue.Minimum = int.Parse(type.Tag1);
+            ParaValue.Maximum = int.Parse(type.Tag2);
+
+            ToolTipService.SetToolTip(ParaValue, type.Tag1 + " - " + type.Tag2);
         }
 
         private void ParaValue_LostFocus(object sender, RoutedEventArgs e)
         {
-            ParamChanged?.Invoke(paraId, ParaValue.Text);
+            ParamChanged?.Invoke(paraId, ParaValue.Value.ToString());
         }
 
-        private void ParaValue_KeyUp(object sender, KeyRoutedEventArgs e)
+        private void ParaValue_ValueChanged(Microsoft.UI.Xaml.Controls.NumberBox sender, Microsoft.UI.Xaml.Controls.NumberBoxValueChangedEventArgs args)
         {
-            if (e.Key == Windows.System.VirtualKey.Enter)
-                ParamChanged?.Invoke(paraId, ParaValue.Text);
-        }
-
-        public string GetValue()
-        {
-            return ParaValue.Text;
+            ParamChanged?.Invoke(paraId, ParaValue.Value.ToString());
         }
     }
 }

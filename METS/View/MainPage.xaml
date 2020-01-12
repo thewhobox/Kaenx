@@ -12,6 +12,11 @@
     extensions:ApplicationViewExtensions.Title="Startseite"
     extensions:ApplicationViewExtensions.BackButtonVisibility="Collapsed"
     mc:Ignorable="d">
+    <Page.Resources>
+        <CornerRadius x:Key="CornerRadius">0</CornerRadius>
+        <CornerRadius x:Key="OverlayCornerRadius">0</CornerRadius>
+        <CornerRadius x:Key="ControlCornerRadius">0</CornerRadius>
+    </Page.Resources>
 
     <Grid>
         <Grid.RowDefinitions>

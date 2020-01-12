@@ -85,7 +85,6 @@ namespace METS.View
                 var resourceLoader = Windows.ApplicationModel.Resources.ResourceLoader.GetForCurrentView("Catalog");
                 string msg = resourceLoader.GetString("MsgNotCopied");
                 Notifi.Show(msg + "\r\n" + ex.Message);
-                //await file.DeleteAsync();
                 return;
             }
             
@@ -107,10 +106,13 @@ namespace METS.View
                         tempLangs.Add(lang.Attribute("Identifier").Value);
                     }
 
-                    DiagLanguage diaglang = new DiagLanguage(tempLangs);
-                    await diaglang.ShowAsync();
-                    Import.SelectedLanguage = diaglang.SelectedLanguage;
-                    ImportHelper.TranslateXml(catXML.Root, diaglang.SelectedLanguage);
+                    if(tempLangs.Count > 1)
+                    {
+                        DiagLanguage diaglang = new DiagLanguage(tempLangs);
+                        await diaglang.ShowAsync();
+                        Import.SelectedLanguage = diaglang.SelectedLanguage;
+                        ImportHelper.TranslateXml(catXML.Root, diaglang.SelectedLanguage);
+                    }
 
                     XElement catalogXML = catXML.Descendants(XName.Get("Catalog", ns)).ElementAt<XElement>(0);
                     Import.DeviceList = CatalogHelper.GetDevicesFromCatalog(catalogXML);

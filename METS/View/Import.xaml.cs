@@ -120,7 +120,6 @@ namespace METS.View
             Log.Information("------------Import wurde gestartet------------");
             Log.Information("Sprache: " + Imports.SelectedLanguage);
             ImportState = resourceLoader.GetString("StateProj");
-            string currentMan;
             List<string> prod2load = new List<string>();
             IEnumerable<Device> devices = from dev in Imports.DeviceList where dev.SlideSettings.IsSelected == true select dev;
 
@@ -129,7 +128,7 @@ namespace METS.View
                 prod2load.Add(device.ProductRefId);
             }
 
-            ProgSub.Maximum = 3;
+            ProgSub.IsIndeterminate = true;
 
             foreach (ZipArchiveEntry entryT in Imports.Archive.Entries)
             {
@@ -140,14 +139,14 @@ namespace METS.View
                 }
             }
 
-            await Task.Delay(5000);
 
-
-            #region "KNX_Master"
+            //Vom Internet holen: https://update.knx.org/data/XML/project-11/knx_master.xml
+            #region KNX_Master
 
             ImportDevice = "KNX-Master Datei aktualisieren";
             ZipArchiveEntry entry = Imports.Archive.GetEntry("knx_master.xml");
             Log.Information("---- Integrierte KNX_Master wird überprüft");
+            await Task.Delay(2000);
             XElement manXML = XDocument.Load(entry.Open()).Root;
             StorageFile masterFile;
 
@@ -198,27 +197,20 @@ namespace METS.View
             }
             catch { }
 
-            ProgSub.Value += 1;
 
-            await Task.Delay(3000);
             ImportDevice = resourceLoader.GetString("StateManus");
             await Helper.UpdateManufacturers(manXML);
-            ProgSub.Value += 1;
             #endregion
 
 
-
-
-            await Task.Delay(3000);
-
             #region Katalog
 
-            ImportDevice = "Katalogeinträge werden gelesen";
+            ImportDevice = resourceLoader.GetString("StateCat");
             Log.Information("---- Katalog analyse gestartet");
+            await Task.Delay(2000);
+            entry = Imports.Archive.GetEntry(Helper.currentMan + "/Catalog.xml");
             try
             {
-                currentMan = entry.FullName.Substring(0, entry.FullName.IndexOf('/'));
-                ImportState = resourceLoader.GetString("StateCat");
                 XElement xml = XDocument.Load(entry.Open()).Root;
                 ImportHelper.TranslateXml(xml, Imports.SelectedLanguage);
                 await Helper.ImportCatalog(xml);
@@ -233,138 +225,34 @@ namespace METS.View
             #endregion
 
 
+            #region Hardware
+
+            entry = Imports.Archive.GetEntry(Helper.currentMan + "/Hardware.xml");
+            ImportDevice = resourceLoader.GetString("StateHard");
+            Log.Information("---- Hardware wird importiert");
+            await Task.Delay(2000);
+            try
+            {
+                XElement xml = XDocument.Load(entry.Open()).Root;
+                ImportHelper.TranslateXml(xml, Imports.SelectedLanguage);
+                await Helper.ImportHardware(xml, prod2load);
+            }
+            catch (Exception e)
+            {
+                Log.Error(e, "Hardware Fehler!");
+            }
+            Log.Information("Hardware wurde importiert");
+
+            #endregion
 
 
+            ProgMain.Value += 1;
+            ProgSub.IsIndeterminate = false;
+            ProgSub.Value = 0;
 
-
-
-
-            await Task.Delay(1000);
-
-            //foreach (ZipArchiveEntry entry in Imports.Archive.Entries)
-            //{
-            //    if (!manwasset && entry.FullName.StartsWith("M-"))
-            //    {
-            //        Helper.currentMan = entry.FullName.Substring(0, 6);
-            //        Log.Information("---- Hersteller gefunden: " + Helper.currentMan);
-            //        manwasset = true;
-            //        continue;
-            //    }
-
-            //    if (entry.Name == "knx_master.xml")
-            //    {
-            //        Log.Information("---- Integrierte KNX_Master wird überprüft");
-            //        ImportState = resourceLoader.GetString("StateManus");
-            //        await Task.Delay(1000);
-
-            //        XElement manXML = XDocument.Load(entry.Open()).Root;
-
-            //        await Helper.UpdateManufacturers(manXML);
-
-            //        StorageFile masterFile;
-
-            //        try
-            //        {
-            //            masterFile = await ApplicationData.Current.LocalFolder.GetFileAsync("knx_master.xml");
-            //        }
-            //        catch
-            //        {
-            //            StorageFile defaultFile = await StorageFile.GetFileFromApplicationUriAsync(new Uri("ms-appx:///Data/knx_master.xml"));
-            //            masterFile = await ApplicationData.Current.LocalFolder.CreateFileAsync("knx_master.xml");
-            //            await FileIO.WriteTextAsync(masterFile, await FileIO.ReadTextAsync(defaultFile));
-            //        }
-
-
-            //        XDocument masterXml;
-            //        try
-            //        {
-            //            masterXml = XDocument.Load(await masterFile.OpenStreamForReadAsync());
-            //        }
-            //        catch (Exception e)
-            //        {
-            //            Log.Error(e, "KNX_Master laden Fehler!");
-            //            Imports.Archive.Dispose();
-            //            ImportState = resourceLoader.GetString("StateFin");
-            //            ImportError.Add(resourceLoader.GetString("MsgMasterError"));
-            //            BtnBack.IsEnabled = true;
-            //            return;
-            //        }
-
-            //        string versionO = masterXml.Root.Element(XName.Get("MasterData", masterXml.Root.Name.NamespaceName)).Attribute("Version").Value;
-            //        string versionN = manXML.Element(XName.Get("MasterData", manXML.Name.NamespaceName)).Attribute("Version").Value;
-
-            //        int versionNew, versionOld;
-
-            //        try
-            //        {
-            //            versionNew = int.Parse(versionN);
-            //            versionOld = int.Parse(versionO);
-
-            //            bool newer = versionNew > versionOld;
-
-            //            if (newer)
-            //            {
-            //                await FileIO.WriteTextAsync(masterFile, manXML.ToString());
-            //                Log.Information("KNX_Master wurde aktualisiert");
-            //            }
-            //        }
-            //        catch { }
-
-            //        ProgSub.Value = 0;
-            //        ProgMain.Value += 1;
-            //        continue;
-            //    }
-
-            //    if (entry.Name == "Catalog.xml")
-            //    {
-            //        Log.Information("---- Katalog analyse gestartet");
-            //        try
-            //        {
-            //            currentMan = entry.FullName.Substring(0, entry.FullName.IndexOf('/'));
-            //            ImportState = resourceLoader.GetString("StateCat");
-            //            await Task.Delay(500);
-            //            XElement xml = XDocument.Load(entry.Open()).Root;
-            //            ImportHelper.TranslateXml(xml, Imports.SelectedLanguage);
-            //            await Helper.ImportCatalog(xml);
-            //        }
-            //        catch (Exception e)
-            //        {
-            //            Log.Error(e, "Katalog Fehler!");
-            //        }
-            //        ProgSub.Value = 0;
-            //        ProgMain.Value += 1;
-            //        Log.Information("Katalog wurde aktualisiert");
-            //        continue;
-            //    }
-
-            //    if (entry.Name == "Hardware.xml")
-            //    {
-            //        Log.Information("---- Hardware wird importiert");
-            //        try
-            //        {
-            //            currentMan = entry.FullName.Substring(0, entry.FullName.IndexOf('/'));
-            //            ImportState = resourceLoader.GetString("StateHard");
-            //            await Task.Delay(1000);
-            //            XElement xml = XDocument.Load(entry.Open()).Root;
-            //            ImportHelper.TranslateXml(xml, Imports.SelectedLanguage);
-            //            await Helper.ImportHardware(xml, prod2load);
-            //        }
-            //        catch (Exception e)
-            //        {
-            //            Log.Error(e, "Hardware Fehler!");
-            //        }
-            //        ProgSub.Value = 0;
-            //        ProgMain.Value += 1;
-            //        Log.Information("Hardware wurde importiert");
-            //        continue;
-            //    }
-            //}
-
+            await Task.Delay(2000);
 
             ImportDevice = "";
-
-            await Task.Delay(5000);
-
             Log.Information("---- Applikationen werden importiert");
             ImportState = resourceLoader.GetString("StateApp");
             await Task.Delay(1000);

@@ -66,7 +66,7 @@ namespace METS.Classes.Project
                     oldVal = para.Value;
                 }
 
-                if (changeOld.Value == change.Value || oldVal == change.Value)
+                if (oldVal == change.Value)
                 {
                     _context.ChangesParam.Remove(changeOld);
                 } else

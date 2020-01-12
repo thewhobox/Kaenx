@@ -5,6 +5,7 @@ using METS.Classes.Project;
 using METS.Context.Catalog;
 using METS.Context.Project;
 using Microsoft.Toolkit.Uwp.UI.Controls;
+using Serilog;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -305,12 +306,13 @@ namespace METS.Views.Easy.Controls
                 {
                     case "ParameterSeparator":
                         Border b = new Border();
-                        b.Height = 1;
                         b.BorderBrush = new SolidColorBrush(Windows.UI.Colors.Gray);
                         b.BorderThickness = new Thickness(0, 1, 0, 0);
                         b.Margin = new Thickness(10, 20, 10, 20);
                         if (xele.Attribute("Text")?.Value != "")
                             b.Child = new TextBlock() { Text = xele.Attribute("Text").Value };
+                        else
+                            b.Height = 1;
                         parent.Children.Add(b);
                         break;
 
@@ -342,8 +344,11 @@ namespace METS.Views.Easy.Controls
                                 parent.Children.Add(paraviewP);
                                 break;
                             case ParamTypes.NumberInt:
-                            case ParamTypes.Text:
                             case ParamTypes.NumberUInt:
+                                ParamNumber paraviewN = new ParamNumber(pbPara, pbType, change);
+                                parent.Children.Add(paraviewN);
+                                break;
+                            case ParamTypes.Text:
                                 if (pbPara.Access == AccessType.Read)
                                 {
                                     ParamText paraviewT = new ParamText(pbPara, pbType);
@@ -359,7 +364,16 @@ namespace METS.Views.Easy.Controls
                             case ParamTypes.Enum:
                                 IEnumerable<AppParameterTypeEnumViewModel> enums = _context.AppParameterTypeEnums.Where(e => e.ParameterId == pbType.Id).OrderBy(e => e.Order).ToList();
 
-                                if (enums.Count() > 2)
+                                if (enums.Count() == 0)
+                                {
+                                    Log.Warning("ParameterTyp Enum hat keine Enums! " + pbType.Id);
+                                    Border b2 = new Border();
+                                    b2.BorderBrush = new SolidColorBrush(Windows.UI.Colors.Red);
+                                    b2.BorderThickness = new Thickness(0, 1, 0, 0);
+                                    b2.Margin = new Thickness(10, 20, 10, 20);
+                                    b2.Child = new TextBlock() { Text = pbPara.Text + " - Keine Enums" };
+                                    parent.Children.Add(b2);
+                                } else if(enums.Count() > 2)
                                 {
                                     ParamEnum paraviewE = new ParamEnum(pbPara, pbType, enums, change) { Name = pbPara.Id };
                                     paraviewE.ParamChanged += ParamChanged;
@@ -374,8 +388,8 @@ namespace METS.Views.Easy.Controls
                                 break;
 
                             case ParamTypes.None:
-                                ParamNone paraviewN = new ParamNone(pbPara, pbType);
-                                parent.Children.Add(paraviewN);
+                                ParamNone paraviewNo = new ParamNone(pbPara, pbType);
+                                parent.Children.Add(paraviewNo);
                                 break;
                         }
                         break;
@@ -446,8 +460,45 @@ namespace METS.Views.Easy.Controls
             comObjects = Newtonsoft.Json.JsonConvert.DeserializeObject<List<DeviceComObject>>(json);
 
 
+            foreach(DeviceComObject com in comObjects)
+            {
+                if (com.Name.Contains("{{"))
+                {
+                    Regex reg = new Regex("{{((.+):(.+))}}");
+                    Match m = reg.Match(com.Name);
+                    if (m.Success)
+                    {
+                        Binding bind = new Binding()
+                        {
+                            Id = m.Groups[2].Value,
+                            DefaultText = m.Groups[3].Value,
+                            TextPlaceholder = reg.Replace(com.Name, "{{dyn}}")
+                        };
+                        if (device.ComObjects.Any(c => c.Id == com.Id))
+                            bind.Item = device.ComObjects.Single(c => c.Id == com.Id);
+                        bindings.Add(bind);
+
+                        //string value = "";
+                        //try
+                        //{
+                        //    ChangeParamModel changeB = _contextP.ChangesParam.Where(c => c.DeviceId == device.UId && c.ParamId.EndsWith("R-" + bind.Id)).OrderByDescending(c => c.StateId).First();
+                        //    value = changeB.Value;
+                        //}
+                        //catch { }
+
+                        //if (bind.Item == null) continue;
+                        //DeviceComObject dco = (DeviceComObject)bind.Item;
+
+                        //if (value == "")
+                        //    dco.Name = reg.Replace(com.Name, bind.DefaultText);
+                        //else
+                        //    dco.Name = reg.Replace(com.Name, value);
+                    }
+                }
+            }
+
             //CheckComObjects();
-            SaveHelper.SaveProject();
+            //SaveHelper.SaveProject();
         }
 
         private void CheckComObjects()
@@ -518,6 +569,38 @@ namespace METS.Views.Easy.Controls
             }
             foreach (DeviceComObject cobj in toAdd)
             {
+                if (cobj.Name.Contains("{{"))
+                {
+                    Regex reg = new Regex("{{((.+):(.+))}}");
+                    Match m = reg.Match(cobj.Name);
+                    if (m.Success)
+                    {
+                        Binding bind = new Binding()
+                        {
+                            Id = m.Groups[2].Value,
+                            DefaultText = m.Groups[3].Value,
+                            TextPlaceholder = reg.Replace(cobj.Name, "{{dyn}}")
+                        };
+                        bind.Item = cobj;
+                        bindings.Add(bind);
+
+                        string value = "";
+                        try
+                        {
+                            ChangeParamModel changeB = _contextP.ChangesParam.Where(c => c.DeviceId == device.UId && c.ParamId.EndsWith("R-" + bind.Id)).OrderByDescending(c => c.StateId).First();
+                            value = changeB.Value;
+                        }
+                        catch { }
+
+                        if (bind.Item == null) continue;
+                        DeviceComObject dco = (DeviceComObject)bind.Item;
+
+                        if (value == "")
+                            dco.Name = reg.Replace(cobj.Name, bind.DefaultText);
+                        else
+                            dco.Name = reg.Replace(cobj.Name, value);
+                    }
+                }
                 device.ComObjects.Add(cobj);
             }
 
@@ -544,11 +627,21 @@ namespace METS.Views.Easy.Controls
                     dest.Visibility = Visibility.Collapsed;
             }
 
-            IEnumerable<Binding> binds = bindings.Where(b => source.EndsWith("R-" + b.Id));
+            IEnumerable<Binding> binds = bindings.Where(b => source.EndsWith("R-" + b.Id) && b.Item != null);
 
             foreach (Binding bind in binds)
             {
-                bind.Item.Header = bind.TextPlaceholder.Replace("{{dyn}}", value);
+                string newName = bind.TextPlaceholder.Replace("{{dyn}}", value == "" ? bind.DefaultText : value);
+
+                if(bind.Item is TabViewItem)
+                {
+                    ((TabViewItem)bind.Item).Header = bind.TextPlaceholder.Replace("{{dyn}}", newName);
+                } else if(bind.Item is DeviceComObject)
+                {
+                    ((DeviceComObject)bind.Item).Name = bind.TextPlaceholder.Replace("{{dyn}}", newName);
+                }
+
+                    
             }
 
             ChangeParamModel change = new ChangeParamModel
@@ -595,6 +688,6 @@ namespace METS.Views.Easy.Controls
         public string Id { get; set; }
         public string DefaultText { get; set; }
         public string TextPlaceholder { get; set; }
-        public TabViewItem Item { get; set; }
+        public object Item { get; set; }
     }
 }

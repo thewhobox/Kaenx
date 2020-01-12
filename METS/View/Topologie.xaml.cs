@@ -380,6 +380,9 @@ namespace METS.View
             InfosApplication.Visibility = Visibility.Collapsed;
             InfosLineMiddle.Visibility = Visibility.Collapsed;
 
+            InNumber.IsEnabled = true;
+            InName.IsEnabled = true;
+
             if (data is LineDevice)
             {
                 InfosApplication.Visibility = Visibility.Visible;
@@ -392,14 +395,55 @@ namespace METS.View
                 {
                     InfoAppName.Text = "Besitzt keine Applikation";
                 }
-                InNumber.IsEnabled = dev.Id != -1;
+                InNumber.IsEnabled = dev.Id > 0;
+                if(dev.Id == 0)
+                {
+                    InNumber.Minimum = 0;
+                    InNumber.Maximum = 0;
+                } else
+                {
+                    InNumber.Minimum = 1;
+                    InNumber.Maximum = 255;
+                }
             } else if(data is LineMiddle)
             {
                 LineMiddle line = data as LineMiddle;
                 InfosLineMiddle.Visibility = Visibility.Visible;
                 InfoLmMaxcurrent.Text = SaveHelper.CalculateLineCurrentAvailible(line).ToString();
                 InfoLmCurrent.Text = SaveHelper.CalculateLineCurrentUsed(line).ToString();
+                InNumber.Minimum = 0;
+                InNumber.Maximum = 15;
+            } else if(data is Line)
+            {
+                InNumber.Minimum = 0;
+                InNumber.Maximum = 15;
             }
+        }
+
+        private async void TreeViewItem_DoubleTapped(object sender, DoubleTappedRoutedEventArgs e)
+        {
+            TopologieBase item = null;
+
+            if (e.OriginalSource is TextBlock)
+            {
+                item = (TopologieBase)((TextBlock)e.OriginalSource).DataContext;
+            }
+            else if (e.OriginalSource is Grid)
+            {
+                item = (TopologieBase)((Grid)e.OriginalSource).DataContext;
+            } else { 
+            
+            }
+            
+
+            DiagNewName diag = new DiagNewName();
+            diag.NewName = item.Name;
+            await diag.ShowAsync();
+            if (diag.NewName != null)
+            {
+                item.Name = diag.NewName;
+            }
+            SaveHelper.SaveProject();
         }
     }
 }

@@ -9,10 +9,13 @@
     mc:Ignorable="d"
     Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
     <Page.Resources>
+        <CornerRadius x:Key="CornerRadius">0</CornerRadius>
+        <CornerRadius x:Key="OverlayCornerRadius">0</CornerRadius>
+        <CornerRadius x:Key="ControlCornerRadius">0</CornerRadius>
         <DataTemplate x:Key="RowDetailsTemplate">
             <StackPanel>
-                <TextBlock Text="Hier steht ein mega langer text. Würde ja gerne das Lorem Ipsum kopieren, aber keine Lust lange danach zu suchen...." />
-                <StackPanel Orientation="Horizontal" Margin="10">
+                <TextBlock Margin="10 10 10 0" Text="Hier steht ein mega langer text. Würde ja gerne das Lorem Ipsum kopieren, aber keine Lust lange danach zu suchen...." />
+                <StackPanel Orientation="Horizontal" Margin="10 0 10 10">
                     <CheckBox MinWidth="10" Content="R" Margin="3 0 3 0" IsChecked="{Binding Flag_Read}" />
                     <CheckBox MinWidth="10" Content="W" Margin="3 0 3 0" IsChecked="{Binding Flag_Write}" />
                     <CheckBox MinWidth="10" Content="T" Margin="3 0 3 0" IsChecked="{Binding Flag_Transmit}" />
@@ -79,7 +82,7 @@
                 <Run Text="{Binding SelectedGroup.Name}" />
         </TextBlock>
         
-        <toolkit:DataGrid x:Name="ListGroupComs" 
+        <toolkit:DataGrid x:Name="ListGroupComs"
                           AllowDrop="True" Drop="ListGroupComs_Drop" DragLeave="General_DragLeave" DragOver="ListGroupComs_DragEnter" 
                           Grid.Column="1" Grid.Row="1" Margin="5 0" AutoGenerateColumns="False" ItemsSource="{Binding SelectedGroup.ComObjects}" BorderThickness="1 1 1 0" BorderBrush="LightGray" IsReadOnly="True">
             <toolkit:DataGrid.Background>
@@ -145,10 +148,10 @@
         </toolkit:DataGrid>
 
         <Border Background="LightGray" Grid.Column="4" Grid.RowSpan="2">
-            <TreeView x:Name="TreeTopologie" CanReorderItems="False" ItemsSource="{Binding Lines}" ItemInvoked="TreeTopologie_ItemInvoked" VerticalAlignment="Stretch" Background="LightGray">
+            <TreeView x:Name="TreeTopologie" MaxWidth="350" CanReorderItems="False" ItemsSource="{Binding Lines}" ItemInvoked="TreeTopologie_ItemInvoked" VerticalAlignment="Stretch" Background="LightGray">
                 <TreeView.ItemTemplate>
                     <DataTemplate x:DataType="local:Line">
-                        <TreeViewItem Margin="-20 0 0 0" Background="Transparent" BorderThickness="0" Content="{Binding}" ItemsSource="{Binding Subs}" IsExpanded="{Binding IsExpanded, Mode=TwoWay}">
+                        <TreeViewItem Margin="-20 0 0 0" Background="Transparent" ToolTipService.ToolTip="{Binding Name}" BorderThickness="0" Content="{Binding}" ItemsSource="{Binding Subs}" IsExpanded="{Binding IsExpanded, Mode=TwoWay}">
                             <TreeViewItem.ContentTemplate>
                                 <DataTemplate x:DataType="local:TopologieBase">
                                     <StackPanel Orientation="Horizontal">
