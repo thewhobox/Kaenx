@@ -2,6 +2,7 @@
 using METS.Classes.Project;
 using METS.Context.Catalog;
 using METS.Context.Project;
+using Serilog;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -417,8 +418,29 @@ namespace METS.Classes.Helper
                 {
                     case "when":
                         ParamCondition cond = new ParamCondition();
-                        if (xele.Attribute("default")?.Value == "true") continue;
-                        cond.Values = xele.Attribute("test").Value.Split(" ").ToList();
+                        int tempOut;
+                        if (xele.Attribute("default")?.Value == "true")
+                        {
+                            List<string> values = new List<string>();
+                            IEnumerable<XElement> whens = xele.Parent.Elements();
+                            foreach(XElement w in whens)
+                            {
+                                if (w == xele) 
+                                    continue;
+
+                                values.AddRange(w.Attribute("test").Value.Split(" "));
+                            }
+                            cond.Values = string.Join(",", values);
+                            cond.Operation = ConditionOperation.Default;
+                        } else if(xele.Attribute("test")?.Value.Contains(" ") == true || int.TryParse(xele.Attribute("test")?.Value, out tempOut)) {
+                            cond.Values = string.Join(",", xele.Attribute("test").Value.Split(" "));
+                            cond.Operation = ConditionOperation.IsInValue;
+                        }
+                        else
+                        {
+                            Log.Warning("Unbekanntes when! " + xele.ToString());
+                        }
+                        
                         xele = xele.Parent;
                         cond.SourceId = xele.Attribute("ParamRefId").Value;
                         conds.Add(cond);
@@ -456,8 +478,20 @@ namespace METS.Classes.Helper
                         tempValues.Add(cond.SourceId, val);
                     }
 
-                    if (!cond.Values.Contains(val))
-                        flag = false;
+                    switch(cond.Operation)
+                    {
+                        case ConditionOperation.IsInValue:
+                            if (!cond.Values.Split(",").Contains(val))
+                                flag = false;
+                            break;
+                        case ConditionOperation.Default:
+                            if (cond.Values.Split(",").Contains(val))
+                                flag = false;
+                            break;
+                        default:
+                            Log.Warning("GetDefaultParams nicht unterstützte Operation! " + cond.Operation.ToString());
+                            break;
+                    }
                 }
 
                 if (flag)
@@ -493,8 +527,20 @@ namespace METS.Classes.Helper
                         tempValues.Add(cond.SourceId, val);
                     }
 
-                    if (!cond.Values.Contains(val))
-                        flag = false;
+                    switch (cond.Operation)
+                    {
+                        case ConditionOperation.IsInValue:
+                            if (!cond.Values.Split(",").Contains(val))
+                                flag = false;
+                            break;
+                        case ConditionOperation.Default:
+                            if (cond.Values.Split(",").Contains(val))
+                                flag = false;
+                            break;
+                        default:
+                            Log.Warning("GetDefaultParams nicht unterstützte Operation! " + cond.Operation.ToString());
+                            break;
+                    }
                 }
 
                 if (flag)

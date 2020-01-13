@@ -2,6 +2,7 @@
 using METS.Classes.Helper;
 using METS.Context.Catalog;
 using METS.MVVM;
+using Microsoft.AppCenter.Analytics;
 using Serilog;
 using System;
 using System.Collections.Generic;
@@ -304,6 +305,8 @@ namespace METS.View
 
             BtnBack.IsEnabled = true;
             Log.Information("Import abgeschlossen");
+
+            Analytics.TrackEvent("Gerät(e) importiert");
         }
 
 

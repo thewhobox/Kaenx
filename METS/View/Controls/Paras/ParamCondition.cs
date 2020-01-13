@@ -10,9 +10,19 @@ namespace METS.Classes.Controls.Paras
     {
         public string SourceId { get; set; }
         public string DestinationId { get; set; }
-        public List<string> Values { get; set; } = new List<string>();
+        public string Values { get; set; }
+        public ConditionOperation Operation { get; set; }
 
         public ParamCondition() { }
+    }
+
+    public enum ConditionOperation
+    {
+        IsInValue,
+        Default,
+        GreatherThan,
+        LowerThan,
+        NotEqual
     }
 
 }

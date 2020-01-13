@@ -285,7 +285,7 @@ namespace METS.Views.Easy.Controls
                                     SourceId = id,
                                     DestinationId = dynid
                                 };
-                                cond.Values.AddRange(condVals);
+                                cond.Values = string.Join(",", condVals);
                                 conditions.Add(cond);
                             }
                         }
@@ -409,11 +409,11 @@ namespace METS.Views.Easy.Controls
 
                             if (xwhen.Attribute("default") != null && xwhen.Attribute("default").Value == "true")
                             {
-
+                                //TODO default richtig integrieren
                             }
                             else if (xwhen.Attribute("test") != null)
                             {
-                                cond.Values.AddRange(xwhen.Attribute("test").Value.Split(" "));
+                                cond.Values = string.Join(",", xwhen.Attribute("test").Value.Split(" "));
                             }
                             conditions.Add(cond);
 
@@ -621,7 +621,7 @@ namespace METS.Views.Easy.Controls
                     continue;
                 }
 
-                if (cond.Values.Count == 0 || cond.Values.Contains(value))
+                if (cond.Values.Split(",").Contains(value))
                     dest.Visibility = Visibility.Visible;
                 else
                     dest.Visibility = Visibility.Collapsed;
