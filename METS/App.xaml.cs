@@ -56,8 +56,13 @@ namespace METS
                 db.Database.Migrate();
             }
             CreateLogger();
+
+#if DEBUG
+            Log.Information("Mode = Debug");
+#else
             AppCenter.Start("15f6e92f-3928-4b75-a73d-6e95dc2a0ee4",
                    typeof(Analytics), typeof(Crashes), typeof(Push));
+#endif
         }
 
         private async void CreateLogger()

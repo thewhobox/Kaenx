@@ -19,7 +19,7 @@ using Windows.UI.Xaml.Navigation;
 
 namespace METS.Classes.Controls.Paras
 {
-    public sealed partial class ParamNumber : UserControl
+    public sealed partial class ParamNumber : UserControl, IParam
     {
         public delegate void ParamChangedHandler(string source, string value);
         public event ParamChangedHandler ParamChanged;
@@ -56,6 +56,16 @@ namespace METS.Classes.Controls.Paras
         private void ParaValue_ValueChanged(Microsoft.UI.Xaml.Controls.NumberBox sender, Microsoft.UI.Xaml.Controls.NumberBoxValueChangedEventArgs args)
         {
             ParamChanged?.Invoke(paraId, ParaValue.Value.ToString());
+        }
+
+        public string GetValue()
+        {
+            return ParaValue.Value.ToString();
+        }
+
+        public void SetVisibility(Visibility visible)
+        {
+            this.Visibility = visible;
         }
     }
 }

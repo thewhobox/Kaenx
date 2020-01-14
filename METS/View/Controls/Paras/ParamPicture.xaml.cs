@@ -18,7 +18,7 @@ using Windows.UI.Xaml.Navigation;
 
 namespace METS.Classes.Controls.Paras
 {
-    public sealed partial class ParamPicture : UserControl
+    public sealed partial class ParamPicture : UserControl, IParam
     {
 
         public ParamPicture(AppParameter param, AppParameterTypeViewModel type)
@@ -27,6 +27,16 @@ namespace METS.Classes.Controls.Paras
             ParaName.Text = param.Text;
 
 
+        }
+
+        public string GetValue()
+        {
+            throw new NotImplementedException();
+        }
+
+        public void SetVisibility(Visibility visible)
+        {
+            this.Visibility = visible;
         }
     }
 }

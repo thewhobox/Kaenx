@@ -409,7 +409,13 @@ namespace METS.Views.Easy.Controls
 
                             if (xwhen.Attribute("default") != null && xwhen.Attribute("default").Value == "true")
                             {
-                                //TODO default richtig integrieren
+                                List<string> tempValues = new List<string>();
+                                foreach(XElement w in xele.Elements())
+                                {
+                                    if (w == xwhen) continue;
+                                    tempValues.AddRange(w.Attribute("test").Value.Split(" "));
+                                }
+                                cond.Values = string.Join(",", tempValues);
                             }
                             else if (xwhen.Attribute("test") != null)
                             {
@@ -434,8 +440,21 @@ namespace METS.Views.Easy.Controls
                                 AppParameter pbParaT = _context.AppParameters.Single(p => p.Id == cond.SourceId);
                                 value = pbParaT.Value;
                             }
-                            if (cond.Values.Contains(value))
-                                panelc.Visibility = Visibility.Visible;
+
+                            switch(cond.Operation)
+                            {
+                                case ConditionOperation.IsInValue:
+                                    if (cond.Values.Contains(value))
+                                        panelc.Visibility = Visibility.Visible;
+                                    break;
+                                case ConditionOperation.Default:
+                                    if (!cond.Values.Contains(value))
+                                        panelc.Visibility = Visibility.Visible;
+                                    break;
+                                default:
+                                    break;
+                            }
+                            
 
                             if (!tempValues.Keys.Contains(cond.SourceId))
                             {
@@ -477,22 +496,6 @@ namespace METS.Views.Easy.Controls
                         if (device.ComObjects.Any(c => c.Id == com.Id))
                             bind.Item = device.ComObjects.Single(c => c.Id == com.Id);
                         bindings.Add(bind);
-
-                        //string value = "";
-                        //try
-                        //{
-                        //    ChangeParamModel changeB = _contextP.ChangesParam.Where(c => c.DeviceId == device.UId && c.ParamId.EndsWith("R-" + bind.Id)).OrderByDescending(c => c.StateId).First();
-                        //    value = changeB.Value;
-                        //}
-                        //catch { }
-
-                        //if (bind.Item == null) continue;
-                        //DeviceComObject dco = (DeviceComObject)bind.Item;
-
-                        //if (value == "")
-                        //    dco.Name = reg.Replace(com.Name, bind.DefaultText);
-                        //else
-                        //    dco.Name = reg.Replace(com.Name, value);
                     }
                 }
             }

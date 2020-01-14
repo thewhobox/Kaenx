@@ -25,7 +25,7 @@
     <AppxBundlePlatforms>x86</AppxBundlePlatforms>
     <AppInstallerUpdateFrequency>0</AppInstallerUpdateFrequency>
     <AppInstallerCheckForUpdateFrequency>OnApplicationRun</AppInstallerCheckForUpdateFrequency>
-    <PackageCertificateThumbprint>FCCF8BBC380F043856CF8A8E5428BCA244901375</PackageCertificateThumbprint>
+    <PackageCertificateThumbprint>CA5D3DA490360BAEEA76510BB468CAA4F2773D2B</PackageCertificateThumbprint>
     <AppxPackageSigningTimestampDigestAlgorithm>SHA256</AppxPackageSigningTimestampDigestAlgorithm>
     <GenerateTestArtifacts>True</GenerateTestArtifacts>
     <HoursBetweenUpdateChecks>0</HoursBetweenUpdateChecks>
@@ -150,6 +150,11 @@
     <Compile Include="View\Controls\DiagSelectApp.xaml.cs">
       <DependentUpon>DiagSelectApp.xaml</DependentUpon>
     </Compile>
+    <Compile Include="View\Controls\EControlParas2.xaml.cs">
+      <DependentUpon>EControlParas2.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="View\Controls\ListBlockModel.cs" />
+    <Compile Include="View\Controls\ListChannelModel.cs" />
     <Compile Include="View\Controls\Paras\IParam.cs" />
     <Compile Include="View\Controls\Paras\ParamCondition.cs" />
     <Compile Include="View\Controls\Paras\ParamEnum.xaml.cs">
@@ -330,6 +335,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="View\Controls\DiagSelectApp.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="View\Controls\EControlParas2.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

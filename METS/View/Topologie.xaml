@@ -63,6 +63,7 @@
                                     <MenuFlyoutItem Text="Applikation (Minimal, Experimentell)" Icon="Onebar" Tag="2" Click="ClickProApp" />
                                 </MenuFlyoutSubItem>
                                 <MenuFlyoutItem Text="Parameter" Icon="Bookmarks" Click="ClickOpenParas" />
+                                <MenuFlyoutItem Text="Parameter2" Icon="Bookmarks" Click="ClickOpenParas2" />
                                 <MenuFlyoutItem Text="Umbenennen" Icon="Rename" Click="ClickAddRename" />
                                 <MenuFlyoutItem Text="Löschen" Icon="Delete" Click="ClickAddDelete" />
                             </MenuFlyout>

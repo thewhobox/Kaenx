@@ -74,5 +74,10 @@ namespace METS.Classes.Controls.Paras
             value = ((RadioButton)sender).Tag.ToString();
             ParamChanged?.Invoke(paramId, value);
         }
+
+        public void SetVisibility(Visibility visible)
+        {
+            this.Visibility = visible;
+        }
     }
 }

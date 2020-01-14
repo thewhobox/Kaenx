@@ -64,5 +64,10 @@ namespace METS.Classes.Controls.Paras
         {
             return ParaValue.Text;
         }
+
+        public void SetVisibility(Visibility visible)
+        {
+            this.Visibility = visible;
+        }
     }
 }

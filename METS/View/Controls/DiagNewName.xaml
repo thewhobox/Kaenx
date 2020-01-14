@@ -11,5 +11,11 @@
     CloseButtonText="Abbrechen"
     DefaultButton="Primary"
     PrimaryButtonClick="ContentDialog_PrimaryButtonClick">
+    <ContentDialog.Resources>
+        <CornerRadius x:Key="CornerRadius">0</CornerRadius>
+        <CornerRadius x:Key="OverlayCornerRadius">0</CornerRadius>
+        <CornerRadius x:Key="ControlCornerRadius">0</CornerRadius>
+    </ContentDialog.Resources>
+    
     <TextBox x:Name="Input" Text="Name" VerticalAlignment="Center" KeyUp="Input_KeyUp" />
 </ContentDialog>

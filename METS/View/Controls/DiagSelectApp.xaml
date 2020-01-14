@@ -12,6 +12,11 @@
     DefaultButton="Primary"
     PrimaryButtonClick="ContentDialog_PrimaryButtonClick"
     SecondaryButtonClick="ContentDialog_SecondaryButtonClick">
+    <ContentDialog.Resources>
+        <CornerRadius x:Key="CornerRadius">0</CornerRadius>
+        <CornerRadius x:Key="OverlayCornerRadius">0</CornerRadius>
+        <CornerRadius x:Key="ControlCornerRadius">0</CornerRadius>
+    </ContentDialog.Resources>
 
     <Grid>
         <ComboBox x:Name="Apps" HorizontalAlignment="Stretch">

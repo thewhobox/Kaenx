@@ -27,7 +27,7 @@
         <StackPanel VerticalAlignment="Center" Width="600">
             <TextBlock Text="{Binding ImportState}" FontSize="20" VerticalAlignment="Center" />
             <TextBlock Text="{Binding ImportDevice}" FontSize="20" VerticalAlignment="Center" />
-            <ProgressBar x:Name="ProgMain" Maximum="6" Height="30" Foreground="Green" />
+            <ProgressBar x:Name="ProgMain" Maximum="4" Height="30" Foreground="Green" />
             <ProgressBar x:Name="ProgSub" Maximum="1" Value="1" Height="30" />
             <ProgressBar x:Name="ProgApp" Maximum="1" Value="1" Height="10" Foreground="SandyBrown" />
             <Button x:Name="BtnBack" x:Uid="/Import/Back" HorizontalAlignment="Center" Margin="10" Click="ClickBack" IsEnabled="False"/>

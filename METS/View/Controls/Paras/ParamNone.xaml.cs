@@ -18,7 +18,7 @@ using Windows.UI.Xaml.Navigation;
 
 namespace METS.Classes.Controls.Paras
 {
-    public sealed partial class ParamNone : UserControl
+    public sealed partial class ParamNone : UserControl, IParam
     {
         public ParamNone(AppParameter param, AppParameterTypeViewModel type)
         {
@@ -34,6 +34,16 @@ namespace METS.Classes.Controls.Paras
             ParaName.Text = text;
             if (string.IsNullOrWhiteSpace(ParaName.Text))
                 ParaBorder.Background = new SolidColorBrush(Windows.UI.Colors.Transparent);
+        }
+
+        public string GetValue()
+        {
+            throw new NotImplementedException();
+        }
+
+        public void SetVisibility(Visibility visible)
+        {
+            this.Visibility = visible;
         }
     }
 }

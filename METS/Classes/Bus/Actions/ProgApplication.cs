@@ -122,7 +122,7 @@ namespace METS.Classes.Bus.Actions
             addedGroups.Sort();
 
 
-            if (_type != ProgAppType.Komplett && Device.LoadedGroups)
+            if (_type != ProgAppType.Komplett && Device.LoadedGroup)
             {
                 State3();
                 return;
@@ -224,7 +224,7 @@ namespace METS.Classes.Bus.Actions
 
             _ = App._dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Low, () =>
             {
-                Device.LoadedGroups = true;
+                Device.LoadedGroup = true;
             });
 
 
@@ -324,7 +324,7 @@ namespace METS.Classes.Bus.Actions
 
             _ = App._dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Low, () =>
               {
-                  Device.LoadedGroups = true;
+                  Device.LoadedGroup = true;
               });
 
             State3();

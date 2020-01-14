@@ -24,9 +24,11 @@ namespace METS.Classes
         private bool _loadedGroups = false;
         private bool _loadedApplication = false;
         private bool _loadedPA = false;
-        public bool LoadedGroups { get { return _loadedGroups; } set { _loadedGroups = value; Changed("LoadedGroups"); } }
+        public bool LoadedGroup { get { return _loadedGroups; } set { _loadedGroups = value; Changed("LoadedGroups"); } }
         public bool LoadedApplication { get { return _loadedApplication; } set { _loadedApplication = value; Changed("LoadedApplication"); } }
         public bool LoadedPA{ get { return _loadedPA; } set { _loadedPA = value; Changed("LoadedPA"); } }
+        public bool IsExpanded { get { return false; } }
+        public List<string> Subs { get; }
 
         //TODO speichern ändern! Nicht immer das ganze Projekt!
 

@@ -151,6 +151,20 @@ namespace METS.View
             tabView.SelectedItem = item;
         }
 
+        private void ClickOpenParas2(object sender, RoutedEventArgs e)
+        {
+            LineDevice device = (LineDevice)((MenuFlyoutItem)e.OriginalSource).DataContext;
+            EControlParas2 paras = new EControlParas2(device);
+            //paras.DataContext = device; 
+
+            TabViewItem item = new TabViewItem();
+            item.Icon = new SymbolIcon(Symbol.AllApps);
+            item.Header = $"{device.LineName} {device.Name}";
+            item.Content = paras;
+            tabView.Items.Add(item);
+            tabView.SelectedItem = item;
+        }
+
         private void ClickOpenCatalog(object sender, RoutedEventArgs e)
         {
             Frame frame = new Frame();
@@ -260,8 +274,11 @@ namespace METS.View
             _contextP.SaveChanges();
             device.UId = linedevmodel.UId;
 
-            StorageFile file = await folder.GetFileAsync(device.ApplicationId + "-PA-Default.json");
-            await file.CopyAsync(folderP, "Device_" + device.UId + "-PA.json");
+            if(model.HasApplicationProgram)
+            {
+                StorageFile file = await folder.GetFileAsync(device.ApplicationId + "-PA-Default.json");
+                await file.CopyAsync(folderP, "Device_" + device.UId + "-PA.json");
+            }
 
 
 

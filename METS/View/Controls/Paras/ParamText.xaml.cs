@@ -18,13 +18,23 @@ using Windows.UI.Xaml.Navigation;
 
 namespace METS.Classes.Controls.Paras
 {
-    public sealed partial class ParamText : UserControl
+    public sealed partial class ParamText : UserControl, IParam
     {
         public ParamText(AppParameter param, AppParameterTypeViewModel type)
         {
             this.InitializeComponent();
             ParaName.Text = param.Text;
             ParaValue.Text = param.Value;
+        }
+
+        public string GetValue()
+        {
+            throw new NotImplementedException();
+        }
+
+        public void SetVisibility(Visibility visible)
+        {
+            this.Visibility = visible;
         }
     }
 }

@@ -1,0 +1,51 @@
+﻿<UserControl
+    x:Class="METS.Views.Easy.Controls.EControlParas2"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:METS.View.Controls"
+    xmlns:toolkit="using:Microsoft.Toolkit.Uwp.UI.Controls"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d"
+    d:DesignHeight="300"
+    d:DesignWidth="400">
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="auto" />
+            <RowDefinition />
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="600" />
+            <ColumnDefinition />
+        </Grid.ColumnDefinitions>
+
+
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition />
+                <ColumnDefinition />
+            </Grid.ColumnDefinitions>
+
+            <ComboBox x:Name="NavChannel" ItemsSource="{Binding ListNavChannel}" HorizontalAlignment="Stretch" DisplayMemberPath="Name" />
+            <ComboBox x:Name="NavBlock" ItemsSource="{Binding ElementName=NavChannel, Path=SelectedItem.Blocks}" SelectionChanged="NavBlock_SelectionChanged" Grid.Column="1" HorizontalAlignment="Stretch" DisplayMemberPath="Name" />
+        </Grid>
+
+        <ScrollViewer Grid.Row="1">
+            <ContentPresenter Content="{Binding ElementName=NavBlock, Path=SelectedItem.Panel}" />
+        </ScrollViewer>
+
+        <Border x:Name="LoadRing" Grid.RowSpan="2" Background="LightGray" Opacity="0.6">
+            <ProgressRing HorizontalAlignment="Center" IsActive="true" Width="100" Height="100"  Visibility="Visible"/>
+        </Border>
+
+        <toolkit:DataGrid x:Name="ComList" Grid.RowSpan="2" Grid.Column="1" BorderBrush="White" BorderThickness="5 0 0 0" AutoGenerateColumns="False" ItemsSource="{Binding device.ComObjects, Mode=OneWay}" IsReadOnly="True" >
+            <toolkit:DataGrid.Columns>
+                <toolkit:DataGridTextColumn Tag="Number" Width="SizeToCells" Header="Nummer" Binding="{Binding Number}" />
+                <toolkit:DataGridTextColumn Tag="Name" Width="SizeToCells" Header="Name" Binding="{Binding Name}" />
+                <toolkit:DataGridTextColumn Tag="Function" Width="SizeToCells" Header="Funktion" Binding="{Binding Function}" />
+                <toolkit:DataGridTextColumn Tag="Connections" Width="SizeToCells" Header="Verbindungen" Binding="{Binding Connections}" />
+            </toolkit:DataGrid.Columns>
+        </toolkit:DataGrid>
+    </Grid>
+</UserControl>
