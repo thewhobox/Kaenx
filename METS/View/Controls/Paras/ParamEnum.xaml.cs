@@ -31,7 +31,7 @@ namespace METS.Classes.Controls.Paras
 
         private string paramId;
 
-        public ParamEnum(AppParameter param, AppParameterTypeViewModel type, IEnumerable<AppParameterTypeEnumViewModel> enums, ChangeParamModel change)
+        public ParamEnum(AppParameter param, AppParameterTypeViewModel type, IEnumerable<AppParameterTypeEnumViewModel> enums)
         {
             this.InitializeComponent();
             this.DataContext = EnumList;
@@ -45,11 +45,7 @@ namespace METS.Classes.Controls.Paras
             }
 
             ToolTip toolTip = new ToolTip();
-
-            if (change == null)
-                ParaValue.SelectedValue = param.Value;
-            else
-                ParaValue.SelectedValue = change.Value;
+            ParaValue.SelectedValue = param.Value;
 
             foreach(AppParameterTypeEnumViewModel e in enums)
             {

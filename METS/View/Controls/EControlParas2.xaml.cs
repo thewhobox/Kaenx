@@ -9,6 +9,7 @@ using Serilog;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices.WindowsRuntime;
@@ -61,11 +62,26 @@ namespace METS.Views.Easy.Controls
             foreach (AppParameter para in _context.AppParameters.Where(p => p.ApplicationId == device.ApplicationId))
                 AppParas.Add(para.Id, para);
 
+
+            if(_contextP.ChangesParam.Any(c => c.DeviceId == device.UId))
+            {
+                var changes = _contextP.ChangesParam.Where(c => c.DeviceId == device.UId).OrderByDescending(c => c.StateId);
+                foreach(ChangeParamModel model in changes)
+                {
+                    AppParas[model.ParamId].Value = model.Value;
+                }
+            }
+
+
+
             Load();
         }
 
         private async Task Load()
         {
+            Stopwatch watch = new Stopwatch();
+            watch.Start();
+
             StorageFolder folder = await ApplicationData.Current.LocalFolder.GetFolderAsync("Dynamic");
             StorageFile file = await folder.GetFileAsync(device.ApplicationId + ".xml");
             StorageFile filePA = await folder.GetFileAsync(device.ApplicationId + "-PA-All.json");
@@ -73,17 +89,11 @@ namespace METS.Views.Easy.Controls
             XDocument dynamic = XDocument.Load(await file.OpenStreamForReadAsync());
 
 
-            PrepareComObject(dynamic.Root);
+            await PrepareComObject(dynamic.Root);
 
             conditions = Newtonsoft.Json.JsonConvert.DeserializeObject<List<ParamVisHelper>>(await FileIO.ReadTextAsync(filePA));
 
-            try
-            {
-                await ParseRoot(dynamic.Root, Visibility.Visible);
-            } catch(Exception e)
-            {
-
-            }
+            await ParseRoot(dynamic.Root, Visibility.Visible);
 
             NavChannel.SelectedIndex = 0;
             NavBlock.SelectedIndex = 0;
@@ -92,6 +102,9 @@ namespace METS.Views.Easy.Controls
                 NavChannel.IsEnabled = false;
 
             LoadRing.Visibility = Visibility.Collapsed;
+
+            watch.Stop();
+            ViewHelper.Instance.ShowNotification("Geladen nach: " + watch.Elapsed.TotalSeconds + "s", 3000);
         }
 
 
@@ -199,43 +212,38 @@ namespace METS.Views.Easy.Controls
                         AppParameter para = AppParas[xele.Attribute("RefId").Value];
                         if (para.Access == AccessType.None) break;
                         AppParameterTypeViewModel paraType = GetParamType(para.ParameterTypeId);
-                        ChangeParamModel change = null;
-                        try
-                        {
-                            change = _contextP.ChangesParam.Where(c => c.DeviceId == device.UId && c.ParamId == para.Id).OrderByDescending(c => c.StateId).First();
-                        }
-                        catch { }
-                        if (change != null)
-                            para.Value = change.Value;
-
 
                         //TODO create hash in PA-All.json to get same param on other positions
                         switch (paraType.Type)
                         {
                             case ParamTypes.Picture:
                                 ParamPicture paraviewP = new ParamPicture(para, paraType);
+                                paraviewP.SetVisibility(visibility);
                                 parent.Children.Add(paraviewP);
-                                Params.Add(para.Id, paraviewP);
+                                //Params.Add(para.Id, paraviewP);
                                 break;
                             case ParamTypes.NumberInt:
                             case ParamTypes.NumberUInt:
-                                ParamNumber paraviewN = new ParamNumber(para, paraType, change);
+                                ParamNumber paraviewN = new ParamNumber(para, paraType);
+                                paraviewN.SetVisibility(visibility);
                                 parent.Children.Add(paraviewN);
-                                Params.Add(para.Id, paraviewN);
+                                //Params.Add(para.Id, paraviewN);
                                 break;
                             case ParamTypes.Text:
                                 if (para.Access == AccessType.Read)
                                 {
                                     ParamText paraviewT = new ParamText(para, paraType);
+                                    paraviewT.SetVisibility(visibility);
                                     parent.Children.Add(paraviewT);
-                                    Params.Add(para.Id, paraviewT);
+                                    //Params.Add(para.Id, paraviewT);
                                 }
                                 else
                                 {
-                                    ParamInput paraviewI = new ParamInput(para, paraType, change) { Name = para.Id };
+                                    ParamInput paraviewI = new ParamInput(para, paraType) { Name = para.Id };
                                     paraviewI.ParamChanged += ParamChanged;
+                                    paraviewI.SetVisibility(visibility);
                                     parent.Children.Add(paraviewI);
-                                    Params.Add(para.Id, paraviewI);
+                                    //Params.Add(para.Id, paraviewI);
                                 }
                                 break;
                             case ParamTypes.Enum:
@@ -249,28 +257,32 @@ namespace METS.Views.Easy.Controls
                                     b2.BorderThickness = new Thickness(0, 1, 0, 0);
                                     b2.Margin = new Thickness(10, 20, 10, 20);
                                     b2.Child = new TextBlock() { Text = para.Text + " - Keine Enums" };
+                                    b2.Visibility = visibility;
                                     parent.Children.Add(b2);
                                 }
                                 else if (enums.Count() > 2)
                                 {
-                                    ParamEnum paraviewE = new ParamEnum(para, paraType, enums, change) { Name = para.Id };
+                                    ParamEnum paraviewE = new ParamEnum(para, paraType, enums) { Name = para.Id };
                                     paraviewE.ParamChanged += ParamChanged;
+                                    paraviewE.SetVisibility(visibility);
                                     parent.Children.Add(paraviewE);
-                                    Params.Add(para.Id, paraviewE);
+                                    //Params.Add(para.Id, paraviewE);
                                 }
                                 else
                                 {
-                                    ParamEnum2 paraviewE2 = new ParamEnum2(para, paraType, enums, change) { Name = para.Id };
+                                    ParamEnum2 paraviewE2 = new ParamEnum2(para, paraType, enums) { Name = para.Id };
                                     paraviewE2.ParamChanged += ParamChanged;
+                                    paraviewE2.SetVisibility(visibility);
                                     parent.Children.Add(paraviewE2);
-                                    Params.Add(para.Id, paraviewE2);
+                                    //Params.Add(para.Id, paraviewE2);
                                 }
                                 break;
 
                             case ParamTypes.None:
                                 ParamNone paraviewNo = new ParamNone(para, paraType);
+                                paraviewNo.SetVisibility(visibility);
                                 parent.Children.Add(paraviewNo);
-                                Params.Add(para.Id, paraviewNo);
+                                //Params.Add(para.Id, paraviewNo);
                                 break;
                         }
                         break;
@@ -285,8 +297,10 @@ namespace METS.Views.Easy.Controls
                             b.Child = new TextBlock() { Text = xele.Attribute("Text").Value };
                         else
                             b.Height = 1;
+                        b.Visibility = visibility;
                         parent.Children.Add(b);
                         //Params.Add(xele.Attribute("Id").Value, b); /TODO add seperator
+                        //Todo conditions for seperators
                         break;
 
                     case "choose":
@@ -310,7 +324,7 @@ namespace METS.Views.Easy.Controls
 
                         foreach (XElement xwhen in xele.Elements())
                         {
-                            Visibility visible = Visibility.Collapsed;
+                            Visibility visible = Visibility.Visible;
 
                             if (visibility == Visibility.Visible)
                             {
@@ -320,8 +334,8 @@ namespace METS.Views.Easy.Controls
                                 }
                                 else if (xwhen.Attribute("test")?.Value.Contains(" ") == true || int.TryParse(xwhen.Attribute("test")?.Value, out tempOut))
                                 {
-                                    if (xwhen.Attribute("test").Value.Split(" ").Contains(choosePara.Value))
-                                        visible = Visibility.Visible;
+                                    if (!xwhen.Attribute("test").Value.Split(" ").Contains(choosePara.Value))
+                                        visible = Visibility.Collapsed;
                                 }
                                 else
                                 {
@@ -330,7 +344,7 @@ namespace METS.Views.Easy.Controls
                             }
                             else
                             {
-                                visible = Visibility;
+                                visible = visibility;
                             }
 
                             await ParseBlock(xwhen, parent, visible);
@@ -340,7 +354,7 @@ namespace METS.Views.Easy.Controls
                     default:
                         break;
                 }
-            }   
+            }
         }
 
         private void ParamChanged(string source, string value)
@@ -381,24 +395,48 @@ namespace METS.Views.Easy.Controls
                 }
             }
 
+
+            ChangeParamModel change = new ChangeParamModel
+            {
+                DeviceId = device.UId,
+                ParamId = source,
+                Value = value
+            };
+
+            device.LoadedApplication = false;
+            ChangeHandler.Instance.ChangedParam(change);
+            //CheckComObjects();
+            //SaveHelper.SaveProject();
+
+
             //TODO set para value if no connected comobj is affected
-         }
+        }
 
         private AppParameterTypeViewModel GetParamType(string id)
         {
-            if (AppParaTypess.ContainsKey(id))
-                return AppParaTypess[id];
+            try
+            {
+                if (AppParaTypess.ContainsKey(id))
+                    return AppParaTypess[id];
 
-            AppParameterTypeViewModel type = _context.AppParameterTypes.Single(pt => pt.Id == id);
-            AppParaTypess.Add(id, type);
-            return type;
+                AppParameterTypeViewModel type = _context.AppParameterTypes.Single(pt => pt.Id == id);
+                AppParaTypess.Add(id, type);
+                return type;
+            } catch(Exception e)
+            {
+
+            }
+            return null;
         }
 
 
 
 
-        private async void PrepareComObject(XElement xele)
+        private async Task PrepareComObject(XElement xele)
         {
+            try
+            {
+
             StorageFolder folder = await ApplicationData.Current.LocalFolder.GetFolderAsync("Dynamic");
             StorageFile fileJSON = await folder.GetFileAsync(device.ApplicationId + "-CO-All.json");
 
@@ -425,6 +463,10 @@ namespace METS.Views.Easy.Controls
                         bindings.Add(bind);
                     }
                 }
+                }
+            }catch(Exception e)
+            {
+
             }
         }
 

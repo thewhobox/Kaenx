@@ -28,19 +28,14 @@ namespace METS.Classes.Controls.Paras
         private string paramId;
         private string value;
 
-        public ParamEnum2(AppParameter param, AppParameterTypeViewModel type, IEnumerable<AppParameterTypeEnumViewModel> enums, ChangeParamModel change)
+        public ParamEnum2(AppParameter param, AppParameterTypeViewModel type, IEnumerable<AppParameterTypeEnumViewModel> enums)
         {
             this.InitializeComponent();
             ToolTip toolTip = new ToolTip();
 
             paramId = param.Id;
             ParaName.Text = param.Text;
-
-            if(change == null)
-                value = param.Value;
-            else
-                value = change.Value;
-
+            value = param.Value;
 
             ParaValue1.Content = enums.ElementAt(0).Text;
             ParaValue1.GroupName = paramId;

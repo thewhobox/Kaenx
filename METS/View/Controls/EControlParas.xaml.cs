@@ -345,7 +345,7 @@ namespace METS.Views.Easy.Controls
                                 break;
                             case ParamTypes.NumberInt:
                             case ParamTypes.NumberUInt:
-                                ParamNumber paraviewN = new ParamNumber(pbPara, pbType, change);
+                                ParamNumber paraviewN = new ParamNumber(pbPara, pbType);
                                 parent.Children.Add(paraviewN);
                                 break;
                             case ParamTypes.Text:
@@ -356,7 +356,7 @@ namespace METS.Views.Easy.Controls
                                 }
                                 else
                                 {
-                                    ParamInput paraviewI = new ParamInput(pbPara, pbType, change) { Name = pbPara.Id };
+                                    ParamInput paraviewI = new ParamInput(pbPara, pbType) { Name = pbPara.Id };
                                     paraviewI.ParamChanged += ParamChanged;
                                     parent.Children.Add(paraviewI);
                                 }
@@ -375,13 +375,13 @@ namespace METS.Views.Easy.Controls
                                     parent.Children.Add(b2);
                                 } else if(enums.Count() > 2)
                                 {
-                                    ParamEnum paraviewE = new ParamEnum(pbPara, pbType, enums, change) { Name = pbPara.Id };
+                                    ParamEnum paraviewE = new ParamEnum(pbPara, pbType, enums) { Name = pbPara.Id };
                                     paraviewE.ParamChanged += ParamChanged;
                                     parent.Children.Add(paraviewE);
                                 }
                                 else
                                 {
-                                    ParamEnum2 paraviewE2 = new ParamEnum2(pbPara, pbType, enums, change) { Name = pbPara.Id };
+                                    ParamEnum2 paraviewE2 = new ParamEnum2(pbPara, pbType, enums) { Name = pbPara.Id };
                                     paraviewE2.ParamChanged += ParamChanged;
                                     parent.Children.Add(paraviewE2);
                                 }

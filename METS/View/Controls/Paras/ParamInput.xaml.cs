@@ -33,16 +33,11 @@ namespace METS.Classes.Controls.Paras
             set { ParaName.Text = value; }
         }
 
-        public ParamInput(AppParameter param, AppParameterTypeViewModel type, ChangeParamModel change)
+        public ParamInput(AppParameter param, AppParameterTypeViewModel type)
         {
             this.InitializeComponent();
             ParaName.Text = param.Text;
-
-            if(change == null)
-                ParaValue.Text = param.Value;
-            else
-                ParaValue.Text = change.Value;
-
+            ParaValue.Text = param.Value;
             paraId = param.Id;
 
             ParaValue.KeyUp += ParaValue_KeyUp;

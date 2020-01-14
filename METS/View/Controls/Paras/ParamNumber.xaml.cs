@@ -26,17 +26,12 @@ namespace METS.Classes.Controls.Paras
 
         private string paraId;
 
-        public ParamNumber(AppParameter param, AppParameterTypeViewModel type, ChangeParamModel change)
+        public ParamNumber(AppParameter param, AppParameterTypeViewModel type)
         {
             this.InitializeComponent();
 
-            if (change == null)
-                ParaValue.Text = param.Value;
-            else
-                ParaValue.Text = change.Value;
-
+            ParaValue.Text = param.Value;
             paraId = param.Id;
-
             ParaName.Text = param.Text;
 
             ParaValue.ValueChanged += ParaValue_ValueChanged;
