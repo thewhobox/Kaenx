@@ -22,7 +22,8 @@ namespace METS.Classes.Controls.Paras
 {
     public sealed partial class ParamInput : UserControl, IParam
     {
-        public delegate void ParamChangedHandler(string source, string value);
+        public string hash { get; set; }
+        public delegate void ParamChangedHandler(string source, string value, string hash);
         public event ParamChangedHandler ParamChanged;
 
         private string paraId;
@@ -46,13 +47,13 @@ namespace METS.Classes.Controls.Paras
 
         private void ParaValue_LostFocus(object sender, RoutedEventArgs e)
         {
-            ParamChanged?.Invoke(paraId, ParaValue.Text);
+            ParamChanged?.Invoke(paraId, ParaValue.Text, hash);
         }
 
         private void ParaValue_KeyUp(object sender, KeyRoutedEventArgs e)
         {
             if (e.Key == Windows.System.VirtualKey.Enter)
-                ParamChanged?.Invoke(paraId, ParaValue.Text);
+                ParamChanged?.Invoke(paraId, ParaValue.Text, hash);
         }
 
         public string GetValue()

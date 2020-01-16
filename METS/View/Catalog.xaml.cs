@@ -24,6 +24,8 @@ using System.Diagnostics;
 using System.ComponentModel;
 using System.Text.RegularExpressions;
 using METS.View.Controls;
+using Windows.UI.Core;
+using Windows.ApplicationModel.Resources;
 
 // The Blank Page item template is documented at http://go.microsoft.com/fwlink/?LinkId=234238
 
@@ -34,6 +36,7 @@ namespace METS.View
     /// </summary>
     public sealed partial class Catalog : Page, INotifyPropertyChanged
     {
+        private ResourceLoader loader = ResourceLoader.GetForCurrentView("Catalog");
         private ObservableCollection<DeviceViewModel> _items = new ObservableCollection<DeviceViewModel>();
         private ObservableCollection<DeviceViewModel> _catalogDevices = new ObservableCollection<DeviceViewModel>();
         public ObservableCollection<DeviceViewModel> CatalogDevices
@@ -57,7 +60,7 @@ namespace METS.View
 
 
             var mainNode = new Classes.TVNode();
-            mainNode.Content = "Alle Hersteller";
+            mainNode.Content = loader.GetString("MansListAll");
             mainNode.SectionId = "main";
             mainNode.IsExpanded = true;
 
@@ -68,12 +71,38 @@ namespace METS.View
             
             this.DataContext = this;
         }
-     
+
+        protected override void OnNavigatedTo(NavigationEventArgs e)
+        {
+            base.OnNavigatedTo(e);
+            if(e.Parameter is StorageFile)
+            {
+                PrepareImport(e.Parameter as StorageFile);
+                Import.wasFromMain = true;
+            } else if(e.Parameter is string && e.Parameter.ToString() == "main") 
+            {
+                var currentView = SystemNavigationManager.GetForCurrentView();
+                currentView.AppViewBackButtonVisibility = AppViewBackButtonVisibility.Visible;
+                currentView.BackRequested += CurrentView_BackRequested;
+                Import.wasFromMain = true;
+            }
+        }
+
+        private void CurrentView_BackRequested(object sender, BackRequestedEventArgs e)
+        {
+            App.Navigate(typeof(MainPage));
+        }
+
         private async void ClickImport(object sender, RoutedEventArgs e)
         {
             FileOpenPicker picker = new FileOpenPicker();
             picker.FileTypeFilter.Add(".knxprod");
             StorageFile file = await picker.PickSingleFileAsync();
+            PrepareImport(file);
+        }
+
+        public async void PrepareImport(StorageFile file)
+        {
             if (file == null) return;
 
             try
@@ -82,8 +111,7 @@ namespace METS.View
             }
             catch (Exception ex)
             {
-                var resourceLoader = Windows.ApplicationModel.Resources.ResourceLoader.GetForCurrentView("Catalog");
-                string msg = resourceLoader.GetString("MsgNotCopied");
+                string msg = loader.GetString("MsgNotCopied");
                 Notifi.Show(msg + "\r\n" + ex.Message);
                 return;
             }

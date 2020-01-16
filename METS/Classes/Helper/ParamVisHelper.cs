@@ -11,7 +11,7 @@ namespace METS.Classes.Helper
     public class ParamVisHelper
     {
         public AppParameter Parameter { get; set; }
-
+        public string Hash { get; set; }
         public List<ParamCondition> Conditions { get; set; }
 
 

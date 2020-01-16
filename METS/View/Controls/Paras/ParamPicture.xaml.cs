@@ -20,12 +20,12 @@ namespace METS.Classes.Controls.Paras
 {
     public sealed partial class ParamPicture : UserControl, IParam
     {
+        public string hash { get; set; }
 
         public ParamPicture(AppParameter param, AppParameterTypeViewModel type)
         {
             this.InitializeComponent();
             ParaName.Text = param.Text;
-
 
         }
 

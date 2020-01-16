@@ -20,6 +20,8 @@ namespace METS.Classes.Controls.Paras
 {
     public sealed partial class ParamNone : UserControl, IParam
     {
+        public string hash { get; set; }
+
         public ParamNone(AppParameter param, AppParameterTypeViewModel type)
         {
             this.InitializeComponent();

@@ -117,31 +117,34 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="AppCrashed" xml:space="preserve">
-    <value>The App crashed shortly!</value>
+  <data name="CListConn.Header" xml:space="preserve">
+    <value>Verbindungen</value>
   </data>
-  <data name="BtnCatalog.Content" xml:space="preserve">
-    <value>Open Catalog</value>
+  <data name="CListContextUnlink.Text" xml:space="preserve">
+    <value>Trennen</value>
   </data>
-  <data name="BtnDelete.Text" xml:space="preserve">
-    <value>Delete</value>
+  <data name="CListFunc.Header" xml:space="preserve">
+    <value>Funktion</value>
   </data>
-  <data name="BtnLoadProject.Text" xml:space="preserve">
-    <value>Load Project</value>
+  <data name="CListName.Header" xml:space="preserve">
+    <value>Name</value>
   </data>
-  <data name="BtnNewProject.Content" xml:space="preserve">
-    <value>Create a new Project</value>
+  <data name="CListNumb.Header" xml:space="preserve">
+    <value>Nr.</value>
   </data>
-  <data name="BtnOpen.Text" xml:space="preserve">
-    <value>Open</value>
+  <data name="GListContextAdd.Text" xml:space="preserve">
+    <value>Hinzufügen</value>
   </data>
-  <data name="BtnWizProject.Content" xml:space="preserve">
-    <value>Use Project Wizard</value>
+  <data name="GListContextDelete.Text" xml:space="preserve">
+    <value>Löschen</value>
   </data>
-  <data name="MsgProjectDeleted" xml:space="preserve">
-    <value>Project was deleted</value>
+  <data name="GListContextRename.Text" xml:space="preserve">
+    <value>Umbenennen</value>
   </data>
-  <data name="MsgSelectProject" xml:space="preserve">
-    <value>Please select a Project first.</value>
+  <data name="ToolAddMain.Label" xml:space="preserve">
+    <value>Haupt</value>
+  </data>
+  <data name="ToolFilter.Label" xml:space="preserve">
+    <value>Filter</value>
   </data>
 </root>

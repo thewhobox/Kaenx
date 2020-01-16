@@ -15,6 +15,7 @@ using System.Threading.Tasks;
 using System.Xml.Linq;
 using Windows.ApplicationModel.Resources;
 using Windows.Storage;
+using Windows.UI.Core;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Navigation;
@@ -65,6 +66,10 @@ namespace METS.View
             Helper.ProgressAppMaxChanged += Helper_ProgressAppMaxChanged;
             Helper.OnDeviceChanged += Helper_OnDeviceChanged;
             Helper.OnError += Helper_OnError;
+
+
+            var currentView = SystemNavigationManager.GetForCurrentView();
+            currentView.AppViewBackButtonVisibility = AppViewBackButtonVisibility.Collapsed;
         }
 
         #region Helper Events
@@ -319,7 +324,7 @@ namespace METS.View
 
         private void ClickBack(object sender, RoutedEventArgs e)
         {
-            ((Frame)this.Parent).GoBack();
+            ((Frame)this.Parent).Navigate(typeof(Catalog), Imports.wasFromMain ? "main" : null);
         }
     }
 }

@@ -396,7 +396,7 @@ namespace METS.Classes.Helper
 
 
                 ParamVisHelper para = new ParamVisHelper(appParam);
-                para.Conditions = GetConditions(xpara);
+                para.Conditions = GetConditions(xpara, para);
                 paras.Add(para);
             }
 
@@ -407,9 +407,15 @@ namespace METS.Classes.Helper
             await FileIO.WriteTextAsync(fileDef, json);
         }
 
-        private static List<ParamCondition> GetConditions(XElement xele)
-        {
+        private static List<ParamCondition> GetConditions(XElement xele, ParamVisHelper helper = null)
+        { 
+
             List<ParamCondition> conds = new List<ParamCondition>();
+            try
+            {
+
+            string ids = xele.Attribute("RefId").Value;
+            string paraId = ids;
             while (true)
             {
                 xele = xele.Parent;
@@ -421,6 +427,7 @@ namespace METS.Classes.Helper
                         int tempOut;
                         if (xele.Attribute("default")?.Value == "true")
                         {
+                            ids = "d" + ids;
                             List<string> values = new List<string>();
                             IEnumerable<XElement> whens = xele.Parent.Elements();
                             foreach(XElement w in whens)
@@ -441,19 +448,36 @@ namespace METS.Classes.Helper
                             Log.Warning("Unbekanntes when! " + xele.ToString());
                         }
                         
-                        xele = xele.Parent;
-                        cond.SourceId = xele.Attribute("ParamRefId").Value;
+                        cond.SourceId = xele.Parent.Attribute("ParamRefId").Value;
                         conds.Add(cond);
+
+                        ids = "|" + cond.SourceId + "." + cond.Values + "|" + ids;
+                        break;
+
+                    case "Channel":
+                    case "ParameterBlock":
+                        ids = xele.Attribute("Id").Value + "|" + ids;
                         break;
 
                     case "Dynamic":
+                        if(helper != null)
+                        {
+                            helper.Hash = Convert.ToBase64String(Encoding.UTF8.GetBytes(ids));
+                        }
                         return conds;
                 }
+                }
             }
+            catch
+            {
+
+            }
+            return conds;
         }
 
         private static List<AppParameter> GetDefaultParams(List<ParamVisHelper> paras)
         {
+            //TODO nachschauen ob ParamVisHelper.Parameter wirklich als object benötigt wird!
             Dictionary<string, string> tempValues = new Dictionary<string, string>();
             ObservableCollection<AppParameter> defObjs = new ObservableCollection<AppParameter>();
 

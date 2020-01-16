@@ -117,6 +117,9 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <data name="AppCrashed" xml:space="preserve">
+    <value>App ist kürzlich abgestürzt!</value>
+  </data>
   <data name="BtnCatalog.Content" xml:space="preserve">
     <value>Katalog öffnen</value>
   </data>
@@ -134,15 +137,6 @@
   </data>
   <data name="BtnWizProject.Content" xml:space="preserve">
     <value>Projekt Wizard benutzen</value>
-  </data>
-  <data name="DiagNewName" xml:space="preserve">
-    <value>Neues Projekt</value>
-  </data>
-  <data name="DiagNewPrimary" xml:space="preserve">
-    <value>Erstellen</value>
-  </data>
-  <data name="DiagNewTitle" xml:space="preserve">
-    <value>Neues Projekt</value>
   </data>
   <data name="MsgProjectDeleted" xml:space="preserve">
     <value>Projekt wurde gelöscht.</value>

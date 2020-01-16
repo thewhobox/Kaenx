@@ -45,17 +45,25 @@ namespace METS.Classes.Helper
         public static void TranslateXml(XElement xml, string selectedLang)
         {
             if (selectedLang == null) return;
+
             XElement lang = xml.Descendants(XName.Get("Language", xml.Name.NamespaceName)).Single(l => l.Attribute("Identifier").Value == selectedLang);
             List<XElement> trans = lang.Descendants(XName.Get("TranslationElement", xml.Name.NamespaceName)).ToList();
             
             foreach(XElement translate in trans)
             {
                 string id = translate.Attribute("RefId").Value;
-                XElement ele = xml.Descendants().Single(e => e.Attribute("Id")?.Value == id);
+                XElement ele = xml.Descendants().Single(e => e.Attribute("Id")?.Value == id && e.Name.LocalName != "TranslationElement");
 
                 foreach(XElement transele in translate.Elements())
                 {
-                    ele.Attribute(transele.Attribute("AttributeName").Value).Value = transele.Attribute("Text").Value;
+                    if (ele.Attribute(transele.Attribute("AttributeName").Value) == null)
+                    {
+                        ele.Add(new XAttribute(transele.Attribute("AttributeName").Value, transele.Attribute("Text").Value));
+                    }
+                    else
+                    {
+                        ele.Attribute(transele.Attribute("AttributeName").Value).Value = transele.Attribute("Text").Value;
+                    }
                 }
             }
         }

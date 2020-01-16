@@ -21,7 +21,8 @@ namespace METS.Classes.Controls.Paras
 {
     public sealed partial class ParamNumber : UserControl, IParam
     {
-        public delegate void ParamChangedHandler(string source, string value);
+        public string hash { get; set; }
+        public delegate void ParamChangedHandler(string source, string value, string hash);
         public event ParamChangedHandler ParamChanged;
 
         private string paraId;
@@ -45,12 +46,12 @@ namespace METS.Classes.Controls.Paras
 
         private void ParaValue_LostFocus(object sender, RoutedEventArgs e)
         {
-            ParamChanged?.Invoke(paraId, ParaValue.Value.ToString());
+            ParamChanged?.Invoke(paraId, ParaValue.Value.ToString(), hash);
         }
 
         private void ParaValue_ValueChanged(Microsoft.UI.Xaml.Controls.NumberBox sender, Microsoft.UI.Xaml.Controls.NumberBoxValueChangedEventArgs args)
         {
-            ParamChanged?.Invoke(paraId, ParaValue.Value.ToString());
+            ParamChanged?.Invoke(paraId, ParaValue.Value.ToString(), hash);
         }
 
         public string GetValue()

@@ -34,7 +34,6 @@ namespace METS.Classes.Controls
         private void ContentDialog_PrimaryButtonClick(ContentDialog sender, ContentDialogButtonClickEventArgs args)
         {
             NewName = Input.Text;
-            //this.Hide();
         }
 
         private void Input_KeyUp(object sender, KeyRoutedEventArgs e)
@@ -49,6 +48,11 @@ namespace METS.Classes.Controls
                 this.IsPrimaryButtonEnabled = false;
             else
                 this.IsPrimaryButtonEnabled = true;
+        }
+
+        private void ContentDialog_CloseButtonClick(ContentDialog sender, ContentDialogButtonClickEventArgs args)
+        {
+            NewName = null;
         }
     }
 }

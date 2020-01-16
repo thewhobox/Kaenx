@@ -118,21 +118,24 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="BarDelete.Label" xml:space="preserve">
-    <value>Löschen</value>
+    <value>Delete</value>
   </data>
   <data name="BarExport.Label" xml:space="preserve">
-    <value>Exportieren</value>
+    <value>Export</value>
   </data>
   <data name="BarImport.Label" xml:space="preserve">
-    <value>Importieren</value>
+    <value>Import</value>
   </data>
   <data name="BarSearch.PlaceholderText" xml:space="preserve">
-    <value>Suchen...</value>
+    <value>Search...</value>
   </data>
   <data name="BarSort.Text" xml:space="preserve">
-    <value>Sortieren:</value>
+    <value>Sort:</value>
+  </data>
+  <data name="DeviceInfoHeader" xml:space="preserve">
+    <value>Devcice information:</value>
   </data>
   <data name="MsgNotCopied" xml:space="preserve">
-    <value>Die Datei konnte nicht kopiert werden.</value>
+    <value>File could not be copied.</value>
   </data>
 </root>

@@ -41,6 +41,7 @@ namespace METS.View
 
         private ResourceLoader loader = ResourceLoader.GetForCurrentView("MainPage");
         private ResourceLoader loaderG = ResourceLoader.GetForCurrentView("Global");
+        private ResourceLoader loaderD = ResourceLoader.GetForCurrentView("Dialogs");
 
         private bool _projectSelected = false;
 
@@ -80,22 +81,22 @@ namespace METS.View
             {
                 ErrorReport report = await Crashes.GetLastSessionCrashReportAsync();
                 Log.Error("App ist in letzter Sitzung abgestürzt!", report.StackTrace);
-                Notify.Show("App ist kürzlich abgestürzt!"); //TODO veraltet
+                Notify.Show(loader.GetString("AppCrashed"));
             }
         }
 
         private void OpenCatalog(object sender, RoutedEventArgs e)
         {
             Serilog.Log.Debug("Katalog öffnen");
-            App.Navigate(typeof(Catalog), typeof(MainPage));
+            App.Navigate(typeof(Catalog), "main");
         }
 
         private async void OpenNewProjekt(object sender, RoutedEventArgs e)
         {
             DiagNewName diag = new DiagNewName();
-            diag.Title = loader.GetString("DiagNewTitle");
-            diag.PrimaryButtonText = loader.GetString("DiagNewPrimary");
-            diag.NewName = loader.GetString("DiagNewName");
+            diag.Title = loaderD.GetString("NewNameProjectTitle");
+            diag.PrimaryButtonText = loaderD.GetString("NewNameProjectPrimary");
+            diag.NewName = loaderD.GetString("NewNameProjectName");
             await diag.ShowAsync();
             if (diag.NewName == null) return;
 
@@ -119,9 +120,6 @@ namespace METS.View
 
             ChangeHandler.Instance = new ChangeHandler(proj.Id);
 
-
-
-            Serilog.Log.Debug("Neues Projekt erstellt: " + proj.Id + " - " + proj.Name);
             Serilog.Log.Debug("Projekt wird geöffnet: " + proj.Id + " - " + proj.Name);
 
             App.AppFrame.Navigate(typeof(WorkdeskEasy), proj);

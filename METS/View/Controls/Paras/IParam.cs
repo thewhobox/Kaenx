@@ -10,6 +10,7 @@ namespace METS.Classes.Controls.Paras
     public interface IParam
     {
         string GetValue();
+        public string hash { get; set; }
         void SetVisibility(Visibility visible);
     }
 }

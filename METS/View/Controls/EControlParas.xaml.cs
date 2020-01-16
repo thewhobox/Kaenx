@@ -54,13 +54,11 @@ namespace METS.Views.Easy.Controls
                 ViewHelper.Instance.ShowNotification("Achtung!!! Applikation konnte nicht gefunden werden. Bitte importieren Sie das Produkt erneut.", 4000, ViewHelper.MessageType.Error);
                 return;
             }
-
-            sw.Start();
-            Load();
         }
 
-        private async void Load()
+        public async void Load()
         {
+            sw.Start();
             StorageFolder folder = await ApplicationData.Current.LocalFolder.GetFolderAsync("Dynamic");
             StorageFile file = await folder.GetFileAsync(device.ApplicationId + ".xml");
 
@@ -610,7 +608,7 @@ namespace METS.Views.Easy.Controls
             device.ComObjects.Sort(s => s.Number);
         }
 
-        private void ParamChanged(string source, string value)
+        private void ParamChanged(string source, string value, string hash)
         {
             IEnumerable<ParamCondition> conds = conditions.Where(c => c.SourceId == source);
 

@@ -137,7 +137,7 @@ namespace METS.View
             CalcCounts();
         }
 
-        private void ClickOpenParas(object sender, RoutedEventArgs e)
+        private async void ClickOpenParas(object sender, RoutedEventArgs e)
         {
             LineDevice device = (LineDevice)((MenuFlyoutItem)e.OriginalSource).DataContext;
             EControlParas paras = new EControlParas(device);
@@ -149,9 +149,12 @@ namespace METS.View
             item.Content = paras;
             tabView.Items.Add(item);
             tabView.SelectedItem = item;
+
+            await Task.Delay(100);
+            paras.Load();
         }
 
-        private void ClickOpenParas2(object sender, RoutedEventArgs e)
+        private async void ClickOpenParas2(object sender, RoutedEventArgs e)
         {
             LineDevice device = (LineDevice)((MenuFlyoutItem)e.OriginalSource).DataContext;
             EControlParas2 paras = new EControlParas2(device);
@@ -159,10 +162,34 @@ namespace METS.View
 
             TabViewItem item = new TabViewItem();
             item.Icon = new SymbolIcon(Symbol.AllApps);
-            item.Header = $"{device.LineName} {device.Name}";
+
+
+            StackPanel header = new StackPanel();
+            header.Orientation = Orientation.Horizontal;
+
+            TextBlock hLine = new TextBlock() { Margin = new Thickness(0, 0, 5, 0) };
+            TextBlock hName = new TextBlock();
+
+            header.Children.Add(hLine);
+            header.Children.Add(hName);
+
+            Windows.UI.Xaml.Data.Binding bindLine = new Windows.UI.Xaml.Data.Binding();
+            bindLine.Path = new PropertyPath("LineName");
+            bindLine.Source = device;
+            hLine.SetBinding(TextBlock.TextProperty, bindLine);
+
+            Windows.UI.Xaml.Data.Binding bindName = new Windows.UI.Xaml.Data.Binding();
+            bindName.Path = new PropertyPath("Name");
+            bindName.Source = device;
+            hName.SetBinding(TextBlock.TextProperty, bindName);
+
+            item.Header = header;
             item.Content = paras;
             tabView.Items.Add(item);
             tabView.SelectedItem = item;
+
+            await Task.Delay(100);
+            paras.Start();
         }
 
         private void ClickOpenCatalog(object sender, RoutedEventArgs e)

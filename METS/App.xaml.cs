@@ -65,6 +65,53 @@ namespace METS
 #endif
         }
 
+
+        protected override void OnFileActivated(FileActivatedEventArgs args)
+        {
+            //----------------< OnFileActivated() >---------------- 
+            //* when opened by file-extension 
+            base.OnFileActivated(args);
+
+            test(args);
+        }
+
+        private async void test(FileActivatedEventArgs args)
+        {
+            Frame rootFrame = Window.Current.Content as Frame;
+            if (rootFrame == null)
+            {
+                rootFrame = new Frame();
+                rootFrame.NavigationFailed += OnNavigationFailed;
+                Window.Current.Content = rootFrame;
+            }
+
+            StorageFile file = args.Files[0] as StorageFile;
+            switch (file.FileType)
+            {
+                case ".knxprod":
+                    //Window.Current.Content as Frame: Content je nach 
+                    Log.Information("Window Content: " + Window.Current.Content.GetType().FullName);
+                    Frame root = Window.Current.Content as Frame;
+                    if (root.Content == null || root.Content is View.MainPage)
+                    {
+                        Navigate(typeof(View.Catalog), file);
+                    } else if(root.Content is View.Catalog)
+                    {
+                        ((View.Catalog)root.Content).PrepareImport(file);
+                    }
+                    Log.Information("Frame Content: " + root.Content.GetType().FullName);
+                    break;
+
+                default:
+                    Log.Warning("Nicht unterstützter Dateityp: " + file.FileType);
+                    break;
+            }
+
+
+
+            Window.Current.Activate();
+        }
+
         private async void CreateLogger()
         {
             StorageFolder localState = await ApplicationData.Current.LocalFolder.CreateFolderAsync("Logs", CreationCollisionOption.OpenIfExists);

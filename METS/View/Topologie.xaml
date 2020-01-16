@@ -33,6 +33,7 @@
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
             <RowDefinition />
+            <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
 
         <Border Grid.RowSpan="2">
@@ -84,29 +85,33 @@
             </TreeView.ItemTemplate>
         </TreeView>
 
-        <toolkit:TabView x:Name="tabView" Grid.Column="1" Grid.RowSpan="2" CanCloseTabs="True" Margin="5 0 5 0" >
-            <toolkit:TabView.Footer>
-                <StackPanel Orientation="Horizontal">
-                    <TextBlock Margin="0 0 10 0">
+        <StackPanel Orientation="Horizontal" Grid.Row="2" Margin="0 5 0 0" Padding="3">
+            <StackPanel.Background>
+                <SolidColorBrush Color="#FFE0E0E0" />
+            </StackPanel.Background>
+            <TextBlock Margin="5 0 10 0">
                         <Run Text="Bereiche:" />
                         <Run x:Name="InfoAreas" />
-                    </TextBlock>
-                    <TextBlock Margin="0 0 10 0">
+            </TextBlock>
+            <TextBlock Margin="0 0 10 0">
                         <Run Text="Linien:" />
                         <Run x:Name="InfoLines" />
-                    </TextBlock>
-                    <TextBlock>
+            </TextBlock>
+            <TextBlock>
                         <Run Text="Geräte: " />
                         <Run x:Name="InfoDevices" />
-                    </TextBlock>
-                </StackPanel>
-            </toolkit:TabView.Footer>
-        </toolkit:TabView>
-
-        
+            </TextBlock>
+        </StackPanel>
 
 
-        <toolkit:Expander Grid.Column="2" Grid.RowSpan="2" ExpandDirection="Left" VerticalContentAlignment="Stretch" IsExpanded="True">
+
+
+        <toolkit:TabView x:Name="tabView" Grid.Column="1" Grid.RowSpan="3" CanCloseTabs="True" Margin="5 0 5 0" />
+
+
+
+
+        <toolkit:Expander Grid.Column="2" Grid.RowSpan="3" ExpandDirection="Left" VerticalContentAlignment="Stretch" IsExpanded="True">
             <toolkit:Expander.HeaderTemplate>
                 <DataTemplate>
                     <TextBlock Text="Eigenschaften" FontSize="20" />

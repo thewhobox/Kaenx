@@ -42,8 +42,8 @@
 
         <Border Background="LightGray" BorderThickness="0 0 0 1" BorderBrush="White">
             <StackPanel Orientation="Horizontal">
-                <AppBarButton Label="Haupt" Icon="Add" Click="ClickAddMain" />
-                <AppBarToggleButton x:Name="BtnToggleProps" Label="Filter" Icon="Filter" IsChecked="True" />
+                <AppBarButton x:Uid="/Groups/ToolAddMain" Icon="Add" Click="ClickAddMain" />
+                <AppBarToggleButton x:Uid="/Groups/ToolFilter" x:Name="BtnToggleProps" Icon="Filter" IsChecked="True" />
             </StackPanel>
         </Border>
 
@@ -54,9 +54,9 @@
                         <TreeViewItem Content="{Binding}" CanDrag="False" Margin="-20 0 0 0" ItemsSource="{Binding Subs}" IsExpanded="{Binding IsExpanded, Mode=TwoWay}" Drop="TreeViewItem_Drop" AllowDrop="True" DragOver="TreeViewItem_DragEnter" DragLeave="General_DragLeave">
                             <TreeViewItem.ContextFlyout>
                                 <MenuFlyout>
-                                    <MenuFlyoutItem Text="Hinzufügen" Icon="Add" Click="ClickAddSub" />
-                                    <MenuFlyoutItem Text="Umbenennen" Icon="Rename" Click="ClickAddRename" />
-                                    <MenuFlyoutItem Text="Löschen" Icon="Delete" Click="ClickAddDelete" />
+                                    <MenuFlyoutItem x:Uid="/Groups/GListContextAdd" Icon="Add" Click="ClickAddSub" />
+                                    <MenuFlyoutItem x:Uid="/Groups/GlistContextRename" Icon="Rename" Click="ClickAddRename" />
+                                    <MenuFlyoutItem x:Uid="/Groups/GListContextDelete" Icon="Delete" Click="ClickAddDelete" />
                                 </MenuFlyout>
                             </TreeViewItem.ContextFlyout>
                             <TreeViewItem.ContentTemplate>
@@ -93,17 +93,17 @@
                     <Setter Property="toolkit:DataGridRow.ContextFlyout">
                         <Setter.Value>
                             <MenuFlyout>
-                                <MenuFlyoutItem Click="ClickUnlink" Icon="Delete" Text="Trennen" />
+                                <MenuFlyoutItem x:Uid="/Groups/CListContextUnlink" Click="ClickUnlink" Icon="Delete" />
                             </MenuFlyout>
                         </Setter.Value>
                     </Setter>
                 </Style>
             </toolkit:DataGrid.RowStyle>
             <toolkit:DataGrid.Columns>
-                <toolkit:DataGridTextColumn Tag="number" Width="SizeToCells" Header="Nummer" Binding="{Binding Number}" />
-                <toolkit:DataGridTextColumn MinWidth="160" Tag="name" Width="SizeToCells" Header="Name" Binding="{Binding Name}" />
-                <toolkit:DataGridTextColumn MinWidth="160" Tag="func" Width="SizeToCells" Header="Funktion" Binding="{Binding Function}" />
-                <toolkit:DataGridTextColumn MinWidth="300" Tag="connections" Width="SizeToCells" Header="Verbindungen" Binding="{Binding Connections}" />
+                <toolkit:DataGridTextColumn x:Uid="/Groups/CListNumb" Tag="number" Width="SizeToCells" Binding="{Binding Number}" />
+                <toolkit:DataGridTextColumn x:Uid="/Groups/CListName" MinWidth="160" Tag="name" Width="SizeToCells" Binding="{Binding Name}" />
+                <toolkit:DataGridTextColumn x:Uid="/Groups/CListFunc" MinWidth="160" Tag="func" Width="SizeToCells" Binding="{Binding Function}" />
+                <toolkit:DataGridTextColumn x:Uid="/Groups/ClistConn" MinWidth="300" Tag="connections" Width="SizeToCells" Binding="{Binding Connections}" />
             </toolkit:DataGrid.Columns>
         </toolkit:DataGrid>
 

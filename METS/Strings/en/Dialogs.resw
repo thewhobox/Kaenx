@@ -117,31 +117,22 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="AppCrashed" xml:space="preserve">
-    <value>The App crashed shortly!</value>
+  <data name="NewName.CloseButtonText" xml:space="preserve">
+    <value>Cancel</value>
   </data>
-  <data name="BtnCatalog.Content" xml:space="preserve">
-    <value>Open Catalog</value>
+  <data name="NewName.PrimaryButtonText" xml:space="preserve">
+    <value>Rename</value>
   </data>
-  <data name="BtnDelete.Text" xml:space="preserve">
-    <value>Delete</value>
+  <data name="NewName.Title" xml:space="preserve">
+    <value>New Name</value>
   </data>
-  <data name="BtnLoadProject.Text" xml:space="preserve">
-    <value>Load Project</value>
+  <data name="NewNameProjectName" xml:space="preserve">
+    <value>New Project</value>
   </data>
-  <data name="BtnNewProject.Content" xml:space="preserve">
-    <value>Create a new Project</value>
+  <data name="NewNameProjectPrimary" xml:space="preserve">
+    <value>Create</value>
   </data>
-  <data name="BtnOpen.Text" xml:space="preserve">
-    <value>Open</value>
-  </data>
-  <data name="BtnWizProject.Content" xml:space="preserve">
-    <value>Use Project Wizard</value>
-  </data>
-  <data name="MsgProjectDeleted" xml:space="preserve">
-    <value>Project was deleted</value>
-  </data>
-  <data name="MsgSelectProject" xml:space="preserve">
-    <value>Please select a Project first.</value>
+  <data name="NewNameProjectTitle" xml:space="preserve">
+    <value>New Project</value>
   </data>
 </root>

@@ -22,7 +22,8 @@ namespace METS.Classes.Controls.Paras
 {
     public sealed partial class ParamEnum2 : UserControl, IParam
     {
-        public delegate void ParamChangedHandler(string source, string value);
+        public string hash { get; set; }
+        public delegate void ParamChangedHandler(string source, string value, string hash);
         public event ParamChangedHandler ParamChanged;
         
         private string paramId;
@@ -67,7 +68,7 @@ namespace METS.Classes.Controls.Paras
         private void ParaValue_Checked(object sender, RoutedEventArgs e)
         {
             value = ((RadioButton)sender).Tag.ToString();
-            ParamChanged?.Invoke(paramId, value);
+            ParamChanged?.Invoke(paramId, value, hash);
         }
 
         public void SetVisibility(Visibility visible)

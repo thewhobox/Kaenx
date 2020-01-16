@@ -27,6 +27,7 @@ namespace METS.MVVM
         }
 
         public string SelectedLanguage { get; set; }
+        public bool wasFromMain = false;
 
         public ZipArchive Archive { get; set; }
 

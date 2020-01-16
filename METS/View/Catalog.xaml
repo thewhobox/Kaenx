@@ -14,8 +14,10 @@
     xmlns:behaviors="using:Microsoft.Toolkit.Uwp.UI.Animations.Behaviors"
     xmlns:controls="using:Microsoft.Toolkit.Uwp.UI.Controls"
     mc:Ignorable="d">
-
     <Page.Resources>
+        <CornerRadius x:Key="CornerRadius">0</CornerRadius>
+        <CornerRadius x:Key="OverlayCornerRadius">0</CornerRadius>
+        <CornerRadius x:Key="ControlCornerRadius">0</CornerRadius>
         <converter:BoolToVisibilityConverter x:Key="BoolToVisibilityConverter" />
     </Page.Resources>
 
@@ -80,39 +82,39 @@
                         <RowDefinition />
                     </Grid.RowDefinitions>
 
-                    <TextBlock Grid.ColumnSpan="2" Text="Gerät Informationen:" Margin="15" FontSize="25" />
+                    <TextBlock x:Uid="/Catalog/DeviceInfoHeader2" Grid.ColumnSpan="2" Margin="15" FontSize="25" />
 
                     <TextBlock Grid.Row="1" Grid.ColumnSpan="2" Margin="10 5" VerticalAlignment="Center">
-                        <Run Text="Name:" />
+                        <Run x:Uid="/Catalog/DeviceInfoName" />
                         <LineBreak />
                         <Run Text="{Binding Name}" />
                     </TextBlock>
 
                     <TextBlock Grid.Row="2" Grid.ColumnSpan="2" Margin="10 5" VerticalAlignment="Center">
-                        <Run Text="Bestellnummer:" />
+                        <Run x:Uid="/Catalog/DeviceInfoOrder" />
                         <LineBreak />
                         <Run Text="{Binding OrderNumber}" />
                     </TextBlock>
 
-                    <TextBlock Grid.Row="3" Text="Busstrom:" Margin="10 5" />
+                    <TextBlock x:Uid="/Catalog/DeviceInfoCurrent" Grid.Row="3" Margin="10 5" />
                     <StackPanel Grid.Row="3" Grid.Column="1" Margin="10 5" Orientation="Horizontal">
                         <TextBlock  Text="{Binding BusCurrent}" />
                         <TextBlock Text="mA" Margin="5 0 0 0" />
                     </StackPanel>
 
-                    <TextBlock Grid.Row="4" Text="Ph. Adresse:" Margin="10 5" />
+                    <TextBlock x:Uid="/Catalog/DeviceInfoAddress" Grid.Row="4" Margin="10 5" />
                     <TextBlock Grid.Row="4" Grid.Column="1" Margin="10 5" Text="{Binding HasIndividualAddress}" />
 
-                    <TextBlock Grid.Row="5" Text="Applikation:" Margin="10 5" />
+                    <TextBlock x:Uid="/Catalog/DeviceInfoHasApp" Grid.Row="5" Margin="10 5" />
                     <TextBlock Grid.Row="5" Grid.Column="1" Margin="10 5" Text="{Binding HasApplicationProgram}" />
 
-                    <TextBlock Grid.Row="6" Text="Koppler:" Margin="10 5" />
+                    <TextBlock x:Uid="/Catalog/Coupler" Grid.Row="6" Margin="10 5" />
                     <TextBlock Grid.Row="6" Grid.Column="1" Margin="10 5" Text="{Binding IsCoupler}" />
 
-                    <TextBlock Grid.Row="7" Text="Netzteil:" Margin="10 5" />
+                    <TextBlock x:Uid="/Catalog/DeviceInfoSupply" Grid.Row="7" Margin="10 5" />
                     <TextBlock Grid.Row="7" Grid.Column="1" Margin="10 5" Text="{Binding IsPowerSupply}" />
 
-                    <TextBlock Grid.Row="8" Text="Aktuellste Applikation:" Margin="10 5" />
+                    <TextBlock x:Uid="/Catalog/DeviceInfoApp" Grid.Row="8" Margin="10 5" />
                     <TextBlock Grid.Row="8" Grid.Column="1" Margin="10 5" x:Name="DevInfoApp" />
 
                 </Grid>
@@ -126,9 +128,9 @@
                     </Style>
                 </controls:DataGrid.Resources>
                 <controls:DataGrid.Columns>
-                    <controls:DataGridTextColumn Tag="Name" Width="SizeToCells" Header="Name" Binding="{Binding Name}" />
-                    <controls:DataGridTextColumn Tag="Desc" Width="SizeToCells" Header="Beschreibung" Binding="{Binding VisibleDescription}" />
-                    <controls:DataGridTextColumn Tag="OrderNr" Width="SizeToCells" Header="Bestellnummer" Binding="{Binding OrderNumber}" />
+                    <controls:DataGridTextColumn x:Uid="/Catalog/DListName" Tag="Name" Width="SizeToCells" Binding="{Binding Name}" />
+                    <controls:DataGridTextColumn x:Uid="/Catalog/DListDesc" Tag="Desc" Width="SizeToCells" Binding="{Binding VisibleDescription}" />
+                    <controls:DataGridTextColumn x:Uid="/Catalog/DListNumb" Tag="OrderNr" Width="SizeToCells" Binding="{Binding OrderNumber}" />
                 </controls:DataGrid.Columns>
             </controls:DataGrid>
         </Grid>
@@ -148,7 +150,7 @@
                 </Grid.ColumnDefinitions>
 
                 <Border Grid.ColumnSpan="3" Margin="10" BorderBrush="{ThemeResource SystemControlBackgroundAccentBrush}" BorderThickness="0,0,0,5">
-                    <TextBlock FontSize="25" Padding="10" Text="Welche Geräte sollen importiert werden?" TextWrapping="WrapWholeWords" />
+                    <TextBlock x:Uid="/Catalog/ImportHeader" FontSize="25" Padding="10" TextWrapping="WrapWholeWords" />
                 </Border>
 
                 <ListView Grid.Row="1" Grid.ColumnSpan="3" x:Name="ImportList" ItemsSource="{Binding Import.DeviceList}" SelectionMode="None" Tapped="ListView_Tapped" IsItemClickEnabled="True" >
@@ -173,9 +175,9 @@
                     </ListView.ItemTemplate>
                 </ListView>
 
-                <Button Grid.Row="2" Content="Alle" Click="ClickSelectAll" HorizontalAlignment="Stretch" />
-                <Button x:Name="ButtonImportSelected" Grid.Row="2" Grid.Column="1" Content="Ausgewählte" Click="ClickSelected" HorizontalAlignment="Stretch" />
-                <Button Grid.Row="2" Grid.Column="2" Content="Abbrechen" Click="ClickCancel" HorizontalAlignment="Stretch" />
+                <Button x:Uid="/Catalog/ImportAll" Grid.Row="2" Click="ClickSelectAll" HorizontalAlignment="Stretch" />
+                <Button x:Uid="/Catalog/ImportSelected" x:Name="ButtonImportSelected" Grid.Row="2" Grid.Column="1" Click="ClickSelected" HorizontalAlignment="Stretch" />
+                <Button x:Uid="/Catalog/ImportCancel" Grid.Row="2" Grid.Column="2" Click="ClickCancel" HorizontalAlignment="Stretch" />
             </Grid>
         </Border>
 

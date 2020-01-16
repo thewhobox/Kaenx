@@ -66,14 +66,14 @@
                     <Button HorizontalAlignment="Stretch" Click="ClickOpen" Background="Transparent" BorderThickness="0" IsEnabled="{Binding ProjectSelected}">
                         <StackPanel Orientation="Horizontal" Margin="5">
                             <SymbolIcon  Symbol="OpenFile" />
-                            <TextBlock x:Uid="/MainPage/BtnOpen" Margin="5 0 0 0" Foreground="Gray" />
+                            <TextBlock x:Uid="/MainPage/BtnOpen" Margin="5 0 0 0" />
                         </StackPanel>
                     </Button>
 
                     <Button Grid.Column="1" HorizontalAlignment="Stretch" Click="ClickDelete" Background="Transparent" BorderThickness="0" IsEnabled="{Binding ProjectSelected}">
                         <StackPanel Orientation="Horizontal" Margin="5">
                             <SymbolIcon  Symbol="Delete" />
-                            <TextBlock x:Uid="/MainPage/BtnDelete" Margin="5 0 0 0" Foreground="Gray" />
+                            <TextBlock x:Uid="/MainPage/BtnDelete" Margin="5 0 0 0" />
                         </StackPanel>
                     </Button>
                 </Grid>

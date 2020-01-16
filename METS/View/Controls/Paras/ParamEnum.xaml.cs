@@ -24,7 +24,8 @@ namespace METS.Classes.Controls.Paras
 {
     public sealed partial class ParamEnum : UserControl, IParam
     {
-        public delegate void ParamChangedHandler(string source, string value);
+        public string hash { get; set; }
+        public delegate void ParamChangedHandler(string source, string value, string hash);
         public event ParamChangedHandler ParamChanged;
 
         private ObservableCollection<AppParameterTypeEnumViewModel> EnumList { get; set; } = new ObservableCollection<AppParameterTypeEnumViewModel>();
@@ -60,7 +61,7 @@ namespace METS.Classes.Controls.Paras
 
         private void ParaValue_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            ParamChanged?.Invoke(paramId, ParaValue.SelectedValue.ToString());
+            ParamChanged?.Invoke(paramId, ParaValue.SelectedValue.ToString(), hash);
         }
 
         public string GetValue()

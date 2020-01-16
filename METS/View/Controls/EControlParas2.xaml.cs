@@ -13,6 +13,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices.WindowsRuntime;
+using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Xml.Linq;
@@ -45,6 +46,7 @@ namespace METS.Views.Easy.Controls
         private List<ParamVisHelper> conditions;
         private Dictionary<string, AppParameter> AppParas = new Dictionary<string, AppParameter>();
         private Dictionary<string, AppParameterTypeViewModel> AppParaTypess = new Dictionary<string, AppParameterTypeViewModel>();
+        Stopwatch watch = new Stopwatch();
 
         public EControlParas2(LineDevice dev)
         {
@@ -58,30 +60,32 @@ namespace METS.Views.Easy.Controls
                 ViewHelper.Instance.ShowNotification("Achtung!!! Applikation konnte nicht gefunden werden. Bitte importieren Sie das Produkt erneut.", 4000, ViewHelper.MessageType.Error);
                 return;
             }
+        }
 
+        public void Start()
+        {
+            watch.Start();
             foreach (AppParameter para in _context.AppParameters.Where(p => p.ApplicationId == device.ApplicationId))
                 AppParas.Add(para.Id, para);
 
 
-            if(_contextP.ChangesParam.Any(c => c.DeviceId == device.UId))
+            if (_contextP.ChangesParam.Any(c => c.DeviceId == device.UId))
             {
+                List<string> updated = new List<string>();
                 var changes = _contextP.ChangesParam.Where(c => c.DeviceId == device.UId).OrderByDescending(c => c.StateId);
-                foreach(ChangeParamModel model in changes)
+                foreach (ChangeParamModel model in changes)
                 {
+                    if (updated.Contains(model.ParamId)) continue;
                     AppParas[model.ParamId].Value = model.Value;
+                    updated.Add(model.ParamId);
                 }
             }
-
-
 
             Load();
         }
 
         private async Task Load()
         {
-            Stopwatch watch = new Stopwatch();
-            watch.Start();
-
             StorageFolder folder = await ApplicationData.Current.LocalFolder.GetFolderAsync("Dynamic");
             StorageFile file = await folder.GetFileAsync(device.ApplicationId + ".xml");
             StorageFile filePA = await folder.GetFileAsync(device.ApplicationId + "-PA-All.json");
@@ -213,21 +217,76 @@ namespace METS.Views.Easy.Controls
                         if (para.Access == AccessType.None) break;
                         AppParameterTypeViewModel paraType = GetParamType(para.ParameterTypeId);
 
+
+                        string ids = para.Id;
+                        bool stopper = false;
+                        XElement xtemp = xele;
+                        while (!stopper)
+                        {
+                            xtemp = xtemp.Parent;
+
+                            switch (xtemp.Name.LocalName)
+                            {
+                                case "when":
+                                    ParamCondition cond = new ParamCondition();
+                                    int tempOut2;
+                                    if (xtemp.Attribute("default")?.Value == "true")
+                                    {
+                                        ids = "d" + ids;
+                                        List<string> values = new List<string>();
+                                        IEnumerable<XElement> whens = xtemp.Parent.Elements();
+                                        foreach (XElement w in whens)
+                                        {
+                                            if (w == xele)
+                                                continue;
+
+                                            values.AddRange(w.Attribute("test").Value.Split(" "));
+                                        }
+                                        cond.Values = string.Join(",", values);
+                                    }
+                                    else if (xtemp.Attribute("test")?.Value.Contains(" ") == true || int.TryParse(xtemp.Attribute("test")?.Value, out tempOut2))
+                                    {
+                                        cond.Values = string.Join(",", xtemp.Attribute("test").Value.Split(" "));
+                                    }
+                                    else
+                                    {
+                                        Log.Warning("Unbekanntes when! " + xele.ToString());
+                                    }
+
+                                    ids = "|" + xtemp.Parent.Attribute("ParamRefId").Value + "." + cond.Values + "|" + ids;
+                                    break;
+
+                                case "Channel":
+                                case "ParameterBlock":
+                                    ids = xtemp.Attribute("Id").Value + "|" + ids;
+                                    break;
+
+                                case "Dynamic":
+                                    stopper = true;
+                                    break;
+                            }
+                        }
+
+                        string hash = Convert.ToBase64String(Encoding.UTF8.GetBytes(ids));
+
                         //TODO create hash in PA-All.json to get same param on other positions
                         switch (paraType.Type)
                         {
                             case ParamTypes.Picture:
                                 ParamPicture paraviewP = new ParamPicture(para, paraType);
+                                paraviewP.hash = hash;
                                 paraviewP.SetVisibility(visibility);
                                 parent.Children.Add(paraviewP);
-                                //Params.Add(para.Id, paraviewP);
+                                Params.Add(hash, paraviewP);
                                 break;
                             case ParamTypes.NumberInt:
                             case ParamTypes.NumberUInt:
                                 ParamNumber paraviewN = new ParamNumber(para, paraType);
+                                paraviewN.hash = hash;
                                 paraviewN.SetVisibility(visibility);
+                                paraviewN.ParamChanged += ParamChanged;
                                 parent.Children.Add(paraviewN);
-                                //Params.Add(para.Id, paraviewN);
+                                Params.Add(hash, paraviewN);
                                 break;
                             case ParamTypes.Text:
                                 if (para.Access == AccessType.Read)
@@ -235,15 +294,16 @@ namespace METS.Views.Easy.Controls
                                     ParamText paraviewT = new ParamText(para, paraType);
                                     paraviewT.SetVisibility(visibility);
                                     parent.Children.Add(paraviewT);
-                                    //Params.Add(para.Id, paraviewT);
+                                    Params.Add(hash, paraviewT);
                                 }
                                 else
                                 {
                                     ParamInput paraviewI = new ParamInput(para, paraType) { Name = para.Id };
+                                    paraviewI.hash = hash;
                                     paraviewI.ParamChanged += ParamChanged;
                                     paraviewI.SetVisibility(visibility);
                                     parent.Children.Add(paraviewI);
-                                    //Params.Add(para.Id, paraviewI);
+                                    Params.Add(hash, paraviewI);
                                 }
                                 break;
                             case ParamTypes.Enum:
@@ -263,18 +323,20 @@ namespace METS.Views.Easy.Controls
                                 else if (enums.Count() > 2)
                                 {
                                     ParamEnum paraviewE = new ParamEnum(para, paraType, enums) { Name = para.Id };
+                                    paraviewE.hash = hash;
                                     paraviewE.ParamChanged += ParamChanged;
                                     paraviewE.SetVisibility(visibility);
                                     parent.Children.Add(paraviewE);
-                                    //Params.Add(para.Id, paraviewE);
+                                    Params.Add(hash, paraviewE);
                                 }
                                 else
                                 {
                                     ParamEnum2 paraviewE2 = new ParamEnum2(para, paraType, enums) { Name = para.Id };
+                                    paraviewE2.hash = hash;
                                     paraviewE2.ParamChanged += ParamChanged;
                                     paraviewE2.SetVisibility(visibility);
                                     parent.Children.Add(paraviewE2);
-                                    //Params.Add(para.Id, paraviewE2);
+                                    Params.Add(hash, paraviewE2);
                                 }
                                 break;
 
@@ -282,7 +344,7 @@ namespace METS.Views.Easy.Controls
                                 ParamNone paraviewNo = new ParamNone(para, paraType);
                                 paraviewNo.SetVisibility(visibility);
                                 parent.Children.Add(paraviewNo);
-                                //Params.Add(para.Id, paraviewNo);
+                                Params.Add(hash, paraviewNo);
                                 break;
                         }
                         break;
@@ -357,7 +419,7 @@ namespace METS.Views.Easy.Controls
             }
         }
 
-        private void ParamChanged(string source, string value)
+        private void ParamChanged(string source, string value, string hash)
         {
             AppParameter para = AppParas[source];
             para.Value = value;
@@ -386,9 +448,9 @@ namespace METS.Views.Easy.Controls
                     }
                 }
 
-                if(Params.ContainsKey(helper.Parameter.Id))
+                if(Params.ContainsKey(helper.Hash))
                 {
-                    Params[helper.Parameter.Id].SetVisibility(flag ? Visibility.Visible : Visibility.Collapsed);
+                    Params[helper.Hash].SetVisibility(flag ? Visibility.Visible : Visibility.Collapsed);
                 } else
                 {
 

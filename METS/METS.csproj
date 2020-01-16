@@ -241,6 +241,9 @@
     </AppxManifest>
     <None Include="Data\Logos\kænx.odg" />
     <None Include="METS_TemporaryKey.pfx" />
+    <PRIResource Include="Strings\de\Groups.resw" />
+    <PRIResource Include="Strings\en\Dialogs.resw" />
+    <PRIResource Include="Strings\de\Dialogs.resw" />
     <PRIResource Include="Strings\en\Global.resw" />
     <PRIResource Include="Strings\en\WorkDeskEasy.resw" />
     <PRIResource Include="Strings\de\WorkDeskEasy.resw" />
