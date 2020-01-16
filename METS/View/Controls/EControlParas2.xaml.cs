@@ -35,6 +35,7 @@ namespace METS.Views.Easy.Controls
     public sealed partial class EControlParas2 : UserControl
     {
         public ObservableCollection<ListChannelModel> ListNavChannel { get; set; } = new ObservableCollection<ListChannelModel>();
+        public ObservableCollection<ListBlockModel> ListNavBlock { get; set; } = new ObservableCollection<ListBlockModel>();
         private List<DeviceComObject> comObjects { get; set; }
 
         public LineDevice device { get; }
@@ -111,6 +112,7 @@ namespace METS.Views.Easy.Controls
             ViewHelper.Instance.ShowNotification("Geladen nach: " + watch.Elapsed.TotalSeconds + "s", 3000);
         }
 
+        List<BlockVisHelper> helperBlock = new List<BlockVisHelper>();
 
         private async Task ParseRoot(XElement xparent, Visibility visibility, ListChannelModel parentChannel = null)
         {
@@ -129,6 +131,7 @@ namespace METS.Views.Easy.Controls
                         break;
                     case "ParameterBlock":
                         ListBlockModel mBlock = new ListBlockModel();
+                        mBlock.Visible = visibility;
                         if(xele.Attribute("ParamRefId") != null)
                         {
                             AppParameter para = AppParas[xele.Attribute("ParamRefId").Value];
@@ -137,6 +140,11 @@ namespace METS.Views.Easy.Controls
                         else
                             mBlock.Name = xele.Attribute("Text").Value;
 
+                        List<ParamCondition> conds = SaveHelper.GetConditions(xele);
+                        if(conds.Count != 0)
+                        {
+                            helperBlock.Add(new BlockVisHelper(mBlock) { Conditions = conds });
+                        }
                         mBlock.Panel = new StackPanel();
                         parentChannel.Blocks.Add(mBlock);
                         await ParseBlock(xele, mBlock.Panel, visibility);
@@ -193,10 +201,7 @@ namespace METS.Views.Easy.Controls
                                 visible = Visibility;
                             }
 
-                            foreach (XElement xele2 in xwhen.Elements())
-                            {
-                                await ParseRoot(xele2, visible, parentChannel);
-                            }
+                            await ParseRoot(xwhen, visible, parentChannel);
                         }
                         break;
                     default:
@@ -269,7 +274,6 @@ namespace METS.Views.Easy.Controls
 
                         string hash = Convert.ToBase64String(Encoding.UTF8.GetBytes(ids));
 
-                        //TODO create hash in PA-All.json to get same param on other positions
                         switch (paraType.Type)
                         {
                             case ParamTypes.Picture:
@@ -451,9 +455,6 @@ namespace METS.Views.Easy.Controls
                 if(Params.ContainsKey(helper.Hash))
                 {
                     Params[helper.Hash].SetVisibility(flag ? Visibility.Visible : Visibility.Collapsed);
-                } else
-                {
-
                 }
             }
 
@@ -538,6 +539,13 @@ namespace METS.Views.Easy.Controls
                 NavBlock.IsEnabled = false;
             else
                 NavBlock.IsEnabled = true;
+        }
+
+        private void NavChannel_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            object selectedItem = NavBlock.SelectedItem;
+            ListNavBlock.Clear();
+
         }
     }
 }

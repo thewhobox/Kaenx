@@ -50,7 +50,7 @@ namespace METS.Classes.Bus.Actions
         public void Run(CancellationToken token)
         {
             Connection.OnTunnelRequest += _conn_OnTunnelResponse;
-            _token = token; //TODO implement cancellation
+            _token = token;
             CheckProgMode();
         }
 

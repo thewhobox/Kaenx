@@ -376,13 +376,9 @@ namespace METS.Classes.Helper
             List<ParamVisHelper> paras = new List<ParamVisHelper>();
 
             StorageFolder folder = await ApplicationData.Current.LocalFolder.GetFolderAsync("Dynamic");
-            //StorageFolder folderG = await ApplicationData.Current.LocalFolder.GetFolderAsync("Projects");
-            //folderG = await folderG.GetFolderAsync("P-" + _project.Id);
             StorageFile fileAll = await folder.CreateFileAsync(appId + "-PA-All.json", CreationCollisionOption.ReplaceExisting);
             StorageFile fileDef = await folder.CreateFileAsync(appId + "-PA-Default.json", CreationCollisionOption.ReplaceExisting);
             StorageFile file = await folder.GetFileAsync(appId + ".xml");
-            //StorageFile file = await folderG.CreateFileAsync("Device_" + device.UId + "-PARA.json", CreationCollisionOption.ReplaceExisting);
-            //TODO bei änderungen von Parameter eruzeugen bzw bei einfügen kopieren
 
             XDocument dynamic = XDocument.Load(await file.OpenStreamForReadAsync());
             string xmlns = dynamic.Root.Name.NamespaceName;
@@ -407,14 +403,14 @@ namespace METS.Classes.Helper
             await FileIO.WriteTextAsync(fileDef, json);
         }
 
-        private static List<ParamCondition> GetConditions(XElement xele, ParamVisHelper helper = null)
+        public static List<ParamCondition> GetConditions(XElement xele, ParamVisHelper helper = null)
         { 
-
             List<ParamCondition> conds = new List<ParamCondition>();
             try
             {
 
-            string ids = xele.Attribute("RefId").Value;
+            string ids = xele.Attribute("RefId")?.Value;
+                if (ids == null) ids = xele.Attribute("Id")?.Value;
             string paraId = ids;
             while (true)
             {

@@ -852,7 +852,7 @@ namespace METS.Classes.Helper
                 if (position % iterationToWait == 0) await Task.Delay(1);
             }
 
-
+            //TODO zusammenbringen mit ComObject auslesen
             Log.Information("ComObjectRefs werden eingelesen");
             tempList = doc.Descendants(GetXName("ComObjectRef")).ToList();
             foreach (XElement cref in tempList)
