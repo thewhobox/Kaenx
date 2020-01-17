@@ -12,4 +12,16 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <data name="MainPage_LoadProject.Text" xml:space="preserve">
+    <value>Load Project</value>
+  </data>
+  <data name="MainPage_NewProject.Content" xml:space="preserve">
+    <value>Create new Project</value>
+  </data>
+  <data name="MainPage_WizProject.Content" xml:space="preserve">
+    <value>Create new Project with Wizard</value>
+  </data>
+  <data name="MainPage_Catalog.Content" xml:space="preserve">
+    <value>Open Catalog</value>
+  </data>
 </root>

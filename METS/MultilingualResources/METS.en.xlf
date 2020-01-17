@@ -55,6 +55,74 @@
           <source>Die Datei konnte nicht kopiert werden.</source>
           <target state="final">The file could not be copied.</target>
         </trans-unit>
+        <trans-unit id="DeviceInfoAddress.Text" translate="yes" xml:space="preserve">
+          <source>Ph. Adresse:</source>
+          <target state="new">Ph. Adresse:</target>
+        </trans-unit>
+        <trans-unit id="DeviceInfoApp.Text" translate="yes" xml:space="preserve">
+          <source>Aktuellste Applikation:</source>
+          <target state="new">Aktuellste Applikation:</target>
+        </trans-unit>
+        <trans-unit id="DeviceInfoCoupler.Text" translate="yes" xml:space="preserve">
+          <source>Koppler:</source>
+          <target state="new">Koppler:</target>
+        </trans-unit>
+        <trans-unit id="DeviceInfoCurrent.Text" translate="yes" xml:space="preserve">
+          <source>Busstrom:</source>
+          <target state="new">Busstrom:</target>
+        </trans-unit>
+        <trans-unit id="DeviceInfoHasApp.Text" translate="yes" xml:space="preserve">
+          <source>Applikation:</source>
+          <target state="new">Applikation:</target>
+        </trans-unit>
+        <trans-unit id="DeviceInfoHeader2.Text" translate="yes" xml:space="preserve">
+          <source>Geräte Informationen</source>
+          <target state="new">Geräte Informationen</target>
+        </trans-unit>
+        <trans-unit id="DeviceInfoName.Text" translate="yes" xml:space="preserve">
+          <source>Name:</source>
+          <target state="new">Name:</target>
+        </trans-unit>
+        <trans-unit id="DeviceInfoOrder.Text" translate="yes" xml:space="preserve">
+          <source>Bestellnummer:</source>
+          <target state="new">Bestellnummer:</target>
+        </trans-unit>
+        <trans-unit id="DeviceInfoSupply.Text" translate="yes" xml:space="preserve">
+          <source>Netzteil:</source>
+          <target state="new">Netzteil:</target>
+        </trans-unit>
+        <trans-unit id="DListDesc.Header" translate="yes" xml:space="preserve">
+          <source>Beschreibung</source>
+          <target state="new">Beschreibung</target>
+        </trans-unit>
+        <trans-unit id="DListName.Header" translate="yes" xml:space="preserve">
+          <source>Name</source>
+          <target state="new">Name</target>
+        </trans-unit>
+        <trans-unit id="DListNumb.Header" translate="yes" xml:space="preserve">
+          <source>Bestellnummer</source>
+          <target state="new">Bestellnummer</target>
+        </trans-unit>
+        <trans-unit id="ImportAll.Content" translate="yes" xml:space="preserve">
+          <source>Alle</source>
+          <target state="new">Alle</target>
+        </trans-unit>
+        <trans-unit id="ImportCancel.Content" translate="yes" xml:space="preserve">
+          <source>Abbrechen</source>
+          <target state="new">Abbrechen</target>
+        </trans-unit>
+        <trans-unit id="ImportHeader.Text" translate="yes" xml:space="preserve">
+          <source>Welche Geräte sollen importiert werden?</source>
+          <target state="new">Welche Geräte sollen importiert werden?</target>
+        </trans-unit>
+        <trans-unit id="ImportSelected.Content" translate="yes" xml:space="preserve">
+          <source>Ausgewählte</source>
+          <target state="new">Ausgewählte</target>
+        </trans-unit>
+        <trans-unit id="MansListAll" translate="yes" xml:space="preserve">
+          <source>Alle Hersteller</source>
+          <target state="new">Alle Hersteller</target>
+        </trans-unit>
       </group>
     </body>
   </file>
@@ -87,6 +155,18 @@
         <trans-unit id="BtnWizProject.Content" translate="yes" xml:space="preserve">
           <source>Projekt Wizard benutzen</source>
           <target state="final">Use Project Wizard</target>
+        </trans-unit>
+        <trans-unit id="AppCrashed" translate="yes" xml:space="preserve">
+          <source>App ist kürzlich abgestürzt!</source>
+          <target state="new">App ist kürzlich abgestürzt!</target>
+        </trans-unit>
+        <trans-unit id="MsgProjectDeleted" translate="yes" xml:space="preserve">
+          <source>Projekt wurde gelöscht.</source>
+          <target state="new">Projekt wurde gelöscht.</target>
+        </trans-unit>
+        <trans-unit id="MsgSelectProject" translate="yes" xml:space="preserve">
+          <source>Bitte wähle zuerst ein Projekt aus.</source>
+          <target state="new">Bitte wähle zuerst ein Projekt aus.</target>
         </trans-unit>
       </group>
     </body>
@@ -133,102 +213,145 @@
           <source>Lade Projektdatenbank...</source>
           <target state="final">Load Projectdatabase...</target>
         </trans-unit>
+        <trans-unit id="MsgMasterError" translate="yes" xml:space="preserve">
+          <source>Die KNX_Master Datenbank ist korrupt</source>
+          <target state="new">Die KNX_Master Datenbank ist korrupt</target>
+        </trans-unit>
       </group>
     </body>
   </file>
-  <file datatype="xml" source-language="de-DE" target-language="en" original="METS/STRINGS/DE-DE/WORKDESK.RESW" tool-id="MultilingualAppToolkit" product-name="n/a" product-version="n/a" build-num="n/a">
+  <file datatype="xml" source-language="de-DE" target-language="en" original="METS/STRINGS/DE-DE/GROUPS.RESW" tool-id="MultilingualAppToolkit" product-name="n/a" product-version="n/a" build-num="n/a">
     <header>
-      <tool tool-id="MultilingualAppToolkit" tool-name="Multilingual App Toolkit" tool-version="4.0.6914.0" tool-company="Microsoft" />
+      <tool tool-id="MultilingualAppToolkit" tool-name="Multilingual App Toolkit" tool-version="4.0.6915.0" tool-company="Microsoft" />
     </header>
     <body>
-      <group id="METS/STRINGS/DE-DE/WORKDESK.RESW" datatype="resx">
+      <group id="METS/STRINGS/DE-DE/GROUPS.RESW" datatype="resx">
+        <trans-unit id="CListConn.Header" translate="yes" xml:space="preserve">
+          <source>Verbindungen</source>
+          <target state="new">Verbindungen</target>
+        </trans-unit>
+        <trans-unit id="CListContextUnlink.Text" translate="yes" xml:space="preserve">
+          <source>Trennen</source>
+          <target state="new">Trennen</target>
+        </trans-unit>
+        <trans-unit id="CListFunc.Header" translate="yes" xml:space="preserve">
+          <source>Funktion</source>
+          <target state="new">Funktion</target>
+        </trans-unit>
+        <trans-unit id="CListName.Header" translate="yes" xml:space="preserve">
+          <source>Name</source>
+          <target state="new">Name</target>
+        </trans-unit>
+        <trans-unit id="CListNumb.Header" translate="yes" xml:space="preserve">
+          <source>Nr.</source>
+          <target state="new">Nr.</target>
+        </trans-unit>
+        <trans-unit id="GListContextAdd.Text" translate="yes" xml:space="preserve">
+          <source>Hinzufügen</source>
+          <target state="new">Hinzufügen</target>
+        </trans-unit>
+        <trans-unit id="GListContextDelete.Text" translate="yes" xml:space="preserve">
+          <source>Löschen</source>
+          <target state="new">Löschen</target>
+        </trans-unit>
+        <trans-unit id="GListContextRename.Text" translate="yes" xml:space="preserve">
+          <source>Umbenennen</source>
+          <target state="new">Umbenennen</target>
+        </trans-unit>
+        <trans-unit id="ToolAddMain.Label" translate="yes" xml:space="preserve">
+          <source>Haupt</source>
+          <target state="new">Haupt</target>
+        </trans-unit>
+        <trans-unit id="ToolFilter.Label" translate="yes" xml:space="preserve">
+          <source>Filter</source>
+          <target state="new">Filter</target>
+        </trans-unit>
+      </group>
+    </body>
+  </file>
+  <file datatype="xml" source-language="de-DE" target-language="en" original="METS/STRINGS/DE-DE/GLOBAL.RESW" tool-id="MultilingualAppToolkit" product-name="n/a" product-version="n/a" build-num="n/a">
+    <header>
+      <tool tool-id="MultilingualAppToolkit" tool-name="Multilingual App Toolkit" tool-version="4.0.6915.0" tool-company="Microsoft" />
+    </header>
+    <body>
+      <group id="METS/STRINGS/DE-DE/GLOBAL.RESW" datatype="resx">
+        <trans-unit id="Area" translate="yes" xml:space="preserve">
+          <source>Bereich</source>
+          <target state="new">Bereich</target>
+        </trans-unit>
+        <trans-unit id="Line" translate="yes" xml:space="preserve">
+          <source>Linie</source>
+          <target state="new">Linie</target>
+        </trans-unit>
+      </group>
+    </body>
+  </file>
+  <file datatype="xml" source-language="de-DE" target-language="en" original="METS/STRINGS/DE-DE/DIALOGS.RESW" tool-id="MultilingualAppToolkit" product-name="n/a" product-version="n/a" build-num="n/a">
+    <header>
+      <tool tool-id="MultilingualAppToolkit" tool-name="Multilingual App Toolkit" tool-version="4.0.6915.0" tool-company="Microsoft" />
+    </header>
+    <body>
+      <group id="METS/STRINGS/DE-DE/DIALOGS.RESW" datatype="resx">
+        <trans-unit id="NewName.CloseButtonText" translate="yes" xml:space="preserve">
+          <source>Abbrechen</source>
+          <target state="new">Abbrechen</target>
+        </trans-unit>
+        <trans-unit id="NewName.PrimaryButtonText" translate="yes" xml:space="preserve">
+          <source>Umbenennen</source>
+          <target state="new">Umbenennen</target>
+        </trans-unit>
+        <trans-unit id="NewName.Title" translate="yes" xml:space="preserve">
+          <source>Neuer Name</source>
+          <target state="new">Neuer Name</target>
+        </trans-unit>
+        <trans-unit id="NewNameProjectName" translate="yes" xml:space="preserve">
+          <source>Neues Projekt</source>
+          <target state="new">Neues Projekt</target>
+        </trans-unit>
+        <trans-unit id="NewNameProjectPrimary" translate="yes" xml:space="preserve">
+          <source>Erstellen</source>
+          <target state="new">Erstellen</target>
+        </trans-unit>
+        <trans-unit id="NewNameProjectTitle" translate="yes" xml:space="preserve">
+          <source>Neues Projekt</source>
+          <target state="new">Neues Projekt</target>
+        </trans-unit>
+      </group>
+    </body>
+  </file>
+  <file datatype="xml" source-language="de-DE" target-language="en" original="METS/STRINGS/DE-DE/WORKDESKEASY.RESW" tool-id="MultilingualAppToolkit" product-name="n/a" product-version="n/a" build-num="n/a">
+    <header>
+      <tool tool-id="MultilingualAppToolkit" tool-name="Multilingual App Toolkit" tool-version="4.0.6915.0" tool-company="Microsoft" />
+    </header>
+    <body>
+      <group id="METS/STRINGS/DE-DE/WORKDESKEASY.RESW" datatype="resx">
         <trans-unit id="BusConnFalse" translate="yes" xml:space="preserve">
           <source>Getrennt</source>
-          <target state="final">Disconnected</target>
+          <target state="new">Getrennt</target>
         </trans-unit>
         <trans-unit id="BusConnTrue" translate="yes" xml:space="preserve">
           <source>Verbunden</source>
-          <target state="final">Connected</target>
+          <target state="new">Verbunden</target>
         </trans-unit>
         <trans-unit id="InfoBus.Text" translate="yes" xml:space="preserve">
-          <source>Bus:</source>
-          <target state="final">Bus:</target>
+          <source>Bus</source>
+          <target state="new">Bus</target>
         </trans-unit>
-        <trans-unit id="MenuBuildings.Text" translate="yes" xml:space="preserve">
-          <source>Gebäude</source>
-          <target state="final">Buildings</target>
+        <trans-unit id="MenuBus.Content" translate="yes" xml:space="preserve">
+          <source>Bus</source>
+          <target state="new">Bus</target>
         </trans-unit>
-        <trans-unit id="MenuBus.Text" translate="yes" xml:space="preserve">
-          <source>Bus Aktionen</source>
-          <target state="final">Bus Actions</target>
-        </trans-unit>
-        <trans-unit id="MenuCatalog.Text" translate="yes" xml:space="preserve">
-          <source>Katalog</source>
-          <target state="final">Catalog</target>
-        </trans-unit>
-        <trans-unit id="MenuClose.Text" translate="yes" xml:space="preserve">
-          <source>Schließen</source>
-          <target state="final">Close</target>
-        </trans-unit>
-        <trans-unit id="MenuComs.Text" translate="yes" xml:space="preserve">
-          <source>Kommunikationsobjekte</source>
-          <target state="final">Communicationobjects</target>
-        </trans-unit>
-        <trans-unit id="MenuGroups.Text" translate="yes" xml:space="preserve">
+        <trans-unit id="MenuGroups.Content" translate="yes" xml:space="preserve">
           <source>Gruppenadressen</source>
-          <target state="final">Groupaddresses</target>
+          <target state="new">Gruppenadressen</target>
         </trans-unit>
-        <trans-unit id="MenuProject.Title" translate="yes" xml:space="preserve">
-          <source>Projekt</source>
-          <target state="final">Project</target>
+        <trans-unit id="MenuHome.Content" translate="yes" xml:space="preserve">
+          <source>Startseite</source>
+          <target state="new">Startseite</target>
         </trans-unit>
-        <trans-unit id="MenuSave.Text" translate="yes" xml:space="preserve">
-          <source>Speichern</source>
-          <target state="final">Save</target>
-        </trans-unit>
-        <trans-unit id="MenuTopologie.Text" translate="yes" xml:space="preserve">
+        <trans-unit id="MenuTopologie.Content" translate="yes" xml:space="preserve">
           <source>Topologie</source>
-          <target state="final">Topology</target>
-        </trans-unit>
-        <trans-unit id="MenuWindows.Title" translate="yes" xml:space="preserve">
-          <source>Fenster</source>
-          <target state="final">Windows</target>
-        </trans-unit>
-        <trans-unit id="MsgBusOpen" translate="yes" xml:space="preserve">
-          <source>Das Fenster 'Bus Aktionen' ist bereits offen.</source>
-          <target state="final">Window 'Bus Actions' is already open.</target>
-        </trans-unit>
-        <trans-unit id="MsgCatalogOpen" translate="yes" xml:space="preserve">
-          <source>Katalog ist bereits offen.</source>
-          <target state="final">Catalog is already open.</target>
-        </trans-unit>
-        <trans-unit id="MsgSave" translate="yes" xml:space="preserve">
-          <source>Projekt wurde gespeichert</source>
-          <target state="final">Project has been saved.</target>
-        </trans-unit>
-        <trans-unit id="ViewBus" translate="yes" xml:space="preserve">
-          <source>Bus Aktionen</source>
-          <target state="final">Bus Actions</target>
-        </trans-unit>
-        <trans-unit id="ViewCatalog" translate="yes" xml:space="preserve">
-          <source>Katalog</source>
-          <target state="final">Catalog</target>
-        </trans-unit>
-        <trans-unit id="ViewComs" translate="yes" xml:space="preserve">
-          <source>Kommunikationsobjekte</source>
-          <target state="final">Communicationobjects</target>
-        </trans-unit>
-        <trans-unit id="ViewGroups" translate="yes" xml:space="preserve">
-          <source>Gruppenadressen</source>
-          <target state="final">Groupaddresses</target>
-        </trans-unit>
-        <trans-unit id="ViewParameter" translate="yes" xml:space="preserve">
-          <source>Parameter</source>
-          <target state="final">Parameter</target>
-        </trans-unit>
-        <trans-unit id="ViewTopologie" translate="yes" xml:space="preserve">
-          <source>Topologie</source>
-          <target state="final">Topology</target>
+          <target state="new">Topologie</target>
         </trans-unit>
       </group>
     </body>
