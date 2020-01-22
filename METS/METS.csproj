@@ -156,6 +156,9 @@
     </Compile>
     <Compile Include="View\Controls\ListBlockModel.cs" />
     <Compile Include="View\Controls\ListChannelModel.cs" />
+    <Compile Include="View\Controls\NumberBox.xaml.cs">
+      <DependentUpon>NumberBox.xaml</DependentUpon>
+    </Compile>
     <Compile Include="View\Controls\Paras\IParam.cs" />
     <Compile Include="View\Controls\Paras\ParamCondition.cs" />
     <Compile Include="View\Controls\Paras\ParamEnum.xaml.cs">
@@ -346,6 +349,10 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
+    <Page Include="View\Controls\NumberBox.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
     <Page Include="View\Controls\Paras\ParamEnum.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -448,9 +455,6 @@
     </PackageReference>
     <PackageReference Include="Microsoft.Toolkit.Uwp.UI.Controls.DataGrid">
       <Version>5.1.0</Version>
-    </PackageReference>
-    <PackageReference Include="Microsoft.UI.Xaml">
-      <Version>2.3.191211002</Version>
     </PackageReference>
     <PackageReference Include="Newtonsoft.Json">
       <Version>12.0.2</Version>

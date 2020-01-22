@@ -31,11 +31,11 @@ namespace METS.Classes.Controls.Paras
         {
             this.InitializeComponent();
 
-            ParaValue.Text = param.Value;
+            ParaValue.Value = int.Parse(param.Value);
             paraId = param.Id;
             ParaName.Text = param.Text;
 
-            ParaValue.ValueChanged += ParaValue_ValueChanged;
+            //ParaValue.ValueChanged += ParaValue_ValueChanged;
             ParaValue.LostFocus += ParaValue_LostFocus;
 
             ParaValue.Minimum = int.Parse(type.Tag1);
@@ -49,7 +49,7 @@ namespace METS.Classes.Controls.Paras
             ParamChanged?.Invoke(paraId, ParaValue.Value.ToString(), hash);
         }
 
-        private void ParaValue_ValueChanged(Microsoft.UI.Xaml.Controls.NumberBox sender, Microsoft.UI.Xaml.Controls.NumberBoxValueChangedEventArgs args)
+        private void ParaValue_ValueChanged()
         {
             ParamChanged?.Invoke(paraId, ParaValue.Value.ToString(), hash);
         }

@@ -97,8 +97,13 @@ namespace METS.Views.Easy.Controls
             await PrepareComObject(dynamic.Root);
 
             conditions = Newtonsoft.Json.JsonConvert.DeserializeObject<List<ParamVisHelper>>(await FileIO.ReadTextAsync(filePA));
+            try
+            {
+                await ParseRoot(dynamic.Root, Visibility.Visible);
+            } catch
+            {
 
-            await ParseRoot(dynamic.Root, Visibility.Visible);
+            }
 
             NavChannel.SelectedIndex = 0;
             NavBlock.SelectedIndex = 0;
@@ -242,10 +247,16 @@ namespace METS.Views.Easy.Controls
                                         IEnumerable<XElement> whens = xtemp.Parent.Elements();
                                         foreach (XElement w in whens)
                                         {
-                                            if (w == xele)
+                                            if (w == xtemp)
                                                 continue;
 
-                                            values.AddRange(w.Attribute("test").Value.Split(" "));
+                                            try
+                                            {
+                                                values.AddRange(w.Attribute("test").Value.Split(" "));
+                                            } catch
+                                            {
+
+                                            }
                                         }
                                         cond.Values = string.Join(",", values);
                                     }

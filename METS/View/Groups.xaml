@@ -9,9 +9,6 @@
     mc:Ignorable="d"
     Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
     <Page.Resources>
-        <CornerRadius x:Key="CornerRadius">0</CornerRadius>
-        <CornerRadius x:Key="OverlayCornerRadius">0</CornerRadius>
-        <CornerRadius x:Key="ControlCornerRadius">0</CornerRadius>
         <DataTemplate x:Key="RowDetailsTemplate">
             <StackPanel>
                 <TextBlock Margin="10 10 10 0" Text="Hier steht ein mega langer text. Würde ja gerne das Lorem Ipsum kopieren, aber keine Lust lange danach zu suchen...." />

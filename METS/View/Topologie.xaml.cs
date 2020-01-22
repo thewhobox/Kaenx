@@ -489,5 +489,29 @@ namespace METS.View
             }
             SaveHelper.SaveProject();
         }
+
+        private bool InNumber_PreviewChanged(int Value)
+        {
+            TopologieBase tbase = PanelSettings.DataContext as TopologieBase;
+
+            if(tbase is LineDevice)
+            {
+                ObservableCollection<Line> Lines = (ObservableCollection<Line>)this.DataContext;
+                foreach(Line line in Lines)
+                {
+                    foreach(LineMiddle middle in line.Subs)
+                    {
+                        if (middle.Subs.Contains(tbase) && middle.Subs.Any(m => m.Id == Value))
+                        {
+                            LineDevice dev = middle.Subs.Single(m => m.Id == Value);
+                            if(dev != tbase)
+                                return true;
+                        }
+                    }
+                }
+            }
+
+            return false;
+        }
     }
 }

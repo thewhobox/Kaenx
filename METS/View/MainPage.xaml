@@ -8,15 +8,11 @@
     xmlns:toolkit="using:Microsoft.Toolkit.Uwp.UI.Controls"
     xmlns:extensions="using:Microsoft.Toolkit.Uwp.UI.Extensions"
     xmlns:animations="using:Microsoft.Toolkit.Uwp.UI.Animations"
+    xmlns:test="using:METS.View.Controls"
     Background="{ThemeResource ApplicationPageBackgroundThemeBrush}"
     extensions:ApplicationViewExtensions.Title="Startseite"
     extensions:ApplicationViewExtensions.BackButtonVisibility="Collapsed"
     mc:Ignorable="d">
-    <Page.Resources>
-        <CornerRadius x:Key="CornerRadius">0</CornerRadius>
-        <CornerRadius x:Key="OverlayCornerRadius">0</CornerRadius>
-        <CornerRadius x:Key="ControlCornerRadius">0</CornerRadius>
-    </Page.Resources>
 
     <Grid>
         <Grid.RowDefinitions>

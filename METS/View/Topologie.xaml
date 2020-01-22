@@ -6,22 +6,13 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:toolkit="using:Microsoft.Toolkit.Uwp.UI.Controls"
-    xmlns:controls="using:Microsoft.UI.Xaml.Controls"
+    xmlns:controls="using:METS.View.Controls"
     xmlns:converter="using:METS.Classes.Converter"
     mc:Ignorable="d"
     Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
     <Page.Resources>
-        <CornerRadius x:Key="CornerRadius">0</CornerRadius>
-        <CornerRadius x:Key="OverlayCornerRadius">0</CornerRadius>
-        <CornerRadius x:Key="ControlCornerRadius">0</CornerRadius>
-        <converter:NumberConverter x:Key="NumberConverter" />
         <converter:Checked2VisibilityConverter x:Key="CheckedConverter" />
-        <Storyboard x:Key="AniShowProps" Storyboard.TargetName="RenderPanelScale" Storyboard.TargetProperty="ScaleX">
-            <DoubleAnimation To="1" Duration="0:0:2" />
-        </Storyboard>
-        <Storyboard x:Key="AniHideProps" Storyboard.TargetName="RenderPanelScale" Storyboard.TargetProperty="ScaleX">
-            <DoubleAnimation To="0" Duration="0:0:2" />
-        </Storyboard>
+        <converter:NumberConverter x:Key="NumberConverter" />
     </Page.Resources>
 
     <Grid x:Name="GridDevices">
@@ -117,7 +108,7 @@
                     <TextBlock Text="Eigenschaften" FontSize="20" />
                 </DataTemplate>
             </toolkit:Expander.HeaderTemplate>
-            <Grid x:Name="PanelSettings" Grid.Column="2" Grid.RowSpan="2" Width="300" VerticalAlignment="Stretch" Visibility="{Binding ElementName=BtnToggleProps, Path=IsChecked, Converter={StaticResource CheckedConverter}}">
+            <Grid x:Name="PanelSettings" Grid.Column="2" Grid.RowSpan="2" Width="300" VerticalAlignment="Stretch">
                 <Grid.Resources>
                     <Style TargetType="toolkit:HeaderedContentControl">
                         <Setter Property="Margin" Value="0 5" />
@@ -141,7 +132,7 @@
 
                 <toolkit:HeaderedContentControl Grid.Row="2" Header="Nummer:" Margin="15 5" HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch">
                     <!--<TextBox x:Name="InNumber" Text="{Binding Id, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"  />-->
-                    <controls:NumberBox x:Name="InNumber" IsEnabled="False" Grid.Row="2" SpinButtonPlacementMode="Inline" CornerRadius="30" Minimum="0" Maximum="12" Value="{Binding Id, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                    <controls:NumberBox x:Name="InNumber" IsEnabled="False" Grid.Row="2" Minimum="0" Maximum="12" ValueOk="{Binding Id, Mode=TwoWay}" PreviewChanged="InNumber_PreviewChanged" />
                 </toolkit:HeaderedContentControl>
 
                 <Grid x:Name="InfosApplication" Grid.Row="3" Visibility="Visible" Margin="15 5">

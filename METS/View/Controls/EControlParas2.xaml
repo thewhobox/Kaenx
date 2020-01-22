@@ -28,7 +28,7 @@
             </Grid.ColumnDefinitions>
 
             <ComboBox x:Name="NavChannel" ItemsSource="{Binding ListNavChannel}" HorizontalAlignment="Stretch" DisplayMemberPath="Name" />
-            <ComboBox x:Name="NavBlock" ItemsSource="{Binding ElementName=NavChannel, Path=SelectedItem.Blocks}" SelectionChanged="NavBlock_SelectionChanged" Grid.Column="1" HorizontalAlignment="Stretch" />
+            <ComboBox x:Name="NavBlock" ItemsSource="{Binding ElementName=NavChannel, Path=SelectedItem.Blocks}" DisplayMemberPath="Name" SelectionChanged="NavBlock_SelectionChanged" Grid.Column="1" HorizontalAlignment="Stretch" />
         </Grid>
 
         <ScrollViewer Grid.Row="1">

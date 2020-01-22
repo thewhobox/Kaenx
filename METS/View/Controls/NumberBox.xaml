@@ -1,0 +1,48 @@
+﻿<UserControl
+    x:Class="METS.View.Controls.NumberBox"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:converter="using:METS.Classes.Converter"
+    mc:Ignorable="d"
+    ToolTipService.ToolTip="{Binding Tooltip}"
+    Height="32"
+    d:DesignHeight="50"
+    d:DesignWidth="400">
+    <UserControl.Resources>
+        <converter:NumberConverter x:Key="NumberConverter" />
+    </UserControl.Resources>
+
+    <Grid x:Name="DataGrid">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="Auto" />
+            <ColumnDefinition Width="Auto" />
+        </Grid.ColumnDefinitions>
+        <VisualStateManager.VisualStateGroups>
+            <!-- Visual states reflect the application's window size -->
+            <VisualStateGroup>
+                <VisualState x:Name="DefaultLayout">
+                    <Storyboard>
+                    </Storyboard>
+                </VisualState>
+                <VisualState x:Name="NotAcceptedLayout">
+                    <VisualState.Setters>
+                        <Setter Target="InputBox.BorderBrush" Value="Red" />
+                    </VisualState.Setters>
+                </VisualState>
+            </VisualStateGroup>
+        </VisualStateManager.VisualStateGroups>
+
+        <TextBox x:Name="InputBox" VerticalAlignment="Center" Background="{ThemeResource TextBoxBackgroundThemeBrush}" Text="{Binding Value, Converter={StaticResource NumberConverter}}" TextChanged="InputBox_TextChanged" AcceptsReturn="False" VerticalContentAlignment="Center" BorderThickness="2,2,0.5,2" PreviewKeyDown="InputBox_PreviewKeyDown" BorderBrush="{ThemeResource TextControlBorderBrush}" />
+
+        <!--<Setter Property="Background" Value="{ThemeResource TextControlBackground}"/>
+        <Setter Property="BorderBrush" Value="{ThemeResource TextControlBorderBrush}"/>-->
+
+        <Button x:Name="BtnUp" Grid.Column="1" Height="32" MinHeight="32" Background="{ThemeResource TextBoxBackgroundThemeBrush}" Click="GoUp" Content="&#xE70E;" Width="40" BorderThickness="1,2,0.5,2" BorderBrush="{ThemeResource TextControlBorderBrush}" VerticalAlignment="Stretch" FontFamily="{ThemeResource SymbolThemeFontFamily}" />
+        <Button x:Name="BtnDown" Grid.Column="2" Height="32" MinHeight="32" Background="{ThemeResource TextBoxBackgroundThemeBrush}" Click="GoDown" Content="&#xE70D;" Width="40" BorderThickness="0.5,2,2,2" BorderBrush="{ThemeResource TextControlBorderBrush}" VerticalAlignment="Stretch" FontFamily="{ThemeResource SymbolThemeFontFamily}" />
+    </Grid>
+
+
+</UserControl>
