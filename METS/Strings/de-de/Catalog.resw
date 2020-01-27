@@ -174,11 +174,17 @@
   <data name="ImportCancel.Content" xml:space="preserve">
     <value>Abbrechen</value>
   </data>
+  <data name="ImportChangeLange.Text" xml:space="preserve">
+    <value>Ändern</value>
+  </data>
   <data name="ImportHeader.Text" xml:space="preserve">
     <value>Welche Geräte sollen importiert werden?</value>
   </data>
   <data name="ImportSelected.Content" xml:space="preserve">
     <value>Ausgewählte</value>
+  </data>
+  <data name="ImportSelectedLang.Text" xml:space="preserve">
+    <value>Sprache: </value>
   </data>
   <data name="MansListAll" xml:space="preserve">
     <value>Alle Hersteller</value>

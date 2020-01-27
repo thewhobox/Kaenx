@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices.WindowsRuntime;
@@ -17,34 +18,57 @@ using Windows.UI.Xaml.Navigation;
 
 namespace METS.View.Controls
 {
-    public sealed partial class NumberBox : UserControl
+    public sealed partial class NumberBox : UserControl, INotifyPropertyChanged
     {
         public static readonly DependencyProperty ValueProperty = DependencyProperty.Register("Value", typeof(int), typeof(NumberBox), new PropertyMetadata(null));
-        public static readonly DependencyProperty ValueOkProperty = DependencyProperty.Register("ValueOk", typeof(int), typeof(NumberBox), new PropertyMetadata(null));
+        public static readonly DependencyProperty ValueOkProperty = DependencyProperty.Register("ValueOk", typeof(int), typeof(NumberBox), new PropertyMetadata(null, new PropertyChangedCallback(TextProperty_PropertyChanged)));
         public static readonly DependencyProperty MaximumProperty = DependencyProperty.Register("Maximum", typeof(int), typeof(NumberBox), new PropertyMetadata(null));
         public static readonly DependencyProperty MinimumProperty = DependencyProperty.Register("Minimum", typeof(int), typeof(NumberBox), new PropertyMetadata(null));
 
 
-        public delegate bool PreviewChangedHandler(int Value);
+        public delegate string PreviewChangedHandler(int Value);
         public event PreviewChangedHandler PreviewChanged;
+        public event PropertyChangedEventHandler PropertyChanged;
+
+        private static void TextProperty_PropertyChanged(DependencyObject obj, DependencyPropertyChangedEventArgs e)
+        {
+            obj.SetValue(ValueProperty, e.NewValue);
+        }
+
+
+        private string _errMessage;
+        public string ErrMessage
+        {
+            get { return _errMessage; }
+            set { _errMessage = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("ErrMessage")); }
+        }
 
         public int Value { 
             get { return (int)GetValue(ValueProperty); }
             set
             {
                 bool error = false;
-                bool handled = PreviewChanged?.Invoke(value) == true;
-                if (handled)
+                string handled = PreviewChanged?.Invoke(value);
+                if (!string.IsNullOrEmpty(handled))
+                {
                     error = true;
+                    ErrMessage = handled;
+                }
 
                 BtnUp.IsEnabled = value < (int)GetValue(MaximumProperty);
                 BtnDown.IsEnabled = value > (int)GetValue(MinimumProperty);
 
                 if (value > (int)GetValue(MaximumProperty))
+                {
                     error = true;
+                    ErrMessage = "Zahl größer als Maximum von " + (int)GetValue(MaximumProperty);
+                }
 
                 if (value < (int)GetValue(MinimumProperty))
+                {
                     error = true;
+                    ErrMessage = "Zahl kleiner als Minimum  von " + (int)GetValue(MinimumProperty);
+                }
 
                 SetValue(ValueProperty, value);
 
@@ -61,7 +85,7 @@ namespace METS.View.Controls
         public int ValueOk
         {
             get { return (int)GetValue(ValueOkProperty); }
-            set { SetValue(ValueProperty, value); }
+            set { SetValue(ValueProperty, value); SetValue(ValueOkProperty, value); }
         }
 
         public int Maximum
@@ -69,11 +93,24 @@ namespace METS.View.Controls
             get { return (int)GetValue(MaximumProperty); }
             set
             {
-                int _max = (int)GetValue(MaximumProperty);
-                if (Value > _max)
-                    Value = _max;
-
                 SetValue(MaximumProperty, value);
+
+                int _val = (int)GetValue(ValueProperty);
+                bool error = false;
+
+                if (_val > value)
+                    error = true;
+
+                if (_val < (int)GetValue(MinimumProperty))
+                    error = true;
+
+                if (!error)
+                {
+                    SetValue(ValueOkProperty, _val);
+                    VisualStateManager.GoToState(this, "DefaultLayout", false);
+                }
+                else
+                    VisualStateManager.GoToState(this, "NotAcceptedLayout", false);
             }
         }
 
@@ -82,11 +119,24 @@ namespace METS.View.Controls
             get { return (int)GetValue(MinimumProperty); }
             set
             {
-                int _min = (int)GetValue(MinimumProperty);
-                if (Value < _min)
-                    Value = _min;
-
                 SetValue(MinimumProperty, value);
+
+                int _val = (int)GetValue(ValueProperty);
+                bool error = false;
+
+                if (_val > (int)GetValue(MaximumProperty))
+                    error = true;
+
+                if (_val < value)
+                    error = true;
+
+                if (!error)
+                {
+                    SetValue(ValueOkProperty, _val);
+                    VisualStateManager.GoToState(this, "DefaultLayout", false);
+                }
+                else
+                    VisualStateManager.GoToState(this, "NotAcceptedLayout", false);
             }
         }
         

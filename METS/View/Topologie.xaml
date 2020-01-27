@@ -35,8 +35,8 @@
         
         <Border BorderThickness="0 0 0 1" BorderBrush="White">
             <StackPanel Orientation="Horizontal">
-                <AppBarButton Label="Bereich" Icon="Add" Click="ClickAddMain" />
-                <AppBarButton Label="Katalog" Icon="Shop" Click="ClickOpenCatalog" />
+                <AppBarButton x:Uid="/Topologie/ToolAdd" Icon="Add" Click="ClickAddMain" />
+                <AppBarButton x:Uid="/Topologie/ToolOpenCat" Icon="Shop" Click="ClickOpenCatalog" />
             </StackPanel>
         </Border>
 
@@ -46,18 +46,18 @@
                     <TreeViewItem Margin="-20 0 0 0" ToolTipService.ToolTip="{Binding Name}" DoubleTapped="TreeViewItem_DoubleTapped" Background="Transparent" BorderThickness="0" AllowDrop="True" Content="{Binding}" ItemsSource="{Binding Subs}" IsExpanded="{Binding IsExpanded, Mode=TwoWay}" DragOver="TreeViewItem_DragOver" Drop="TreeViewItem_Drop">
                         <TreeViewItem.ContextFlyout>
                             <MenuFlyout Opening="MenuFlyout_Opening">
-                                <MenuFlyoutItem Text="Hinzufügen" Icon="Add" Click="ClickAddSub" />
-                                <MenuFlyoutSubItem Text="Programmieren" Icon="PostUpdate">
-                                    <MenuFlyoutItem Text="Ph. Adresse" Icon="MapPin" Click="ClickProAddr" />
+                                <MenuFlyoutItem x:Uid="/Topologie/MenAdd" Icon="Add" Click="ClickAddSub" />
+                                <MenuFlyoutSubItem x:Uid="/Topologie/MenProg" Icon="PostUpdate">
+                                    <MenuFlyoutItem x:Uid="/Topologie/MenProgPh" Icon="MapPin" Click="ClickProAddr" />
                                     <MenuFlyoutSeparator />
-                                    <MenuFlyoutItem Text="Applikation (Komplett)" Icon="FourBars" Tag="0" Click="ClickProApp" />
-                                    <MenuFlyoutItem Text="Applikation (Partiell)" Icon="ThreeBars" Tag="1" Click="ClickProApp" />
-                                    <MenuFlyoutItem Text="Applikation (Minimal, Experimentell)" Icon="Onebar" Tag="2" Click="ClickProApp" />
+                                    <MenuFlyoutItem x:Uid="/Topologie/MenProgAppK" Text="Applikation (Komplett)" Icon="FourBars" Tag="0" Click="ClickProApp" />
+                                    <MenuFlyoutItem x:Uid="/Topologie/MenProgAppP" Text="Applikation (Partiell)" Icon="ThreeBars" Tag="1" Click="ClickProApp" />
+                                    <MenuFlyoutItem x:Uid="/Topologie/MenProgAppM" Icon="Onebar" Tag="2" Click="ClickProApp" />
                                 </MenuFlyoutSubItem>
-                                <MenuFlyoutItem Text="Parameter" Icon="Bookmarks" Click="ClickOpenParas" />
-                                <MenuFlyoutItem Text="Parameter2" Icon="Bookmarks" Click="ClickOpenParas2" />
-                                <MenuFlyoutItem Text="Umbenennen" Icon="Rename" Click="ClickAddRename" />
-                                <MenuFlyoutItem Text="Löschen" Icon="Delete" Click="ClickAddDelete" />
+                                <MenuFlyoutItem x:Uid="/Topologie/MenOpenPara" Icon="Bookmarks" Click="ClickOpenParas" />
+                                <MenuFlyoutItem x:Uid="/Topologie/MenOpenPara2" Icon="Bookmarks" Click="ClickOpenParas2" />
+                                <MenuFlyoutItem x:Uid="/Topologie/MenRename" Icon="Rename" Click="ClickAddRename" />
+                                <MenuFlyoutItem x:Uid="/Topologie/MenDelete" Icon="Delete" Click="ClickAddDelete" />
                             </MenuFlyout>
                         </TreeViewItem.ContextFlyout>
                         <TreeViewItem.ContentTemplate>
@@ -81,15 +81,15 @@
                 <SolidColorBrush Color="#FFE0E0E0" />
             </StackPanel.Background>
             <TextBlock Margin="5 0 10 0">
-                        <Run Text="Bereiche:" />
+                        <Run x:Uid="/Topologie/InfoArea" />
                         <Run x:Name="InfoAreas" />
             </TextBlock>
             <TextBlock Margin="0 0 10 0">
-                        <Run Text="Linien:" />
+                        <Run x:Uid="/Topologie/InfoLine" />
                         <Run x:Name="InfoLines" />
             </TextBlock>
             <TextBlock>
-                        <Run Text="Geräte: " />
+                        <Run x:Uid="/Topologie/InfoDevice" />
                         <Run x:Name="InfoDevices" />
             </TextBlock>
         </StackPanel>
@@ -105,7 +105,7 @@
         <toolkit:Expander Grid.Column="2" Grid.RowSpan="3" ExpandDirection="Left" VerticalContentAlignment="Stretch" IsExpanded="True">
             <toolkit:Expander.HeaderTemplate>
                 <DataTemplate>
-                    <TextBlock Text="Eigenschaften" FontSize="20" />
+                    <TextBlock x:Uid="/Topologie/SideProps"  FontSize="20" />
                 </DataTemplate>
             </toolkit:Expander.HeaderTemplate>
             <Grid x:Name="PanelSettings" Grid.Column="2" Grid.RowSpan="2" Width="300" VerticalAlignment="Stretch">
@@ -124,14 +124,13 @@
                     <RowDefinition Height="auto" />
                 </Grid.RowDefinitions>
 
-                <TextBlock Text="Eigenschaften" Margin="15 20" FontSize="25" />
+                <TextBlock x:Uid="/Topologie/SideProps" Margin="15 20" FontSize="25" />
 
-                <toolkit:HeaderedContentControl Grid.Row="1" Header="Name:" Margin="15 5" HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch">
+                <toolkit:HeaderedContentControl x:Uid="/Topologie/SidePropsName" Grid.Row="1" Margin="15 5" HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch">
                     <TextBox x:Name="InName" IsEnabled="False" Text="{Binding Name, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
                 </toolkit:HeaderedContentControl>
 
-                <toolkit:HeaderedContentControl Grid.Row="2" Header="Nummer:" Margin="15 5" HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch">
-                    <!--<TextBox x:Name="InNumber" Text="{Binding Id, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"  />-->
+                <toolkit:HeaderedContentControl x:Uid="/Topologie/SidePropsNumb" Grid.Row="2" Margin="15 5" HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch">
                     <controls:NumberBox x:Name="InNumber" IsEnabled="False" Grid.Row="2" Minimum="0" Maximum="12" ValueOk="{Binding Id, Mode=TwoWay}" PreviewChanged="InNumber_PreviewChanged" />
                 </toolkit:HeaderedContentControl>
 
@@ -156,12 +155,12 @@
                             <ColumnDefinition />
                         </Grid.ColumnDefinitions>
 
-                        <CheckBox MinWidth="10" Content="Gruppen" IsChecked="{Binding LoadedGroup}" IsEnabled="False" />
-                        <CheckBox Grid.Row="1" MinWidth="10" Content="Applikation" IsChecked="{Binding LoadedApplication}" IsEnabled="False" />
-                        <CheckBox Grid.Row="2" MinWidth="10" Content="Phy. Adresse" IsChecked="{Binding LoadedPA}" IsEnabled="False" />
+                        <CheckBox x:Uid="/Topologie/SidePropsCheckG" MinWidth="10" IsChecked="{Binding LoadedGroup}" IsEnabled="False" />
+                        <CheckBox x:Uid="/Topologie/SidePropsCheckA" Grid.Row="1" MinWidth="10" IsChecked="{Binding LoadedApplication}" IsEnabled="False" />
+                        <CheckBox x:Uid="/Topologie/SidePropsCheckP" Grid.Row="2" MinWidth="10" IsChecked="{Binding LoadedPA}" IsEnabled="False" />
                     </Grid>
 
-                    <toolkit:HeaderedContentControl Grid.Row="1" Header="Applikation:" HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch">
+                    <toolkit:HeaderedContentControl x:Uid="/Topologie/SidePropsApp" Grid.Row="1" HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch">
                         <TextBlock x:Name="InfoAppName" />
                     </toolkit:HeaderedContentControl>
                 </Grid>
@@ -175,14 +174,14 @@
                     </Grid.RowDefinitions>
                     <TextBlock Text="Linie" Margin="0 20" FontSize="20" />
 
-                    <toolkit:HeaderedContentControl Grid.Row="1" Header="Verfügbarer Busstrom:" HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch">
+                    <toolkit:HeaderedContentControl x:Uid="/Topologie/SidePropsCurrentA" Grid.Row="1" HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch">
                         <TextBlock>
                         <Run x:Name="InfoLmMaxcurrent" />
                         <Run Text="mA" />
                         </TextBlock>
                     </toolkit:HeaderedContentControl>
 
-                    <toolkit:HeaderedContentControl Grid.Row="2" Header="Berechneter Busstrom:" HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch">
+                    <toolkit:HeaderedContentControl x:Uid="/Topologie/SidePropsCurrentU" Grid.Row="2" HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch">
                         <TextBlock>
                         <Run x:Name="InfoLmCurrent" />
                         <Run Text="mA" />

@@ -335,6 +335,8 @@ namespace METS.Classes.Helper
             List<LineDeviceModel> lds = context.LineDevices.Where(l => l.ProjectId == id).ToList();
             context.LineDevices.RemoveRange(lds);
 
+            //TODO projectordner löschen
+
             context.SaveChanges();
         }
     
@@ -392,7 +394,7 @@ namespace METS.Classes.Helper
 
 
                 ParamVisHelper para = new ParamVisHelper(appParam);
-                para.Conditions = GetConditions(xpara, para);
+                para.Conditions = GetConditions(xpara, para, true);
                 paras.Add(para);
             }
 
@@ -403,7 +405,7 @@ namespace METS.Classes.Helper
             await FileIO.WriteTextAsync(fileDef, json);
         }
 
-        public static List<ParamCondition> GetConditions(XElement xele, ParamVisHelper helper = null)
+        public static List<ParamCondition> GetConditions(XElement xele, ParamVisHelper helper = null, bool isParam = false)
         { 
             List<ParamCondition> conds = new List<ParamCondition>();
             try
@@ -412,6 +414,7 @@ namespace METS.Classes.Helper
             string ids = xele.Attribute("RefId")?.Value;
                 if (ids == null) ids = xele.Attribute("Id")?.Value;
             string paraId = ids;
+                bool finished = false;
             while (true)
             {
                 xele = xele.Parent;
@@ -419,6 +422,7 @@ namespace METS.Classes.Helper
                 switch (xele.Name.LocalName)
                 {
                     case "when":
+                            if (finished && isParam) continue;
                         ParamCondition cond = new ParamCondition();
                         int tempOut;
                         if (xele.Attribute("default")?.Value == "true")
@@ -453,6 +457,7 @@ namespace METS.Classes.Helper
                     case "Channel":
                     case "ParameterBlock":
                         ids = xele.Attribute("Id").Value + "|" + ids;
+                            finished = true;
                         break;
 
                     case "Dynamic":

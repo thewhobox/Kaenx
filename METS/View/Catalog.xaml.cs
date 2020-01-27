@@ -36,6 +36,7 @@ namespace METS.View
     /// </summary>
     public sealed partial class Catalog : Page, INotifyPropertyChanged
     {
+        private string lastCategorie = "main";
         private ResourceLoader loader = ResourceLoader.GetForCurrentView("Catalog");
         private ObservableCollection<DeviceViewModel> _items = new ObservableCollection<DeviceViewModel>();
         private ObservableCollection<DeviceViewModel> _catalogDevices = new ObservableCollection<DeviceViewModel>();
@@ -101,7 +102,7 @@ namespace METS.View
             PrepareImport(file);
         }
 
-        public async void PrepareImport(StorageFile file)
+        public async void PrepareImport(StorageFile file, bool changeLang = false)
         {
             if (file == null) return;
 
@@ -136,11 +137,30 @@ namespace METS.View
 
                     if(tempLangs.Count > 1)
                     {
-                        DiagLanguage diaglang = new DiagLanguage(tempLangs);
-                        await diaglang.ShowAsync();
-                        Import.SelectedLanguage = diaglang.SelectedLanguage;
-                        ImportHelper.TranslateXml(catXML.Root, diaglang.SelectedLanguage);
+
+                        ApplicationDataContainer container = ApplicationData.Current.LocalSettings;
+                        string defaultLang = container.Values["defaultLang"]?.ToString();
+
+                        if (!tempLangs.Contains(defaultLang) || changeLang)
+                        {
+                            if(!changeLang && !string.IsNullOrEmpty(defaultLang) && tempLangs.Any(l => l.StartsWith(defaultLang.Split("-")[0])))
+                            {
+
+                            } else
+                            {
+                                DiagLanguage diaglang = new DiagLanguage(tempLangs);
+                                await diaglang.ShowAsync();
+                                Import.SelectedLanguage = diaglang.SelectedLanguage;
+                                ImportHelper.TranslateXml(catXML.Root, diaglang.SelectedLanguage);
+                            }
+                        } else
+                        {
+                            Import.SelectedLanguage = defaultLang;
+                            ImportHelper.TranslateXml(catXML.Root, defaultLang);
+                        }
                     }
+
+                    OutSelectedLang.Text = Import.SelectedLanguage;
 
                     XElement catalogXML = catXML.Descendants(XName.Get("Catalog", ns)).ElementAt<XElement>(0);
                     Import.DeviceList = CatalogHelper.GetDevicesFromCatalog(catalogXML);
@@ -181,18 +201,21 @@ namespace METS.View
 
         private void ListView_Tapped(object sender, TappedRoutedEventArgs e)
         {
-            if(e.PointerDeviceType == Windows.Devices.Input.PointerDeviceType.Mouse ||
-                e.PointerDeviceType == Windows.Devices.Input.PointerDeviceType.Pen)
+            if (((FrameworkElement)e.OriginalSource).DataContext is Device)
             {
-                Device device = (Device)((FrameworkElement)e.OriginalSource).DataContext;
-                device.SlideSettings.IsSelected = !device.SlideSettings.IsSelected;
+                if (e.PointerDeviceType == Windows.Devices.Input.PointerDeviceType.Mouse ||
+                    e.PointerDeviceType == Windows.Devices.Input.PointerDeviceType.Pen)
+                {
+                    Device device = (Device)((FrameworkElement)e.OriginalSource).DataContext;
+                    device.SlideSettings.IsSelected = !device.SlideSettings.IsSelected;
 
-                int count = Import.DeviceList.Where<Device>(d => d.SlideSettings.IsSelected == true).Count();
+                    int count = Import.DeviceList.Where<Device>(d => d.SlideSettings.IsSelected == true).Count();
 
-                if (count == 0)
-                    ButtonImportSelected.IsEnabled = false;
-                else
-                    ButtonImportSelected.IsEnabled = true;
+                    if (count == 0)
+                        ButtonImportSelected.IsEnabled = false;
+                    else
+                        ButtonImportSelected.IsEnabled = true;
+                }
             }
         }
 
@@ -221,6 +244,7 @@ namespace METS.View
 
         private async void LoadDevices(string section)
         {
+            lastCategorie = section;
             CatalogDevices.Clear();
             _items.Clear();
             List<string> cats = new List<string>();
@@ -266,8 +290,10 @@ namespace METS.View
             if(device == null || !device.HasApplicationProgram)
             {
                 DevInfoApp.Text = "";
+                BarDelete.IsEnabled = false;
                 return;
             }
+            BarDelete.IsEnabled = true;
 
             List<ApplicationViewModel> apps = new List<ApplicationViewModel>();
             Hardware2AppModel model = _context.Hardware2App.Where(h => h.HardwareId == device.HardwareId).OrderByDescending(h => h.Version).First();
@@ -346,6 +372,102 @@ namespace METS.View
         private void RowLoading(object sender, DataGridRowEventArgs e)
         {
             e.Row.DragStarting += RowDragStarting;
+        }
+
+        private async void ClickDelete(object sender, RoutedEventArgs e)
+        {
+            DeviceViewModel device = CatalogDeviceList.SelectedItem as DeviceViewModel;
+            _context.Devices.Remove(device);
+
+            if (device.HasApplicationProgram)
+            {
+                int count = _context.Devices.Count(d => d != device && d.HardwareId == device.HardwareId);
+                if(count == 0)
+                {
+                    Hardware2AppModel h2a = _context.Hardware2App.Single(h => h.HardwareId == device.HardwareId);
+                    _context.Hardware2App.Remove(h2a);
+                    count = _context.Hardware2App.Count(h => h != h2a && h.ApplicationId == h2a.ApplicationId);
+
+                    if(count == 0)
+                    {
+                        IEnumerable<object> tempList = _context.AppAbsoluteSegments.Where(a => a.ApplicationId == h2a.ApplicationId);
+                        _context.RemoveRange(tempList);
+
+                        tempList = _context.AppComObjects.Where(a => a.ApplicationId == h2a.ApplicationId);
+                        _context.RemoveRange(tempList);
+
+                        tempList = _context.Applications.Where(a => a.Id == h2a.ApplicationId);
+                        _context.RemoveRange(tempList);
+
+                        tempList = _context.AppParameters.Where(a => a.ApplicationId == h2a.ApplicationId);
+                        _context.RemoveRange(tempList);
+
+                        List<object> toDelete = new List<object>();
+                        foreach (AppParameter para in tempList)
+                        {
+                            AppParameterTypeViewModel pType = _context.AppParameterTypes.Single(p => p.Id == para.ParameterTypeId);
+                            toDelete.Add(pType);
+
+                            if(pType.Type == ParamTypes.Enum)
+                            {
+                                IEnumerable<object> tempList2 = _context.AppParameterTypeEnums.Where(e => e.ParameterId == pType.Id);
+                                _context.RemoveRange(tempList2);
+                            }
+                        }
+                        _context.RemoveRange(toDelete);
+
+                        StorageFolder dyn = await ApplicationData.Current.LocalFolder.GetFolderAsync("Dynamic");
+                        StorageFile file = await dyn.GetFileAsync(h2a.ApplicationId + ".xml");
+                        await file.DeleteAsync();
+                        file = await dyn.GetFileAsync(h2a.ApplicationId + "-CO-All.json");
+                        await file.DeleteAsync();
+                        file = await dyn.GetFileAsync(h2a.ApplicationId + "-CO-Default.json");
+                        await file.DeleteAsync();
+                        file = await dyn.GetFileAsync(h2a.ApplicationId + "-PA-All.json");
+                        await file.DeleteAsync();
+                        file = await dyn.GetFileAsync(h2a.ApplicationId + "-PA-Default.json");
+                        await file.DeleteAsync();
+                    }
+                }
+            }
+
+            _context.SaveChanges();
+            LoadDevices(lastCategorie);
+        }
+
+        private async void HyperlinkChangeLang_Click(Windows.UI.Xaml.Documents.Hyperlink sender, Windows.UI.Xaml.Documents.HyperlinkClickEventArgs args)
+        {
+            foreach (ZipArchiveEntry entry in Import.Archive.Entries)
+            {
+                if (entry.FullName.StartsWith("M-") && entry.FullName.EndsWith("/Catalog.xml"))
+                {
+                    XDocument catXML = XDocument.Load(entry.Open());
+                    string ns = catXML.Root.Name.NamespaceName;
+                    List<XElement> langs = catXML.Descendants(XName.Get("Language", ns)).ToList();
+
+                    ObservableCollection<string> tempLangs = new ObservableCollection<string>();
+                    foreach (XElement lang in langs)
+                    {
+                        tempLangs.Add(lang.Attribute("Identifier").Value);
+                    }
+
+                    DiagLanguage diaglang = new DiagLanguage(tempLangs);
+                    await diaglang.ShowAsync();
+                    Import.SelectedLanguage = diaglang.SelectedLanguage;
+                    ImportHelper.TranslateXml(catXML.Root, diaglang.SelectedLanguage);
+                    OutSelectedLang.Text = Import.SelectedLanguage;
+                    XElement catalogXML = catXML.Descendants(XName.Get("Catalog", ns)).ElementAt<XElement>(0);
+                    Import.DeviceList = CatalogHelper.GetDevicesFromCatalog(catalogXML);
+
+                    foreach (Device device in Import.DeviceList)
+                    {
+                        SlideListItemBase swipe = new SlideListItemBase();
+                        swipe.LeftSymbol = Symbol.Accept;
+                        swipe.LeftBackground = new SolidColorBrush(Windows.UI.Color.FromArgb(255, 22, 128, 34));
+                        device.SlideSettings = swipe;
+                    }
+                }
+            }
         }
     }
 }

@@ -126,6 +126,9 @@
   <data name="InfoBus.Text" xml:space="preserve">
     <value>Bus</value>
   </data>
+  <data name="InfoBusState.Text" xml:space="preserve">
+    <value>Getrennt</value>
+  </data>
   <data name="MenuBus.Content" xml:space="preserve">
     <value>Bus</value>
   </data>

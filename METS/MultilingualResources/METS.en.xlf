@@ -1,6 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <xliff version="1.2" xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
-  <file datatype="xml" source-language="de-DE" target-language="en" original="METS/STRINGS/DE-DE/RESOURCES.RESW" tool-id="MultilingualAppToolkit" product-name="n/a" product-version="n/a" build-num="n/a">
+  <file datatype="xml" source-language="de" target-language="en" original="METS/STRINGS/DE-DE/RESOURCES.RESW" tool-id="MultilingualAppToolkit" product-name="n/a" product-version="n/a" build-num="n/a">
     <header>
       <tool tool-id="MultilingualAppToolkit" tool-name="Multilingual App Toolkit" tool-version="4.0.6914.0" tool-company="Microsoft" />
     </header>
@@ -25,7 +25,7 @@
       </group>
     </body>
   </file>
-  <file datatype="xml" source-language="de-DE" target-language="en" original="METS/STRINGS/DE-DE/CATALOG.RESW" tool-id="MultilingualAppToolkit" product-name="n/a" product-version="n/a" build-num="n/a">
+  <file datatype="xml" source-language="de" target-language="en" original="METS/STRINGS/DE-DE/CATALOG.RESW" tool-id="MultilingualAppToolkit" product-name="n/a" product-version="n/a" build-num="n/a">
     <header>
       <tool tool-id="MultilingualAppToolkit" tool-name="Multilingual App Toolkit" tool-version="4.0.6914.0" tool-company="Microsoft" />
     </header>
@@ -123,10 +123,18 @@
           <source>Alle Hersteller</source>
           <target state="new">Alle Hersteller</target>
         </trans-unit>
+        <trans-unit id="ImportChangeLange.Text" translate="yes" xml:space="preserve">
+          <source>Ändern</source>
+          <target state="new">Ändern</target>
+        </trans-unit>
+        <trans-unit id="ImportSelectedLang.Text" translate="yes" xml:space="preserve">
+          <source>Sprache: </source>
+          <target state="new">Sprache: </target>
+        </trans-unit>
       </group>
     </body>
   </file>
-  <file datatype="xml" source-language="de-DE" target-language="en" original="METS/STRINGS/DE-DE/MAINPAGE.RESW" tool-id="MultilingualAppToolkit" product-name="n/a" product-version="n/a" build-num="n/a">
+  <file datatype="xml" source-language="de" target-language="en" original="METS/STRINGS/DE-DE/MAINPAGE.RESW" tool-id="MultilingualAppToolkit" product-name="n/a" product-version="n/a" build-num="n/a">
     <header>
       <tool tool-id="MultilingualAppToolkit" tool-name="Multilingual App Toolkit" tool-version="4.0.6914.0" tool-company="Microsoft" />
     </header>
@@ -171,7 +179,7 @@
       </group>
     </body>
   </file>
-  <file datatype="xml" source-language="de-DE" target-language="en" original="METS/STRINGS/DE-DE/IMPORT.RESW" tool-id="MultilingualAppToolkit" product-name="n/a" product-version="n/a" build-num="n/a">
+  <file datatype="xml" source-language="de" target-language="en" original="METS/STRINGS/DE-DE/IMPORT.RESW" tool-id="MultilingualAppToolkit" product-name="n/a" product-version="n/a" build-num="n/a">
     <header>
       <tool tool-id="MultilingualAppToolkit" tool-name="Multilingual App Toolkit" tool-version="4.0.6914.0" tool-company="Microsoft" />
     </header>
@@ -220,7 +228,7 @@
       </group>
     </body>
   </file>
-  <file datatype="xml" source-language="de-DE" target-language="en" original="METS/STRINGS/DE-DE/GROUPS.RESW" tool-id="MultilingualAppToolkit" product-name="n/a" product-version="n/a" build-num="n/a">
+  <file datatype="xml" source-language="de" target-language="en" original="METS/STRINGS/DE-DE/GROUPS.RESW" tool-id="MultilingualAppToolkit" product-name="n/a" product-version="n/a" build-num="n/a">
     <header>
       <tool tool-id="MultilingualAppToolkit" tool-name="Multilingual App Toolkit" tool-version="4.0.6915.0" tool-company="Microsoft" />
     </header>
@@ -266,10 +274,42 @@
           <source>Filter</source>
           <target state="new">Filter</target>
         </trans-unit>
+        <trans-unit id="DragConnectKO" translate="yes" xml:space="preserve">
+          <source>KO mit "{0} {1}" verknüpfen.</source>
+          <target state="new">KO mit "{0} {1}" verknüpfen.</target>
+        </trans-unit>
+        <trans-unit id="LComsConn.Header" translate="yes" xml:space="preserve">
+          <source>Verbindungen</source>
+          <target state="new">Verbindungen</target>
+        </trans-unit>
+        <trans-unit id="LComsFunc.Header" translate="yes" xml:space="preserve">
+          <source>Funktion</source>
+          <target state="new">Funktion</target>
+        </trans-unit>
+        <trans-unit id="LComsName.Header" translate="yes" xml:space="preserve">
+          <source>Name</source>
+          <target state="new">Name</target>
+        </trans-unit>
+        <trans-unit id="LComsNumb.Header" translate="yes" xml:space="preserve">
+          <source>Nr.</source>
+          <target state="new">Nr.</target>
+        </trans-unit>
+        <trans-unit id="NewGroupAddr" translate="yes" xml:space="preserve">
+          <source>Neue Gruppenadresse</source>
+          <target state="new">Neue Gruppenadresse</target>
+        </trans-unit>
+        <trans-unit id="NewGroupMain" translate="yes" xml:space="preserve">
+          <source>Neue Hauptgruppe</source>
+          <target state="new">Neue Hauptgruppe</target>
+        </trans-unit>
+        <trans-unit id="NewGroupMiddle" translate="yes" xml:space="preserve">
+          <source>Neue Mittelgruppe</source>
+          <target state="new">Neue Mittelgruppe</target>
+        </trans-unit>
       </group>
     </body>
   </file>
-  <file datatype="xml" source-language="de-DE" target-language="en" original="METS/STRINGS/DE-DE/GLOBAL.RESW" tool-id="MultilingualAppToolkit" product-name="n/a" product-version="n/a" build-num="n/a">
+  <file datatype="xml" source-language="de" target-language="en" original="METS/STRINGS/DE-DE/GLOBAL.RESW" tool-id="MultilingualAppToolkit" product-name="n/a" product-version="n/a" build-num="n/a">
     <header>
       <tool tool-id="MultilingualAppToolkit" tool-name="Multilingual App Toolkit" tool-version="4.0.6915.0" tool-company="Microsoft" />
     </header>
@@ -286,7 +326,7 @@
       </group>
     </body>
   </file>
-  <file datatype="xml" source-language="de-DE" target-language="en" original="METS/STRINGS/DE-DE/DIALOGS.RESW" tool-id="MultilingualAppToolkit" product-name="n/a" product-version="n/a" build-num="n/a">
+  <file datatype="xml" source-language="de" target-language="en" original="METS/STRINGS/DE-DE/DIALOGS.RESW" tool-id="MultilingualAppToolkit" product-name="n/a" product-version="n/a" build-num="n/a">
     <header>
       <tool tool-id="MultilingualAppToolkit" tool-name="Multilingual App Toolkit" tool-version="4.0.6915.0" tool-company="Microsoft" />
     </header>
@@ -319,7 +359,7 @@
       </group>
     </body>
   </file>
-  <file datatype="xml" source-language="de-DE" target-language="en" original="METS/STRINGS/DE-DE/WORKDESKEASY.RESW" tool-id="MultilingualAppToolkit" product-name="n/a" product-version="n/a" build-num="n/a">
+  <file datatype="xml" source-language="de" target-language="en" original="METS/STRINGS/DE-DE/WORKDESKEASY.RESW" tool-id="MultilingualAppToolkit" product-name="n/a" product-version="n/a" build-num="n/a">
     <header>
       <tool tool-id="MultilingualAppToolkit" tool-name="Multilingual App Toolkit" tool-version="4.0.6915.0" tool-company="Microsoft" />
     </header>
@@ -354,6 +394,14 @@
           <target state="new">Topologie</target>
         </trans-unit>
       </group>
+    </body>
+  </file>
+  <file datatype="xml" source-language="de" target-language="en" original="METS/STRINGS/DE-DE/TOPOLOGIE.RESW" tool-id="MultilingualAppToolkit" product-name="n/a" product-version="n/a" build-num="n/a">
+    <header>
+      <tool tool-id="MultilingualAppToolkit" tool-name="Multilingual App Toolkit" tool-version="4.0.6915.0" tool-company="Microsoft" />
+    </header>
+    <body>
+      <group id="METS/STRINGS/DE-DE/TOPOLOGIE.RESW" datatype="resx" />
     </body>
   </file>
 </xliff>

@@ -11,6 +11,7 @@ using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices.WindowsRuntime;
+using Windows.ApplicationModel.Resources;
 using Windows.Foundation;
 using Windows.Foundation.Collections;
 using Windows.UI.Xaml;
@@ -35,6 +36,7 @@ namespace METS.View
         private LineDevice defaultDevice = new LineDevice() { Name = "Bitte Gerät auswählen" };
         private GroupAddress defaultGroup = new GroupAddress() { Name = "Bitte Gruppe auswählen", Id = -1 };
 
+        private ResourceLoader loader = ResourceLoader.GetForCurrentView("Groups");
         private GroupAddress _selectedGroup;
         private LineDevice _selectedDevice;
         private Project _project;
@@ -77,7 +79,7 @@ namespace METS.View
 
         private void ClickAddMain(object sender, RoutedEventArgs e)
         {
-            Group group = new Group(getFirstFreeIdMain(), "Neue Hauptgruppe");
+            Group group = new Group(getFirstFreeIdMain(), loader.GetString("NewGroupMain"));
             _project.Groups.Add(group);
             count++;
 
@@ -99,7 +101,7 @@ namespace METS.View
             if(dc is Group)
             {
                 Group item = dc as Group;
-                GroupMiddle Group = new GroupMiddle(getFirstFreeIdSub(item), "Neue Gruppe", item);
+                GroupMiddle Group = new GroupMiddle(getFirstFreeIdSub(item), loader.GetString("NewGroupMiddle"), item);
                 count++;
 
                 GroupMiddleModel model = new GroupMiddleModel();
@@ -118,7 +120,7 @@ namespace METS.View
             if(dc is GroupMiddle)
             {
                 GroupMiddle item = dc as GroupMiddle;
-                GroupAddress Group = new GroupAddress(getFirstFreeIdSub(item), "Neue Gruppe", item);
+                GroupAddress Group = new GroupAddress(getFirstFreeIdSub(item), loader.GetString("NewGroupAddr"), item);
                 count++;
 
                 GroupAddressModel model = new GroupAddressModel();
@@ -256,7 +258,7 @@ namespace METS.View
         {
             if(SelectedGroup.Id != -1)
             {
-                e.DragUIOverride.Caption = "KO mit \"" + SelectedGroup.GroupName + " " + SelectedGroup.Name + "\" verknüpfen";
+                e.DragUIOverride.Caption = string.Format(loader.GetString("DragConnectKO"), SelectedGroup.GroupName, SelectedGroup.Name);
                 e.AcceptedOperation = Windows.ApplicationModel.DataTransfer.DataPackageOperation.Link;
             } else
             {
@@ -303,7 +305,7 @@ namespace METS.View
             if (tvi.DataContext is GroupAddress)
             {
                 GroupAddress ga = tvi.DataContext as GroupAddress;
-                e.DragUIOverride.Caption = "KO mit \"" + ga.GroupName + " " + ga.Name + "\" verknüpfen";
+                e.DragUIOverride.Caption = string.Format(loader.GetString("DragConnectKO"), ga.GroupName, ga.Name);
             } else
             {
                 e.DragUIOverride.Caption = "";

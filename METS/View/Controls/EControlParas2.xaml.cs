@@ -152,7 +152,7 @@ namespace METS.Views.Easy.Controls
                         }
                         mBlock.Panel = new StackPanel();
                         parentChannel.Blocks.Add(mBlock);
-                        await ParseBlock(xele, mBlock.Panel, visibility);
+                        await ParseBlock(xele, mBlock.Panel, Visibility.Visible);
                         break;
                     case "ChannelIndependentBlock":
                         NavChannel.IsEnabled = false;
@@ -224,12 +224,14 @@ namespace METS.Views.Easy.Controls
                 {
                     case "ParameterRefRef":
                         AppParameter para = AppParas[xele.Attribute("RefId").Value];
-                        if (para.Access == AccessType.None) break;
+                        if (para.Access == AccessType.None) continue;
+                        //TODO überprüfen
                         AppParameterTypeViewModel paraType = GetParamType(para.ParameterTypeId);
 
 
                         string ids = para.Id;
                         bool stopper = false;
+                        bool finished = false;
                         XElement xtemp = xele;
                         while (!stopper)
                         {
@@ -238,6 +240,7 @@ namespace METS.Views.Easy.Controls
                             switch (xtemp.Name.LocalName)
                             {
                                 case "when":
+                                    if (finished) continue;
                                     ParamCondition cond = new ParamCondition();
                                     int tempOut2;
                                     if (xtemp.Attribute("default")?.Value == "true")
@@ -275,6 +278,7 @@ namespace METS.Views.Easy.Controls
                                 case "Channel":
                                 case "ParameterBlock":
                                     ids = xtemp.Attribute("Id").Value + "|" + ids;
+                                    finished = true;
                                     break;
 
                                 case "Dynamic":
@@ -446,6 +450,7 @@ namespace METS.Views.Easy.Controls
 
                 foreach(ParamCondition cond in helper.Conditions)
                 {
+                    if (flag == false) break;
                     AppParameter paraCond = AppParas[cond.SourceId];
                     switch (cond.Operation)
                     {

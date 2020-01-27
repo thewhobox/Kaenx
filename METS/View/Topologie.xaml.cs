@@ -15,6 +15,7 @@ using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices.WindowsRuntime;
 using System.Threading.Tasks;
+using Windows.ApplicationModel.Resources;
 using Windows.Foundation;
 using Windows.Foundation.Collections;
 using Windows.Storage;
@@ -38,6 +39,7 @@ namespace METS.View
     {
         public Project _project;
         private CatalogContext _context = new CatalogContext();
+        private ResourceLoader loader = ResourceLoader.GetForCurrentView("Topologie");
 
         public Topologie()
         {
@@ -85,7 +87,7 @@ namespace METS.View
         private void ClickAddMain(object sender, RoutedEventArgs e)
         {
             ObservableCollection<Line> Lines = (ObservableCollection<Line>)this.DataContext;
-            Line line = new Line(getFirstFreeIdMain(), "Neue Linie");
+            Line line = new Line(getFirstFreeIdMain(), loader.GetString("NewLineMain"));
             Lines.Add(line);
 
             SaveHelper.SaveProject();
@@ -100,7 +102,7 @@ namespace METS.View
             {
                 case "METS.Classes.Line":
                     Line main = (Line)data;
-                    LineMiddle line = new LineMiddle(getFirstFreeIdSub(main), "Neue Linie", main);
+                    LineMiddle line = new LineMiddle(getFirstFreeIdSub(main), loader.GetString("NewLineMiddle"), main);
                     main.Subs.Add(line);
                     main.IsExpanded = true;
                     break;
@@ -132,6 +134,9 @@ namespace METS.View
                     SaveHelper.CalculateLineCurrent(device.Parent);
                     break;
             }
+
+            //TODO nicht das ganze Project speichern.
+            //Lokale Dateien der Geräte löschen
 
             SaveHelper.SaveProject();
             CalcCounts();
@@ -198,7 +203,7 @@ namespace METS.View
 
             TabViewItem item = new TabViewItem();
             item.Icon = new SymbolIcon(Symbol.Shop);
-            item.Header = "Katalog";
+            item.Header = loader.GetString("Catalog");
             item.Content = frame;
             tabView.Items.Add(item);
             tabView.SelectedItem = item;
@@ -215,7 +220,7 @@ namespace METS.View
             {
                 LineMiddle line = (LineMiddle)tbase;
                 e.AcceptedOperation = Windows.ApplicationModel.DataTransfer.DataPackageOperation.Link;
-                e.DragUIOverride.Caption = "Zu Linie " + line.Parent.Id + "." + line.Id + " hinzufügen";
+                e.DragUIOverride.Caption = string.Format(loader.GetString("DragConnect"), line.Parent.Id, line.Id);
                 e.Handled = true;
             }
         }
@@ -234,7 +239,7 @@ namespace METS.View
             {
                 if (line.Subs.Any(s => s.Id == 0))
                 {
-                    ViewHelper.Instance.ShowNotification("In der Linie ist bereits ein Koppler vorhanden.", 4000, ViewHelper.MessageType.Error);
+                    ViewHelper.Instance.ShowNotification(loader.GetString("ErrMsgCoupler"), 4000, ViewHelper.MessageType.Error);
                     return;
                 }
                 device.Id = 0;
@@ -243,7 +248,7 @@ namespace METS.View
             {
                 if (context.Devices.Any(d => d.IsPowerSupply && line.Subs.Any(l => l.DeviceId == d.Id)))
                 {
-                    ViewHelper.Instance.ShowNotification("In der Linie ist bereits eine Spannungsversorgung vorhanden.", 4000, ViewHelper.MessageType.Error);
+                    ViewHelper.Instance.ShowNotification(loader.GetString("ErrMsgPowerSupply"), 4000, ViewHelper.MessageType.Error);
                     return;
                 }
                 device.Id = -1;
@@ -254,7 +259,7 @@ namespace METS.View
                 {
                     if (line.Subs.Count(s => s.Id != -1) > 255)
                     {
-                        ViewHelper.Instance.ShowNotification("Sie haben das Limit von 255 Geräten Pro Linie erreicht.", 4000, ViewHelper.MessageType.Error);
+                        ViewHelper.Instance.ShowNotification(loader.GetString("ErrMsgMaxDevices"), 4000, ViewHelper.MessageType.Error);
                         return;
                     }
                     device.Id = getFirstFreeIdDev(line);
@@ -307,14 +312,8 @@ namespace METS.View
                 await file.CopyAsync(folderP, "Device_" + device.UId + "-PA.json");
             }
 
-
-
-            int insertOffset = line.Subs.Count(s => s.Id == -1) + device.Id;
-            if (insertOffset > line.Subs.Count) insertOffset = line.Subs.Count;
-            if (insertOffset < 0) insertOffset = 0;
-            line.Subs.Insert(insertOffset, device);
-
-            //line.Subs.Add(device);
+            line.Subs.Add(device);
+            line.Subs.Sort(l => l.Id);
             line.IsExpanded = true;
             e.Handled = true;
 
@@ -434,10 +433,10 @@ namespace METS.View
                 try
                 {
                     ApplicationViewModel app = _context.Applications.Single(a => a.Id == dev.ApplicationId);
-                    InfoAppName.Text = app.Name + " " + app.VersionString;
+                    InfoAppName.Text = app.Name + " " + app.VersionString + Environment.NewLine + dev.ApplicationId;
                 } catch
                 {
-                    InfoAppName.Text = "Besitzt keine Applikation";
+                    InfoAppName.Text = loader.GetString("ErrMsgNoApp");
                 }
                 InNumber.IsEnabled = dev.Id > 0;
                 if(dev.Id == 0)
@@ -490,13 +489,13 @@ namespace METS.View
             SaveHelper.SaveProject();
         }
 
-        private bool InNumber_PreviewChanged(int Value)
+        private string InNumber_PreviewChanged(int Value)
         {
+            ObservableCollection<Line> Lines = (ObservableCollection<Line>)this.DataContext;
             TopologieBase tbase = PanelSettings.DataContext as TopologieBase;
 
             if(tbase is LineDevice)
             {
-                ObservableCollection<Line> Lines = (ObservableCollection<Line>)this.DataContext;
                 foreach(Line line in Lines)
                 {
                     foreach(LineMiddle middle in line.Subs)
@@ -504,14 +503,34 @@ namespace METS.View
                         if (middle.Subs.Contains(tbase) && middle.Subs.Any(m => m.Id == Value))
                         {
                             LineDevice dev = middle.Subs.Single(m => m.Id == Value);
-                            if(dev != tbase)
-                                return true;
+                            if (dev != tbase)
+                                return loader.GetString("ErrMsgExistDevice");
                         }
+                    }
+                }
+            }else if(tbase is Line)
+            {
+                if (Lines.Any(m => m.Id == Value))
+                {
+                    Line line = Lines.Single(m => m.Id == Value);
+                    if (line != tbase)
+                        return loader.GetString("ErrMsgExistArea");
+                }
+            } else if(tbase is LineMiddle)
+            {
+                foreach (Line line in Lines)
+                {
+                    
+                    if (line.Subs.Contains(tbase) && line.Subs.Any(m => m.Id == Value))
+                    {
+                        LineMiddle lineM = line.Subs.Single(m => m.Id == Value);
+                        if (lineM != tbase)
+                            return loader.GetString("ErrMsgExistLine");
                     }
                 }
             }
 
-            return false;
+            return null;
         }
     }
 }

@@ -152,7 +152,7 @@ namespace METS.View
             ImportDevice = "KNX-Master Datei aktualisieren";
             ZipArchiveEntry entry = Imports.Archive.GetEntry("knx_master.xml");
             Log.Information("---- Integrierte KNX_Master wird überprüft");
-            await Task.Delay(2000);
+            //await Task.Delay(2000);
             XElement manXML = XDocument.Load(entry.Open()).Root;
             StorageFile masterFile;
 
@@ -213,7 +213,7 @@ namespace METS.View
 
             ImportDevice = resourceLoader.GetString("StateCat");
             Log.Information("---- Katalog analyse gestartet");
-            await Task.Delay(2000);
+            //await Task.Delay(2000);
             entry = Imports.Archive.GetEntry(Helper.currentMan + "/Catalog.xml");
             try
             {
@@ -236,7 +236,7 @@ namespace METS.View
             entry = Imports.Archive.GetEntry(Helper.currentMan + "/Hardware.xml");
             ImportDevice = resourceLoader.GetString("StateHard");
             Log.Information("---- Hardware wird importiert");
-            await Task.Delay(2000);
+            //await Task.Delay(2000);
             try
             {
                 XElement xml = XDocument.Load(entry.Open()).Root;
@@ -256,12 +256,12 @@ namespace METS.View
             ProgSub.IsIndeterminate = false;
             ProgSub.Value = 0;
 
-            await Task.Delay(2000);
+            //await Task.Delay(2000);
 
             ImportDevice = "";
             Log.Information("---- Applikationen werden importiert");
             ImportState = resourceLoader.GetString("StateApp");
-            await Task.Delay(1000);
+            await Task.Delay(500);
             try
             {
                 await Helper.ImportApplications(Imports);

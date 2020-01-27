@@ -213,7 +213,7 @@ namespace METS.Classes.Helper
             foreach (string appId in AppIds)
             {
                 Log.Information("---- Applikation wird importiert:  " + appId);
-                await Task.Delay(200);
+                await Task.Delay(10);
                 string hardId = App2Hardware[appId];
                 string manuId = appId.Substring(0, appId.IndexOf('_'));
 

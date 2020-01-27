@@ -14,7 +14,6 @@ namespace METS.Context.Catalog
         public DbSet<DeviceViewModel> Devices { get; set; }
         public DbSet<ApplicationViewModel> Applications { get; set; }
         public DbSet<CatalogViewModel> Sections { get; set; }
-        public DbSet<ManufacturerViewModel> Manufacturer { get; set; }
 
         public DbSet<AppComObject> AppComObjects { get; set; }
         public DbSet<AppParameter> AppParameters { get; set; }

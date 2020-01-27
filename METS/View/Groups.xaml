@@ -137,10 +137,10 @@
                 <SolidColorBrush Color="#FFE0E0E0" />
             </toolkit:DataGrid.Background>
             <toolkit:DataGrid.Columns>
-                <toolkit:DataGridTextColumn Tag="number" Width="SizeToCells" Header="Nummer" Binding="{Binding Number}" />
-                <toolkit:DataGridTextColumn MinWidth="160" Tag="name" Width="SizeToCells" Header="Name" Binding="{Binding Name}" />
-                <toolkit:DataGridTextColumn MinWidth="160" Tag="func" Width="SizeToCells" Header="Funktion" Binding="{Binding Function}" />
-                <toolkit:DataGridTextColumn MinWidth="300" Tag="connections" Width="SizeToCells" Header="Verbindungen" Binding="{Binding Connections}" />
+                <toolkit:DataGridTextColumn x:Uid="/Groups/LComsNumb" Tag="number" Width="SizeToCells" Binding="{Binding Number}" />
+                <toolkit:DataGridTextColumn x:Uid="/Groups/LComsName" MinWidth="160" Tag="name" Width="SizeToCells" Binding="{Binding Name}" />
+                <toolkit:DataGridTextColumn x:Uid="/Groups/LComsFunc" MinWidth="160" Tag="func" Width="SizeToCells" Binding="{Binding Function}" />
+                <toolkit:DataGridTextColumn x:Uid="/Groups/LComsConn" MinWidth="300" Tag="connections" Width="SizeToCells" Binding="{Binding Connections}" />
             </toolkit:DataGrid.Columns>
         </toolkit:DataGrid>
 

@@ -62,10 +62,10 @@
 
 
 
-                    <Button x:Uid="/WorkDesk/TooltipInfoBus"  Grid.Column="1" Style="{StaticResource InfobarButton}">
+                    <Button x:Uid="/WorkDesk/TooltipInfoBus" Grid.Column="1" Style="{StaticResource InfobarButton}">
                         <TextBlock>
                             <Run x:Uid="/WorkDesk/InfoBus" />
-                            <Run x:Uid="/WorkDesk/InfoBusState" x:Name="InfoBus" Text="Getrennt" />
+                            <Run x:Uid="/WorkDesk/InfoBusState" x:Name="InfoBus" />
                         </TextBlock>
                     </Button>
 

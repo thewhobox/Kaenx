@@ -117,58 +117,109 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="CListConn.Header" xml:space="preserve">
-    <value>Verbindungen</value>
+  <data name="Catalog" xml:space="preserve">
+    <value>Katalog</value>
   </data>
-  <data name="CListContextUnlink.Text" xml:space="preserve">
-    <value>Trennen</value>
+  <data name="DragConnect" xml:space="preserve">
+    <value>Zu Linie {0}.{1} hinzufügen.</value>
   </data>
-  <data name="CListFunc.Header" xml:space="preserve">
-    <value>Funktion</value>
+  <data name="ErrMsgCoupler" xml:space="preserve">
+    <value>In der Linie ist bereits ein Koppler vorhanden.</value>
   </data>
-  <data name="CListName.Header" xml:space="preserve">
-    <value>Name</value>
+  <data name="ErrMsgExistArea" xml:space="preserve">
+    <value>Es existiert bereits ein Bereich mit dieser ID.</value>
   </data>
-  <data name="CListNumb.Header" xml:space="preserve">
-    <value>Nr.</value>
+  <data name="ErrMsgExistLine" xml:space="preserve">
+    <value>Es existiert bereits eine Linie mit dieser ID.</value>
   </data>
-  <data name="DragConnectKO" xml:space="preserve">
-    <value>KO mit "{0} {1}" verknüpfen.</value>
+  <data name="ErrMsgMaxDevices" xml:space="preserve">
+    <value>Sie haben das Limit von 255 Geräten Pro Linie erreicht.</value>
   </data>
-  <data name="GListContextAdd.Text" xml:space="preserve">
+  <data name="ErrMsgNoApp" xml:space="preserve">
+    <value>Besitzt keine Applikation</value>
+  </data>
+  <data name="ErrMsgPowerSupply" xml:space="preserve">
+    <value>In der Linie ist bereits eine Spannungsversorgung vorhanden.</value>
+  </data>
+  <data name="ErrorMsgExistDevice" xml:space="preserve">
+    <value>Es existiert bereits ein Gerät mit dieser ID.</value>
+  </data>
+  <data name="InfoArea.Text" xml:space="preserve">
+    <value>Bereiche: </value>
+  </data>
+  <data name="InfoDevice.Text" xml:space="preserve">
+    <value>Geräte: </value>
+  </data>
+  <data name="InfoLine.Text" xml:space="preserve">
+    <value>Linien: </value>
+  </data>
+  <data name="MenAdd.Text" xml:space="preserve">
     <value>Hinzufügen</value>
   </data>
-  <data name="GListContextDelete.Text" xml:space="preserve">
+  <data name="MenDelete.Text" xml:space="preserve">
     <value>Löschen</value>
   </data>
-  <data name="GListContextRename.Text" xml:space="preserve">
+  <data name="MenOpenPara.Text" xml:space="preserve">
+    <value>Parameter</value>
+  </data>
+  <data name="MenOpenPara2.Text" xml:space="preserve">
+    <value>Parameter 2</value>
+  </data>
+  <data name="MenProg.Text" xml:space="preserve">
+    <value>Programmieren</value>
+  </data>
+  <data name="MenProgAppK.Text" xml:space="preserve">
+    <value>Applikation (Komplett)</value>
+  </data>
+  <data name="MenProgAppM.Text" xml:space="preserve">
+    <value>Applikation (Minimal, Experimentell)</value>
+  </data>
+  <data name="MenProgAppP.Text" xml:space="preserve">
+    <value>Applikation (Partiell)</value>
+  </data>
+  <data name="MenProgPh.Text" xml:space="preserve">
+    <value>Ph. Adresse</value>
+  </data>
+  <data name="MenRename.Text" xml:space="preserve">
     <value>Umbenennen</value>
   </data>
-  <data name="LComsConn.Header" xml:space="preserve">
-    <value>Verbindungen</value>
+  <data name="NewLineMain" xml:space="preserve">
+    <value>Neuer Bereich</value>
   </data>
-  <data name="LComsFunc.Header" xml:space="preserve">
-    <value>Funktion</value>
+  <data name="NewLineMiddle" xml:space="preserve">
+    <value>Neue Linie</value>
   </data>
-  <data name="LComsName.Header" xml:space="preserve">
-    <value>Name</value>
+  <data name="SideProps.Text" xml:space="preserve">
+    <value>Eigenschaften</value>
   </data>
-  <data name="LComsNumb.Header" xml:space="preserve">
-    <value>Nr.</value>
+  <data name="SidePropsApp.Header" xml:space="preserve">
+    <value>Applikation:</value>
   </data>
-  <data name="NewGroupAddr" xml:space="preserve">
-    <value>Neue Gruppenadresse</value>
+  <data name="SidePropsCheckA.Content" xml:space="preserve">
+    <value>Applikation</value>
   </data>
-  <data name="NewGroupMain" xml:space="preserve">
-    <value>Neue Hauptgruppe</value>
+  <data name="SidePropsCheckG.Content" xml:space="preserve">
+    <value>Gruppen</value>
   </data>
-  <data name="NewGroupMiddle" xml:space="preserve">
-    <value>Neue Mittelgruppe</value>
+  <data name="SidePropsCheckP.Content" xml:space="preserve">
+    <value>Ph. Adresse</value>
   </data>
-  <data name="ToolAddMain.Label" xml:space="preserve">
-    <value>Haupt</value>
+  <data name="SidePropsCurrentA.Header" xml:space="preserve">
+    <value>Verfügbarer Busstrom:</value>
   </data>
-  <data name="ToolFilter.Label" xml:space="preserve">
-    <value>Filter</value>
+  <data name="SidePropsCurrentU.Header" xml:space="preserve">
+    <value>Berechneter Busstrom:</value>
+  </data>
+  <data name="SidePropsName.Header" xml:space="preserve">
+    <value>Name:</value>
+  </data>
+  <data name="SidePropsNumb.Header" xml:space="preserve">
+    <value>Nummer:</value>
+  </data>
+  <data name="ToolAdd.Label" xml:space="preserve">
+    <value>Bereich</value>
+  </data>
+  <data name="ToolOpenCat.Label" xml:space="preserve">
+    <value>Katalog</value>
   </data>
 </root>

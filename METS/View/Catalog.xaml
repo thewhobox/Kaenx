@@ -52,7 +52,7 @@
                 <AppBarElementContainer>
                     <TextBox Width="200" x:Uid="/Catalog/BarSearch" x:Name="BarSearchIn" Margin="0 4 0 0" TextChanged="SearchTextChanged" />
                 </AppBarElementContainer>
-                <AppBarButton Icon="Delete" x:Uid="/Catalog/BarDelete" />
+                <AppBarButton Icon="Delete" x:Uid="/Catalog/BarDelete" x:Name="BarDelete" Click="ClickDelete"  IsEnabled="False"/>
                 <AppBarSeparator />
                 <AppBarButton Icon="Download" x:Uid="/Catalog/BarImport" controls:Menu.InputGestureText="Ctrl+Shift+N" Click="ClickImport" />
                 <AppBarButton Icon="Upload" x:Uid="/Catalog/BarExport" />
@@ -146,9 +146,14 @@
                     <ColumnDefinition />
                 </Grid.ColumnDefinitions>
 
-                <Border Grid.ColumnSpan="3" Margin="10" BorderBrush="{ThemeResource SystemControlBackgroundAccentBrush}" BorderThickness="0,0,0,5">
+                <StackPanel Grid.ColumnSpan="3" Margin="10" BorderBrush="{ThemeResource SystemControlBackgroundAccentBrush}" BorderThickness="0,0,0,5">
                     <TextBlock x:Uid="/Catalog/ImportHeader" FontSize="25" Padding="10" TextWrapping="WrapWholeWords" />
-                </Border>
+                    <TextBlock Padding="10 0 10 10">
+                        <Run x:Uid="/Catalog/ImportSelectedLang" />
+                        <Run x:Name="OutSelectedLang" />
+                        <Hyperlink Click="HyperlinkChangeLang_Click"><Run x:Uid="/Catalog/ImportChangeLange" /></Hyperlink>
+                    </TextBlock>
+                </StackPanel>
 
                 <ListView Grid.Row="1" Grid.ColumnSpan="3" x:Name="ImportList" ItemsSource="{Binding Import.DeviceList}" SelectionMode="None" Tapped="ListView_Tapped" IsItemClickEnabled="True" >
                     <ListView.ItemTemplate>

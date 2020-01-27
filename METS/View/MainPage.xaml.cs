@@ -65,6 +65,11 @@ namespace METS.View
 
             AppVersion.Text =  string.Format("{0}.{1}.{2}.{3}", version.Major, version.Minor, version.Build, version.Revision);
 
+
+
+
+
+
             LoadProjects();
         }
 
