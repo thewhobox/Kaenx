@@ -137,7 +137,6 @@ namespace METS.View
 
                     if(tempLangs.Count > 1)
                     {
-
                         ApplicationDataContainer container = ApplicationData.Current.LocalSettings;
                         string defaultLang = container.Values["defaultLang"]?.ToString();
 
@@ -151,16 +150,21 @@ namespace METS.View
                                 DiagLanguage diaglang = new DiagLanguage(tempLangs);
                                 await diaglang.ShowAsync();
                                 Import.SelectedLanguage = diaglang.SelectedLanguage;
-                                ImportHelper.TranslateXml(catXML.Root, diaglang.SelectedLanguage);
+                                await ImportHelper.TranslateXml(catXML.Root, diaglang.SelectedLanguage);
                             }
                         } else
                         {
                             Import.SelectedLanguage = defaultLang;
-                            ImportHelper.TranslateXml(catXML.Root, defaultLang);
+                            await ImportHelper.TranslateXml(catXML.Root, defaultLang);
                         }
+                    } else if(tempLangs.Count == 1)
+                    {
+                        Import.SelectedLanguage = tempLangs[0];
+                        await ImportHelper.TranslateXml(catXML.Root, tempLangs[0]);
                     }
 
-                    OutSelectedLang.Text = Import.SelectedLanguage;
+                    if(!string.IsNullOrEmpty(Import.SelectedLanguage))
+                        OutSelectedLang.Text = Import.SelectedLanguage;
 
                     XElement catalogXML = catXML.Descendants(XName.Get("Catalog", ns)).ElementAt<XElement>(0);
                     Import.DeviceList = CatalogHelper.GetDevicesFromCatalog(catalogXML);
@@ -454,7 +458,7 @@ namespace METS.View
                     DiagLanguage diaglang = new DiagLanguage(tempLangs);
                     await diaglang.ShowAsync();
                     Import.SelectedLanguage = diaglang.SelectedLanguage;
-                    ImportHelper.TranslateXml(catXML.Root, diaglang.SelectedLanguage);
+                    await ImportHelper.TranslateXml(catXML.Root, diaglang.SelectedLanguage);
                     OutSelectedLang.Text = Import.SelectedLanguage;
                     XElement catalogXML = catXML.Descendants(XName.Get("Catalog", ns)).ElementAt<XElement>(0);
                     Import.DeviceList = CatalogHelper.GetDevicesFromCatalog(catalogXML);

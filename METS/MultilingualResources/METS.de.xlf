@@ -393,6 +393,10 @@
           <source>Topologie</source>
           <target state="new">Topologie</target>
         </trans-unit>
+        <trans-unit id="InfoBusState.Text" translate="yes" xml:space="preserve">
+          <source>Getrennt</source>
+          <target state="new">Getrennt</target>
+        </trans-unit>
       </group>
     </body>
   </file>
@@ -401,7 +405,148 @@
       <tool tool-id="MultilingualAppToolkit" tool-name="Multilingual App Toolkit" tool-version="4.0.6915.0" tool-company="Microsoft" />
     </header>
     <body>
-      <group id="METS/STRINGS/DE-DE/TOPOLOGIE.RESW" datatype="resx" />
+      <group id="METS/STRINGS/DE-DE/TOPOLOGIE.RESW" datatype="resx">
+        <trans-unit id="Catalog" translate="yes" xml:space="preserve">
+          <source>Katalog</source>
+          <target state="new">Katalog</target>
+        </trans-unit>
+        <trans-unit id="DragConnect" translate="yes" xml:space="preserve">
+          <source>Zu Linie {0}.{1} hinzufügen.</source>
+          <target state="new">Zu Linie {0}.{1} hinzufügen.</target>
+        </trans-unit>
+        <trans-unit id="ErrMsgCoupler" translate="yes" xml:space="preserve">
+          <source>In der Linie ist bereits ein Koppler vorhanden.</source>
+          <target state="new">In der Linie ist bereits ein Koppler vorhanden.</target>
+        </trans-unit>
+        <trans-unit id="ErrMsgExistArea" translate="yes" xml:space="preserve">
+          <source>Es existiert bereits ein Bereich mit dieser ID.</source>
+          <target state="new">Es existiert bereits ein Bereich mit dieser ID.</target>
+        </trans-unit>
+        <trans-unit id="ErrMsgExistLine" translate="yes" xml:space="preserve">
+          <source>Es existiert bereits eine Linie mit dieser ID.</source>
+          <target state="new">Es existiert bereits eine Linie mit dieser ID.</target>
+        </trans-unit>
+        <trans-unit id="ErrMsgMaxDevices" translate="yes" xml:space="preserve">
+          <source>Sie haben das Limit von 255 Geräten Pro Linie erreicht.</source>
+          <target state="new">Sie haben das Limit von 255 Geräten Pro Linie erreicht.</target>
+        </trans-unit>
+        <trans-unit id="ErrMsgNoApp" translate="yes" xml:space="preserve">
+          <source>Besitzt keine Applikation</source>
+          <target state="new">Besitzt keine Applikation</target>
+        </trans-unit>
+        <trans-unit id="ErrMsgPowerSupply" translate="yes" xml:space="preserve">
+          <source>In der Linie ist bereits eine Spannungsversorgung vorhanden.</source>
+          <target state="new">In der Linie ist bereits eine Spannungsversorgung vorhanden.</target>
+        </trans-unit>
+        <trans-unit id="ErrorMsgExistDevice" translate="yes" xml:space="preserve">
+          <source>Es existiert bereits ein Gerät mit dieser ID.</source>
+          <target state="new">Es existiert bereits ein Gerät mit dieser ID.</target>
+        </trans-unit>
+        <trans-unit id="InfoArea.Text" translate="yes" xml:space="preserve">
+          <source>Bereiche: </source>
+          <target state="new">Bereiche: </target>
+        </trans-unit>
+        <trans-unit id="InfoDevice.Text" translate="yes" xml:space="preserve">
+          <source>Geräte: </source>
+          <target state="new">Geräte: </target>
+        </trans-unit>
+        <trans-unit id="InfoLine.Text" translate="yes" xml:space="preserve">
+          <source>Linien: </source>
+          <target state="new">Linien: </target>
+        </trans-unit>
+        <trans-unit id="MenAdd.Text" translate="yes" xml:space="preserve">
+          <source>Hinzufügen</source>
+          <target state="new">Hinzufügen</target>
+        </trans-unit>
+        <trans-unit id="MenDelete.Text" translate="yes" xml:space="preserve">
+          <source>Löschen</source>
+          <target state="new">Löschen</target>
+        </trans-unit>
+        <trans-unit id="MenOpenPara.Text" translate="yes" xml:space="preserve">
+          <source>Parameter</source>
+          <target state="new">Parameter</target>
+        </trans-unit>
+        <trans-unit id="MenOpenPara2.Text" translate="yes" xml:space="preserve">
+          <source>Parameter 2</source>
+          <target state="new">Parameter 2</target>
+        </trans-unit>
+        <trans-unit id="MenProg.Text" translate="yes" xml:space="preserve">
+          <source>Programmieren</source>
+          <target state="new">Programmieren</target>
+        </trans-unit>
+        <trans-unit id="MenProgAppK.Text" translate="yes" xml:space="preserve">
+          <source>Applikation (Komplett)</source>
+          <target state="new">Applikation (Komplett)</target>
+        </trans-unit>
+        <trans-unit id="MenProgAppM.Text" translate="yes" xml:space="preserve">
+          <source>Applikation (Minimal, Experimentell)</source>
+          <target state="new">Applikation (Minimal, Experimentell)</target>
+        </trans-unit>
+        <trans-unit id="MenProgAppP.Text" translate="yes" xml:space="preserve">
+          <source>Applikation (Partiell)</source>
+          <target state="new">Applikation (Partiell)</target>
+        </trans-unit>
+        <trans-unit id="MenProgPh.Text" translate="yes" xml:space="preserve">
+          <source>Ph. Adresse</source>
+          <target state="new">Ph. Adresse</target>
+        </trans-unit>
+        <trans-unit id="MenRename.Text" translate="yes" xml:space="preserve">
+          <source>Umbenennen</source>
+          <target state="new">Umbenennen</target>
+        </trans-unit>
+        <trans-unit id="NewLineMain" translate="yes" xml:space="preserve">
+          <source>Neuer Bereich</source>
+          <target state="new">Neuer Bereich</target>
+        </trans-unit>
+        <trans-unit id="NewLineMiddle" translate="yes" xml:space="preserve">
+          <source>Neue Linie</source>
+          <target state="new">Neue Linie</target>
+        </trans-unit>
+        <trans-unit id="SideProps.Text" translate="yes" xml:space="preserve">
+          <source>Eigenschaften</source>
+          <target state="new">Eigenschaften</target>
+        </trans-unit>
+        <trans-unit id="SidePropsApp.Header" translate="yes" xml:space="preserve">
+          <source>Applikation:</source>
+          <target state="new">Applikation:</target>
+        </trans-unit>
+        <trans-unit id="SidePropsCheckA.Content" translate="yes" xml:space="preserve">
+          <source>Applikation</source>
+          <target state="new">Applikation</target>
+        </trans-unit>
+        <trans-unit id="SidePropsCheckG.Content" translate="yes" xml:space="preserve">
+          <source>Gruppen</source>
+          <target state="new">Gruppen</target>
+        </trans-unit>
+        <trans-unit id="SidePropsCheckP.Content" translate="yes" xml:space="preserve">
+          <source>Ph. Adresse</source>
+          <target state="new">Ph. Adresse</target>
+        </trans-unit>
+        <trans-unit id="SidePropsCurrentA.Header" translate="yes" xml:space="preserve">
+          <source>Verfügbarer Busstrom:</source>
+          <target state="new">Verfügbarer Busstrom:</target>
+        </trans-unit>
+        <trans-unit id="SidePropsCurrentU.Header" translate="yes" xml:space="preserve">
+          <source>Berechneter Busstrom:</source>
+          <target state="new">Berechneter Busstrom:</target>
+        </trans-unit>
+        <trans-unit id="SidePropsName.Header" translate="yes" xml:space="preserve">
+          <source>Name:</source>
+          <target state="new">Name:</target>
+        </trans-unit>
+        <trans-unit id="SidePropsNumb.Header" translate="yes" xml:space="preserve">
+          <source>Nummer:</source>
+          <target state="new">Nummer:</target>
+        </trans-unit>
+        <trans-unit id="ToolAdd.Label" translate="yes" xml:space="preserve">
+          <source>Bereich</source>
+          <target state="new">Bereich</target>
+        </trans-unit>
+        <trans-unit id="ToolOpenCat.Label" translate="yes" xml:space="preserve">
+          <source>Katalog</source>
+          <target state="new">Katalog</target>
+        </trans-unit>
+      </group>
     </body>
   </file>
 </xliff>

@@ -218,7 +218,7 @@ namespace METS.View
             try
             {
                 XElement xml = XDocument.Load(entry.Open()).Root;
-                ImportHelper.TranslateXml(xml, Imports.SelectedLanguage);
+                await ImportHelper.TranslateXml(xml, Imports.SelectedLanguage);
                 await Helper.ImportCatalog(xml);
             }
             catch (Exception e)
@@ -240,7 +240,7 @@ namespace METS.View
             try
             {
                 XElement xml = XDocument.Load(entry.Open()).Root;
-                ImportHelper.TranslateXml(xml, Imports.SelectedLanguage);
+                await ImportHelper.TranslateXml(xml, Imports.SelectedLanguage);
                 await Helper.ImportHardware(xml, prod2load);
             }
             catch (Exception e)

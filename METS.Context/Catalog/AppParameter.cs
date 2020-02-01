@@ -19,7 +19,8 @@ namespace METS.Context.Catalog
         public string Value { get; set; }
 
         [MaxLength(100)]
-        public string AbsoluteSegmentId { get; set; }
+        public string SegmentId { get; set; }
+        public SegmentTypes SegmentType { get; set; }
         public int Offset { get; set; }
         public int OffsetBit { get; set; }
         public AccessType Access { get; set; }
@@ -30,12 +31,19 @@ namespace METS.Context.Catalog
             ParameterTypeId = para.ParameterTypeId;
             ApplicationId = para.ApplicationId;
             Text = para.Text;
-            AbsoluteSegmentId = para.AbsoluteSegmentId;
+            SegmentId = para.SegmentId;
             Offset = para.Offset;
             OffsetBit = para.OffsetBit;
             Access = para.Access;
             Value = para.Value;
         }
+    }
+
+    public enum SegmentTypes
+    {
+        Memory = 0,
+        Property = 1,
+        None = 255
     }
 
     public enum AccessType

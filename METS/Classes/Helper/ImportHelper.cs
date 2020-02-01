@@ -37,18 +37,23 @@ namespace METS.Classes.Helper
         private Dictionary<string, string> App2Hardware;
         private List<ImportError> AppErrors;
         private List<string> AppIds;
-
-        private XElement transCatalog;
+        private string currentAppName;
         private Dictionary<string, string> cat2prod = new Dictionary<string, string>();
 
 
-        public static void TranslateXml(XElement xml, string selectedLang)
+        public static async Task TranslateXml(XElement xml, string selectedLang, ValueHandler deviceH = null, ProgressChangedHandler maxH = null, ProgressChangedHandler currH = null)
         {
             if (selectedLang == null) return;
 
             XElement lang = xml.Descendants(XName.Get("Language", xml.Name.NamespaceName)).Single(l => l.Attribute("Identifier").Value == selectedLang);
             List<XElement> trans = lang.Descendants(XName.Get("TranslationElement", xml.Name.NamespaceName)).ToList();
-            
+
+            deviceH?.Invoke("Übersetzen");
+            maxH?.Invoke(trans.Count);
+
+            await Task.Delay(100);
+
+            int c = 0;
             foreach(XElement translate in trans)
             {
                 string id = translate.Attribute("RefId").Value;
@@ -64,6 +69,13 @@ namespace METS.Classes.Helper
                     {
                         ele.Attribute(transele.Attribute("AttributeName").Value).Value = transele.Attribute("Text").Value;
                     }
+                }
+
+                c++;
+                if(c % 100 == 0)
+                {
+                    currH?.Invoke(c);
+                    await Task.Delay(10);
                 }
             }
         }
@@ -232,11 +244,33 @@ namespace METS.Classes.Helper
                     app = _context.Applications.Single(a => a.Id == appId);
                 else
                     app = new ApplicationViewModel() { Id = appId };
+;
+
 
                 XElement doc = XDocument.Load(appEntry.Open()).Root;
-                ImportHelper.TranslateXml(doc, import.SelectedLanguage);
-
                 XElement appele = doc.Descendants(XName.Get("ApplicationProgram", doc.Name.Namespace.NamespaceName)).First();
+
+                List<string> errs = CheckApplication(XmlReader.Create(appEntry.Open()));
+                if (errs.Count > 0)
+                {
+                    Log.Error("Check nicht bestanden! " + string.Join(",", errs));
+                    ImportError err = new ImportError(app.Id);
+                    err.Code = string.Join(",", errs);
+                    err.Exception = "ApplicationCheck";
+                    err.Message = appele.Attribute("Name").Value + "Die Applikation hat die Überprüfung nicht bestanden. (evtl. Plugin benötigt) " + string.Join(",", errs);
+                    AppErrors.Add(err);
+
+                    OnError(appele.Attribute("Name").Value + ": Die Applikation hat die Überprüfung nicht bestanden. (evtl. Plugin benötigt) " + string.Join(",", errs));
+
+                    count++;
+                    ProgressChanged(count);
+                    continue;
+                }
+
+
+                await ImportHelper.TranslateXml(doc, import.SelectedLanguage, OnDeviceChanged, ProgressAppMaxChanged, ProgressAppChanged);
+
+                appele = doc.Descendants(XName.Get("ApplicationProgram", doc.Name.Namespace.NamespaceName)).First();
 
                 app.Number = int.Parse(appele.Attribute("ApplicationNumber").Value);
                 app.Version = int.Parse(appele.Attribute("ApplicationVersion").Value);
@@ -254,26 +288,11 @@ namespace METS.Classes.Helper
                 int rest = app.Version % 16;
                 int full = (app.Version - rest) / 16;
 
-                OnDeviceChanged(app.Name + " " + "V" + full.ToString() + "." + rest.ToString());
+                currentAppName = app.Name + " " + "V" + full.ToString() + "." + rest.ToString();
+                OnDeviceChanged(currentAppName + " - Check Application");
+                await Task.Delay(10);
 
                 Log.Information(app.Name + " V" + full.ToString() + "." + rest.ToString());
-
-                List<string> errs = CheckApplication(XmlReader.Create(appEntry.Open()));
-                if (errs.Count > 0)
-                {
-                    Log.Error("Check nicht bestanden! " + string.Join(",", errs));
-                    ImportError err = new ImportError(app.Id);
-                    err.Code = string.Join(",", errs);
-                    err.Exception = "ApplicationCheck";
-                    err.Message = app.Name + "Die Applikation hat die Überprüfung nicht bestanden. (evtl. Plugin benötigt) " + string.Join(",", errs);
-                    AppErrors.Add(err);
-
-                    OnError(app.Name + ": Die Applikation hat die Überprüfung nicht bestanden. (evtl. Plugin benötigt) " + string.Join(",", errs));
-
-                    count++;
-                    ProgressChanged(count);
-                    continue;
-                }
                 
                 int cmax = 0;
                 using(XmlReader reader = XmlReader.Create(appEntry.Open()))
@@ -291,6 +310,8 @@ namespace METS.Classes.Helper
 
 
                 Log.Information("Applikation wird nun eingelesen...");
+                OnDeviceChanged(currentAppName + " - Einlesen");
+                await Task.Delay(10);
                 await ReadApplication(doc, app, cmax);
 
                 
@@ -741,7 +762,7 @@ namespace METS.Classes.Helper
                 if (para.Elements(GetXName("Memory")).Count() > 0)
                 {
                     XElement mem = para.Elements(GetXName("Memory")).ElementAt(0);
-                    param.AbsoluteSegmentId = mem.Attribute("CodeSegment").Value;
+                    param.SegmentId = mem.Attribute("CodeSegment").Value;
                     param.Offset = int.Parse(mem.Attribute("Offset").Value);
                     param.OffsetBit = int.Parse(mem.Attribute("BitOffset").Value);
                 }
@@ -756,20 +777,46 @@ namespace METS.Classes.Helper
             tempList = doc.Descendants(GetXName("Union")).ToList();
             foreach (XElement union in tempList)
             {
+                //TODO also check for property for parameter
+                string t1 = null;
+                int t2 = 0;
+                int t3 = 0;
+                SegmentTypes segType = SegmentTypes.None;
                 XElement mem = union.Element(GetXName("Memory"));
-                string t1 = mem.Attribute("CodeSegment").Value;
-                int t2 = int.Parse(mem.Attribute("Offset").Value);
-                int t3 = int.Parse(mem.Attribute("BitOffset").Value);
+                if (mem != null)
+                {
+                    t1 = mem.Attribute("CodeSegment").Value;
+                    t2 = int.Parse(mem.Attribute("Offset").Value);
+                    t3 = int.Parse(mem.Attribute("BitOffset").Value);
+                    segType = SegmentTypes.Memory;
+                } else
+                {
+                    mem = union.Element(GetXName("Property"));
+                    if (mem != null)
+                    {
+                        //ObjectIndex="6" PropertyId="57" Offset="17" BitOffset="0"
+
+                        t1 = "Property:" + mem.Attribute("ObjectIndex").Value + ":" + mem.Attribute("PropertyId").Value;
+                        t2 = int.Parse(mem.Attribute("Offset").Value);
+                        t3 = int.Parse(mem.Attribute("BitOffset").Value);
+                        segType = SegmentTypes.Property;
+                    } else
+                    {
+                        Log.Error("Union hat keinen bekannten Speicher! " + union.ToString());
+                    }
+                }
+                
                 int t4 = int.Parse(union.Attribute("SizeInBit").Value);
                 mem = null;
                 foreach (XElement para in union.Elements(GetXName("Parameter")))
                 {
                     AppParameter param = Params[para.Attribute("Id").Value];
-                    param.AbsoluteSegmentId = t1;
+                    param.SegmentId = t1;
                     int off = int.Parse(para.Attribute("Offset").Value);
                     int offb = int.Parse(para.Attribute("BitOffset").Value);
                     param.Offset = t2 + off;
                     param.OffsetBit = t3 + offb;
+                    param.SegmentType = segType;
                 }
                 position++;
                 ProgressAppChanged(position);
@@ -1125,11 +1172,11 @@ namespace METS.Classes.Helper
                         if (!errs.Contains("ParameterCalculations")) errs.Add("ParameterCalculations");
                         reader.ReadOuterXml();
                         break;
-                    case "Property":
-                        Log.Warning("Unbekannte Property!", reader.ReadOuterXml());
-                        //if (!errs.Contains("Property")) errs.Add("Property");
-                        // ToDo: Check what it means
-                        break;
+                    //case "Property":
+                    //    Log.Warning("Unbekannte Property! ", reader.ReadOuterXml());
+                    //    //if (!errs.Contains("Property")) errs.Add("Property");
+                    //    // ToDo: Check what it means
+                    //    break;
                 }
             }
 
