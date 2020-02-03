@@ -22,10 +22,10 @@
     <GenerateAppInstallerFile>False</GenerateAppInstallerFile>
     <AppxAutoIncrementPackageRevision>False</AppxAutoIncrementPackageRevision>
     <AppxBundle>Always</AppxBundle>
-    <AppxBundlePlatforms>x86</AppxBundlePlatforms>
+    <AppxBundlePlatforms>x86|x64|arm</AppxBundlePlatforms>
     <AppInstallerUpdateFrequency>0</AppInstallerUpdateFrequency>
     <AppInstallerCheckForUpdateFrequency>OnApplicationRun</AppInstallerCheckForUpdateFrequency>
-    <PackageCertificateThumbprint>A355B4FFB9C82295EA0D53D08D3A09BE7D66598A</PackageCertificateThumbprint>
+    <PackageCertificateThumbprint>4EF11E869A30325269E0F3289C3F3551A7DFEBE4</PackageCertificateThumbprint>
     <AppxPackageSigningTimestampDigestAlgorithm>SHA256</AppxPackageSigningTimestampDigestAlgorithm>
     <GenerateTestArtifacts>True</GenerateTestArtifacts>
     <HoursBetweenUpdateChecks>0</HoursBetweenUpdateChecks>
@@ -137,6 +137,7 @@
     <Compile Include="Classes\Controls\ControlUpdate.xaml.cs">
       <DependentUpon>ControlUpdate.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Classes\DeviceImportInfo.cs" />
     <Compile Include="Classes\Helper\BlockVisHelper.cs" />
     <Compile Include="Classes\Helper\ParamVisHelper.cs" />
     <Compile Include="Classes\Project\DeviceComObject.cs" />

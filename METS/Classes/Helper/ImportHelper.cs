@@ -11,6 +11,7 @@ using Windows.Storage;
 using METS.Context.Catalog;
 using Serilog;
 using METS.MVVM;
+using System.Collections.ObjectModel;
 
 namespace METS.Classes.Helper
 {
@@ -32,23 +33,26 @@ namespace METS.Classes.Helper
         private List<ManufacturerViewModel> tempManus;
         private CatalogContext _context = new CatalogContext();
 
-        private Dictionary<string, string> Prod2Section;
+        //private Dictionary<string, string> Prod2Section;
         private List<string> DeviceIds;
         private Dictionary<string, string> App2Hardware;
         private List<ImportError> AppErrors;
         private List<string> AppIds;
         private string currentAppName;
-        private Dictionary<string, string> cat2prod = new Dictionary<string, string>();
 
 
-        public static async Task TranslateXml(XElement xml, string selectedLang, ValueHandler deviceH = null, ProgressChangedHandler maxH = null, ProgressChangedHandler currH = null)
+        public static async Task TranslateXml(XElement xml, string selectedLang, ProgressChangedHandler maxH = null, ProgressChangedHandler currH = null)
         {
             if (selectedLang == null) return;
+
+            if (!xml.Descendants(XName.Get("Language", xml.Name.NamespaceName)).Any(l => l.Attribute("Identifier").Value == selectedLang))
+            {
+                return;
+            }
 
             XElement lang = xml.Descendants(XName.Get("Language", xml.Name.NamespaceName)).Single(l => l.Attribute("Identifier").Value == selectedLang);
             List<XElement> trans = lang.Descendants(XName.Get("TranslationElement", xml.Name.NamespaceName)).ToList();
 
-            deviceH?.Invoke("Übersetzen");
             maxH?.Invoke(trans.Count);
 
             await Task.Delay(100);
@@ -81,10 +85,8 @@ namespace METS.Classes.Helper
         }
 
 
-        public async Task ImportCatalog(XElement catXML)
+        public async Task ImportCatalog(XElement catXML, ObservableCollection<DeviceImportInfo> devicesList)
         {
-            Prod2Section = new Dictionary<string, string>();
-
             currentNamespace = catXML.Attribute("xmlns").Value;
             XElement catalog = catXML.Element(GetXName("ManufacturerData")).Element(GetXName("Manufacturer")).Element(GetXName("Catalog"));
 
@@ -112,217 +114,146 @@ namespace METS.Classes.Helper
                 await Task.Delay(100);
                 section = new CatalogViewModel();
                 section.Id = sectionEle.Attribute("Id").Value;
-                if (!_context.Sections.Any(s => s.Id == section.Id))
+                bool catHasSubs = false;
+
+                foreach (XElement subsectionEle in sectionEle.Elements())
+                {
+                    CatalogViewModel sectionSub = new CatalogViewModel();
+                    sectionSub.Id = subsectionEle.Attribute("Id").Value;
+                    bool subHasItems = false;
+
+                    foreach (XElement itemEle in subsectionEle.Elements())
+                    {
+                        if(devicesList.Any(d => d.Id == itemEle.Attribute("Id").Value))
+                        {
+                            subHasItems = true;
+                            DeviceImportInfo device = devicesList.Single(d => d.Id == itemEle.Attribute("Id").Value);
+                            device.CatalogId = sectionSub.Id;
+                            device.HardwareRefId = itemEle.Attribute("Hardware2ProgramRefId").Value;
+                            device.ProductRefId = itemEle.Attribute("ProductRefId").Value;
+                        }
+                    }
+
+                    if (subHasItems && !_context.Sections.Any(s => s.Id == sectionSub.Id))
+                    {
+                        catHasSubs = true;
+                        sectionSub.Name = subsectionEle.Attribute("Name")?.Value;
+                        sectionSub.ParentId = section.Id;
+                        _context.Sections.Add(sectionSub);
+                    }
+                }
+
+
+                if (catHasSubs && !_context.Sections.Any(s => s.Id == section.Id))
                 {
                     section.Name = sectionEle.Attribute("Name")?.Value;
                     section.ParentId = currentMan;
                     _context.Sections.Add(section);
                 }
 
-                foreach (XElement subsectionEle in sectionEle.Elements())
-                {
-                    CatalogViewModel sectionSub = new CatalogViewModel();
-                    sectionSub.Id = subsectionEle.Attribute("Id").Value;
-                    if (!_context.Sections.Any(s => s.Id == sectionSub.Id))
-                    {
-                        sectionSub.Name = subsectionEle.Attribute("Name")?.Value;
-                        sectionSub.ParentId = section.Id;
-                        _context.Sections.Add(sectionSub);
-                    }
-
-                    foreach (XElement itemEle in subsectionEle.Elements())
-                    {
-                        cat2prod.Add(itemEle.Attribute("Id").Value, itemEle.Attribute("ProductRefId").Value);
-                        if (!Prod2Section.Keys.Contains(itemEle.Attribute("ProductRefId").Value))
-                            Prod2Section.Add(itemEle.Attribute("ProductRefId").Value, itemEle.Parent.Attribute("Id").Value);
-                    }
-                }
-
                 count++;
                 ProgressChanged(count);
             }
             _context.SaveChanges();
         }
 
-        public async Task ImportHardware(XElement hardXML, List<string> prods2load)
+        public void ImportHardware(XElement hardXML, DeviceImportInfo deviceInfo)
         {
-            AppIds = new List<string>();
-            DeviceIds = new List<string>();
-            App2Hardware = new Dictionary<string, string>();
+            currentNamespace = hardXML.Name.NamespaceName;
+            DeviceViewModel device;
+            bool existed = _context.Devices.Any(d => d.Id == deviceInfo.Id);
 
-            currentNamespace = hardXML.Attribute("xmlns").Value;
-            XElement hardware = hardXML.Element(GetXName("ManufacturerData")).Element(GetXName("Manufacturer")).Element(GetXName("Hardware"));
+            if (existed)
+                device = _context.Devices.Single(d => d.Id == deviceInfo.Id);
+            else
+                device = new DeviceViewModel() { Id = deviceInfo.Id };
 
-            IEnumerable<XElement> prods = hardware.Descendants(GetXName("Product"));
-            int count = 0;
 
-            Dictionary<string, DeviceViewModel> devices = new Dictionary<string, DeviceViewModel>();
+            XElement productXml = hardXML.Descendants(GetXName("Product")).Single(p => p.Attribute("Id").Value == deviceInfo.ProductRefId);
+            XElement hardwareXml = productXml.Parent.Parent;
+            XElement hardware2ProgXml = hardXML.Descendants(GetXName("Hardware2Program")).Single(p => p.Attribute("Id").Value == deviceInfo.HardwareRefId);
 
-            ProgressMaxChanged(prods.Count());
+            device.ManufacturerId = currentMan;
+            device.Name = deviceInfo.Name;
+            device.VisibleDescription = deviceInfo.Description;
+            device.OrderNumber = productXml.Attribute("OrderNumber").Value;
+            device.BusCurrent = ConvertBusCurrent(hardwareXml.Attribute("BusCurrent")?.Value);
+            device.IsRailMounted = GetAttributeAsBool(productXml, "IsRailMounted");
+            device.IsPowerSupply = GetAttributeAsBool(hardwareXml, "IsPowerSupply");
+            device.IsCoupler = GetAttributeAsBool(hardwareXml, "IsCoupler");
+            device.HasApplicationProgram = GetAttributeAsBool(hardwareXml, "HasApplicationProgram");
+            device.HasIndividualAddress = GetAttributeAsBool(hardwareXml, "HasIndividualAddress");
+            device.HardwareId = hardwareXml.Attribute("Id").Value;
+            device.CatalogId = deviceInfo.CatalogId;
 
-            foreach (XElement prodEle in prods)
-            {
-                await Task.Delay(1);
-                string x = prodEle.Attribute("Id").Value;
-                if (!prods2load.Contains(x))
-                    continue;
+            if (existed)
+                _context.Devices.Update(device);
+            else
+                _context.Devices.Add(device);
 
-                XElement parent = prodEle.Parent.Parent;
-                DeviceViewModel device = new DeviceViewModel();
-                device.Id = prodEle.Attribute("Id").Value;
-                DeviceIds.Add(device.Id);
 
-                if (!_context.Devices.Any(d => d.Id == device.Id))
-                {
-                    device.ManufacturerId = currentMan;
-                    device.Name = prodEle.Attribute("Text").Value;
-                    //TODO Description aus Catalog.xml hinzufügen
-                    device.VisibleDescription = prodEle.Attribute("VisibleDescription")?.Value;
-                    device.OrderNumber = prodEle.Attribute("OrderNumber").Value;
+            deviceInfo.ApplicationId = hardware2ProgXml.Element(GetXName("ApplicationProgramRef")).Attribute("RefId").Value;
+            deviceInfo.HardwareId = device.HardwareId;
 
-                    device.BusCurrent = ConvertBusCurrent(parent.Attribute("BusCurrent")?.Value);
-                    if (Prod2Section.Keys.Contains(device.Id))
-                        device.CatalogId = Prod2Section[device.Id];
-                    else
-                        device.CatalogId = currentMan;
-                    device.IsRailMounted = GetAttributeAsBool(prodEle, "IsRailMounted");
-                    device.IsPowerSupply = GetAttributeAsBool(parent, "IsPowerSupply");
-                    device.IsCoupler = GetAttributeAsBool(parent, "IsCoupler");
-                    device.HasApplicationProgram = GetAttributeAsBool(parent, "HasApplicationProgram");
-                    device.HasIndividualAddress = GetAttributeAsBool(parent, "HasIndividualAddress");
-                    device.HardwareId = parent.Attribute("Id").Value;
-
-                    _context.Devices.Add(device);
-                }
-
-                IEnumerable<XElement> apps = parent.Descendants(GetXName("ApplicationProgramRef"));
-
-                foreach (XElement app in apps)
-                {
-                    string appId = app.Attribute("RefId").Value;
-                    string hardId = parent.Attribute("Id").Value;
-                    if (!AppIds.Contains(appId))
-                        AppIds.Add(appId);
-
-                    if (!App2Hardware.Keys.Contains(appId)) 
-                        App2Hardware.Add(appId, hardId);
-
-                    if (!_context.Hardware2App.Any(h => h.HardwareId == hardId && h.ApplicationId == appId))
-                        _context.Hardware2App.Add(new Hardware2AppModel { HardwareId = hardId, ApplicationId = appId });
-
-                }
-            }
+            if (!_context.Hardware2App.Any(h => h.HardwareId == device.HardwareId && h.ApplicationId == deviceInfo.ApplicationId))
+                _context.Hardware2App.Add(new Hardware2AppModel { HardwareId = device.HardwareId, ApplicationId = deviceInfo.ApplicationId });
 
             _context.SaveChanges();
         }
 
-        public async Task ImportApplications(ImportDevices import)
+        public async Task ImportApplications(XElement appXml, DeviceImportInfo device)
         {
-            ProgressMaxChanged(AppIds.Count);
-            AppErrors = new List<ImportError>();
+            currentNamespace = appXml.Name.NamespaceName;
+            Log.Information("---- Applikation wird importiert");
+            Log.Information(device.ApplicationId);
 
-            int count = 0;
-            foreach (string appId in AppIds)
-            {
-                Log.Information("---- Applikation wird importiert:  " + appId);
-                await Task.Delay(10);
-                string hardId = App2Hardware[appId];
-                string manuId = appId.Substring(0, appId.IndexOf('_'));
-
-                ZipArchiveEntry appEntry = null;
-                try
-                {
-                    appEntry = import.Archive.GetEntry(manuId + "/" + appId + ".xml");
-                } catch(Exception e)
-                {
-                    Log.Error(e, "Applikation konnte nicht geladen werden.");
-                    continue;
-                }
-
-                ApplicationViewModel app;
-                if(_context.Applications.Any(a => a.Id == appId))
-                    app = _context.Applications.Single(a => a.Id == appId);
-                else
-                    app = new ApplicationViewModel() { Id = appId };
-;
+            ApplicationViewModel app;
+            if (_context.Applications.Any(a => a.Id == device.ApplicationId))
+                app = _context.Applications.Single(a => a.Id == device.ApplicationId);
+            else
+                app = new ApplicationViewModel() { Id = device.ApplicationId };
 
 
-                XElement doc = XDocument.Load(appEntry.Open()).Root;
-                XElement appele = doc.Descendants(XName.Get("ApplicationProgram", doc.Name.Namespace.NamespaceName)).First();
+            app.Number = int.Parse(appXml.Attribute("ApplicationNumber").Value);
+            app.Version = int.Parse(appXml.Attribute("ApplicationVersion").Value);
+            app.Mask = appXml.Attribute("MaskVersion").Value;
+            app.Name = appXml.Attribute("Name").Value;
 
-                List<string> errs = CheckApplication(XmlReader.Create(appEntry.Open()));
-                if (errs.Count > 0)
-                {
-                    Log.Error("Check nicht bestanden! " + string.Join(",", errs));
-                    ImportError err = new ImportError(app.Id);
-                    err.Code = string.Join(",", errs);
-                    err.Exception = "ApplicationCheck";
-                    err.Message = appele.Attribute("Name").Value + "Die Applikation hat die Überprüfung nicht bestanden. (evtl. Plugin benötigt) " + string.Join(",", errs);
-                    AppErrors.Add(err);
-
-                    OnError(appele.Attribute("Name").Value + ": Die Applikation hat die Überprüfung nicht bestanden. (evtl. Plugin benötigt) " + string.Join(",", errs));
-
-                    count++;
-                    ProgressChanged(count);
-                    continue;
-                }
+            Hardware2AppModel hard2App = _context.Hardware2App.Single(h => h.ApplicationId == app.Id && h.HardwareId == device.HardwareId);
+            //hard2App.Name = app.Name;
+            //hard2App.Version = app.Version;
+            //hard2App.Number = app.Number;
+            //_context.Hardware2App.Update(hard2App);
+            //_context.SaveChanges();
 
 
-                await ImportHelper.TranslateXml(doc, import.SelectedLanguage, OnDeviceChanged, ProgressAppMaxChanged, ProgressAppChanged);
+            int rest = app.Version % 16;
+            int full = (app.Version - rest) / 16;
 
-                appele = doc.Descendants(XName.Get("ApplicationProgram", doc.Name.Namespace.NamespaceName)).First();
+            currentAppName = app.Name + " " + "V" + full.ToString() + "." + rest.ToString();
+            OnDeviceChanged(currentAppName + " - Check Application");
+            await Task.Delay(10);
 
-                app.Number = int.Parse(appele.Attribute("ApplicationNumber").Value);
-                app.Version = int.Parse(appele.Attribute("ApplicationVersion").Value);
-                app.Mask = appele.Attribute("MaskVersion").Value;
-                app.Name = appele.Attribute("Name").Value;
-
-                //Hardware2AppModel hard2App = _context.Hardware2App.Single(h => h.ApplicationId == app.Id);
-                //hard2App.Name = app.Name;
-                //hard2App.Version = app.Version;
-                //hard2App.Number = app.Number;
-                //_context.Hardware2App.Update(hard2App);
-                //_context.SaveChanges();
-
-
-                int rest = app.Version % 16;
-                int full = (app.Version - rest) / 16;
-
-                currentAppName = app.Name + " " + "V" + full.ToString() + "." + rest.ToString();
-                OnDeviceChanged(currentAppName + " - Check Application");
-                await Task.Delay(10);
-
-                Log.Information(app.Name + " V" + full.ToString() + "." + rest.ToString());
+            Log.Information(app.Name + " V" + full.ToString() + "." + rest.ToString());
                 
-                int cmax = 0;
-                using(XmlReader reader = XmlReader.Create(appEntry.Open()))
-                {
-                    cmax += doc.Descendants(XName.Get("ParameterType", doc.Name.NamespaceName)).Count();
-                    cmax += doc.Descendants(XName.Get("Parameter", doc.Name.NamespaceName)).Count();
-                    cmax += doc.Descendants(XName.Get("Union", doc.Name.NamespaceName)).Count();
-                    cmax += doc.Descendants(XName.Get("ParameterRef", doc.Name.NamespaceName)).Count();
-                    cmax += doc.Descendants(XName.Get("ComObject", doc.Name.NamespaceName)).Count();
-                    cmax += doc.Descendants(XName.Get("ComObjectRef", doc.Name.NamespaceName)).Count();
-                }
+            int cmax = 0;
+            cmax += appXml.Descendants(GetXName("ParameterType")).Count();
+            cmax += appXml.Descendants(GetXName("Parameter")).Count();
+            cmax += appXml.Descendants(GetXName("Union")).Count();
+            cmax += appXml.Descendants(GetXName("ParameterRef")).Count();
+            cmax += appXml.Descendants(GetXName("ComObject")).Count();
+            cmax += appXml.Descendants(GetXName("ComObjectRef")).Count();
 
-                Log.Information("Berechnete Anzahl an Elementen: " + cmax);
-                ProgressAppMaxChanged(cmax);
+            Log.Information("Berechnete Anzahl an Elementen: " + cmax);
+            ProgressAppMaxChanged(cmax);
 
 
-                Log.Information("Applikation wird nun eingelesen...");
-                OnDeviceChanged(currentAppName + " - Einlesen");
-                await Task.Delay(10);
-                await ReadApplication(doc, app, cmax);
+            Log.Information("Applikation wird nun eingelesen...");
+            OnDeviceChanged(currentAppName + " - Einlesen");
+            await Task.Delay(10);
+            await ReadApplication(appXml, app, cmax);
 
-                
-
-                count++;
-                ProgressChanged(count);
-
-                Log.Information("Applikation wurde eingelesen...");
-            }
-
-            OnDeviceChanged("");
+            Log.Information("Applikation wurde eingelesen...");
         }
 
 
@@ -863,9 +794,10 @@ namespace METS.Classes.Helper
 
 
             Log.Information("ComObjectTable wird eingelesen");
-            XElement table = doc.Descendants(GetXName("ComObjectTable")).ElementAt(0);
-            if(table.Attribute("CodeSegment") != null)
+            XElement table = null;
+            if (doc.Descendants(GetXName("ComObjectTable")).Count() != 0 && doc.Descendants(GetXName("ComObjectTable")).ElementAt(0).Attribute("CodeSegment") != null)
             {
+                table = doc.Descendants(GetXName("ComObjectTable")).ElementAt(0);
                 app.Table_Object = table.Attribute("CodeSegment").Value;
                 int offsetObject;
                 int.TryParse(table.Attribute("Offset").Value, out offsetObject);
@@ -876,27 +808,30 @@ namespace METS.Classes.Helper
             }
 
             Log.Information("ComObjects werden eingelesen");
-            foreach (XElement com in table.Elements())
+            if(table != null)
             {
-                AppComObject cobj = new AppComObject();
-                cobj.Id = com.Attribute("Id").Value;
-                cobj.SetText(com.Attribute("Text")?.Value);
-                cobj.SetFunction(com.Attribute("FunctionText")?.Value);
-                cobj.SetSize(com.Attribute("ObjectSize")?.Value);
-                cobj.SetDatapoint(com.Attribute("DatapointType")?.Value);
-                cobj.Number = int.Parse(com.Attribute("Number").Value);
+                foreach (XElement com in table.Elements())
+                {
+                    AppComObject cobj = new AppComObject();
+                    cobj.Id = com.Attribute("Id").Value;
+                    cobj.SetText(com.Attribute("Text")?.Value);
+                    cobj.SetFunction(com.Attribute("FunctionText")?.Value);
+                    cobj.SetSize(com.Attribute("ObjectSize")?.Value);
+                    cobj.SetDatapoint(com.Attribute("DatapointType")?.Value);
+                    cobj.Number = int.Parse(com.Attribute("Number").Value);
 
-                cobj.Flag_Communicate = com.Attribute("CommunicationFlag")?.Value == "Enabled";
-                cobj.Flag_Read = com.Attribute("ReadFlag")?.Value == "Enabled";
-                cobj.Flag_ReadOnInit = com.Attribute("ReadOnInitFlag")?.Value == "Enabled";
-                cobj.Flag_Transmit = com.Attribute("TransmitFlag")?.Value == "Enabled";
-                cobj.Flag_Update = com.Attribute("UpdateFlag")?.Value == "Enabled";
-                cobj.Flag_Write = com.Attribute("WriteFlag")?.Value == "Enabled";
+                    cobj.Flag_Communicate = com.Attribute("CommunicationFlag")?.Value == "Enabled";
+                    cobj.Flag_Read = com.Attribute("ReadFlag")?.Value == "Enabled";
+                    cobj.Flag_ReadOnInit = com.Attribute("ReadOnInitFlag")?.Value == "Enabled";
+                    cobj.Flag_Transmit = com.Attribute("TransmitFlag")?.Value == "Enabled";
+                    cobj.Flag_Update = com.Attribute("UpdateFlag")?.Value == "Enabled";
+                    cobj.Flag_Write = com.Attribute("WriteFlag")?.Value == "Enabled";
 
-                ComObjects.Add(cobj.Id, cobj);
-                position++;
-                ProgressAppChanged(position);
-                if (position % iterationToWait == 0) await Task.Delay(1);
+                    ComObjects.Add(cobj.Id, cobj);
+                    position++;
+                    ProgressAppChanged(position);
+                    if (position % iterationToWait == 0) await Task.Delay(1);
+                }
             }
 
             //TODO zusammenbringen mit ComObject auslesen
@@ -1110,8 +1045,10 @@ namespace METS.Classes.Helper
             }
 
             Log.Information("Standard ComObjects werden generiert");
+            OnDeviceChanged(currentAppName + " - Generiere ComObjects");
             await SaveHelper.GenerateDefaultComs(app.Id);
             Log.Information("Standard Props werden generiert");
+            OnDeviceChanged(currentAppName + " - Generiere Props");
             await SaveHelper.GenerateVisibleProps(app.Id);
         }
 
@@ -1145,7 +1082,7 @@ namespace METS.Classes.Helper
             }
         }
 
-        private List<string> CheckApplication(XmlReader reader)
+        public List<string> CheckApplication(XmlReader reader)
         {
             List<string> errs = new List<string>();
 

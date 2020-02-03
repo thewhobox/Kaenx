@@ -12,6 +12,7 @@ using System.IO;
 using System.IO.Compression;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Xml;
 using System.Xml.Linq;
 using Windows.ApplicationModel.Resources;
 using Windows.Storage;
@@ -53,6 +54,13 @@ namespace METS.View
             set { _importError = value; Update("ImportError"); }
         }
 
+        private ObservableCollection<DeviceImportInfo> _devicesList = new ObservableCollection<DeviceImportInfo>();
+        public ObservableCollection<DeviceImportInfo> DevicesList
+        {
+            get { return _devicesList; }
+            set { _devicesList = value; Update("DevicesList"); }
+        }
+
         private ImportHelper Helper = new ImportHelper();
 
         public Import()
@@ -80,13 +88,13 @@ namespace METS.View
 
         private void Helper_ProgressAppMaxChanged(int count)
         {
-            ProgApp.Maximum = count;
-            ProgApp.Value = 0;
+            ProgressApp.Maximum = count;
+            ProgressApp.Value = 0;
         }
 
         private void Helper_ProgressAppChanged(int count)
         {
-            ProgApp.Value = count;
+            ProgressApp.Value = count;
         }
 
         private void Helper_OnError(string Error)
@@ -97,13 +105,13 @@ namespace METS.View
 
         private void Helper_ProgressMaxChanged(int count)
         {
-            ProgSub.Maximum = count;
-            ProgSub.Value = 0;
+            //ProgSub.Maximum = count;
+            //ProgSub.Value = 0;
         }
 
         private void Helper_ProgressChanged(int count)
         {
-            ProgSub.Value = count;
+            //ProgSub.Value = count;
         }
 
         protected override void OnNavigatedTo(NavigationEventArgs e)
@@ -126,15 +134,19 @@ namespace METS.View
             Log.Information("------------Import wurde gestartet------------");
             Log.Information("Sprache: " + Imports.SelectedLanguage);
             ImportState = resourceLoader.GetString("StateProj");
-            List<string> prod2load = new List<string>();
             IEnumerable<Device> devices = from dev in Imports.DeviceList where dev.SlideSettings.IsSelected == true select dev;
 
             foreach (Device device in devices)
             {
-                prod2load.Add(device.ProductRefId);
+                DevicesList.Add(new DeviceImportInfo()
+                {
+                    Id = device.Id,
+                    Name = device.Name,
+                    Description = device.VisibleDescription
+                });
             }
 
-            ProgSub.IsIndeterminate = true;
+            ProgressMain.IsIndeterminate = true;
 
             foreach (ZipArchiveEntry entryT in Imports.Archive.Entries)
             {
@@ -160,11 +172,14 @@ namespace METS.View
             {
                 masterFile = await ApplicationData.Current.LocalFolder.GetFileAsync("knx_master.xml");
             }
-            catch
+            catch(Exception e)
             {
                 StorageFile defaultFile = await StorageFile.GetFileFromApplicationUriAsync(new Uri("ms-appx:///Data/knx_master.xml"));
                 masterFile = await ApplicationData.Current.LocalFolder.CreateFileAsync("knx_master.xml");
                 await FileIO.WriteTextAsync(masterFile, await FileIO.ReadTextAsync(defaultFile));
+                Log.Error(e, "KNX_Master konnte nicht ersetzt werden.");
+                ShowError("Die KNX_Master Datei konnte nicht ersetzt werden.");
+                return;
             }
 
 
@@ -175,11 +190,12 @@ namespace METS.View
             }
             catch (Exception e)
             {
-                Log.Error(e, "KNX_Master laden Fehler!");
                 Imports.Archive.Dispose();
                 ImportState = resourceLoader.GetString("StateFin");
                 ImportError.Add(resourceLoader.GetString("MsgMasterError"));
                 BtnBack.IsEnabled = true;
+                Log.Error(e, "KNX_Master konnte geöffnet werden.");
+                ShowError("Die KNX_Master Datei konnte nicht geöffnet werden.");
                 return;
             }
 
@@ -201,7 +217,12 @@ namespace METS.View
                     Log.Information("KNX_Master wurde aktualisiert");
                 }
             }
-            catch { }
+            catch (Exception e)
+            {
+                Log.Error(e, "KNX_Master konnte nicht aktualisiert werden.");
+                ShowError("KNX_Master konnte nicht aktualisiert werden.");
+                return;
+            }
 
 
             ImportDevice = resourceLoader.GetString("StateManus");
@@ -215,77 +236,152 @@ namespace METS.View
             Log.Information("---- Katalog analyse gestartet");
             //await Task.Delay(2000);
             entry = Imports.Archive.GetEntry(Helper.currentMan + "/Catalog.xml");
+            XElement catalogXml = XDocument.Load(entry.Open()).Root;
             try
             {
-                XElement xml = XDocument.Load(entry.Open()).Root;
-                await ImportHelper.TranslateXml(xml, Imports.SelectedLanguage);
-                await Helper.ImportCatalog(xml);
+                await ImportHelper.TranslateXml(catalogXml, Imports.SelectedLanguage);
+                await Helper.ImportCatalog(catalogXml, DevicesList);
             }
             catch (Exception e)
             {
                 Log.Error(e, "Katalog Fehler!");
             }
-            ProgSub.Value += 1;
             Log.Information("Katalog wurde aktualisiert");
 
             #endregion
 
 
+            ProgressMain.IsIndeterminate = true;
+
+            List<string> loadedIds = new List<string>();
+
+
+
+
+
+            foreach (DeviceImportInfo device in DevicesList)
+            {
+                ViewDevicesList.SelectedItem = device;
+                ProgressMain.Value = 0;
+
+                await Task.Delay(1000);
+
+                ImportDevice = resourceLoader.GetString("StateHard");
+                Log.Information("---- Hardware wird importiert");
+
+                try
+                {
+                    entry = Imports.Archive.GetEntry(Helper.currentMan + "/Hardware.xml");
+                    XElement xml = XDocument.Load(entry.Open()).Root;
+                    await ImportHelper.TranslateXml(xml, Imports.SelectedLanguage);
+                    Helper.ImportHardware(xml, device);
+                }
+                catch (Exception e)
+                {
+                    Log.Error(e, "Hardware Fehler!");
+                    ImportError.Add(device.ApplicationId + ": " + e.Message);
+                    device.Icon = Symbol.ReportHacked;
+                    continue;
+                }
+                await Task.Delay(2000);
+                ProgressMain.Value += 1;
+
+                if (!loadedIds.Contains(device.ApplicationId))
+                {
+                    ImportDevice = resourceLoader.GetString("StateApp");
+                    Log.Information("---- Applikation wird importiert");
+                    Log.Information(device.ApplicationId);
+
+                    string manuId = device.ApplicationId.Substring(0, device.ApplicationId.IndexOf('_'));
+                    ZipArchiveEntry appEntry = Imports.Archive.GetEntry(manuId + "/" + device.ApplicationId + ".xml");
+                    List<string> errs = Helper.CheckApplication(XmlReader.Create(appEntry.Open()));
+
+                    if (errs.Count > 0)
+                    {
+                        Log.Error("Check nicht bestanden! " + string.Join(",", errs));
+                        ImportError.Add(device.ApplicationId + ": Die Applikation hat die Überprüfung nicht bestanden. (evtl. Plugin benötigt) " + string.Join(",", errs));
+                        device.Icon = Symbol.ReportHacked;
+                        continue;
+                    }
+
+                    await Task.Delay(1000);
+
+                    try
+                    {
+                        XElement doc = XDocument.Load(appEntry.Open()).Root;
+                        ImportDevice = "Übersetzen";
+                        await ImportHelper.TranslateXml(doc, Imports.SelectedLanguage, Helper_ProgressAppMaxChanged, Helper_ProgressAppChanged);
+                        XElement appXml = doc.Descendants(XName.Get("ApplicationProgram", doc.Name.Namespace.NamespaceName)).First();
+                        ImportDevice = "Applikation importieren";
+                        await Helper.ImportApplications(appXml, device);
+                    }
+                    catch (Exception e)
+                    {
+                        Log.Error(e, "Applikation Fehler!");
+                        ImportError.Add(device.ApplicationId + ": " + e.Message);
+                        device.Icon = Symbol.ReportHacked;
+                        continue;
+                    }
+                    Log.Information("Import Applikationen abgeschlossen");
+                    loadedIds.Add(device.ApplicationId);
+                } else
+                {
+
+                }
+                ProgressMain.Value += 1;
+
+
+                ImportDevice = resourceLoader.GetString("StateCheck");
+                await Task.Delay(2000);
+                ProgressMain.Value += 1;
+
+                device.Icon = Symbol.Like;
+                await Task.Delay(2000);
+
+            }
+
+
+            Imports.Archive.Dispose();
+            StorageFile file = await ApplicationData.Current.TemporaryFolder.GetFileAsync("temp.knxprod");
+            await file.DeleteAsync();
+
+
+            await Task.Delay(1000);
+            ImportState = resourceLoader.GetString("StateFin");
+
+            BtnBack.IsEnabled = true;
+            Log.Information("Import abgeschlossen");
+
+            Analytics.TrackEvent("Gerät(e) importiert");
+
+            ViewDevicesList.SelectedItem = null;
+            return;
+
+
+
+
             #region Hardware
 
+            
             entry = Imports.Archive.GetEntry(Helper.currentMan + "/Hardware.xml");
             ImportDevice = resourceLoader.GetString("StateHard");
             Log.Information("---- Hardware wird importiert");
-            //await Task.Delay(2000);
             try
             {
                 XElement xml = XDocument.Load(entry.Open()).Root;
                 await ImportHelper.TranslateXml(xml, Imports.SelectedLanguage);
-                await Helper.ImportHardware(xml, prod2load);
+                //await Helper.ImportHardware(xml, prod2load, catalogXml);
             }
             catch (Exception e)
             {
                 Log.Error(e, "Hardware Fehler!");
+                ShowError(e.Message);
+                return;
             }
             Log.Information("Hardware wurde importiert");
 
             #endregion
 
-
-            ProgMain.Value += 1;
-            ProgSub.IsIndeterminate = false;
-            ProgSub.Value = 0;
-
-            //await Task.Delay(2000);
-
-            ImportDevice = "";
-            Log.Information("---- Applikationen werden importiert");
-            ImportState = resourceLoader.GetString("StateApp");
-            await Task.Delay(500);
-            try
-            {
-                await Helper.ImportApplications(Imports);
-            }
-            catch (Exception e)
-            {
-                Log.Error(e, "Applikation Fehler!");
-            }
-            ProgMain.Value += 1;
-
-            Log.Information("Import Applikationen abgeschlossen");
-
-
-
-            Imports.Archive.Dispose();
-
-            StorageFile file = await ApplicationData.Current.TemporaryFolder.GetFileAsync("temp.knxprod");
-            await file.DeleteAsync();
-
-
-            //ImportState = "Checke Applikationsprogramme...";
-            //await Task.Delay(1000);
-            //await Helper.CheckParams();
-            ProgMain.Value += 1;
 
             ImportState = resourceLoader.GetString("StateCheck");
             await Task.Delay(1000);
@@ -303,15 +399,18 @@ namespace METS.View
                 ImportError.Add(addedString);
             }
 
+        }
 
-            await Task.Delay(1000);
-            ImportState = resourceLoader.GetString("StateFin");
-            ProgMain.Value += 1;
 
+        private async void ShowError(string msg)
+        {
+            ImportState = "Es trat ein Fehler auf!";
+            ImportDevice = msg;
             BtnBack.IsEnabled = true;
-            Log.Information("Import abgeschlossen");
 
-            Analytics.TrackEvent("Gerät(e) importiert");
+            Imports.Archive.Dispose();
+            StorageFile file = await ApplicationData.Current.TemporaryFolder.GetFileAsync("temp.knxprod");
+            await file.DeleteAsync();
         }
 
 

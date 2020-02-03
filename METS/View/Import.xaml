@@ -15,20 +15,58 @@
             <SolidColorBrush Color="#FFE0E0E0" />
         </Grid.Background>
         <Grid.RowDefinitions>
+            <RowDefinition Height="auto" />
+            <RowDefinition Height="auto" />
+            <RowDefinition Height="auto" />
             <RowDefinition />
             <RowDefinition Height="auto" />
+            <RowDefinition Height="auto" />
         </Grid.RowDefinitions>
-        
-        <StackPanel VerticalAlignment="Center" Width="600">
+
+        <StackPanel Padding="50 100 50 20" >
             <TextBlock Text="{Binding ImportState}" FontSize="20" VerticalAlignment="Center" />
             <TextBlock Text="{Binding ImportDevice}" FontSize="20" VerticalAlignment="Center" />
-            <ProgressBar x:Name="ProgMain" Maximum="4" Height="30" Foreground="Green" />
-            <ProgressBar x:Name="ProgSub" Maximum="1" Value="1" Height="30" />
-            <ProgressBar x:Name="ProgApp" Maximum="1" Value="1" Height="10" Foreground="SandyBrown" />
+        </StackPanel>
+
+
+        <ProgressBar Grid.Row="1" x:Name="ProgressMain" Maximum="4" Height="30" Foreground="Green" />
+        <ProgressBar Grid.Row="2" x:Name="ProgressApp" Maximum="1" Value="1" Height="10" Foreground="SandyBrown" />
+
+
+
+        <ListView x:Name="ViewDevicesList" Grid.Row="3" ItemsSource="{Binding DevicesList}" Background="white">
+            <ListView.ItemTemplate>
+                <DataTemplate>
+                    <Grid Margin="10">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="50" />
+                            <ColumnDefinition />
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition />
+                            <RowDefinition />
+                        </Grid.RowDefinitions>
+
+                        <SymbolIcon Grid.RowSpan="2" MinWidth="10" Symbol="{Binding Icon}" Foreground="Red" />
+                        <TextBlock Grid.Column="1" Text="{Binding Name}" FontSize="18" />
+                        <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding Description}" Foreground="DarkBlue" VerticalAlignment="Center" />
+                    </Grid>
+                </DataTemplate>
+            </ListView.ItemTemplate>
+        </ListView>
+
+        <Border Grid.Row="3">
+            <Border.Background>
+                <SolidColorBrush Color="White" Opacity="0" />
+            </Border.Background>
+        </Border>
+
+
+        <StackPanel Grid.Row="4" VerticalAlignment="Center">
             <Button x:Name="BtnBack" x:Uid="/Import/Back" HorizontalAlignment="Center" Margin="10" Click="ClickBack" IsEnabled="False"/>
         </StackPanel>
 
-        <toolkit:HeaderedContentControl Grid.Row="1" VerticalAlignment="Bottom">
+        <toolkit:HeaderedContentControl Grid.Row="5" VerticalAlignment="Bottom">
             <toolkit:HeaderedContentControl.Header>
                 <Border Background="LightGray">
                     <TextBlock x:Uid="/Import/Error" FontSize="26" Foreground="OrangeRed" Margin="10" />
