@@ -119,80 +119,31 @@ namespace METS.View
             
             StorageFile file2 = await ApplicationData.Current.TemporaryFolder.GetFileAsync("temp.knxprod");
 
+
             Import.Archive = ZipFile.Open(file2.Path, ZipArchiveMode.Read);
 
-            foreach(ZipArchiveEntry entry in Import.Archive.Entries)
+            ImportHelper helper = new ImportHelper();
+
+            bool success = await helper.GetDeviceList(Import);
+
+            if (!success)
             {
-                if(entry.FullName.StartsWith("M-") && entry.FullName.EndsWith("/Catalog.xml"))
-                {
-                    XDocument catXML = XDocument.Load(entry.Open());
-                    string ns = catXML.Root.Name.NamespaceName;
-                    List<XElement> langs = catXML.Descendants(XName.Get("Language", ns)).ToList();
-
-                    ObservableCollection<string> tempLangs = new ObservableCollection<string>();
-                    foreach(XElement lang in langs)
-                    {
-                        tempLangs.Add(lang.Attribute("Identifier").Value);
-                    }
-
-                    if(tempLangs.Count > 1)
-                    {
-                        ApplicationDataContainer container = ApplicationData.Current.LocalSettings;
-                        string defaultLang = container.Values["defaultLang"]?.ToString();
-
-                        if (!tempLangs.Contains(defaultLang) || changeLang)
-                        {
-                            if(!changeLang && !string.IsNullOrEmpty(defaultLang) && tempLangs.Any(l => l.StartsWith(defaultLang.Split("-")[0])))
-                            {
-
-                            } else
-                            {
-                                DiagLanguage diaglang = new DiagLanguage(tempLangs);
-                                await diaglang.ShowAsync();
-                                Import.SelectedLanguage = diaglang.SelectedLanguage;
-                                await ImportHelper.TranslateXml(catXML.Root, diaglang.SelectedLanguage);
-                            }
-                        } else
-                        {
-                            Import.SelectedLanguage = defaultLang;
-                            await ImportHelper.TranslateXml(catXML.Root, defaultLang);
-                        }
-                    } else if(tempLangs.Count == 1)
-                    {
-                        Import.SelectedLanguage = tempLangs[0];
-                        await ImportHelper.TranslateXml(catXML.Root, tempLangs[0]);
-                    }
-
-                    if(!string.IsNullOrEmpty(Import.SelectedLanguage))
-                        OutSelectedLang.Text = Import.SelectedLanguage;
-
-                    XElement catalogXML = catXML.Descendants(XName.Get("Catalog", ns)).ElementAt<XElement>(0);
-                    Import.DeviceList = CatalogHelper.GetDevicesFromCatalog(catalogXML);
-
-                    if (Import.DeviceList.Count == 0) continue;
-
-                    if(Import.DeviceList.Count > 1)
-                    {
-                        foreach(Device device in Import.DeviceList)
-                        {
-                            SlideListItemBase swipe = new SlideListItemBase();
-                            swipe.LeftSymbol = Symbol.Accept;
-                            swipe.LeftBackground = new SolidColorBrush(Windows.UI.Color.FromArgb(255, 22, 128, 34));
-                            device.SlideSettings = swipe;
-                        }
-
-                        GridImportDevices.Visibility = Visibility.Visible;
-                    } else
-                    {
-                        SlideListItemBase swipe = new SlideListItemBase();
-                        swipe.LeftSymbol = Symbol.Accept;
-                        swipe.LeftBackground = new SolidColorBrush(Windows.UI.Color.FromArgb(255, 22, 128, 34));
-                        swipe.IsSelected = true;
-                        Import.DeviceList[0].SlideSettings = swipe;
-                        ((Frame)this.Parent).Navigate(typeof(Import), Import);
-                    }
-                }
+                //todo blabla
+                return;
             }
+
+            if(Import.DeviceList.Count == 1)
+            {
+                ((Frame)this.Parent).Navigate(typeof(Import), Import);
+            } else
+            {
+                GridImportDevices.Visibility = Visibility.Visible;
+            }
+
+
+            if (!string.IsNullOrEmpty(Import.SelectedLanguage))
+                OutSelectedLang.Text = Import.SelectedLanguage;
+
         }
 
         private async void ClickCancel(object sender, RoutedEventArgs e)
