@@ -1,9 +1,7 @@
-﻿using METS.Context;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO.Compression;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using System.Xml;
 using System.Xml.Linq;
@@ -12,10 +10,14 @@ using METS.Context.Catalog;
 using Serilog;
 using METS.MVVM;
 using System.Collections.ObjectModel;
+using METS.View.Controls;
+using METS.Classes.Controls;
+using Windows.UI.Xaml.Controls;
+using Windows.UI.Xaml.Media;
 
 namespace METS.Classes.Helper
 {
-    class ImportHelper
+    public class ImportHelper
     {
         public delegate void ProgressChangedHandler(int count);
         public event ProgressChangedHandler ProgressChanged;
@@ -44,6 +46,7 @@ namespace METS.Classes.Helper
         public static async Task TranslateXml(XElement xml, string selectedLang, ProgressChangedHandler maxH = null, ProgressChangedHandler currH = null)
         {
             if (selectedLang == null) return;
+
 
             if (!xml.Descendants(XName.Get("Language", xml.Name.NamespaceName)).Any(l => l.Attribute("Identifier").Value == selectedLang))
             {
@@ -83,6 +86,92 @@ namespace METS.Classes.Helper
                 }
             }
         }
+
+
+
+        public async Task<bool> GetDeviceList(ImportDevices Import, bool changeLang = false)
+        {
+            string manName = "";
+
+            foreach(ZipArchiveEntry entryTemp in Import.Archive.Entries)
+            {
+                if (entryTemp.FullName.StartsWith("M-"))
+                    manName = entryTemp.FullName.Substring(0, 6);
+            }
+
+            if (manName == "")
+                return false;
+
+                
+            ZipArchiveEntry entry = Import.Archive.GetEntry(manName + "/Catalog.xml");
+
+            XDocument catXML = XDocument.Load(entry.Open());
+            string ns = catXML.Root.Name.NamespaceName;
+            List<XElement> langs = catXML.Descendants(XName.Get("Language", ns)).ToList();
+
+            ObservableCollection<string> tempLangs = new ObservableCollection<string>();
+            foreach (XElement lang in langs)
+            {
+                tempLangs.Add(lang.Attribute("Identifier").Value);
+            }
+
+            if (tempLangs.Count > 1)
+            {
+                ApplicationDataContainer container = ApplicationData.Current.LocalSettings;
+                string defaultLang = container.Values["defaultLang"]?.ToString();
+
+                if (!tempLangs.Contains(defaultLang) || changeLang)
+                {
+                    if (!changeLang && !string.IsNullOrEmpty(defaultLang) && tempLangs.Any(l => l.StartsWith(defaultLang.Split("-")[0])))
+                    {
+
+                    }
+                    else
+                    {
+                        DiagLanguage diaglang = new DiagLanguage(tempLangs);
+                        await diaglang.ShowAsync();
+                        Import.SelectedLanguage = diaglang.SelectedLanguage;
+                        await ImportHelper.TranslateXml(catXML.Root, diaglang.SelectedLanguage);
+                    }
+                }
+                else
+                {
+                    Import.SelectedLanguage = defaultLang;
+                    await ImportHelper.TranslateXml(catXML.Root, defaultLang);
+                }
+            }
+            else if (tempLangs.Count == 1)
+            {
+                Import.SelectedLanguage = tempLangs[0];
+                await ImportHelper.TranslateXml(catXML.Root, tempLangs[0]);
+            }
+
+            XElement catalogXML = catXML.Descendants(XName.Get("Catalog", ns)).ElementAt<XElement>(0);
+            Import.DeviceList = CatalogHelper.GetDevicesFromCatalog(catalogXML);
+
+            if (Import.DeviceList.Count == 0) return false ;
+
+            if (Import.DeviceList.Count > 0)
+            {
+                foreach (Device device in Import.DeviceList)
+                {
+                    SlideListItemBase swipe = new SlideListItemBase();
+                    swipe.LeftSymbol = Symbol.Accept;
+                    swipe.LeftBackground = new SolidColorBrush(Windows.UI.Color.FromArgb(255, 22, 128, 34));
+                    device.SlideSettings = swipe;
+                }
+
+                if(Import.DeviceList.Count == 1)
+                {
+                    Import.DeviceList[0].SlideSettings.IsSelected = true;
+                }
+            }
+
+            return true;
+        }
+
+
+
 
 
         public async Task ImportCatalog(XElement catXML, ObservableCollection<DeviceImportInfo> devicesList)
