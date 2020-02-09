@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Windows.UI.Xaml.Controls;
+using Windows.UI.Xaml.Media;
 
 namespace METS.Classes
 {
@@ -14,7 +15,23 @@ namespace METS.Classes
         public Symbol Icon
         {
             get { return _icon; }
-            set { _icon = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Icon")); }
+            set { _icon = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Icon")); PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("IconBrush")); }
+        }
+
+        public SolidColorBrush IconBrush
+        {
+            get
+            {
+                switch (Icon)
+                {
+                    case Symbol.Like:
+                        return new SolidColorBrush(Windows.UI.Colors.Green);
+                    case Symbol.ReportHacked:
+                        return new SolidColorBrush(Windows.UI.Colors.Red);
+                    default:
+                        return new SolidColorBrush(Windows.UI.Colors.Black);
+                }
+            }
         }
 
 

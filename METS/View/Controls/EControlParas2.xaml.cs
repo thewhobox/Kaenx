@@ -130,7 +130,7 @@ namespace METS.Views.Easy.Controls
                         break;
                     case "Channel":
                         ListChannelModel mChannel = new ListChannelModel();
-                        mChannel.Name = "Allgemein";
+                        mChannel.Name = string.IsNullOrEmpty(xele.Attribute("Text")?.Value) ? "Allgemein" : xele.Attribute("Text").Value;
                         ListNavChannel.Add(mChannel);
                         await ParseRoot(xele, visibility, mChannel);
                         break;
