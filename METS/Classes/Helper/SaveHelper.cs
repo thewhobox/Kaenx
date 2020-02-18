@@ -29,21 +29,22 @@ namespace METS.Classes.Helper
 
         public static ProjectModel SaveProject(Project.Project _pro = null)
         {
-            if(_pro != null)
+            if (_pro != null)
             {
                 _project = _pro;
             }
-            if(_project == null)
+            if (_project == null)
                 return null;
 
             ProjectModel model;
 
-            if(!context.Projects.Any(p => p.Id == _project.Id))
+            if (!context.Projects.Any(p => p.Id == _project.Id))
             {
                 model = new ProjectModel();
                 context.Projects.Add(model);
                 context.SaveChanges();
-            } else
+            }
+            else
             {
                 model = context.Projects.Single(p => p.Id == _project.Id);
             }
@@ -51,13 +52,14 @@ namespace METS.Classes.Helper
             model.Name = _project.Name;
 
 
-            foreach(Line line in _project.Lines)
+            foreach (Line line in _project.Lines)
             {
                 LineModel linemodel;
-                if(context.LinesMain.Any(l => l.UId == line.UId && l.ProjectId == model.Id))
+                if (context.LinesMain.Any(l => l.UId == line.UId && l.ProjectId == model.Id))
                 {
                     linemodel = context.LinesMain.Single(l => l.UId == line.UId && l.ProjectId == model.Id);
-                } else
+                }
+                else
                 {
                     linemodel = new LineModel(model.Id);
                     context.LinesMain.Add(linemodel);
@@ -69,13 +71,14 @@ namespace METS.Classes.Helper
                 linemodel.IsExpanded = line.IsExpanded;
                 context.LinesMain.Update(linemodel);
 
-                foreach(LineMiddle linem in line.Subs)
+                foreach (LineMiddle linem in line.Subs)
                 {
                     LineMiddleModel linemiddlemodel;
-                    if(context.LinesMiddle.Any(l => l.UId == linem.UId && l.ProjectId == model.Id))
+                    if (context.LinesMiddle.Any(l => l.UId == linem.UId && l.ProjectId == model.Id))
                     {
                         linemiddlemodel = context.LinesMiddle.Single(l => l.UId == linem.UId && l.ProjectId == model.Id);
-                    } else
+                    }
+                    else
                     {
                         linemiddlemodel = new LineMiddleModel(model.Id);
                         context.LinesMiddle.Add(linemiddlemodel);
@@ -89,13 +92,14 @@ namespace METS.Classes.Helper
                     context.LinesMiddle.Update(linemiddlemodel);
 
 
-                    foreach(LineDevice linedev in linem.Subs)
+                    foreach (LineDevice linedev in linem.Subs)
                     {
                         LineDeviceModel linedevmodel;
-                        if(context.LineDevices.Any(l => l.UId == linedev.UId && l.ProjectId == model.Id))
+                        if (context.LineDevices.Any(l => l.UId == linedev.UId && l.ProjectId == model.Id))
                         {
                             linedevmodel = context.LineDevices.Single(l => l.UId == linedev.UId && l.ProjectId == model.Id);
-                        } else
+                        }
+                        else
                         {
                             linedevmodel = new LineDeviceModel(model.Id);
                             context.LineDevices.Add(linedevmodel);
@@ -156,7 +160,7 @@ namespace METS.Classes.Helper
 
             return model;
         }
-        
+
         public static void SaveGroups()
         {
             context.SaveChanges();
@@ -255,24 +259,24 @@ namespace METS.Classes.Helper
                 Line line = new Line(lmodel);
                 project.Lines.Add(line);
 
-                foreach(LineMiddleModel lmm in context.LinesMiddle.Where(l => l.ProjectId == projectId && l.ParentId == line.Id))
+                foreach (LineMiddleModel lmm in context.LinesMiddle.Where(l => l.ProjectId == projectId && l.ParentId == line.Id))
                 {
                     LineMiddle lm = new LineMiddle(lmm, line);
                     line.Subs.Add(lm);
 
-                    foreach(LineDeviceModel ldm in context.LineDevices.Where(l => l.ProjectId == projectId && l.ParentId == lm.Id).OrderBy(l => l.Id))
+                    foreach (LineDeviceModel ldm in context.LineDevices.Where(l => l.ProjectId == projectId && l.ParentId == lm.Id).OrderBy(l => l.Id))
                     {
                         LineDevice ld = new LineDevice(ldm, lm);
                         ld.DeviceId = ldm.DeviceId;
 
 
-                        foreach(ComObject com in context.ComObjects.Where(co => co.DeviceId == ld.UId))
+                        foreach (ComObject com in context.ComObjects.Where(co => co.DeviceId == ld.UId))
                         {
                             AppComObject comObj = contextC.AppComObjects.Single(c => c.Id == com.ComId);
                             DeviceComObject dcom = new DeviceComObject(comObj);
                             string[] ids = com.Groups.Split(",");
 
-                            if(com.Groups != "")
+                            if (com.Groups != "")
                             {
                                 foreach (string id_str in ids)
                                 {
@@ -320,7 +324,7 @@ namespace METS.Classes.Helper
 
             return project;
         }
-        
+
         public static void DeleteProject(int id)
         {
             List<ProjectModel> ps = context.Projects.Where(p => p.Id == id).ToList();
@@ -339,7 +343,7 @@ namespace METS.Classes.Helper
 
             context.SaveChanges();
         }
-    
+
 
 
         public static async Task GenerateDefaultComs(string appId)
@@ -406,67 +410,74 @@ namespace METS.Classes.Helper
         }
 
         public static List<ParamCondition> GetConditions(XElement xele, ParamVisHelper helper = null, bool isParam = false)
-        { 
+        {
             List<ParamCondition> conds = new List<ParamCondition>();
             try
             {
 
-            string ids = xele.Attribute("RefId")?.Value;
+                string ids = xele.Attribute("RefId")?.Value;
                 if (ids == null) ids = xele.Attribute("Id")?.Value;
-            string paraId = ids;
+                string paraId = ids;
                 bool finished = false;
-            while (true)
-            {
-                xele = xele.Parent;
-
-                switch (xele.Name.LocalName)
+                while (true)
                 {
-                    case "when":
+                    xele = xele.Parent;
+
+                    switch (xele.Name.LocalName)
+                    {
+                        case "when":
                             if (finished && isParam) continue;
-                        ParamCondition cond = new ParamCondition();
-                        int tempOut;
-                        if (xele.Attribute("default")?.Value == "true")
-                        {
-                            ids = "d" + ids;
-                            List<string> values = new List<string>();
-                            IEnumerable<XElement> whens = xele.Parent.Elements();
-                            foreach(XElement w in whens)
+                            ParamCondition cond = new ParamCondition();
+                            int tempOut;
+                            if (xele.Attribute("default")?.Value == "true")
                             {
-                                if (w == xele) 
-                                    continue;
+                                ids = "d" + ids;
+                                List<string> values = new List<string>();
+                                IEnumerable<XElement> whens = xele.Parent.Elements();
+                                foreach (XElement w in whens)
+                                {
+                                    if (w == xele)
+                                        continue;
 
-                                values.AddRange(w.Attribute("test").Value.Split(" "));
+                                    values.AddRange(w.Attribute("test").Value.Split(" "));
+                                }
+                                cond.Values = string.Join(",", values);
+                                cond.Operation = ConditionOperation.Default;
                             }
-                            cond.Values = string.Join(",", values);
-                            cond.Operation = ConditionOperation.Default;
-                        } else if(xele.Attribute("test")?.Value.Contains(" ") == true || int.TryParse(xele.Attribute("test")?.Value, out tempOut)) {
-                            cond.Values = string.Join(",", xele.Attribute("test").Value.Split(" "));
-                            cond.Operation = ConditionOperation.IsInValue;
-                        }
-                        else
-                        {
-                            Log.Warning("Unbekanntes when! " + xele.ToString());
-                        }
-                        
-                        cond.SourceId = xele.Parent.Attribute("ParamRefId").Value;
-                        conds.Add(cond);
+                            else if (xele.Attribute("test")?.Value.Contains(" ") == true || int.TryParse(xele.Attribute("test")?.Value, out tempOut))
+                            {
+                                cond.Values = string.Join(",", xele.Attribute("test").Value.Split(" "));
+                                cond.Operation = ConditionOperation.IsInValue;
+                            }
+                            else if (xele.Attribute("test")?.Value.StartsWith("!=") == true)
+                            {
+                                cond.Values = xele.Attribute("test").Value.Substring(2);
+                                cond.Operation = ConditionOperation.NotEqual;
+                            }
+                            else
+                            {
+                                Log.Warning("Unbekanntes when! " + xele.ToString());
+                            }
 
-                        ids = "|" + cond.SourceId + "." + cond.Values + "|" + ids;
-                        break;
+                            cond.SourceId = xele.Parent.Attribute("ParamRefId").Value;
+                            conds.Add(cond);
 
-                    case "Channel":
-                    case "ParameterBlock":
-                        ids = xele.Attribute("Id").Value + "|" + ids;
+                            ids = "|" + cond.SourceId + "." + cond.Values + "|" + ids;
+                            break;
+
+                        case "Channel":
+                        case "ParameterBlock":
+                            ids = xele.Attribute("Id").Value + "|" + ids;
                             finished = true;
-                        break;
+                            break;
 
-                    case "Dynamic":
-                        if(helper != null)
-                        {
-                            helper.Hash = Convert.ToBase64String(Encoding.UTF8.GetBytes(ids));
-                        }
-                        return conds;
-                }
+                        case "Dynamic":
+                            if (helper != null)
+                            {
+                                helper.Hash = Convert.ToBase64String(Encoding.UTF8.GetBytes(ids));
+                            }
+                            return conds;
+                    }
                 }
             }
             catch
@@ -503,7 +514,7 @@ namespace METS.Classes.Helper
                         tempValues.Add(cond.SourceId, val);
                     }
 
-                    switch(cond.Operation)
+                    switch (cond.Operation)
                     {
                         case ConditionOperation.IsInValue:
                             if (!cond.Values.Split(",").Contains(val))
@@ -511,6 +522,10 @@ namespace METS.Classes.Helper
                             break;
                         case ConditionOperation.Default:
                             if (cond.Values.Split(",").Contains(val))
+                                flag = false;
+                            break;
+                        case ConditionOperation.NotEqual:
+                            if (cond.Values == val)
                                 flag = false;
                             break;
                         default:
@@ -530,7 +545,7 @@ namespace METS.Classes.Helper
         {
             Dictionary<string, string> tempValues = new Dictionary<string, string>();
             ObservableCollection<DeviceComObject> defObjs = new ObservableCollection<DeviceComObject>();
-            
+
             foreach (DeviceComObject obj in comObjects)
             {
                 if (obj.Conditions.Count == 0)

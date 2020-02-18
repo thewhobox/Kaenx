@@ -23,7 +23,7 @@
             <RowDefinition Height="auto" />
         </Grid.RowDefinitions>
 
-        <StackPanel Padding="50 100 50 20" >
+        <StackPanel Padding="50 20 50 20" >
             <TextBlock Text="{Binding ImportState}" FontSize="20" VerticalAlignment="Center" />
             <TextBlock Text="{Binding ImportDevice}" FontSize="20" VerticalAlignment="Center" />
         </StackPanel>
@@ -47,7 +47,7 @@
                             <RowDefinition />
                         </Grid.RowDefinitions>
 
-                        <SymbolIcon Grid.RowSpan="2" MinWidth="10" Symbol="{Binding Icon}" Foreground="Red" />
+                        <SymbolIcon Grid.RowSpan="2" MinWidth="10" Symbol="{Binding Icon}" Foreground="{Binding IconBrush}" />
                         <TextBlock Grid.Column="1" Text="{Binding Name}" FontSize="18" />
                         <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding Description}" Foreground="DarkBlue" VerticalAlignment="Center" />
                     </Grid>

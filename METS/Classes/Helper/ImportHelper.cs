@@ -82,7 +82,7 @@ namespace METS.Classes.Helper
                 if(c % 100 == 0)
                 {
                     currH?.Invoke(c);
-                    await Task.Delay(10);
+                    await Task.Delay(1);
                 }
             }
         }
@@ -881,24 +881,26 @@ namespace METS.Classes.Helper
                 if (position % iterationToWait == 0) await Task.Delay(1);
             }
 
-
-            Log.Information("ComObjectTable wird eingelesen");
             XElement table = null;
-            if (doc.Descendants(GetXName("ComObjectTable")).Count() != 0 && doc.Descendants(GetXName("ComObjectTable")).ElementAt(0).Attribute("CodeSegment") != null)
+            Log.Information("ComObjectTable wird eingelesen");
+            if(doc.Descendants(GetXName("ComObjectTable")).Count() != 0)
             {
                 table = doc.Descendants(GetXName("ComObjectTable")).ElementAt(0);
-                app.Table_Object = table.Attribute("CodeSegment").Value;
-                int offsetObject;
-                int.TryParse(table.Attribute("Offset").Value, out offsetObject);
-                app.Table_Object_Offset = offsetObject;
-            } else
-            {
-                Log.Information("Für ComObjectTable kein CodeSegment gefunden");
-            }
 
-            Log.Information("ComObjects werden eingelesen");
-            if(table != null)
-            {
+                if (table.Attribute("CodeSegment") != null)
+                {
+                    table = doc.Descendants(GetXName("ComObjectTable")).ElementAt(0);
+                    app.Table_Object = table.Attribute("CodeSegment").Value;
+                    int offsetObject;
+                    int.TryParse(table.Attribute("Offset").Value, out offsetObject);
+                    app.Table_Object_Offset = offsetObject;
+                }
+                else
+                {
+                    Log.Information("Für ComObjectTable kein CodeSegment gefunden");
+                }
+
+                Log.Information("ComObjects werden eingelesen");
                 foreach (XElement com in table.Elements())
                 {
                     AppComObject cobj = new AppComObject();
@@ -922,7 +924,7 @@ namespace METS.Classes.Helper
                     if (position % iterationToWait == 0) await Task.Delay(1);
                 }
             }
-
+            
             //TODO zusammenbringen mit ComObject auslesen
             Log.Information("ComObjectRefs werden eingelesen");
             tempList = doc.Descendants(GetXName("ComObjectRef")).ToList();

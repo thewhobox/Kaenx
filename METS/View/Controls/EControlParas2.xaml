@@ -29,12 +29,12 @@
 
             <ComboBox x:Name="NavChannel" ItemsSource="{Binding ListNavChannel}" HorizontalAlignment="Stretch" DisplayMemberPath="Name" />
             <ComboBox x:Name="NavBlock" ItemsSource="{Binding ElementName=NavChannel, Path=SelectedItem.Blocks}" SelectionChanged="NavBlock_SelectionChanged" Grid.Column="1" HorizontalAlignment="Stretch">
-                <ComboBox.Resources>
+                <!--<ComboBox.Resources>
                     <Style TargetType="ComboBoxItem">
                         <Setter Property="Padding" Value="0"/>
                         <Setter Property="Margin" Value="0"/>
                     </Style>
-                </ComboBox.Resources>
+                </ComboBox.Resources>-->
                 <ComboBox.ItemTemplate>
                     <DataTemplate>
                         <TextBlock Text="{Binding Name}" Visibility="{Binding Visible}" />
