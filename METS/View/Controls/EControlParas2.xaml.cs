@@ -136,7 +136,7 @@ namespace METS.Views.Easy.Controls
                         break;
                     case "ParameterBlock":
                         ListBlockModel mBlock = new ListBlockModel();
-                        mBlock.Visible = visibility;
+                        mBlock.Visible = vis2vis(visibility);
                         if(xele.Attribute("ParamRefId") != null)
                         {
                             AppParameter para = AppParas[xele.Attribute("ParamRefId").Value];
@@ -201,10 +201,6 @@ namespace METS.Views.Easy.Controls
 
                                 }
                             }
-                            else
-                            {
-                                visible = Visibility;
-                            }
 
                             await ParseRoot(xwhen, visible, parentChannel);
                         }
@@ -213,6 +209,13 @@ namespace METS.Views.Easy.Controls
                         break;
                 }
             }
+        }
+
+
+        private Visibility vis2vis(Visibility input)
+        {
+            if (input == Visibility.Visible) return Visibility.Visible;
+            return Visibility.Collapsed;
         }
 
 
@@ -294,7 +297,7 @@ namespace METS.Views.Easy.Controls
                             case ParamTypes.Picture:
                                 ParamPicture paraviewP = new ParamPicture(para, paraType);
                                 paraviewP.hash = hash;
-                                paraviewP.SetVisibility(visibility);
+                                paraviewP.SetVisibility(vis2vis(visibility));
                                 parent.Children.Add(paraviewP);
                                 Params.Add(hash, paraviewP);
                                 break;
@@ -302,7 +305,7 @@ namespace METS.Views.Easy.Controls
                             case ParamTypes.NumberUInt:
                                 ParamNumber paraviewN = new ParamNumber(para, paraType);
                                 paraviewN.hash = hash;
-                                paraviewN.SetVisibility(visibility);
+                                paraviewN.SetVisibility(vis2vis(visibility));
                                 paraviewN.ParamChanged += ParamChanged;
                                 parent.Children.Add(paraviewN);
                                 Params.Add(hash, paraviewN);
@@ -311,7 +314,7 @@ namespace METS.Views.Easy.Controls
                                 if (para.Access == AccessType.Read)
                                 {
                                     ParamText paraviewT = new ParamText(para, paraType);
-                                    paraviewT.SetVisibility(visibility);
+                                    paraviewT.SetVisibility(vis2vis(visibility));
                                     parent.Children.Add(paraviewT);
                                     Params.Add(hash, paraviewT);
                                 }
@@ -320,7 +323,7 @@ namespace METS.Views.Easy.Controls
                                     ParamInput paraviewI = new ParamInput(para, paraType) { Name = para.Id };
                                     paraviewI.hash = hash;
                                     paraviewI.ParamChanged += ParamChanged;
-                                    paraviewI.SetVisibility(visibility);
+                                    paraviewI.SetVisibility(vis2vis(visibility));
                                     parent.Children.Add(paraviewI);
                                     Params.Add(hash, paraviewI);
                                 }
@@ -336,7 +339,7 @@ namespace METS.Views.Easy.Controls
                                     b2.BorderThickness = new Thickness(0, 1, 0, 0);
                                     b2.Margin = new Thickness(10, 20, 10, 20);
                                     b2.Child = new TextBlock() { Text = para.Text + " - Keine Enums" };
-                                    b2.Visibility = visibility;
+                                    b2.Visibility = vis2vis(visibility);
                                     parent.Children.Add(b2);
                                 }
                                 else if (enums.Count() > 2)
@@ -344,7 +347,7 @@ namespace METS.Views.Easy.Controls
                                     ParamEnum paraviewE = new ParamEnum(para, paraType, enums) { Name = para.Id };
                                     paraviewE.hash = hash;
                                     paraviewE.ParamChanged += ParamChanged;
-                                    paraviewE.SetVisibility(visibility);
+                                    paraviewE.SetVisibility(vis2vis(visibility));
                                     parent.Children.Add(paraviewE);
                                     Params.Add(hash, paraviewE);
                                 }
@@ -353,7 +356,7 @@ namespace METS.Views.Easy.Controls
                                     ParamEnum2 paraviewE2 = new ParamEnum2(para, paraType, enums) { Name = para.Id };
                                     paraviewE2.hash = hash;
                                     paraviewE2.ParamChanged += ParamChanged;
-                                    paraviewE2.SetVisibility(visibility);
+                                    paraviewE2.SetVisibility(vis2vis(visibility));
                                     parent.Children.Add(paraviewE2);
                                     Params.Add(hash, paraviewE2);
                                 }
@@ -361,7 +364,7 @@ namespace METS.Views.Easy.Controls
 
                             case ParamTypes.None:
                                 ParamNone paraviewNo = new ParamNone(para, paraType);
-                                paraviewNo.SetVisibility(visibility);
+                                paraviewNo.SetVisibility(vis2vis(visibility));
                                 parent.Children.Add(paraviewNo);
                                 Params.Add(hash, paraviewNo);
                                 break;
@@ -378,7 +381,7 @@ namespace METS.Views.Easy.Controls
                             b.Child = new TextBlock() { Text = xele.Attribute("Text").Value };
                         else
                             b.Height = 1;
-                        b.Visibility = visibility;
+                        b.Visibility = vis2vis(visibility);
                         parent.Children.Add(b);
                         //Params.Add(xele.Attribute("Id").Value, b); /TODO add seperator
                         //Todo conditions for seperators
@@ -425,7 +428,7 @@ namespace METS.Views.Easy.Controls
                             }
                             else
                             {
-                                visible = visibility;
+                                visible = vis2vis(visibility);
                             }
 
                             await ParseBlock(xwhen, parent, visible);

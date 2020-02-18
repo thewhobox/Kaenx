@@ -37,7 +37,7 @@
                 </ComboBox.Resources>
                 <ComboBox.ItemTemplate>
                     <DataTemplate>
-                        <TextBlock Text="{Binding Name}" Visibility="{Binding Visible}" Margin="5" />
+                        <TextBlock Text="{Binding Name}" Visibility="{Binding Visible}" />
                     </DataTemplate>
                 </ComboBox.ItemTemplate>
             </ComboBox>
