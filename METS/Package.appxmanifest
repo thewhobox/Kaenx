@@ -1,6 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Package xmlns="http://schemas.microsoft.com/appx/manifest/foundation/windows10" xmlns:mp="http://schemas.microsoft.com/appx/2014/phone/manifest" xmlns:uap="http://schemas.microsoft.com/appx/manifest/uap/windows10" IgnorableNamespaces="uap mp">
-  <Identity Name="55505Exe-Creation.KAENX" Publisher="CN=92410570-9637-4D05-BB82-BCB990CF0C1C" Version="0.0.10.0" />
+  <Identity Name="55505Exe-Creation.KAENX" Publisher="CN=92410570-9637-4D05-BB82-BCB990CF0C1C" Version="0.0.12.0" />
   <mp:PhoneIdentity PhoneProductId="d5ad105d-c5a0-4668-a9e1-ffdd84ab2e9f" PhonePublisherId="00000000-0000-0000-0000-000000000000" />
   <Properties>
     <DisplayName>KAENX</DisplayName>

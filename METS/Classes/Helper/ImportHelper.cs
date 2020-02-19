@@ -35,11 +35,7 @@ namespace METS.Classes.Helper
         private List<ManufacturerViewModel> tempManus;
         private CatalogContext _context = new CatalogContext();
 
-        //private Dictionary<string, string> Prod2Section;
-        private List<string> DeviceIds;
-        private Dictionary<string, string> App2Hardware;
         private List<ImportError> AppErrors;
-        private List<string> AppIds;
         private string currentAppName;
 
 
@@ -309,11 +305,11 @@ namespace METS.Classes.Helper
             app.Name = appXml.Attribute("Name").Value;
 
             Hardware2AppModel hard2App = _context.Hardware2App.Single(h => h.ApplicationId == app.Id && h.HardwareId == device.HardwareId);
-            //hard2App.Name = app.Name;
-            //hard2App.Version = app.Version;
-            //hard2App.Number = app.Number;
-            //_context.Hardware2App.Update(hard2App);
-            //_context.SaveChanges();
+            hard2App.Name = app.Name;
+            hard2App.Version = app.Version;
+            hard2App.Number = app.Number;
+            _context.Hardware2App.Update(hard2App);
+            _context.SaveChanges();
 
 
             int rest = app.Version % 16;
@@ -366,6 +362,7 @@ namespace METS.Classes.Helper
 
         public async Task CheckParams()
         {
+            Dictionary<string, string> App2Hardware = new Dictionary<string, string>();
             ProgressMaxChanged(App2Hardware.Count);
             int count = 0;
             int c = 0;
@@ -568,6 +565,7 @@ namespace METS.Classes.Helper
         {
 
             List<DeviceViewModel> AddedDevices = new List<DeviceViewModel>();
+            List<string> DeviceIds = new List<string>();
             ProgressMaxChanged(DeviceIds.Count);
             int count = 0;
 

@@ -22,6 +22,7 @@ using Windows.Foundation.Collections;
 using Windows.Graphics.Imaging;
 using Windows.Storage;
 using Windows.Storage.Pickers;
+using Windows.Storage.Streams;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Controls.Primitives;
@@ -176,13 +177,26 @@ namespace METS.View
             FlyoutBase.ShowAttachedFlyout((FrameworkElement)sender);
         }
 
-        private async void ClickChangePic(object sender, RoutedEventArgs e)
+        private async void ClickChangePicFile(object sender, RoutedEventArgs e)
         {
             FileOpenPicker picker = new FileOpenPicker();
             picker.FileTypeFilter.Add(".jpg");
             picker.FileTypeFilter.Add(".png");
             StorageFile file = await picker.PickSingleFileAsync();
-            Cropper.LoadImageFromFile(file);
+            _ = Cropper.LoadImageFromFile(file);
+            Cropper.Visibility = Visibility.Visible;
+            CropperStandard.Visibility = Visibility.Collapsed;
+        }
+
+        private void ClickChangePicStandard(object sender, RoutedEventArgs e)
+        {
+            string id = ((ComboBoxItem)DiagStandard.SelectedItem).Tag.ToString();
+
+            BitmapImage image = new BitmapImage() { UriSource = new Uri("ms-appx:///Assets/ProjectImgs/" + id + ".png") };
+            CropperStandard.Source = image;
+
+            Cropper.Visibility = Visibility.Collapsed;
+            CropperStandard.Visibility = Visibility.Visible;
         }
 
         private void CickDiagCancel(object sender, RoutedEventArgs e)
@@ -200,11 +214,83 @@ namespace METS.View
             Backbone.Subs.Add(new LineMiddle(1, loaderG.GetString("Line") + " 1", Backbone));
             proj.Lines.Add(Backbone);
 
-            StorageFile file = await ApplicationData.Current.TemporaryFolder.CreateFileAsync("tempProjImg.png", CreationCollisionOption.ReplaceExisting);
-            await Cropper.SaveAsync(await file.OpenAsync(FileAccessMode.ReadWrite, StorageOpenOptions.None), Microsoft.Toolkit.Uwp.UI.Controls.BitmapFileFormat.Png);
+            WriteableBitmap image;
+            if (Cropper.Visibility == Visibility.Visible)
+            {
+                StorageFile file = await ApplicationData.Current.TemporaryFolder.CreateFileAsync("tempProjImg.png", CreationCollisionOption.ReplaceExisting);
+                await Cropper.SaveAsync(await file.OpenAsync(FileAccessMode.ReadWrite, StorageOpenOptions.None), Microsoft.Toolkit.Uwp.UI.Controls.BitmapFileFormat.Png);
+                image = new WriteableBitmap((int)Cropper.CroppedRegion.Width, (int)Cropper.CroppedRegion.Height);
+                image.SetSource(await file.OpenReadAsync());
 
-            WriteableBitmap image = new WriteableBitmap((int)Cropper.CroppedRegion.Width, (int)Cropper.CroppedRegion.Height);
-            image.SetSource(await file.OpenReadAsync());
+                WriteableBitmap newImage;
+
+                using (var fileStream = await file.OpenReadAsync())
+                {
+                    var bitmap = new BitmapImage();
+                    bitmap.SetSource(fileStream);
+
+                    newImage = new WriteableBitmap(512, 512);
+                    fileStream.Seek(0);
+                    var decoder = await BitmapDecoder.CreateAsync(fileStream);
+
+                    // Scale image to appropriate size 
+                    var transform = new BitmapTransform()
+                    {
+                        ScaledWidth = Convert.ToUInt32(newImage.PixelWidth),
+                        ScaledHeight = Convert.ToUInt32(newImage.PixelHeight)
+                    };
+                    var pixelData = await decoder.GetPixelDataAsync(
+                        BitmapPixelFormat.Bgra8, // WriteableBitmap uses BGRA format 
+                        BitmapAlphaMode.Straight,
+                        transform,
+                        ExifOrientationMode.IgnoreExifOrientation, // This sample ignores Exif orientation 
+                        ColorManagementMode.DoNotColorManage
+                    );
+
+                    // An array containing the decoded image data, which could be modified before being displayed 
+                    var sourcePixels = pixelData.DetachPixelData();
+
+                    // Open a stream to copy the image contents to the WriteableBitmap's pixel buffer 
+                    using (var stream = newImage.PixelBuffer.AsStream())
+                    {
+                        await stream.WriteAsync(sourcePixels, 0, sourcePixels.Length);
+                    }
+                }
+
+                image = newImage;
+
+
+                //StorageFolder pictureFolder = ApplicationData.Current.LocalFolder;
+                //var file2 = await pictureFolder.CreateFileAsync("test.jpg", CreationCollisionOption.ReplaceExisting);
+
+                //using (var stream = await file2.OpenStreamForWriteAsync())
+                //{
+                //    BitmapEncoder encoder = await BitmapEncoder.CreateAsync(BitmapEncoder.JpegEncoderId, stream.AsRandomAccessStream());
+                //    var pixelStream = image.PixelBuffer.AsStream();
+                //    byte[] pixels2 = new byte[image.PixelBuffer.Length];
+
+                //    await pixelStream.ReadAsync(pixels2, 0, pixels2.Length);
+
+                //    encoder.SetPixelData(BitmapPixelFormat.Bgra8, BitmapAlphaMode.Ignore, (uint)image.PixelWidth, (uint)image.PixelHeight, 96, 96, pixels2);
+
+                //    await encoder.FlushAsync();
+                //}
+
+                await file.DeleteAsync();
+            }
+            else
+            {
+                BitmapImage bmp = (BitmapImage)CropperStandard.Source;
+                RandomAccessStreamReference random = RandomAccessStreamReference.CreateFromUri(bmp.UriSour‌​ce);
+                using (IRandomAccessStream stream = await random.OpenReadAsync())
+                {
+                    image = new WriteableBitmap((int)bmp.PixelWidth, (int)bmp.PixelHeight);
+                    await image.SetSourceAsync(stream);
+                }
+
+            }
+            
+
 
             byte[] pixels;
             using (Stream stream = image.PixelBuffer.AsStream())
@@ -217,7 +303,6 @@ namespace METS.View
             proj.ImageW = image.PixelWidth;
             proj.Id = SaveHelper.SaveProject(proj).Id;
 
-            await file.DeleteAsync();
 
             StorageFolder folder = await ApplicationData.Current.LocalFolder.CreateFolderAsync("Projects", CreationCollisionOption.OpenIfExists);
             await folder.CreateFolderAsync(proj.Id.ToString(), CreationCollisionOption.ReplaceExisting);

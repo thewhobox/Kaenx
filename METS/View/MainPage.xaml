@@ -107,7 +107,7 @@
             </GridView.ItemsPanel>
             <GridView.ItemTemplate>
                 <DataTemplate>
-                    <Grid x:Name="GridTemplate" Tapped="GridItemTapped" IsTapEnabled="True" Height="240" Width="240">
+                    <Grid x:Name="GridTemplate" Tapped="GridItemTapped" IsTapEnabled="True" Height="240" Width="240" BorderBrush="LightGray" BorderThickness="1">
                         <Grid.RowDefinitions>
                             <RowDefinition />
                             <RowDefinition Height="auto" />
@@ -135,7 +135,7 @@
                         <Image Grid.RowSpan="2" Source="{Binding Image}" />
                         <Border Grid.Row="2" Padding=" 5 2">
                             <Border.Background>
-                                <SolidColorBrush Color="Gray" Opacity="0.7" />
+                                <SolidColorBrush Color="LightGray" Opacity="0.9" />
                             </Border.Background>
                             <TextBlock x:Name="Rofl" Text="{Binding Name}" TextWrapping="WrapWholeWords" />
                         </Border>
@@ -168,8 +168,9 @@
                     <RowDefinition Height="auto" />
                     <RowDefinition Height="10" />
                     <RowDefinition Height="auto" />
+                    <RowDefinition  />
                     <RowDefinition Height="auto" />
-                    <RowDefinition />
+                    <RowDefinition Height="auto" />
                 </Grid.RowDefinitions>
 
                 <TextBlock Grid.ColumnSpan="2" Text="Neues Projekt" FontSize="24" Margin="0 0 0 30" />
@@ -177,14 +178,23 @@
                 <TextBlock Grid.Row="1" Text="Name:" />
                 <TextBox Grid.Row="1" Grid.Column="1" x:Name="InName" Text="Neues Projekt" />
 
-                <Button Grid.Row="3" Grid.Column="1" Content="Bild ändern" Click="ClickChangePic" />
+                <TextBlock Grid.Row="3" Text="Bild:" />
+                <StackPanel Grid.Row="3" Grid.Column="1" Orientation="Horizontal">
+                    <Button Content="Aus Datei" Click="ClickChangePicFile" Margin="0 0 10 0" />
+                    <Button Content="Aus Standard" Click="ClickChangePicStandard" Margin="0 0 10 0" />
+                    <ComboBox x:Name="DiagStandard">
+                        <ComboBoxItem Content="Gebäude" Tag="home" IsSelected="True" />
+                        <ComboBoxItem Content="Hochhaus" Tag="skyline" />
+                        <ComboBoxItem Content="Kirche" Tag="church" />
+                    </ComboBox>
+                </StackPanel>
 
-                <toolkit:ImageCropper x:Name="Cropper" Grid.Row="4" Grid.ColumnSpan="2" AspectRatio="1" />
-                <!--<Viewbox Grid.Row="4" Grid.ColumnSpan="2" Height="400">
-                    <toolkit:ImageCropper x:Name="Cropper" CropShape="Rectangular" AspectRatio="1" />
-                </Viewbox>-->
+                <ScrollViewer Grid.Row="4" Grid.ColumnSpan="2" VerticalAlignment="Stretch" Margin="0 10 0 10">
+                    <toolkit:ImageCropper x:Name="Cropper" Grid.Row="4" Grid.ColumnSpan="2" AspectRatio="1" Visibility="Collapsed" />
+                </ScrollViewer>
+                <Image x:Name="CropperStandard" Grid.Row="4" Grid.ColumnSpan="2" Source="/Assets/ProjectImgs/home.png" MaxHeight="300" />
 
-                <Grid Grid.RowSpan="6" Grid.ColumnSpan="2" VerticalAlignment="Bottom">
+                <Grid Grid.Row="5" Grid.ColumnSpan="2" VerticalAlignment="Bottom">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition />
                         <ColumnDefinition Width="20" />
