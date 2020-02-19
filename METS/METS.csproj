@@ -247,22 +247,16 @@
     </AppxManifest>
     <None Include="Data\Logos\kænx.odg" />
     <None Include="METS_TemporaryKey.pfx" />
-    <PRIResource Include="Strings\en\MainPage.resw" />
     <PRIResource Include="Strings\de-de\Topologie.resw" />
     <PRIResource Include="Strings\de-de\Groups.resw" />
-    <PRIResource Include="Strings\en\Dialogs.resw" />
     <PRIResource Include="Strings\de-de\Dialogs.resw" />
-    <PRIResource Include="Strings\en\Global.resw" />
-    <PRIResource Include="Strings\en\WorkDeskEasy.resw" />
     <PRIResource Include="Strings\de-de\WorkDeskEasy.resw" />
     <PRIResource Include="Strings\de-de\Global.resw" />
     <PRIResource Include="Strings\de-de\Catalog.resw" />
     <PRIResource Include="Strings\de-de\Import.resw" />
     <PRIResource Include="Strings\de-de\Resources.resw" />
     <PRIResource Include="Strings\de-de\MainPage.resw" />
-    <PRIResource Include="Strings\en\Catalog.resw" />
-    <PRIResource Include="Strings\en\Import.resw" />
-    <PRIResource Include="Strings\en\Resources.resw" />
+    <PRIResource Include="Strings\en\MainPage.resw" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Package.StoreAssociation.xml" />
@@ -473,10 +467,6 @@
     <WCFMetadata Include="Connected Services\" />
   </ItemGroup>
   <ItemGroup>
-    <XliffResource Include="MultilingualResources\METS.de.xlf" />
-    <XliffResource Include="MultilingualResources\METS.en.xlf" />
-  </ItemGroup>
-  <ItemGroup>
     <ProjectReference Include="..\METS.Context\METS.Context.csproj">
       <Project>{b5a8a078-65e2-4621-9d3c-1c7ce248926d}</Project>
       <Name>METS.Context</Name>
@@ -486,7 +476,6 @@
       <Name>METS.Knx</Name>
     </ProjectReference>
   </ItemGroup>
-  <ItemGroup />
   <PropertyGroup Condition=" '$(VisualStudioVersion)' == '' or '$(VisualStudioVersion)' &lt; '14.0' ">
     <VisualStudioVersion>14.0</VisualStudioVersion>
   </PropertyGroup>
