@@ -3,14 +3,16 @@ using System;
 using METS.Context.Project;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace METS.Context.Migrations.Project
 {
     [DbContext(typeof(ProjectContext))]
-    partial class ProjectContextModelSnapshot : ModelSnapshot
+    [Migration("20200218232404_Images")]
+    partial class Images
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -168,10 +170,6 @@ namespace METS.Context.Migrations.Project
                         .ValueGeneratedOnAdd();
 
                     b.Property<byte[]>("Image");
-
-                    b.Property<int>("ImageH");
-
-                    b.Property<int>("ImageW");
 
                     b.Property<string>("Name");
 

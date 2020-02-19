@@ -12,6 +12,9 @@ namespace METS.Classes.Project
     {
         public int Id { get; set; }
         public string Name { get; set; }
+        public byte[] Image { get; set; }
+        public int ImageH { get; set; }
+        public int ImageW { get; set; }
 
         private ObservableCollection<Group> _groups = new ObservableCollection<Group>();
 

@@ -120,28 +120,19 @@
   <data name="AppCrashed" xml:space="preserve">
     <value>App ist kürzlich abgestürzt!</value>
   </data>
-  <data name="BtnCatalog.Content" xml:space="preserve">
-    <value>Katalog öffnen</value>
+  <data name="BtnArchiv.Text" xml:space="preserve">
+    <value>Archiv</value>
   </data>
-  <data name="BtnDelete.Text" xml:space="preserve">
-    <value>Löschen</value>
+  <data name="BtnCatalog.Text" xml:space="preserve">
+    <value>Katalog</value>
   </data>
-  <data name="BtnLoadProject.Text" xml:space="preserve">
-    <value>Projekt laden</value>
+  <data name="BtnNewProject.Text" xml:space="preserve">
+    <value>Erstellen</value>
   </data>
-  <data name="BtnNewProject.Content" xml:space="preserve">
-    <value>Neues Fortgeschrittenes Projekt</value>
-  </data>
-  <data name="BtnOpen.Text" xml:space="preserve">
-    <value>Öffnen</value>
-  </data>
-  <data name="BtnWizProject.Content" xml:space="preserve">
-    <value>Projekt Wizard benutzen</value>
+  <data name="BtnSettings.Text" xml:space="preserve">
+    <value>Einstellungen</value>
   </data>
   <data name="MsgProjectDeleted" xml:space="preserve">
     <value>Projekt wurde gelöscht.</value>
-  </data>
-  <data name="MsgSelectProject" xml:space="preserve">
-    <value>Bitte wähle zuerst ein Projekt aus.</value>
   </data>
 </root>

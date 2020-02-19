@@ -42,6 +42,7 @@ namespace METS.Views.Easy.Controls
         private CatalogContext _context = new CatalogContext();
         private ProjectContext _contextP = new ProjectContext();
 
+        private List<BlockVisHelper> helperBlock = new List<BlockVisHelper>();
         private List<Binding> bindings = new List<Binding>();
         private Dictionary<string, IParam> Params = new Dictionary<string, IParam>();
         private List<ParamVisHelper> conditions;
@@ -106,7 +107,9 @@ namespace METS.Views.Easy.Controls
             }
 
             NavChannel.SelectedIndex = 0;
-            NavBlock.SelectedIndex = 0;
+            NavChannel.Visibility = Visibility.Collapsed;
+            Grid.SetColumn(NavBlock, 0);
+            Grid.SetColumnSpan(NavBlock, 2);
 
             if (ListNavChannel.Count < 2)
                 NavChannel.IsEnabled = false;
@@ -117,7 +120,6 @@ namespace METS.Views.Easy.Controls
             ViewHelper.Instance.ShowNotification("Geladen nach: " + watch.Elapsed.TotalSeconds + "s", 3000);
         }
 
-        List<BlockVisHelper> helperBlock = new List<BlockVisHelper>();
 
         private async Task ParseRoot(XElement xparent, Visibility visibility, ListChannelModel parentChannel = null)
         {
@@ -137,6 +139,7 @@ namespace METS.Views.Easy.Controls
                     case "ParameterBlock":
                         ListBlockModel mBlock = new ListBlockModel();
                         mBlock.Visible = vis2vis(visibility);
+                        mBlock.Id = xele.Attribute("Id").Value;
                         if(xele.Attribute("ParamRefId") != null)
                         {
                             AppParameter para = AppParas[xele.Attribute("ParamRefId").Value];
@@ -477,6 +480,36 @@ namespace METS.Views.Easy.Controls
                 }
             }
 
+            IEnumerable<BlockVisHelper> helpersB = helperBlock.Where(h => h.Conditions.Any(c => c.SourceId == source));
+            foreach(BlockVisHelper helper in helpersB)
+            {
+                bool flag = true;
+
+                foreach (ParamCondition cond in helper.Conditions)
+                {
+                    if (flag == false) break;
+                    AppParameter paraCond = AppParas[cond.SourceId];
+                    switch (cond.Operation)
+                    {
+                        case ConditionOperation.IsInValue:
+                            if (!cond.Values.Split(",").Contains(paraCond.Value))
+                                flag = false;
+                            break;
+
+                        case ConditionOperation.Default:
+                            if (cond.Values.Split(",").Contains(paraCond.Value))
+                                flag = false;
+                            break;
+                        default:
+                            break;
+                    }
+                }
+
+                helper.Block.Visible = flag ? Visibility.Visible : Visibility.Collapsed;
+            }
+
+            if (helpersB.Count() > 0)
+                filterBlocks();
 
             ChangeParamModel change = new ChangeParamModel
             {
@@ -552,19 +585,33 @@ namespace METS.Views.Easy.Controls
             }
         }
 
-        private void NavBlock_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-            if (NavBlock.Items.Count < 2)
-                NavBlock.IsEnabled = false;
-            else
-                NavBlock.IsEnabled = true;
-        }
-
         private void NavChannel_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            object selectedItem = NavBlock.SelectedItem;
-            ListNavBlock.Clear();
+            if (NavChannel.SelectedItem == null) return;
+            filterBlocks();
+            NavBlock.SelectedIndex = 0;
+        }
 
+        private void filterBlocks()
+        {
+            ListChannelModel selectedItem = (ListChannelModel)NavChannel.SelectedItem;
+
+
+            foreach (ListBlockModel block in selectedItem.Blocks)
+            {
+                if (block.Visible == Visibility.Visible || !ListNavBlock.Any(b => ((ListBlockModel)b).Id == block.Id)) continue;
+
+                ListBlockModel helper = ListNavBlock.Single(b => b.Id == block.Id);
+                ListNavBlock.Remove(helper);
+            }
+
+
+
+            foreach (ListBlockModel block in selectedItem.Blocks)
+            {
+                if (block.Visible == Visibility.Collapsed || ListNavBlock.Any(b => ((ListBlockModel)b).Id == block.Id)) continue;
+                ListNavBlock.Add(block);
+            }
         }
     }
 }

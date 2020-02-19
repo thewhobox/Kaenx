@@ -25,7 +25,7 @@
     <AppxBundlePlatforms>x86</AppxBundlePlatforms>
     <AppInstallerUpdateFrequency>0</AppInstallerUpdateFrequency>
     <AppInstallerCheckForUpdateFrequency>OnApplicationRun</AppInstallerCheckForUpdateFrequency>
-    <PackageCertificateThumbprint>A3423A4D730BEE95AF5DB23C838EC0C9855C4629</PackageCertificateThumbprint>
+    <PackageCertificateThumbprint>D42AFA64DE3CFF3043FF6E8E873A1338413D2E09</PackageCertificateThumbprint>
     <AppxPackageSigningTimestampDigestAlgorithm>SHA256</AppxPackageSigningTimestampDigestAlgorithm>
     <GenerateTestArtifacts>True</GenerateTestArtifacts>
     <HoursBetweenUpdateChecks>0</HoursBetweenUpdateChecks>
@@ -140,6 +140,7 @@
     <Compile Include="Classes\DeviceImportInfo.cs" />
     <Compile Include="Classes\Helper\BlockVisHelper.cs" />
     <Compile Include="Classes\Helper\ParamVisHelper.cs" />
+    <Compile Include="Classes\Helper\ProjectViewHelper.cs" />
     <Compile Include="Classes\Project\DeviceComObject.cs" />
     <Compile Include="Classes\Project\GroupAddress.cs" />
     <Compile Include="Classes\Project\GroupMiddle.cs" />
@@ -246,6 +247,7 @@
     </AppxManifest>
     <None Include="Data\Logos\kænx.odg" />
     <None Include="METS_TemporaryKey.pfx" />
+    <PRIResource Include="Strings\en\MainPage.resw" />
     <PRIResource Include="Strings\de-de\Topologie.resw" />
     <PRIResource Include="Strings\de-de\Groups.resw" />
     <PRIResource Include="Strings\en\Dialogs.resw" />
@@ -261,7 +263,6 @@
     <PRIResource Include="Strings\en\Catalog.resw" />
     <PRIResource Include="Strings\en\Import.resw" />
     <PRIResource Include="Strings\en\Resources.resw" />
-    <PRIResource Include="Strings\en\MainPage.resw" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Package.StoreAssociation.xml" />

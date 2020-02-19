@@ -102,7 +102,7 @@
 
 
 
-        <toolkit:Expander Grid.Column="2" Grid.RowSpan="3" ExpandDirection="Left" VerticalContentAlignment="Stretch" IsExpanded="True">
+        <toolkit:Expander Grid.Column="2" Grid.RowSpan="3" ExpandDirection="Left" VerticalContentAlignment="Stretch" IsExpanded="False">
             <toolkit:Expander.HeaderTemplate>
                 <DataTemplate>
                     <TextBlock x:Uid="/Topologie/SideProps"  FontSize="20" />

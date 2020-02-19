@@ -9,10 +9,16 @@
     Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
 
     <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition />
+            <RowDefinition Height="auto" />
+        </Grid.RowDefinitions>
         <Grid.Background>
             <SolidColorBrush Color="#FFE0E0E0" />
         </Grid.Background>
 
-        <TextBlock Text="Willkommen bei METS!" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="25" />
+        <TextBlock Text="Willkommen bei KAENX!" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="25" />
+
+        <Image x:Name="ProjectImage" Grid.Row="1" Height="400" />
     </Grid>
 </Page>

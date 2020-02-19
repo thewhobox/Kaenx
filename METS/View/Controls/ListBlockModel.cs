@@ -10,6 +10,7 @@ namespace METS.View.Controls
 {
     public class ListBlockModel
     {
+        public string Id { get; set; }
         public string Name { get; set; }
         public StackPanel Panel { get; set; }
         public Visibility Visible { get; set; }

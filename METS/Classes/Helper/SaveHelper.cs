@@ -50,6 +50,9 @@ namespace METS.Classes.Helper
             }
 
             model.Name = _project.Name;
+            model.Image = _project.Image;
+            model.ImageH = _project.ImageH;
+            model.ImageW = _project.ImageW;
 
 
             foreach (Line line in _project.Lines)
@@ -232,6 +235,9 @@ namespace METS.Classes.Helper
             ProjectModel pm = context.Projects.Single(p => p.Id == projectId);
             project.Name = pm.Name;
             project.Id = pm.Id;
+            project.Image = pm.Image;
+            project.ImageH = pm.ImageH;
+            project.ImageW = pm.ImageW;
 
             Dictionary<int, GroupAddress> groups = new Dictionary<int, GroupAddress>();
 

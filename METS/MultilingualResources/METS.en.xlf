@@ -140,30 +140,6 @@
     </header>
     <body>
       <group id="METS/STRINGS/DE-DE/MAINPAGE.RESW" datatype="resx">
-        <trans-unit id="BtnCatalog.Content" translate="yes" xml:space="preserve">
-          <source>Katalog öffnen</source>
-          <target state="final">Open Catalog</target>
-        </trans-unit>
-        <trans-unit id="BtnDelete.Text" translate="yes" xml:space="preserve">
-          <source>Löschen</source>
-          <target state="final">Delete</target>
-        </trans-unit>
-        <trans-unit id="BtnLoadProject.Text" translate="yes" xml:space="preserve">
-          <source>Projekt laden</source>
-          <target state="final">Load Project</target>
-        </trans-unit>
-        <trans-unit id="BtnNewProject.Content" translate="yes" xml:space="preserve">
-          <source>Neues Fortgeschrittenes Projekt</source>
-          <target state="final">New pro Project</target>
-        </trans-unit>
-        <trans-unit id="BtnOpen.Text" translate="yes" xml:space="preserve">
-          <source>Öffnen</source>
-          <target state="final">Open</target>
-        </trans-unit>
-        <trans-unit id="BtnWizProject.Content" translate="yes" xml:space="preserve">
-          <source>Projekt Wizard benutzen</source>
-          <target state="final">Use Project Wizard</target>
-        </trans-unit>
         <trans-unit id="AppCrashed" translate="yes" xml:space="preserve">
           <source>App ist kürzlich abgestürzt!</source>
           <target state="new">App ist kürzlich abgestürzt!</target>
@@ -172,9 +148,21 @@
           <source>Projekt wurde gelöscht.</source>
           <target state="new">Projekt wurde gelöscht.</target>
         </trans-unit>
-        <trans-unit id="MsgSelectProject" translate="yes" xml:space="preserve">
-          <source>Bitte wähle zuerst ein Projekt aus.</source>
-          <target state="new">Bitte wähle zuerst ein Projekt aus.</target>
+        <trans-unit id="BtnCatalog.Text" translate="yes" xml:space="preserve">
+          <source>Katalog</source>
+          <target state="new">Katalog</target>
+        </trans-unit>
+        <trans-unit id="BtnNewProject.Text" translate="yes" xml:space="preserve">
+          <source>Erstellen</source>
+          <target state="new">Erstellen</target>
+        </trans-unit>
+        <trans-unit id="BtnSettings.Text" translate="yes" xml:space="preserve">
+          <source>Einstellungen</source>
+          <target state="new">Einstellungen</target>
+        </trans-unit>
+        <trans-unit id="BtnArchiv.Text" translate="yes" xml:space="preserve">
+          <source>Archiv</source>
+          <target state="new">Archiv</target>
         </trans-unit>
       </group>
     </body>
