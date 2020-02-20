@@ -520,7 +520,7 @@ namespace METS.Views.Easy.Controls
 
             device.LoadedApplication = false;
             ChangeHandler.Instance.ChangedParam(change);
-            //CheckComObjects();
+            CheckComObjects();
             //SaveHelper.SaveProject();
 
 
@@ -546,6 +546,112 @@ namespace METS.Views.Easy.Controls
 
 
 
+
+        private void CheckComObjects()
+        {
+            List<DeviceComObject> newObjs = new List<DeviceComObject>();
+
+            foreach (DeviceComObject obj in comObjects)
+            {
+                if (obj.Conditions.Count == 0)
+                {
+                    newObjs.Add(obj);
+                    continue;
+                }
+
+                bool flag = true;
+                foreach (ParamCondition cond in obj.Conditions)
+                {
+                    string val = AppParas[cond.SourceId].Value;
+                    //if (tempValues.ContainsKey(cond.SourceId))
+                    //    val = tempValues[cond.SourceId];
+                    //else
+                    //{
+                    //    AppParameter pbPara = _context.AppParameters.Single(p => p.Id == cond.SourceId);
+                    //    ChangeParamModel change = null;
+                    //    try
+                    //    {
+                    //        change = _contextP.ChangesParam.Where(c => c.DeviceId == device.UId && c.ParamId == pbPara.Id).OrderByDescending(c => c.StateId).First();
+                    //    }
+                    //    catch { }
+                    //    if (change == null)
+                    //        val = pbPara.Value;
+                    //    else
+                    //        val = change.Value;
+
+                    //    tempValues.Add(cond.SourceId, val);
+                    //}
+
+                    if (!cond.Values.Contains(val))
+                        flag = false;
+                }
+
+                if (flag)
+                    newObjs.Add(obj);
+            }
+
+            List<DeviceComObject> toAdd = new List<DeviceComObject>();
+            foreach (DeviceComObject cobj in newObjs)
+            {
+                if (!device.ComObjects.Any(co => co.Id == cobj.Id))
+                    toAdd.Add(cobj);
+            }
+
+            List<DeviceComObject> toDelete = new List<DeviceComObject>();
+            foreach (DeviceComObject cobj in device.ComObjects)
+            {
+                if (!newObjs.Any(co => co.Id == cobj.Id))
+                {
+                    if (cobj.Groups.Count != 0)
+                    {
+                        //TODO frage ob verbundene Kommunikationsobjekte gelöscht werden sollen, sonst zurück setzen
+                    }
+                    toDelete.Add(cobj);
+                }
+            }
+            foreach (DeviceComObject cobj in toDelete)
+            {
+                device.ComObjects.Remove(cobj);
+            }
+            foreach (DeviceComObject cobj in toAdd)
+            {
+                if (cobj.Name.Contains("{{"))
+                {
+                    Regex reg = new Regex("{{((.+):(.+))}}");
+                    Match m = reg.Match(cobj.Name);
+                    if (m.Success)
+                    {
+                        Binding bind = new Binding()
+                        {
+                            Id = m.Groups[2].Value,
+                            DefaultText = m.Groups[3].Value,
+                            TextPlaceholder = reg.Replace(cobj.Name, "{{dyn}}")
+                        };
+                        bind.Item = cobj;
+                        bindings.Add(bind);
+
+                        string value = "";
+                        try
+                        {
+                            ChangeParamModel changeB = _contextP.ChangesParam.Where(c => c.DeviceId == device.UId && c.ParamId.EndsWith("R-" + bind.Id)).OrderByDescending(c => c.StateId).First();
+                            value = changeB.Value;
+                        }
+                        catch { }
+
+                        if (bind.Item == null) continue;
+                        DeviceComObject dco = (DeviceComObject)bind.Item;
+
+                        if (value == "")
+                            dco.Name = reg.Replace(cobj.Name, bind.DefaultText);
+                        else
+                            dco.Name = reg.Replace(cobj.Name, value);
+                    }
+                }
+                device.ComObjects.Add(cobj);
+            }
+
+            device.ComObjects.Sort(s => s.Number);
+        }
 
         private async Task PrepareComObject(XElement xele)
         {

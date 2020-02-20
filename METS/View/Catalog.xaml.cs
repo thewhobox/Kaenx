@@ -26,6 +26,7 @@ using System.Text.RegularExpressions;
 using METS.View.Controls;
 using Windows.UI.Core;
 using Windows.ApplicationModel.Resources;
+using Windows.UI.ViewManagement;
 
 // The Blank Page item template is documented at http://go.microsoft.com/fwlink/?LinkId=234238
 
@@ -86,6 +87,7 @@ namespace METS.View
                 currentView.AppViewBackButtonVisibility = AppViewBackButtonVisibility.Visible;
                 currentView.BackRequested += CurrentView_BackRequested;
                 Import.wasFromMain = true;
+                ApplicationView.GetForCurrentView().Title = "Katalog";
             }
         }
 
