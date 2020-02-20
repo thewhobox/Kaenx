@@ -83,7 +83,7 @@ namespace METS.Views.Easy.Controls
                 }
             }
 
-            Load();
+            _ = Load();
         }
 
         private async Task Load()
@@ -539,7 +539,7 @@ namespace METS.Views.Easy.Controls
                 return type;
             } catch(Exception e)
             {
-
+                Log.Error(e, "GetParamType Fehler!");
             }
             return null;
         }
@@ -687,7 +687,7 @@ namespace METS.Views.Easy.Controls
                 }
             }catch(Exception e)
             {
-
+                Log.Error(e, "PrepareComObject Fehler!");
             }
         }
 

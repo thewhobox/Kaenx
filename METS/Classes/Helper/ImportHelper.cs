@@ -35,7 +35,6 @@ namespace METS.Classes.Helper
         private List<ManufacturerViewModel> tempManus;
         private CatalogContext _context = new CatalogContext();
 
-        private List<ImportError> AppErrors;
         private string currentAppName;
 
 
@@ -188,59 +187,44 @@ namespace METS.Classes.Helper
             }
             _context.SaveChanges();
 
-            ProgressMaxChanged(catalog.Elements().Count());
-
             Log.Information(catalog.Elements().Count() + " Einträge gefunden");
 
-            int count = 0;
 
-            foreach (XElement sectionEle in catalog.Elements())
-            {
-                await Task.Delay(100);
-                section = new CatalogViewModel();
-                section.Id = sectionEle.Attribute("Id").Value;
-                bool catHasSubs = false;
+            await GetSubItems(catalog, currentMan, devicesList);
 
-                foreach (XElement subsectionEle in sectionEle.Elements())
-                {
-                    CatalogViewModel sectionSub = new CatalogViewModel();
-                    sectionSub.Id = subsectionEle.Attribute("Id").Value;
-                    bool subHasItems = false;
-
-                    foreach (XElement itemEle in subsectionEle.Elements())
-                    {
-                        if(devicesList.Any(d => d.Id == itemEle.Attribute("Id").Value))
-                        {
-                            subHasItems = true;
-                            DeviceImportInfo device = devicesList.Single(d => d.Id == itemEle.Attribute("Id").Value);
-                            device.CatalogId = sectionSub.Id;
-                            device.HardwareRefId = itemEle.Attribute("Hardware2ProgramRefId").Value;
-                            device.ProductRefId = itemEle.Attribute("ProductRefId").Value;
-                        }
-                    }
-
-                    if (subHasItems && !_context.Sections.Any(s => s.Id == sectionSub.Id))
-                    {
-                        catHasSubs = true;
-                        sectionSub.Name = subsectionEle.Attribute("Name")?.Value;
-                        sectionSub.ParentId = section.Id;
-                        _context.Sections.Add(sectionSub);
-                    }
-                }
-
-
-                if (catHasSubs && !_context.Sections.Any(s => s.Id == section.Id))
-                {
-                    section.Name = sectionEle.Attribute("Name")?.Value;
-                    section.ParentId = currentMan;
-                    _context.Sections.Add(section);
-                }
-
-                count++;
-                ProgressChanged(count);
-            }
             _context.SaveChanges();
         }
+
+
+        private async Task GetSubItems(XElement xparent, string parentSub, ObservableCollection<DeviceImportInfo> devicesList)
+        {
+            foreach (XElement xele in xparent.Elements())
+            {
+                await Task.Delay(100);
+
+
+                if(xele.Name.LocalName == "CatalogItem")
+                {
+                    DeviceImportInfo device = devicesList.Single(d => d.Id == xele.Attribute("Id").Value);
+                    device.CatalogId = parentSub;
+                    device.HardwareRefId = xele.Attribute("Hardware2ProgramRefId").Value;
+                    device.ProductRefId = xele.Attribute("ProductRefId").Value;
+                } else
+                {
+                    if(!_context.Sections.Any(s => s.Id == xele.Attribute("Id").Value))
+                    {
+                        CatalogViewModel section = new CatalogViewModel();
+                        section.Id = xele.Attribute("Id").Value;
+                        section.Name = xele.Attribute("Name")?.Value;
+                        section.ParentId = parentSub;
+                        _context.Sections.Add(section);
+                    }
+                    await GetSubItems(xele, xele.Attribute("Id").Value, devicesList);
+                }
+            }
+        }
+
+
 
         public void ImportHardware(XElement hardXML, DeviceImportInfo deviceInfo)
         {
@@ -343,7 +327,7 @@ namespace METS.Classes.Helper
 
 
 
-        public async Task UpdateManufacturers(XElement manXML)
+        public void UpdateManufacturers(XElement manXML)
         {
             tempManus = new List<ManufacturerViewModel>();
             currentNamespace = manXML.Attribute("xmlns").Value;
@@ -360,16 +344,15 @@ namespace METS.Classes.Helper
             }
         }
 
+        //TODO really implement a check. dont forget to clean catalog sections
         public async Task CheckParams()
         {
             Dictionary<string, string> App2Hardware = new Dictionary<string, string>();
             ProgressMaxChanged(App2Hardware.Count);
             int count = 0;
-            int c = 0;
+
             foreach (string appId in App2Hardware.Keys)
             {
-                if (AppErrors.Any(e => e.Id == appId)) continue;
-
                 IEnumerable<AppAbsoluteSegmentViewModel> segmentsList = _context.AppAbsoluteSegments.Where(s => s.ApplicationId == appId);
 
                 Dictionary<string, byte[]> segments = new Dictionary<string, byte[]>();
@@ -387,7 +370,6 @@ namespace METS.Classes.Helper
                 IEnumerable<AppParameter> ps = _context.AppParameters.Where(p => p.ApplicationId == appId);
 
                 ProgressAppMaxChanged(ps.Count());
-                c = 0;
 
                 #region Generate AppSegment
                 //foreach (AppParameter para in ps)
@@ -623,11 +605,11 @@ namespace METS.Classes.Helper
             }
 
             try { 
-            _context.SaveChanges();
-
+                _context.SaveChanges();
             }
             catch(Exception e)
             {
+                Log.Error(e, "CheckDevices Fehler!");
             }
 
 

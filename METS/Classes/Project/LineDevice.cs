@@ -98,7 +98,16 @@ namespace METS.Classes
 
         private void Changed(string name)
         {
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
+            try
+            {
+                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
+            } catch
+            {
+                _ = App._dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Normal, () =>
+                {
+                    PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
+                });
+            }
         }
         public event PropertyChangedEventHandler PropertyChanged;
     }

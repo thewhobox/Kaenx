@@ -114,7 +114,7 @@ namespace METS.View
             App.Navigate(typeof(Catalog), "main");
         }
 
-        private async void OpenNewProjekt(object sender, RoutedEventArgs e)
+        private void OpenNewProjekt(object sender, RoutedEventArgs e)
         {
             DiagNew.Visibility = Visibility;
             InName.Focus(FocusState.Pointer);

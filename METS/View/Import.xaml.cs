@@ -177,9 +177,7 @@ namespace METS.View
                 StorageFile defaultFile = await StorageFile.GetFileFromApplicationUriAsync(new Uri("ms-appx:///Data/knx_master.xml"));
                 masterFile = await ApplicationData.Current.LocalFolder.CreateFileAsync("knx_master.xml");
                 await FileIO.WriteTextAsync(masterFile, await FileIO.ReadTextAsync(defaultFile));
-                Log.Error(e, "KNX_Master konnte nicht ersetzt werden.");
-                ShowError("Die KNX_Master Datei konnte nicht ersetzt werden.");
-                return;
+                Log.Warning(e, "Es konnte keine KNX_Master Datei gefunden werden.");
             }
 
 
@@ -226,7 +224,7 @@ namespace METS.View
 
 
             ImportDevice = resourceLoader.GetString("StateManus");
-            await Helper.UpdateManufacturers(manXML);
+            Helper.UpdateManufacturers(manXML);
             #endregion
 
 

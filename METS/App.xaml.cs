@@ -72,11 +72,6 @@ namespace METS
             //* when opened by file-extension 
             base.OnFileActivated(args);
 
-            test(args);
-        }
-
-        private async void test(FileActivatedEventArgs args)
-        {
             Frame rootFrame = Window.Current.Content as Frame;
             if (rootFrame == null)
             {
@@ -95,7 +90,8 @@ namespace METS
                     if (root.Content == null || root.Content is View.MainPage)
                     {
                         Navigate(typeof(View.Catalog), file);
-                    } else if(root.Content is View.Catalog)
+                    }
+                    else if (root.Content is View.Catalog)
                     {
                         ((View.Catalog)root.Content).PrepareImport(file);
                     }
@@ -106,8 +102,6 @@ namespace METS
                     Log.Warning("Nicht unterstützter Dateityp: " + file.FileType);
                     break;
             }
-
-
 
             Window.Current.Activate();
         }

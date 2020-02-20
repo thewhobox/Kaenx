@@ -62,6 +62,10 @@ namespace METS.Classes.Bus.Actions
 
             int threeshold = 0;
 
+
+            //TODO check if PA already taken
+
+
             while(!_token.IsCancellationRequested)
             {
                 if (progDevices.Count == 1)
@@ -70,6 +74,7 @@ namespace METS.Classes.Bus.Actions
                     {
                         TodoText = "Gerät hat bereits die Adresse";
                         Device.LoadedPA = true;
+                        await RestartCommands();
                         Finished?.Invoke(this, new EventArgs());
                         break;
                     }
@@ -92,7 +97,7 @@ namespace METS.Classes.Bus.Actions
                 }
                 progDevices.Clear();
                 TunnelRequest builder = new TunnelRequest();
-                builder.Build(UnicastAddress.FromString("0.0.0"), MulticastAddress.FromString("0/0/0"), Knx.Parser.ApciTypes.IndividualAddressRead, _sequence, 0);
+                builder.Build(UnicastAddress.FromString("0.0.0"), MulticastAddress.FromString("0/0/0"), Knx.Parser.ApciTypes.IndividualAddressRead, _sequence, 255);
                 Connection.Send(builder);
                 _sequence++;
 
@@ -168,29 +173,7 @@ namespace METS.Classes.Bus.Actions
             ProgressValue = 95;
 
 
-            TunnelRequest builder = new TunnelRequest();
-            byte[] apci = { 0x80 };
-            builder.Build(UnicastAddress.FromString("0.0.0"), UnicastAddress.FromString(Device.LineName), Knx.Parser.ApciTypes.Connect, _sequence, 255);
-            Connection.Send(builder);
-            _sequence++;
-            await Task.Delay(200);
-
-            builder = new TunnelRequest();
-            apci = new byte[] { 0x43, 0x80 };
-            builder.Build(UnicastAddress.FromString("0.0.0"), UnicastAddress.FromString(Device.LineName), Knx.Parser.ApciTypes.Restart, _sequence, 0);
-            Connection.Send(builder);
-            _sequence++;
-            await Task.Delay(200);
-
-            builder = new TunnelRequest();
-            apci = new byte[] { 0x81 };
-            builder.Build(UnicastAddress.FromString("0.0.0"), UnicastAddress.FromString(Device.LineName), Knx.Parser.ApciTypes.IndividualAddressRead, _sequence, 2);
-            Connection.Send(builder);
-            _sequence++;
-            ProgressValue = 100;
-            TodoText = "Erfolgreich abgeschlossen";
-            await Task.Delay(2000);
-
+            await RestartCommands();
 
             _ = App._dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Low, () =>
             {
@@ -198,6 +181,29 @@ namespace METS.Classes.Bus.Actions
             });
 
             Finished?.Invoke(this, new EventArgs());
+        }
+
+        private async Task RestartCommands()
+        {
+            TunnelRequest builder = new TunnelRequest();
+            builder.Build(UnicastAddress.FromString("0.0.0"), UnicastAddress.FromString(Device.LineName), Knx.Parser.ApciTypes.Connect, _sequence, 255);
+            Connection.Send(builder);
+            _sequence++;
+            await Task.Delay(200);
+
+            builder = new TunnelRequest();
+            builder.Build(UnicastAddress.FromString("0.0.0"), UnicastAddress.FromString(Device.LineName), Knx.Parser.ApciTypes.Restart, _sequence, 0);
+            Connection.Send(builder);
+            _sequence++;
+            await Task.Delay(200);
+
+            builder = new TunnelRequest();
+            builder.Build(UnicastAddress.FromString("0.0.0"), UnicastAddress.FromString(Device.LineName), Knx.Parser.ApciTypes.IndividualAddressRead, _sequence, 2);
+            Connection.Send(builder);
+            _sequence++;
+            ProgressValue = 100;
+            TodoText = "Erfolgreich abgeschlossen";
+            await Task.Delay(2000);
         }
 
         private void Changed(string name)
