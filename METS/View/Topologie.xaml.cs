@@ -532,5 +532,31 @@ namespace METS.View
 
             return null;
         }
+
+        private void SubNavPanel_SelectionChanged(NavigationView sender, NavigationViewSelectionChangedEventArgs args)
+        {
+            string selected = ((NavigationViewItem)args.SelectedItem).Tag.ToString();
+
+            switch(selected)
+            {
+                case "topo":
+                    ColsTree.Width = new GridLength(1, GridUnitType.Star);
+                    ColsPara.Width = new GridLength(0, GridUnitType.Star);
+                    ColsSett.Width = new GridLength(0, GridUnitType.Star);
+                    break;
+
+                case "para":
+                    ColsTree.Width = new GridLength(0, GridUnitType.Star);
+                    ColsPara.Width = new GridLength(1, GridUnitType.Star);
+                    ColsSett.Width = new GridLength(0, GridUnitType.Star);
+                    break;
+
+                case "sett":
+                    ColsTree.Width = new GridLength(0, GridUnitType.Star);
+                    ColsPara.Width = new GridLength(0, GridUnitType.Star);
+                    ColsSett.Width = new GridLength(1, GridUnitType.Star);
+                    break;
+            }
+        }
     }
 }

@@ -16,34 +16,62 @@
     </Page.Resources>
 
     <Grid x:Name="GridDevices">
+        <VisualStateManager.VisualStateGroups>
+            <VisualStateGroup>
+                <VisualState>
+                    <VisualState.StateTriggers>
+                        <AdaptiveTrigger MinWindowWidth="700" />
+                    </VisualState.StateTriggers>
+                    <VisualState.Setters>
+                        <Setter Target="ColsTree.Width" Value="auto" />
+                        <Setter Target="ColsPara.Width" Value="*" />
+                        <Setter Target="ColsSett.Width" Value="auto" />
+                        <Setter Target="SubNavPanel.Visibility" Value="Collapsed" />
+                        <Setter Target="TreeV.MaxWidth" Value="350" />
+                        <Setter Target="SettExpander.IsExpanded" Value="False" />
+                        <Setter Target="PanelSettings.Width" Value="300" />
+                    </VisualState.Setters>
+                </VisualState>
+            </VisualStateGroup>
+        </VisualStateManager.VisualStateGroups>
+        
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="auto" />
-            <ColumnDefinition />
-            <ColumnDefinition Width="auto" />
+            <ColumnDefinition x:Name="ColsTree" />
+            <ColumnDefinition x:Name="ColsPara" Width="0" />
+            <ColumnDefinition x:Name="ColsSett" Width="0" />
         </Grid.ColumnDefinitions>
         <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
             <RowDefinition />
             <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
 
-        <Border Grid.RowSpan="2">
+        <NavigationView x:Name="SubNavPanel" Grid.ColumnSpan="3" Margin="0 0 0 5" SelectionChanged="SubNavPanel_SelectionChanged" PaneDisplayMode="Top" IsSettingsVisible="False" IsBackButtonVisible="Collapsed">
+            <NavigationView.MenuItems>
+                <NavigationViewItem Content="Geräte"  Tag="topo" IsSelected="true" />
+                <NavigationViewItem Content="Parameter" Tag="para" />
+                <NavigationViewItem Content="Einstellungen" Tag="sett" />
+            </NavigationView.MenuItems>
+        </NavigationView>
+
+        <Border Grid.Row="1" Grid.RowSpan="2">
             <Border.Background>
                 <SolidColorBrush Color="#FFE0E0E0" />
             </Border.Background>
         </Border>
         
-        <Border BorderThickness="0 0 0 1" BorderBrush="White">
+        <Border Grid.Row="1" BorderThickness="0 0 0 1" BorderBrush="White">
             <StackPanel Orientation="Horizontal">
                 <AppBarButton x:Uid="/Topologie/ToolAdd" Icon="Add" Click="ClickAddMain" />
                 <AppBarButton x:Uid="/Topologie/ToolOpenCat" Icon="Shop" Click="ClickOpenCatalog" />
             </StackPanel>
         </Border>
 
-        <TreeView x:Name="TreeV" Grid.Row="1" MaxWidth="350" ItemsSource="{Binding}" CanReorderItems="False" ItemInvoked="TreeV_ItemInvoked"  VerticalAlignment="Stretch" Background="LightGray">
+        <TreeView x:Name="TreeV" Grid.Row="2" ItemsSource="{Binding}" CanReorderItems="False" ItemInvoked="TreeV_ItemInvoked"  VerticalAlignment="Stretch" Background="LightGray">
             <TreeView.ItemTemplate>
                 <DataTemplate x:DataType="local:Line">
-                    <TreeViewItem Margin="-20 0 0 0" ToolTipService.ToolTip="{Binding Name}" DoubleTapped="TreeViewItem_DoubleTapped" Background="Transparent" BorderThickness="0" AllowDrop="True" Content="{Binding}" ItemsSource="{Binding Subs}" IsExpanded="{Binding IsExpanded, Mode=TwoWay}" DragOver="TreeViewItem_DragOver" Drop="TreeViewItem_Drop">
+                    <TreeViewItem Margin="-20 0 0 0" CanDrag="False" ToolTipService.ToolTip="{Binding Name}" DoubleTapped="TreeViewItem_DoubleTapped" Background="Transparent" BorderThickness="0" AllowDrop="True" Content="{Binding}" ItemsSource="{Binding Subs}" IsExpanded="{Binding IsExpanded, Mode=TwoWay}" DragOver="TreeViewItem_DragOver" Drop="TreeViewItem_Drop">
                         <TreeViewItem.ContextFlyout>
                             <MenuFlyout Opening="MenuFlyout_Opening">
                                 <MenuFlyoutItem x:Uid="/Topologie/MenAdd" Icon="Add" Click="ClickAddSub" />
@@ -76,7 +104,7 @@
             </TreeView.ItemTemplate>
         </TreeView>
 
-        <StackPanel Orientation="Horizontal" Grid.Row="2" Margin="0 5 0 0" Padding="3">
+        <StackPanel Orientation="Horizontal" Grid.Row="3" Margin="0 5 0 0" Padding="3">
             <StackPanel.Background>
                 <SolidColorBrush Color="#FFE0E0E0" />
             </StackPanel.Background>
@@ -95,20 +123,16 @@
         </StackPanel>
 
 
+        <toolkit:TabView x:Name="tabView" Grid.Column="1" Grid.Row="1" Grid.RowSpan="3" CanCloseTabs="True" Margin="5 0 5 0" />
 
 
-        <toolkit:TabView x:Name="tabView" Grid.Column="1" Grid.RowSpan="3" CanCloseTabs="True" Margin="5 0 5 0" />
-
-
-
-
-        <toolkit:Expander Grid.Column="2" Grid.RowSpan="3" ExpandDirection="Left" VerticalContentAlignment="Stretch" IsExpanded="False">
+        <toolkit:Expander x:Name="SettExpander" Grid.Row="1" Grid.Column="2" Grid.RowSpan="3" HorizontalContentAlignment="Stretch" ExpandDirection="Left" VerticalContentAlignment="Stretch" IsExpanded="True">
             <toolkit:Expander.HeaderTemplate>
                 <DataTemplate>
                     <TextBlock x:Uid="/Topologie/SideProps"  FontSize="20" />
                 </DataTemplate>
             </toolkit:Expander.HeaderTemplate>
-            <Grid x:Name="PanelSettings" Grid.Column="2" Grid.RowSpan="2" Width="300" VerticalAlignment="Stretch">
+            <Grid x:Name="PanelSettings" Grid.Column="2" Grid.RowSpan="2" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
                 <Grid.Resources>
                     <Style TargetType="toolkit:HeaderedContentControl">
                         <Setter Property="Margin" Value="0 5" />

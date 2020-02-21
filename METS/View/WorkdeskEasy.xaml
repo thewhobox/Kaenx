@@ -40,10 +40,6 @@
                 <NavigationViewItem x:Uid="/WorkDeskEasy/MenuBus" Tag="bus" Icon="View" />
             </NavigationView.MenuItems>
 
-            <!--<NavigationView.AutoSuggestBox>
-                <AutoSuggestBox x:Name="NavViewSearchBox" QueryIcon="Find"/>
-            </NavigationView.AutoSuggestBox>-->
-
             <Grid>
                 <Grid.RowDefinitions>
                     <RowDefinition />
