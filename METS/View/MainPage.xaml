@@ -28,11 +28,11 @@
                         <AdaptiveTrigger MinWindowWidth="800" />
                     </VisualState.StateTriggers>
                     <VisualState.Setters>
-                        <Setter Target="LogoImage.Height" Value="200" />
-                        <Setter Target="VB1.Height" Value="150" />
-                        <Setter Target="VB2.Height" Value="150" />
-                        <Setter Target="VB3.Height" Value="150" />
-                        <Setter Target="VB4.Height" Value="150" />
+                        <Setter Target="LogoImage.Height" Value="270" />
+                        <Setter Target="VB1.Height" Value="100" />
+                        <Setter Target="VB2.Height" Value="100" />
+                        <Setter Target="VB3.Height" Value="100" />
+                        <Setter Target="VB4.Height" Value="100" />
                         <Setter Target="TestGrid.VerticalAlignment" Value="Bottom" />
                         <Setter Target="WrapGrid.Orientation" Value="Vertical" />
                         <Setter Target="WrapGrid.MaximumRowsOrColumns" Value="1" />
@@ -44,7 +44,7 @@
         </VisualStateManager.VisualStateGroups>
 
 
-        <Image x:Name="LogoImage" Source="ms-appx:///Assets/Wide310x150Logo.png"  Height="150" />
+        <Image x:Name="LogoImage" Source="ms-appx:///Assets/SplashScreen.png"  Height="150" />
 
         <Grid Grid.Row="1"  Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
             <Grid.ColumnDefinitions>

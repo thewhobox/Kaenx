@@ -49,7 +49,7 @@ namespace METS.View.Controls
             {
                 bool error = false;
                 string handled = PreviewChanged?.Invoke(value);
-                if (!string.IsNullOrEmpty(handled))
+                if (handled != null)
                 {
                     error = true;
                     ErrMessage = handled;

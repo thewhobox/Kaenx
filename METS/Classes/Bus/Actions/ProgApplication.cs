@@ -368,7 +368,7 @@ namespace METS.Classes.Bus.Actions
             //ProjectContext context = new ProjectContext();
             //LineDeviceModel model = context.LineDevices.Single(d => d.UId == Device.UId);
 
-            TodoText = "Erfolgreich abgeschlossen";
+            //TodoText = "Erfolgreich abgeschlossen";
             Finished(this, null);
         }
 

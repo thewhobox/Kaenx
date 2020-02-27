@@ -186,8 +186,8 @@ namespace METS.Classes.Helper
                 section.Name = man.Name;
                 section.ParentId = "main";
                 _context.Sections.Add(section);
+                _context.SaveChanges();
             }
-            _context.SaveChanges();
 
             Log.Information(catalog.Elements().Count() + " Einträge gefunden");
 

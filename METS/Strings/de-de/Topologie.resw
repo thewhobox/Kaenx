@@ -129,6 +129,9 @@
   <data name="ErrMsgExistArea" xml:space="preserve">
     <value>Es existiert bereits ein Bereich mit dieser ID.</value>
   </data>
+  <data name="ErrMsgExistDevice" xml:space="preserve">
+    <value>Es existiert bereits ein Gerät mit dieser ID.</value>
+  </data>
   <data name="ErrMsgExistLine" xml:space="preserve">
     <value>Es existiert bereits eine Linie mit dieser ID.</value>
   </data>
