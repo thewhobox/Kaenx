@@ -15,6 +15,8 @@ using METS.Classes.Controls;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Media;
 using System.Diagnostics;
+using Windows.ApplicationModel.Resources;
+using System.IO;
 
 namespace METS.Classes.Helper
 {
@@ -29,12 +31,15 @@ namespace METS.Classes.Helper
         public delegate void ValueHandler(string value);
         public event ValueHandler OnError;
         public event ValueHandler OnDeviceChanged;
+        public event ValueHandler OnStateChanged;
 
         public string currentMan = "";
+        public ImportDevices Imports;
 
         private string currentNamespace;
         private List<ManufacturerViewModel> tempManus;
         private CatalogContext _context = new CatalogContext();
+        private ResourceLoader resourceLoader = ResourceLoader.GetForCurrentView("Import");
 
         private string currentAppName;
 
@@ -82,6 +87,82 @@ namespace METS.Classes.Helper
                     await Task.Delay(1);
                 }
             }
+        }
+
+
+
+
+        public async Task StartImport(ObservableCollection<DeviceImportInfo> deviceList)
+        {
+            await UpdateKnxMaster();
+
+            await ImportCatalog(deviceList);
+        }
+
+
+        public async Task UpdateKnxMaster()
+        {
+            OnStateChanged?.Invoke("KNX-Master Datei aktualisieren");
+            ZipArchiveEntry entry = Imports.Archive.GetEntry("knx_master.xml");
+            Log.Information("---- Integrierte KNX_Master wird überprüft");
+            //await Task.Delay(2000);
+            XElement manXML = XDocument.Load(entry.Open()).Root;
+            StorageFile masterFile;
+
+            try
+            {
+                masterFile = await ApplicationData.Current.LocalFolder.GetFileAsync("knx_master.xml");
+            }
+            catch (Exception e)
+            {
+                StorageFile defaultFile = await StorageFile.GetFileFromApplicationUriAsync(new Uri("ms-appx:///Data/knx_master.xml"));
+                masterFile = await ApplicationData.Current.LocalFolder.CreateFileAsync("knx_master.xml");
+                await FileIO.WriteTextAsync(masterFile, await FileIO.ReadTextAsync(defaultFile));
+                Log.Warning(e, "Es konnte keine KNX_Master Datei gefunden werden.");
+            }
+
+
+            XDocument masterXml;
+            try
+            {
+                masterXml = XDocument.Load(await masterFile.OpenStreamForReadAsync());
+            }
+            catch (Exception e)
+            {
+                Imports.Archive.Dispose();
+                OnStateChanged?.Invoke(resourceLoader.GetString("StateFin"));
+                Log.Error(e, "KNX_Master konnte geöffnet werden.");
+                OnError?.Invoke("Die KNX_Master Datei konnte nicht geöffnet werden.");
+                return;
+            }
+
+            string versionO = masterXml.Root.Element(XName.Get("MasterData", masterXml.Root.Name.NamespaceName)).Attribute("Version").Value;
+            string versionN = manXML.Element(XName.Get("MasterData", manXML.Name.NamespaceName)).Attribute("Version").Value;
+
+            int versionNew, versionOld;
+
+            try
+            {
+                versionNew = int.Parse(versionN);
+                versionOld = int.Parse(versionO);
+
+                bool newer = versionNew > versionOld;
+
+                if (newer)
+                {
+                    await FileIO.WriteTextAsync(masterFile, manXML.ToString());
+                    Log.Information("KNX_Master wurde aktualisiert");
+                }
+            }
+            catch (Exception e)
+            {
+                Log.Error(e, "KNX_Master konnte nicht aktualisiert werden.");
+                OnError?.Invoke("KNX_Master konnte nicht aktualisiert werden.");
+                return;
+            }
+
+            OnStateChanged?.Invoke(resourceLoader.GetString("StateManus"));
+            UpdateManufacturers(manXML);
         }
 
 
@@ -171,34 +252,39 @@ namespace METS.Classes.Helper
 
 
 
-        public async Task ImportCatalog(XElement catXML, ObservableCollection<DeviceImportInfo> devicesList)
+        public async Task ImportCatalog(ObservableCollection<DeviceImportInfo> devicesList)
         {
-            currentNamespace = catXML.Attribute("xmlns").Value;
-            XElement catalog = catXML.Element(GetXName("ManufacturerData")).Element(GetXName("Manufacturer")).Element(GetXName("Catalog"));
-
-            CatalogViewModel section = null;
-
-            if (!_context.Sections.Any(s => s.Id == currentMan))
+            foreach(ZipArchiveEntry entry in Imports.Archive.Entries)
             {
-                ManufacturerViewModel man = tempManus.Find(e => e.Id == currentMan);
-                section = new CatalogViewModel();
-                section.Id = currentMan;
-                section.Name = man.Name;
-                section.ParentId = "main";
-                _context.Sections.Add(section);
-                _context.SaveChanges();
+                if (entry.Name != "Catalog.xml") continue;
+
+                string manu = entry.FullName.Substring(0, 6);
+
+                if (!_context.Sections.Any(s => s.Id == manu))
+                {
+                    CatalogViewModel section = null;
+                    ManufacturerViewModel man = tempManus.Find(e => e.Id == currentMan);
+                    section = new CatalogViewModel();
+                    section.Id = manu;
+                    section.Name = man.Name;
+                    section.ParentId = "main";
+                    _context.Sections.Add(section);
+                    _context.SaveChanges();
+                }
+
+                XElement catalog = XDocument.Load(entry.Open()).Root;
+                currentNamespace = catalog.Name.NamespaceName;
+                catalog = catalog.Element(GetXName("ManufacturerData")).Element(GetXName("Manufacturer")).Element(GetXName("Catalog"));
+
+                await GetSubItems(catalog, currentMan, devicesList);
+
             }
-
-            Log.Information(catalog.Elements().Count() + " Einträge gefunden");
-
-
-            await GetSubItems(catalog, currentMan, devicesList);
 
             _context.SaveChanges();
         }
 
 
-        private async Task GetSubItems(XElement xparent, string parentSub, ObservableCollection<DeviceImportInfo> devicesList)
+        private async Task<bool> GetSubItems(XElement xparent, string parentSub, ObservableCollection<DeviceImportInfo> devicesList)
         {
             foreach (XElement xele in xparent.Elements())
             {
@@ -210,10 +296,13 @@ namespace METS.Classes.Helper
                         device.CatalogId = parentSub;
                         device.HardwareRefId = xele.Attribute("Hardware2ProgramRefId").Value;
                         device.ProductRefId = xele.Attribute("ProductRefId").Value;
+                        return true;
                     }
+                    return false;
                 } else
                 {
-                    if(!_context.Sections.Any(s => s.Id == xele.Attribute("Id").Value))
+                    bool hasItem = await GetSubItems(xele, xele.Attribute("Id").Value, devicesList);
+                    if (!_context.Sections.Any(s => s.Id == xele.Attribute("Id").Value))
                     {
                         CatalogViewModel section = new CatalogViewModel();
                         section.Id = xele.Attribute("Id").Value;
@@ -221,9 +310,10 @@ namespace METS.Classes.Helper
                         section.ParentId = parentSub;
                         _context.Sections.Add(section);
                     }
-                    await GetSubItems(xele, xele.Attribute("Id").Value, devicesList);
+                    return hasItem;
                 }
             }
+            return false;
         }
 
 
