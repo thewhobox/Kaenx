@@ -28,6 +28,7 @@ using Microsoft.AppCenter;
 using Microsoft.AppCenter.Analytics;
 using Microsoft.AppCenter.Crashes;
 using Microsoft.AppCenter.Push;
+using Windows.UI.StartScreen;
 
 namespace METS
 {
@@ -56,6 +57,7 @@ namespace METS
                 db.Database.Migrate();
             }
             CreateLogger();
+
 
 #if DEBUG
             Log.Information("Mode = Debug");
@@ -114,6 +116,30 @@ namespace METS
                 .MinimumLevel.Debug()
                 .WriteTo.File(Path.Combine(localState.Path, "log-.txt"), rollingInterval: RollingInterval.Day)
                 .CreateLogger();
+
+
+            if (!JumpList.IsSupported()) 
+                return;
+
+
+            JumpList jumpList = await JumpList.LoadCurrentAsync();
+            jumpList.Items.Clear();
+            jumpList.SystemGroupKind = JumpListSystemGroupKind.None;
+
+            JumpListItem item = JumpListItem.CreateWithArguments("open:1", "Sebastian");
+            item.GroupName = "Projekte";
+            jumpList.Items.Add(item);
+            item = JumpListItem.CreateWithArguments("open:2", "Mike");
+            item.GroupName = "Projekte";
+            jumpList.Items.Add(item);
+
+            jumpList.Items.Add(JumpListItem.CreateSeparator());
+
+            item = JumpListItem.CreateWithArguments("newProject", "Neues Projekt");
+            item.GroupName = "Aktionen";
+            item.Description = "Erstellt ein neues Projekt";
+            jumpList.Items.Add(item);
+            await jumpList.SaveAsync();
         }
 
         public static Frame AppFrame
@@ -170,6 +196,9 @@ namespace METS
                     // configuring the new page by passing required information as a navigation
                     // parameter
                     rootFrame.Navigate(typeof(View.MainPage), e.Arguments);
+                } else if (e.Kind == ActivationKind.Launch)
+                {
+                    //TODO impelement jumplist
                 }
                 // Ensure the current window is active
                 Window.Current.Activate();
