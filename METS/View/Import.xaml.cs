@@ -142,7 +142,8 @@ namespace METS.View
                 {
                     Id = device.Id,
                     Name = device.Name,
-                    Description = device.VisibleDescription
+                    Description = device.VisibleDescription,
+                    ProductRefId = device.ProductRefId
                 });
             }
 

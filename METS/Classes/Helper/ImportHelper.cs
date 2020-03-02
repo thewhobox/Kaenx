@@ -14,6 +14,7 @@ using METS.View.Controls;
 using METS.Classes.Controls;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Media;
+using System.Diagnostics;
 
 namespace METS.Classes.Helper
 {
@@ -41,6 +42,7 @@ namespace METS.Classes.Helper
         public static async Task TranslateXml(XElement xml, string selectedLang, ProgressChangedHandler maxH = null, ProgressChangedHandler currH = null)
         {
             if (selectedLang == null) return;
+
 
 
             if (!xml.Descendants(XName.Get("Language", xml.Name.NamespaceName)).Any(l => l.Attribute("Identifier").Value == selectedLang))
@@ -184,8 +186,8 @@ namespace METS.Classes.Helper
                 section.Name = man.Name;
                 section.ParentId = "main";
                 _context.Sections.Add(section);
+                _context.SaveChanges();
             }
-            _context.SaveChanges();
 
             Log.Information(catalog.Elements().Count() + " Einträge gefunden");
 
@@ -200,15 +202,15 @@ namespace METS.Classes.Helper
         {
             foreach (XElement xele in xparent.Elements())
             {
-                await Task.Delay(100);
-
-
                 if(xele.Name.LocalName == "CatalogItem")
                 {
-                    DeviceImportInfo device = devicesList.Single(d => d.Id == xele.Attribute("Id").Value);
-                    device.CatalogId = parentSub;
-                    device.HardwareRefId = xele.Attribute("Hardware2ProgramRefId").Value;
-                    device.ProductRefId = xele.Attribute("ProductRefId").Value;
+                    if(devicesList.Any(d => d.Id == xele.Attribute("Id").Value))
+                    {
+                        DeviceImportInfo device = devicesList.Single(d => d.Id == xele.Attribute("Id").Value);
+                        device.CatalogId = parentSub;
+                        device.HardwareRefId = xele.Attribute("Hardware2ProgramRefId").Value;
+                        device.ProductRefId = xele.Attribute("ProductRefId").Value;
+                    }
                 } else
                 {
                     if(!_context.Sections.Any(s => s.Id == xele.Attribute("Id").Value))
@@ -320,7 +322,10 @@ namespace METS.Classes.Helper
             Log.Information("Applikation wird nun eingelesen...");
             OnDeviceChanged(currentAppName + " - Einlesen");
             await Task.Delay(10);
+            Stopwatch sw = new Stopwatch();
+            sw.Start();
             await ReadApplication(appXml, app, cmax);
+            sw.Stop();
 
             Log.Information("Applikation wurde eingelesen...");
         }
@@ -625,6 +630,9 @@ namespace METS.Classes.Helper
             } catch(Exception e) {
                 Log.Error(e, "Applikation Dynamic Ordner Fehler!");
             }
+
+
+            //_context.ChangeTracker.AutoDetectChangesEnabled = false;
 
             List<AppError> Errors = new List<AppError>();
             Dictionary<string, AppParameter> Params = new Dictionary<string, AppParameter>();
@@ -1107,8 +1115,10 @@ namespace METS.Classes.Helper
 
             try
             {
-                ProgressAppChanged(maxcount);
+                //_context.ChangeTracker.AutoDetectChangesEnabled = true;
+                //_context.ChangeTracker.DetectChanges();
                 _context.SaveChanges();
+                ProgressAppChanged(maxcount);
             }
             catch (Exception e)
             {
