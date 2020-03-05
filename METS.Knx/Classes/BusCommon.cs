@@ -21,6 +21,15 @@ namespace METS.Knx.Classes
             _conn.OnTunnelRequest += OnTunnelRequest;
         }
 
+        private void OnTunnelRequest(TunnelResponse response)
+        {
+            responses.Add(response.SequenceCounter, response);
+            //TODO move ack to connection class!
+            TunnelRequest builder = new TunnelRequest();
+            builder.Build(UnicastAddress.FromString("0.0.0"), from, Parser.ApciTypes.Ack, Convert.ToByte(response.SequenceNumber));
+            _conn.Send(builder);
+        }
+
 
 
         private async Task<TunnelResponse> WaitForData(byte seq)

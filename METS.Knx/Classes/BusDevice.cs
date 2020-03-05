@@ -1,7 +1,9 @@
 ﻿using METS.Knx.Addresses;
 using METS.Knx.Builders;
+using METS.Knx.Parser;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -13,11 +15,13 @@ namespace METS.Knx.Classes
 {
     public class BusDevice
     {
+        private List<ApciTypes> responseTypes = new List<ApciTypes>() { ApciTypes.DeviceDescriptorResponse, ApciTypes.GroupValueResponse, ApciTypes.IndividualAddressSerialNumberResponse, ApciTypes.MemoryResponse };
+
         private UnicastAddress _address;
         private Connection _conn;
-        private Dictionary<byte, TunnelResponse> responses = new Dictionary<byte, TunnelResponse>();
+        private Dictionary<int, TunnelResponse> responses = new Dictionary<int, TunnelResponse>();
 
-        private byte _currentSeqNum = 0;
+        private int _currentSeqNum = 0;
         private bool _connected = false;
 
         public BusDevice(string address, Connection conn)
@@ -29,11 +33,18 @@ namespace METS.Knx.Classes
 
         private void OnTunnelRequest(TunnelResponse response)
         {
-            responses.Add(response.SequenceCounter, response);
+            if (responseTypes.Contains(response.APCI))
+            {
+                responses.Add(response.SequenceNumber, response);
+
+                Debug.WriteLine(response.SequenceNumber + ": " + response.APCI + " - " + response.Data.Length);
+
+                TunnelRequest builder = new TunnelRequest();
+                builder.Build(UnicastAddress.FromString("0.0.0"), _address, Parser.ApciTypes.Ack, response.SequenceCounter);
+                _conn.Send(builder);
+            }
             //TODO move ack to connection class!
-            TunnelRequest builder = new TunnelRequest();
-            builder.Build(UnicastAddress.FromString("0.0.0"), _address, Parser.ApciTypes.Ack, Convert.ToByte(response.SequenceNumber));
-            _conn.Send(builder);
+
         }
 
         public BusDevice(UnicastAddress address, Connection conn)
@@ -48,7 +59,7 @@ namespace METS.Knx.Classes
         /// </summary>
         /// <param name="seq">Sequenznummer</param>
         /// <returns>Daten als Byte Array</returns>
-        private async Task<TunnelResponse> WaitForData(byte seq)
+        private async Task<TunnelResponse> WaitForData(int seq)
         {
             while(!responses.ContainsKey(seq))
                 await Task.Delay(10); // TODO maybe erhöhen
@@ -162,10 +173,10 @@ namespace METS.Knx.Classes
             byte[] data_temp = BitConverter.GetBytes(Convert.ToInt16(x2));
             byte[] data = { objIdx, propId, data_temp[1], data_temp[0] };
 
-            _currentSeqNum++;
-
             builder.Build(UnicastAddress.FromString("0.0.0"), _address, Parser.ApciTypes.PropertyValueRead, _currentSeqNum, data);
-            byte seq = _conn.Send(builder);
+            var seq = _currentSeqNum;
+            _currentSeqNum++;
+            _conn.Send(builder);
             TunnelResponse resp = await WaitForData(seq);
 
             return (T)Convert.ChangeType(resp.Data, typeof(T));
@@ -238,7 +249,9 @@ namespace METS.Knx.Classes
 
             TunnelRequest builder = new TunnelRequest();
             builder.Build(UnicastAddress.FromString("0.0.0"), _address, Knx.Parser.ApciTypes.MemoryRead, _currentSeqNum, data.ToArray());
-            byte seq = _conn.Send(builder);
+            var seq = _currentSeqNum;
+            _currentSeqNum++;
+            _conn.Send(builder);
             TunnelResponse resp = await WaitForData(seq);
 
             return (T)Convert.ChangeType(resp.Data, typeof(T));
@@ -252,8 +265,10 @@ namespace METS.Knx.Classes
         {
             TunnelRequest builder = new TunnelRequest();
             builder.Build(UnicastAddress.FromString("0.0.0"), _address, Knx.Parser.ApciTypes.DeviceDescriptorRead,_currentSeqNum);
-            byte seq = _conn.Send(builder);
-
+            var seq = _currentSeqNum;
+            _currentSeqNum++;
+            _conn.Send(builder);
+            Debug.WriteLine("waiting for: " + seq);
             TunnelResponse resp = await WaitForData(seq); 
             return BitConverter.ToString(resp.Data).Replace("-", "");
         }

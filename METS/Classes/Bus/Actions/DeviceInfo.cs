@@ -92,13 +92,15 @@ namespace METS.Classes.Bus.Actions
             TodoText = "Lese Maskenversion...";
             dev.Connect();
 
-            _data.MaskVersion = await dev.DeviceDescriptorRead();
+            await Task.Delay(100);
+
+            _data.MaskVersion = "MV-" + await dev.DeviceDescriptorRead();
 
             ProgressValue = 10;
             TodoText = "Lese Seriennummer...";
             await Task.Delay(500);
             _data.SerialNumber = BitConverter.ToString(await dev.PropertyRead(_data.MaskVersion, "DeviceSerialNumber")).Replace(" - ", "").Substring(8);
-            string xy = await dev.PropertyRead<string>(_data.MaskVersion, "DeviceSerialNumber"));
+            string xy = await dev.PropertyRead<string>(_data.MaskVersion, "DeviceSerialNumber");
 
 
             ProgressValue = 20;

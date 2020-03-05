@@ -16,14 +16,14 @@ namespace METS.Knx.Builders
         private BitArray ctrlByte = new BitArray(new byte[] { 0xb0 });
         private BitArray drlByte = new BitArray(new byte[] { 0xe0 });
 
-        public void Build(IKnxAddress sourceAddress, IKnxAddress destinationAddress, ApciTypes apciType, byte sCounter = 255, byte[] data = null)
+        public void Build(IKnxAddress sourceAddress, IKnxAddress destinationAddress, ApciTypes apciType, int sCounter = 255, byte[] data = null)
         {
             Build(sourceAddress, destinationAddress, apciType, 0, sCounter, data);
         }
 
 
             //TODO sequenz obsolet machen!!
-         public void Build(IKnxAddress sourceAddress, IKnxAddress destinationAddress, ApciTypes apciType, byte sequence, byte sCounter, byte[] data = null)
+         public void Build(IKnxAddress sourceAddress, IKnxAddress destinationAddress, ApciTypes apciType, byte sequence, int sCounter, byte[] data = null)
         {
             byte[] header = { 0x06, 0x10, 0x04, 0x20 };
             bytes.AddRange(header);
