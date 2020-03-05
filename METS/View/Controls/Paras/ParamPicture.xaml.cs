@@ -12,6 +12,7 @@ using Windows.UI.Xaml.Controls.Primitives;
 using Windows.UI.Xaml.Data;
 using Windows.UI.Xaml.Input;
 using Windows.UI.Xaml.Media;
+using Windows.UI.Xaml.Media.Imaging;
 using Windows.UI.Xaml.Navigation;
 
 // Die Elementvorlage "Benutzersteuerelement" wird unter https://go.microsoft.com/fwlink/?LinkId=234236 dokumentiert.
@@ -27,6 +28,8 @@ namespace METS.Classes.Controls.Paras
             this.InitializeComponent();
             ParaName.Text = param.Text;
 
+            BitmapImage img = new BitmapImage(new Uri("ms-appdata:///local/Baggages/" + type.Tag1));
+            ParaValue.Source = img;
         }
 
         public string GetValue()

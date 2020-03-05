@@ -107,12 +107,13 @@ namespace METS.Views.Easy.Controls
             }
 
             NavChannel.SelectedIndex = 0;
-            NavChannel.Visibility = Visibility.Collapsed;
-            Grid.SetColumn(NavBlock, 0);
-            Grid.SetColumnSpan(NavBlock, 2);
 
-            if (ListNavChannel.Count < 2)
-                NavChannel.IsEnabled = false;
+            if (ListNavChannel.Count != 1)
+            {
+                NavChannel.Visibility = Visibility.Visible;
+                Grid.SetColumn(NavBlock, 1);
+                Grid.SetColumnSpan(NavBlock, 1);
+            }
 
             LoadRing.Visibility = Visibility.Collapsed;
 
