@@ -48,6 +48,8 @@ namespace METS.Knx.Builders
 
         public void SetChannelId(byte channelId) { }
 
+        public void SetSequence(byte sequence) { }
+
         public void SetSequenzCounter(byte sequenzCounter) { }
     }
 }

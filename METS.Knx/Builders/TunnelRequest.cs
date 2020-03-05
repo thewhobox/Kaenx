@@ -16,7 +16,14 @@ namespace METS.Knx.Builders
         private BitArray ctrlByte = new BitArray(new byte[] { 0xb0 });
         private BitArray drlByte = new BitArray(new byte[] { 0xe0 });
 
-        public void Build(IKnxAddress sourceAddress, IKnxAddress destinationAddress, ApciTypes apciType, byte sequence, byte sCounter, byte[] data = null)
+        public void Build(IKnxAddress sourceAddress, IKnxAddress destinationAddress, ApciTypes apciType, byte sCounter = 255, byte[] data = null)
+        {
+            Build(sourceAddress, destinationAddress, apciType, 0, sCounter, data);
+        }
+
+
+            //TODO sequenz obsolet machen!!
+         public void Build(IKnxAddress sourceAddress, IKnxAddress destinationAddress, ApciTypes apciType, byte sequence, byte sCounter, byte[] data = null)
         {
             byte[] header = { 0x06, 0x10, 0x04, 0x20 };
             bytes.AddRange(header);
@@ -24,7 +31,7 @@ namespace METS.Knx.Builders
             // Connection HPAI
             bytes.Add(0x04); // Body Structure Length
             bytes.Add(0x1f); // Channel Id -> Placeholder
-            bytes.Add(sequence); // Sequenz Counter
+            bytes.Add(0x1f); // Sequenz Counter -> Placeholder
             bytes.Add(0x00); // Reserved
 
             bytes.Add(0x11); // cEMI Message Code
@@ -127,6 +134,11 @@ namespace METS.Knx.Builders
         public void SetChannelId(byte channelId)
         {
             bytes[7] = channelId;
+        }
+
+        public void SetSequence(byte sequence)
+        {
+            bytes[8] = sequence;
         }
 
 

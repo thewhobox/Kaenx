@@ -17,6 +17,6 @@
         </Grid.ColumnDefinitions>
 
         <TextBlock x:Name="ParaName" Text="Platzhalter" VerticalAlignment="Center" Margin="5" />
-        <Image Grid.Column="1" x:Name="ParaValue" HorizontalAlignment="Stretch" />
+        <Image Grid.Column="1" x:Name="ParaValue" HorizontalAlignment="Stretch" MaxHeight="60" />
     </Grid>
 </UserControl>

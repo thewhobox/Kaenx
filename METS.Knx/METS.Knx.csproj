@@ -129,6 +129,8 @@
     <Compile Include="Builders\IRequestBuilder.cs" />
     <Compile Include="Builders\TunnelRequest.cs" />
     <Compile Include="Builders\TunnelRequestBuilder.cs" />
+    <Compile Include="Classes\BusCommon.cs" />
+    <Compile Include="Classes\BusDevice.cs" />
     <Compile Include="Classes\HostProtocolAddressInformation.cs" />
     <Compile Include="Classes\IReceiveParser.cs" />
     <Compile Include="Classes\ReceiverParserDispatcher.cs" />

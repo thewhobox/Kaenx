@@ -15,6 +15,8 @@ using METS.Classes.Controls;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Media;
 using System.Diagnostics;
+using Windows.ApplicationModel.Resources;
+using System.IO;
 
 namespace METS.Classes.Helper
 {
@@ -29,12 +31,14 @@ namespace METS.Classes.Helper
         public delegate void ValueHandler(string value);
         public event ValueHandler OnError;
         public event ValueHandler OnDeviceChanged;
+        public event ValueHandler OnStateChanged;
 
-        public string currentMan = "";
+        public ImportDevices Imports;
 
         private string currentNamespace;
         private List<ManufacturerViewModel> tempManus;
         private CatalogContext _context = new CatalogContext();
+        private ResourceLoader resourceLoader = ResourceLoader.GetForCurrentView("Import");
 
         private string currentAppName;
 
@@ -82,6 +86,189 @@ namespace METS.Classes.Helper
                     await Task.Delay(1);
                 }
             }
+        }
+
+
+
+
+        public async Task StartImport(ObservableCollection<DeviceImportInfo> deviceList)
+        {
+            await UpdateKnxMaster();
+
+            await ImportCatalog(deviceList);
+
+            List<string> loadedIds = new List<string>();
+            Dictionary<string, XElement> hards = new Dictionary<string, XElement>();
+
+            foreach (DeviceImportInfo device in deviceList)
+            {
+                //ViewDevicesList.SelectedItem = device;
+
+                ProgressChanged?.Invoke(0);
+                await Task.Delay(1000);
+
+                OnDeviceChanged?.Invoke(resourceLoader.GetString("StateHard"));
+                Log.Information("---- Hardware wird importiert");
+
+
+                string manu = device.Id.Substring(0, 6);
+                XElement xml;
+
+                if (hards.ContainsKey(manu))
+                {
+                    xml = hards[manu];
+                } else
+                {
+                    try
+                    {
+                        ZipArchiveEntry entry = Imports.Archive.GetEntry(manu + "/Hardware.xml");
+                        xml = XDocument.Load(entry.Open()).Root;
+                        await ImportHelper.TranslateXml(xml, Imports.SelectedLanguage);
+                        hards.Add(manu, xml);
+                    }
+                    catch (Exception e)
+                    {
+                        Log.Error(e, "Hardware Fehler!");
+                        OnError?.Invoke(device.ApplicationId + ": " + e.Message);
+                        device.Icon = Symbol.ReportHacked;
+                        continue;
+                    }
+                }
+
+                ImportHardware(xml, device);
+
+                await Task.Delay(2000);
+                ProgressChanged?.Invoke(1);
+
+                if (!loadedIds.Contains(device.ApplicationId))
+                {
+                    OnDeviceChanged?.Invoke(resourceLoader.GetString("StateApp"));
+                    Log.Information("---- Applikation wird importiert");
+                    Log.Information(device.ApplicationId);
+
+                    string manuId = device.ApplicationId.Substring(0, device.ApplicationId.IndexOf('_'));
+                    ZipArchiveEntry appEntry = Imports.Archive.GetEntry(manuId + "/" + device.ApplicationId + ".xml");
+                    List<string> errs = CheckApplication(XmlReader.Create(appEntry.Open()));
+
+                    if (errs.Count > 0)
+                    {
+                        Log.Error("Check nicht bestanden! " + string.Join(",", errs));
+                        OnError?.Invoke(device.ApplicationId + ": Die Applikation hat die Überprüfung nicht bestanden. (evtl. Plugin benötigt) " + string.Join(",", errs));
+                        device.Icon = Symbol.ReportHacked;
+                        continue;
+                    }
+
+                    await Task.Delay(1000);
+
+                    try
+                    {
+                        XElement doc = XDocument.Load(appEntry.Open()).Root;
+                        OnDeviceChanged?.Invoke("Übersetzen"); //TODO localisation
+                        await TranslateXml(doc, Imports.SelectedLanguage, ProgressAppMaxChanged, ProgressAppChanged);
+                        ProgressChanged?.Invoke(2);
+                        XElement appXml = doc.Descendants(XName.Get("ApplicationProgram", doc.Name.Namespace.NamespaceName)).First();
+                        OnDeviceChanged?.Invoke("Applikation importieren"); //TODO localisation
+                        await ImportApplications(appXml, device);
+                    }
+                    catch (Exception e)
+                    {
+                        Log.Error(e, "Applikation Fehler!");
+                        OnError?.Invoke(device.ApplicationId + ": " + e.Message);
+                        device.Icon = Symbol.ReportHacked;
+                        continue;
+                    }
+                    Log.Information("Import Applikationen abgeschlossen");
+                    loadedIds.Add(device.ApplicationId);
+                }
+                ProgressChanged?.Invoke(5);
+
+
+                OnDeviceChanged?.Invoke(resourceLoader.GetString("StateCheck"));
+                //TODO check wirklich implementieren
+                await Task.Delay(2000);
+                ProgressChanged?.Invoke(6);
+
+                device.Icon = Symbol.Like;
+                await Task.Delay(2000);
+
+            }
+
+
+            Imports.Archive.Dispose();
+            StorageFile file = await ApplicationData.Current.TemporaryFolder.GetFileAsync("temp.knxprod");
+            await file.DeleteAsync();
+
+
+            await Task.Delay(1000);
+            OnStateChanged?.Invoke(resourceLoader.GetString("StateFin"));
+
+            Log.Information("Import abgeschlossen");
+        }
+
+
+        public async Task UpdateKnxMaster()
+        {
+            OnStateChanged?.Invoke("KNX-Master Datei aktualisieren");
+            ZipArchiveEntry entry = Imports.Archive.GetEntry("knx_master.xml");
+            Log.Information("---- Integrierte KNX_Master wird überprüft");
+            //await Task.Delay(2000);
+            XElement manXML = XDocument.Load(entry.Open()).Root;
+            StorageFile masterFile;
+
+            try
+            {
+                masterFile = await ApplicationData.Current.LocalFolder.GetFileAsync("knx_master.xml");
+            }
+            catch (Exception e)
+            {
+                StorageFile defaultFile = await StorageFile.GetFileFromApplicationUriAsync(new Uri("ms-appx:///Data/knx_master.xml"));
+                masterFile = await ApplicationData.Current.LocalFolder.CreateFileAsync("knx_master.xml");
+                await FileIO.WriteTextAsync(masterFile, await FileIO.ReadTextAsync(defaultFile));
+                Log.Warning(e, "Es konnte keine KNX_Master Datei gefunden werden.");
+            }
+
+
+            XDocument masterXml;
+            try
+            {
+                masterXml = XDocument.Load(await masterFile.OpenStreamForReadAsync());
+            }
+            catch (Exception e)
+            {
+                Imports.Archive.Dispose();
+                OnStateChanged?.Invoke(resourceLoader.GetString("StateFin"));
+                Log.Error(e, "KNX_Master konnte geöffnet werden.");
+                OnError?.Invoke("Die KNX_Master Datei konnte nicht geöffnet werden.");
+                return;
+            }
+
+            string versionO = masterXml.Root.Element(XName.Get("MasterData", masterXml.Root.Name.NamespaceName)).Attribute("Version").Value;
+            string versionN = manXML.Element(XName.Get("MasterData", manXML.Name.NamespaceName)).Attribute("Version").Value;
+
+            int versionNew, versionOld;
+
+            try
+            {
+                versionNew = int.Parse(versionN);
+                versionOld = int.Parse(versionO);
+
+                bool newer = versionNew > versionOld;
+
+                if (newer)
+                {
+                    await FileIO.WriteTextAsync(masterFile, manXML.ToString());
+                    Log.Information("KNX_Master wurde aktualisiert");
+                }
+            }
+            catch (Exception e)
+            {
+                Log.Error(e, "KNX_Master konnte nicht aktualisiert werden.");
+                OnError?.Invoke("KNX_Master konnte nicht aktualisiert werden.");
+                return;
+            }
+
+            OnStateChanged?.Invoke(resourceLoader.GetString("StateManus"));
+            UpdateManufacturers(manXML);
         }
 
 
@@ -168,38 +355,42 @@ namespace METS.Classes.Helper
         }
 
 
-
-
-
-        public async Task ImportCatalog(XElement catXML, ObservableCollection<DeviceImportInfo> devicesList)
+        public async Task ImportCatalog(ObservableCollection<DeviceImportInfo> devicesList)
         {
-            currentNamespace = catXML.Attribute("xmlns").Value;
-            XElement catalog = catXML.Element(GetXName("ManufacturerData")).Element(GetXName("Manufacturer")).Element(GetXName("Catalog"));
-
-            CatalogViewModel section = null;
-
-            if (!_context.Sections.Any(s => s.Id == currentMan))
+            foreach(ZipArchiveEntry entry in Imports.Archive.Entries)
             {
-                ManufacturerViewModel man = tempManus.Find(e => e.Id == currentMan);
-                section = new CatalogViewModel();
-                section.Id = currentMan;
-                section.Name = man.Name;
-                section.ParentId = "main";
-                _context.Sections.Add(section);
-                _context.SaveChanges();
+                if (entry.Name != "Catalog.xml") continue;
+
+                string manu = entry.FullName.Substring(0, 6);
+
+                if (!_context.Sections.Any(s => s.Id == manu))
+                {
+                    CatalogViewModel section = null;
+                    ManufacturerViewModel man = tempManus.Find(e => e.Id == manu);
+                    section = new CatalogViewModel();
+                    section.Id = manu;
+                    section.Name = man.Name;
+                    section.ParentId = "main";
+                    _context.Sections.Add(section);
+                    _context.SaveChanges();
+                }
+
+                XElement catalog = XDocument.Load(entry.Open()).Root;
+                currentNamespace = catalog.Name.NamespaceName;
+                catalog = catalog.Element(GetXName("ManufacturerData")).Element(GetXName("Manufacturer")).Element(GetXName("Catalog"));
+
+                await GetSubItems(catalog, manu, devicesList);
+
             }
-
-            Log.Information(catalog.Elements().Count() + " Einträge gefunden");
-
-
-            await GetSubItems(catalog, currentMan, devicesList);
 
             _context.SaveChanges();
         }
 
 
-        private async Task GetSubItems(XElement xparent, string parentSub, ObservableCollection<DeviceImportInfo> devicesList)
+        private async Task<bool> GetSubItems(XElement xparent, string parentSub, ObservableCollection<DeviceImportInfo> devicesList)
         {
+            bool flagHasItem = false;
+
             foreach (XElement xele in xparent.Elements())
             {
                 if(xele.Name.LocalName == "CatalogItem")
@@ -210,10 +401,12 @@ namespace METS.Classes.Helper
                         device.CatalogId = parentSub;
                         device.HardwareRefId = xele.Attribute("Hardware2ProgramRefId").Value;
                         device.ProductRefId = xele.Attribute("ProductRefId").Value;
+                        flagHasItem = true;
                     }
                 } else
                 {
-                    if(!_context.Sections.Any(s => s.Id == xele.Attribute("Id").Value))
+                    bool hasItem = await GetSubItems(xele, xele.Attribute("Id").Value, devicesList);
+                    if (!_context.Sections.Any(s => s.Id == xele.Attribute("Id").Value))
                     {
                         CatalogViewModel section = new CatalogViewModel();
                         section.Id = xele.Attribute("Id").Value;
@@ -221,9 +414,10 @@ namespace METS.Classes.Helper
                         section.ParentId = parentSub;
                         _context.Sections.Add(section);
                     }
-                    await GetSubItems(xele, xele.Attribute("Id").Value, devicesList);
+                    if (hasItem) flagHasItem = true;
                 }
             }
+            return flagHasItem;
         }
 
 
@@ -244,7 +438,7 @@ namespace METS.Classes.Helper
             XElement hardwareXml = productXml.Parent.Parent;
             XElement hardware2ProgXml = hardXML.Descendants(GetXName("Hardware2Program")).Single(p => p.Attribute("Id").Value == deviceInfo.HardwareRefId);
 
-            device.ManufacturerId = currentMan;
+            device.ManufacturerId = hardwareXml.Attribute("Id").Value.Substring(0,6);
             device.Name = deviceInfo.Name;
             device.VisibleDescription = deviceInfo.Description;
             device.OrderNumber = productXml.Attribute("OrderNumber").Value;
@@ -642,6 +836,53 @@ namespace METS.Classes.Helper
             int iterationToWait = 50;
 
             List<XElement> tempList;
+
+
+            tempList = doc.Descendants(GetXName("Baggage")).ToList();
+            if(tempList.Count != 0)
+            {
+                Log.Information("Baggages werden gespeichert");
+                ZipArchiveEntry entryBags = Imports.Archive.GetEntry(app.Id.Substring(0, 6) + "/Baggages.xml");
+                List<XElement> baggs = XDocument.Load(entryBags.Open()).Root.Descendants(GetXName("Baggage")).ToList();
+                StorageFolder appData = await ApplicationData.Current.LocalFolder.CreateFolderAsync("Baggages", CreationCollisionOption.OpenIfExists);
+
+                foreach(XElement xbag in tempList)
+                {
+                    XElement ebag = baggs.Single(b => b.Attribute("Id").Value == xbag.Attribute("RefId").Value);
+                    bool flagSaveBag= true;
+                    string bagId = ebag.Attribute("Id").Value;
+                    DateTime time = DateTime.Parse(ebag.Element(GetXName("FileInfo")).Attribute("TimeInfo").Value);
+                    StorageFile file = null;
+
+                    try
+                    {
+                        file = await appData.GetFileAsync(bagId);
+                    } catch { }
+
+                    if(file != null && time <= file.DateCreated)
+                    {
+                        flagSaveBag = false;
+                        //TODO check if file is newer
+                    } else
+                    {
+                        file = await appData.CreateFileAsync(bagId);
+                        File.SetCreationTime(file.Path, time);
+                    }
+
+                    if (flagSaveBag)
+                    {
+                        ZipArchiveEntry entryBag = Imports.Archive.GetEntry(app.Id.Substring(0, 6) + "/Baggages/" + ebag.Attribute("Name").Value);
+                        Stream sread = entryBag.Open();
+                        Stream swrite = await file.OpenStreamForWriteAsync();
+                        sread.CopyTo(swrite);
+                        sread.Flush();
+                        sread.Close();
+                        swrite.Close();
+                    }
+                }
+            }
+            else
+                Log.Information("Keine Baggages vorhanden");
 
 
             Log.Information("Parameter Typen werden eingelesen");
@@ -1126,9 +1367,11 @@ namespace METS.Classes.Helper
             }
 
             Log.Information("Standard ComObjects werden generiert");
+            ProgressChanged?.Invoke(3);
             OnDeviceChanged(currentAppName + " - Generiere ComObjects");
             await SaveHelper.GenerateDefaultComs(app.Id);
             Log.Information("Standard Props werden generiert");
+            ProgressChanged?.Invoke(4);
             OnDeviceChanged(currentAppName + " - Generiere Props");
             await SaveHelper.GenerateVisibleProps(app.Id);
         }

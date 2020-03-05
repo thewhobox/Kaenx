@@ -2,6 +2,7 @@
 using METS.Knx;
 using METS.Knx.Addresses;
 using METS.Knx.Builders;
+using METS.Knx.Classes;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -78,7 +79,70 @@ namespace METS.Classes.Bus.Actions
             _token = token; // TODO implement cancellation
             _state = 0;
             TodoText = "Lese Geräteinfo...";
-            Start();
+
+            Start2();
+
+
+            //Start();
+        }
+
+        private async void Start2()
+        {
+            BusDevice dev = new BusDevice(Device.LineName, Connection);
+            TodoText = "Lese Maskenversion...";
+            dev.Connect();
+
+            _data.MaskVersion = await dev.DeviceDescriptorRead();
+
+            ProgressValue = 10;
+            TodoText = "Lese Seriennummer...";
+            await Task.Delay(500);
+            _data.SerialNumber = BitConverter.ToString(await dev.PropertyRead(_data.MaskVersion, "DeviceSerialNumber")).Replace(" - ", "").Substring(8);
+            string xy = await dev.PropertyRead<string>(_data.MaskVersion, "DeviceSerialNumber"));
+
+
+            ProgressValue = 20;
+            TodoText = "Lese Applikations Id...";
+            await Task.Delay(500);
+            string appId = BitConverter.ToString(await dev.PropertyRead(_data.MaskVersion, "ApplicationId")).Replace(" - ", "").Substring(8);
+            appId = "M-" + appId.Substring(0, 4) + "_A-" + appId.Substring(4, 4) + "-" + appId.Substring(8, 2) + "-";
+            _data.ApplicationId = appId + "XXXX";
+
+            ProgressValue = 30;
+            TodoText = "Lese Gruppentabelle...";
+            await Task.Delay(500);
+
+            CatalogContext context = new CatalogContext();
+            ApplicationViewModel appModel = context.Applications.Single(a => a.Id.StartsWith(appId)); //TODO check if now complete appid is returned
+            int grpAddr;
+
+            if (appModel.Table_Group != "" || appModel.Table_Group != null)
+            {
+                AppAbsoluteSegmentViewModel segmentModel = context.AppAbsoluteSegments.Single(s => s.Id == appModel.Table_Group);
+                grpAddr = segmentModel.Address;
+            }
+            else
+            {
+                //byte[] addrbyte = await dev.PropertyRead(_data.MaskVersion, "GroupAddressTable");
+                //TODO check if returned value is plausible
+                //grpAddr = Convert.ToInt16(addrbyte);
+                grpAddr = await dev.PropertyRead<int>(_data.MaskVersion, "GroupAddressTable");
+            }
+
+            byte[] datax = await dev.MemoryRead(grpAddr, 1);
+            int length = Convert.ToInt16(datax) -1;
+
+            datax = await dev.MemoryRead(grpAddr + 3, length * 2);
+            List<MulticastAddress> addresses = new List<MulticastAddress>();
+            for (int i = 0; i < ((datax.Length - 2) / 2); i++)
+            {
+                int offset = (i * 2) + 2;
+                addresses.Add(MulticastAddress.FromByteArray(new byte[] { datax[offset], datax[offset + 1] }));
+            }
+
+            _data.GroupTable = addresses;
+
+            Finish();
         }
 
 

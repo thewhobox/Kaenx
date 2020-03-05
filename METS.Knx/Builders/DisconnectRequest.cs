@@ -30,6 +30,8 @@ namespace METS.Knx.Builders
             
         }
 
+        public void SetSequence(byte sequence) { }
+
         public void SetSequenzCounter(byte sequenzCounter) { }
     }
 }
