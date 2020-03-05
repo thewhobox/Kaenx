@@ -4,6 +4,7 @@ using METS.Context.Project;
 using METS.Knx;
 using METS.Knx.Addresses;
 using METS.Knx.Builders;
+using METS.Knx.Classes;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -73,12 +74,51 @@ namespace METS.Classes.Bus.Actions
 
         public void Run(CancellationToken token)
         {
-            Connection.OnTunnelRequest += _conn_OnTunnelResponse;
+            //Connection.OnTunnelRequest += _conn_OnTunnelResponse;
             _token = token;
             _state = 0;
 
-            Start();
+
+            Start2();
+
+            //Start();
         }
+
+        private async void Start2()
+        {
+            BusDevice dev = new BusDevice(Device.LineName, Connection);
+            dev.Connect();
+            byte[] data = await dev.PropertyRead(3, 13, 5, 1);
+
+            ProgressValue = 10;
+            appId = BitConverter.ToString(data).Replace("-", "").Substring(8);
+            appId = "M-" + appId.Substring(0, 4) + "_A-" + appId.Substring(4, 4) + "-" + appId.Substring(8, 2) + "-";
+
+            //TODO Versionen beachten
+            if (!Device.ApplicationId.StartsWith(appId))
+            {
+                TodoText = "Inkompatible Applikation";
+                Finish();
+                return;
+            }
+
+
+            addedGroups = new List<string> { "" };
+            foreach (DeviceComObject com in Device.ComObjects)
+                foreach (GroupAddress group in com.Groups)
+                    if (!addedGroups.Contains(group.GroupName))
+                        addedGroups.Add(group.GroupName);
+
+            addedGroups.Sort();
+
+
+            if (_type != ProgAppType.Komplett && Device.LoadedGroup)
+            {
+                State3();
+                return;
+            }
+        }
+
 
         private async void Start()
         {
@@ -91,7 +131,7 @@ namespace METS.Classes.Bus.Actions
             _sequence++;
 
             builder = new TunnelRequest();
-            byte[] data = { 3, 13, 0x01 << 4, 0x01 };
+            byte[] data = { 3, 13, 0x01 << 4, 0x01 }; // TODO probiere 5 ob ganze appID und Start bei 0!
             builder.Build(UnicastAddress.FromString("0.0.0"), UnicastAddress.FromString(Device.LineName), Knx.Parser.ApciTypes.PropertyValueRead, _sequence, _currentSeqNum, data);
             Connection.Send(builder);
             _state = 1;

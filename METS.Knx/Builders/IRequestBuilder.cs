@@ -9,5 +9,6 @@ namespace METS.Knx.Builders
     {
         byte[] GetBytes();
         void SetChannelId(byte channelId);
+        void SetSequence(byte sequence);
     }
 }

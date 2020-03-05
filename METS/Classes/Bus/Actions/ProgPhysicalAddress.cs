@@ -132,8 +132,6 @@ namespace METS.Classes.Bus.Actions
             ProgressValue = 66;
             progDevices.Clear();
 
-            Connection.IncreaseSequence();
-
             while (!_token.IsCancellationRequested)
             {
                 if (progDevices.Count == 1)
@@ -197,10 +195,6 @@ namespace METS.Classes.Bus.Actions
             _sequence++;
             await Task.Delay(200);
 
-            builder = new TunnelRequest();
-            builder.Build(UnicastAddress.FromString("0.0.0"), UnicastAddress.FromString(Device.LineName), Knx.Parser.ApciTypes.IndividualAddressRead, _sequence, 2);
-            Connection.Send(builder);
-            _sequence++;
             ProgressValue = 100;
             TodoText = "Erfolgreich abgeschlossen";
             await Task.Delay(2000);

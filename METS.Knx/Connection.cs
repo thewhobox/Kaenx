@@ -30,7 +30,7 @@ namespace METS.Knx
         private readonly BlockingCollection<byte[]> _sendMessages;
         private readonly ReceiverParserDispatcher _receiveParserDispatcher;
         private byte _communicationChannel;
-        private byte _sequenceCounter;
+        private byte _sequenceCounter = 0;
 
         public bool IsConnected { get; private set; }
 
@@ -74,23 +74,46 @@ namespace METS.Knx
             _sendMessages.Add(builder.GetBytes());
         }
 
-
-        public void Send(IRequestBuilder builder)
-        {
-            SendAsync(builder);
-        }
-
-        public Task SendAsync(IRequestBuilder builder)
+        /// <summary>
+        /// Sendet die Daten vom angegebenen Builder.
+        /// </summary>
+        /// <param name="builder">Builder</param>
+        /// <returns>Gibt den Sequenz Counter zurück</returns>
+        public byte Send(IRequestBuilder builder)
         {
             if (!IsConnected)
                 throw new Exception("Roflkopter");
 
+            var seq = _sequenceCounter;
             builder.SetChannelId(_communicationChannel);
+            builder.SetSequence(_sequenceCounter);
+            _sequenceCounter++;
             byte[] data = builder.GetBytes();
 
             _sendMessages.Add(data);
 
-            return Task.CompletedTask;
+            return seq;
+        }
+
+        /// <summary>
+        /// Sendet die Daten vom angegebenen Builder.
+        /// </summary>
+        /// <param name="builder">Builder</param>
+        /// <returns>Gibt den Sequenz Counter zurück</returns>
+        public async Task<byte> SendAsync(IRequestBuilder builder)
+        {
+            if (!IsConnected)
+                throw new Exception("Roflkopter");
+
+            var seq = _sequenceCounter;
+            builder.SetChannelId(_communicationChannel);
+            builder.SetSequence(_sequenceCounter);
+            _sequenceCounter++;
+            byte[] data = builder.GetBytes();
+
+            _sendMessages.Add(data);
+
+            return seq;
         }
 
         public Task SendAsync(byte[] bytes)
@@ -101,11 +124,6 @@ namespace METS.Knx
             _sendMessages.Add(bytes);
 
             return Task.CompletedTask;
-        }
-
-        public void IncreaseSequence()
-        {
-            _sequenceCounter++;
         }
 
 
@@ -139,6 +157,7 @@ namespace METS.Knx
 
                                 break;
                             case Builders.TunnelResponse tunnelResponse:
+                                //TODO check if ack works correct
                                 _sendMessages.Add(new Responses.TunnelResponse(0x06, 0x10, 0x0A, 0x04, _communicationChannel, tunnelResponse.SequenceCounter, 0x00).GetBytes());
                                 OnTunnelRequest?.Invoke(tunnelResponse);
                                 break;
