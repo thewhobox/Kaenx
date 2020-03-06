@@ -15,8 +15,6 @@ namespace METS.Knx.Classes
 {
     public class BusDevice
     {
-        private List<ApciTypes> responseTypes = new List<ApciTypes>() { ApciTypes.DeviceDescriptorResponse, ApciTypes.GroupValueResponse, ApciTypes.IndividualAddressSerialNumberResponse, ApciTypes.MemoryResponse };
-
         private UnicastAddress _address;
         private Connection _conn;
         private Dictionary<int, TunnelResponse> responses = new Dictionary<int, TunnelResponse>();
@@ -28,23 +26,14 @@ namespace METS.Knx.Classes
         {
             _address = UnicastAddress.FromString(address);
             _conn = conn;
-            _conn.OnTunnelRequest += OnTunnelRequest;
+            _conn.OnTunnelResponse += OnTunnelResponse;
         }
 
-        private void OnTunnelRequest(TunnelResponse response)
+        private void OnTunnelResponse(TunnelResponse response)
         {
-            if (responseTypes.Contains(response.APCI))
-            {
-                responses.Add(response.SequenceNumber, response);
+            responses.Add(response.SequenceNumber, response);
 
-                Debug.WriteLine(response.SequenceNumber + ": " + response.APCI + " - " + response.Data.Length);
-
-                TunnelRequest builder = new TunnelRequest();
-                builder.Build(UnicastAddress.FromString("0.0.0"), _address, Parser.ApciTypes.Ack, response.SequenceCounter);
-                _conn.Send(builder);
-            }
-            //TODO move ack to connection class!
-
+            Debug.WriteLine(response.SequenceNumber + ": " + response.APCI + " - " + response.Data.Length);
         }
 
         public BusDevice(UnicastAddress address, Connection conn)
@@ -112,11 +101,18 @@ namespace METS.Knx.Classes
         {
             XDocument master = await GetKnxMaster();
             XElement mask = master.Descendants(XName.Get("MaskVersion", master.Root.Name.NamespaceName)).Single(mv => mv.Attribute("Id").Value == maskId);
-            XElement prop = mask.Descendants(XName.Get("Resource", master.Root.Name.NamespaceName)).Single(mv => mv.Attribute("Name").Value == resourceId);
+            XElement prop = null;
+            try
+            {
+                prop = mask.Descendants(XName.Get("Resource", master.Root.Name.NamespaceName)).Single(mv => mv.Attribute("Name").Value == resourceId);
+            } catch
+            {
+                throw new Exception("Device does not support this Property");
+            }
 
             XElement loc = prop.Element(XName.Get("Location", master.Root.Name.NamespaceName));
             int length = int.Parse(prop.Element(XName.Get("ResourceType", master.Root.Name.NamespaceName)).Attribute("Length").Value);
-            string start = loc.Attribute("StartAddress").Value;
+            string start = loc.Attribute("StartAddress")?.Value;
 
             switch (loc.Attribute("AddressSpace").Value)
             {
@@ -126,8 +122,7 @@ namespace METS.Knx.Classes
                     return await PropertyRead<T>(Convert.ToByte(obj), Convert.ToByte(pid), length, int.Parse(start));
 
                 case "StandardMemory":
-
-                    break;
+                    return await MemoryRead<T>(int.Parse(start), length);
 
                 case "Pointer":
                     string newProp = loc.Attribute("PtrResource").Value;
@@ -160,11 +155,15 @@ namespace METS.Knx.Classes
         /// <param name="length">Anzahl der zu lesenden Bytes</param>
         /// <param name="start">Startindex</param>
         /// <returns>Daten</returns>
-        public async Task<T> PropertyRead<T>(byte objIdx, byte propId, int length, int start = 0)
+        public async Task<T> PropertyRead<T>(byte objIdx, byte propId, int length, int start = 1)
         {
             if (!_connected) throw new Exception("Nicht mit Gerät verbunden.");
 
             TunnelRequest builder = new TunnelRequest();
+
+
+            length = 1;
+            start = 1;
 
             int x1 = length << 12;
             start = start & 0xFFF;
@@ -179,7 +178,35 @@ namespace METS.Knx.Classes
             _conn.Send(builder);
             TunnelResponse resp = await WaitForData(seq);
 
-            return (T)Convert.ChangeType(resp.Data, typeof(T));
+
+            switch(Type.GetTypeCode(typeof(T)))
+            {
+                case TypeCode.String:
+                    string datas = BitConverter.ToString(resp.Data.Skip(4).ToArray()).Replace("-", "");
+                    return (T)Convert.ChangeType(datas, typeof(T));
+
+                case TypeCode.Int32:
+                    byte[] datai = resp.Data.Skip(2).ToArray();
+                    byte[] xint = new byte[4];
+
+                    for (int i = 0; i < 4; i++)
+                    {
+                        if (i >= datai.Length)
+                            xint[i] = 0;
+                        else
+                            xint[i] = datai[i];
+                    }
+                    return (T)Convert.ChangeType(BitConverter.ToUInt32(xint, 0), typeof(T));
+
+                default:
+                    try
+                    {
+                        return (T)Convert.ChangeType(resp.Data.Skip(4).ToArray(), typeof(T));
+                    } catch(Exception e)
+                    {
+                        throw new Exception("Data kann nicht in angegebenen Type konvertiert werden. " + typeof(T).ToString(), e);
+                    }
+            }
         }
 
 
@@ -254,7 +281,35 @@ namespace METS.Knx.Classes
             _conn.Send(builder);
             TunnelResponse resp = await WaitForData(seq);
 
-            return (T)Convert.ChangeType(resp.Data, typeof(T));
+            switch (Type.GetTypeCode(typeof(T)))
+            {
+                case TypeCode.String:
+                    string datas = BitConverter.ToString(resp.Data.Skip(2).ToArray()).Replace("-", "");
+                    return (T)Convert.ChangeType(datas, typeof(T));
+
+                case TypeCode.Int32:
+                    byte[] datai = resp.Data.Skip(2).ToArray();
+                    byte[] xint = new byte[4];
+
+                    for(int i = 0; i < 4; i++)
+                    {
+                        if (i >= datai.Length)
+                            xint[i] = 0;
+                        else
+                            xint[i] = datai[i];
+                    }
+                    return (T)Convert.ChangeType(BitConverter.ToUInt32(xint, 0), typeof(T));
+
+                default:
+                    try
+                    {
+                        return (T)Convert.ChangeType(resp.Data.Skip(2).ToArray(), typeof(T));
+                    }
+                    catch (Exception e)
+                    {
+                        throw new Exception("Data kann nicht in angegebenen Type konvertiert werden. " + typeof(T).ToString(), e);
+                    }
+            }
         }
 
 

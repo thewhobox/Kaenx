@@ -12,6 +12,8 @@ namespace METS.Classes.Bus.Actions
         public string MaskVersion { get; set; }
         public string SerialNumber { get; set; }
         public string ApplicationId { get; set; }
+        public string Manufacturer { get; set; }
+        public string Device { get; set; }
 
         public List<MulticastAddress> GroupTable { get; set; }
     }

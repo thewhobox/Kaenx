@@ -156,19 +156,27 @@
                     <RowDefinition Height="auto" />
                 </Grid.RowDefinitions>
 
-                <toolkit:HeaderedContentControl Header="MaskVersion:">
-                    <TextBlock Text="{Binding MaskVersion}" />
+                <toolkit:HeaderedContentControl Header="Hersteller:">
+                    <TextBlock Text="{Binding Manufacturer}" />
                 </toolkit:HeaderedContentControl>
 
-                <toolkit:HeaderedContentControl Grid.Row="1" Header="Seriennummer:">
-                    <TextBlock Text="{Binding SerialNumber}" />
+                <toolkit:HeaderedContentControl Grid.Row="1" Header="Gerät:">
+                    <TextBlock Text="{Binding Device}" />
                 </toolkit:HeaderedContentControl>
 
                 <toolkit:HeaderedContentControl Grid.Row="2" Header="Applikation:">
                     <TextBlock Text="{Binding ApplicationId}" />
                 </toolkit:HeaderedContentControl>
 
-                <toolkit:HeaderedContentControl Grid.Row="3" Header="Grouptable:">
+                <toolkit:HeaderedContentControl Grid.Row="3" Header="Seriennummer:">
+                    <TextBlock Text="{Binding SerialNumber}" />
+                </toolkit:HeaderedContentControl>
+
+                <toolkit:HeaderedContentControl Grid.Row="4" Header="MaskVersion:">
+                    <TextBlock Text="{Binding MaskVersion}" />
+                </toolkit:HeaderedContentControl>
+
+                <toolkit:HeaderedContentControl Grid.Row="5" Header="Grouptable:">
                     <ListBox ItemsSource="{Binding GroupTable}" />
                 </toolkit:HeaderedContentControl>
             </Grid>

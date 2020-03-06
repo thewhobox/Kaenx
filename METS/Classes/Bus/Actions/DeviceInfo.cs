@@ -6,10 +6,13 @@ using METS.Knx.Classes;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Xml.Linq;
+using Windows.Storage;
 
 namespace METS.Classes.Bus.Actions
 {
@@ -40,42 +43,8 @@ namespace METS.Classes.Bus.Actions
         { 
         }
 
-        private void Conn_OnTunnelResponse(TunnelResponse response)
-        {
-            bool sendAck = true;
-
-            if (_state == 1 && response.APCI == Knx.Parser.ApciTypes.DeviceDescriptorResponse)
-            {
-                State1(response);
-            }
-            else if (_state == 2 && response.APCI == Knx.Parser.ApciTypes.PropertyValueResponse)
-            {
-                State2(response);
-            } else if (_state == 3 && response.APCI == Knx.Parser.ApciTypes.PropertyValueResponse)
-            {
-                State3(response);
-            }
-            else if (_state == 4 && response.APCI == Knx.Parser.ApciTypes.MemoryResponse)
-            {
-                State4(response);
-            } else if (_state == 5 && response.APCI == Knx.Parser.ApciTypes.MemoryResponse)
-            {
-                State5(response);
-            }
-            else {
-                sendAck = false;
-            }
-
-            if (!sendAck) return;
-            _sequence++;
-            TunnelRequest builder = new TunnelRequest();
-            builder.Build(UnicastAddress.FromString("0.0.0"), UnicastAddress.FromString(Device.LineName), Knx.Parser.ApciTypes.Ack, _sequence, BitConverter.GetBytes(response.SequenceNumber)[0]);
-            Connection.Send(builder);
-        }
-
         public void Run(CancellationToken token)
         {
-            Connection.OnTunnelRequest += Conn_OnTunnelResponse;
             _token = token; // TODO implement cancellation
             _state = 0;
             TodoText = "Lese Geräteinfo...";
@@ -99,191 +68,92 @@ namespace METS.Classes.Bus.Actions
             ProgressValue = 10;
             TodoText = "Lese Seriennummer...";
             await Task.Delay(500);
-            _data.SerialNumber = BitConverter.ToString(await dev.PropertyRead(_data.MaskVersion, "DeviceSerialNumber")).Replace(" - ", "").Substring(8);
-            string xy = await dev.PropertyRead<string>(_data.MaskVersion, "DeviceSerialNumber");
+            try
+            {
+                _data.SerialNumber = await dev.PropertyRead<string>(_data.MaskVersion, "DeviceSerialNumber");
+            } catch(Exception e)
+            {
+                _data.SerialNumber = e.Message;
+            }
 
 
             ProgressValue = 20;
             TodoText = "Lese Applikations Id...";
             await Task.Delay(500);
-            string appId = BitConverter.ToString(await dev.PropertyRead(_data.MaskVersion, "ApplicationId")).Replace(" - ", "").Substring(8);
+            string appId = await dev.PropertyRead<string>(_data.MaskVersion, "ApplicationId");
+            if (appId.Length == 8) appId = "00" + appId;
             appId = "M-" + appId.Substring(0, 4) + "_A-" + appId.Substring(4, 4) + "-" + appId.Substring(8, 2) + "-";
+
+            CatalogContext context = new CatalogContext();
+
+            XElement master = (await GetKnxMaster()).Root;
+            XElement manu = master.Descendants(XName.Get("Manufacturer", master.Name.NamespaceName)).Single(m => m.Attribute("Id").Value == appId.Substring(0, 6));
+            _data.Manufacturer = manu.Attribute("Name").Value;
+
+            try
+            {
+                Hardware2AppModel h2a = context.Hardware2App.First(h => h.ApplicationId.StartsWith(appId));
+                DeviceViewModel dvm = context.Devices.First(d => d.HardwareId == h2a.HardwareId);
+                _data.Device = dvm.Name + Environment.NewLine + h2a.Name + " " + h2a.VersionString;
+            }
+            catch { }
+
             _data.ApplicationId = appId + "XXXX";
+
 
             ProgressValue = 30;
             TodoText = "Lese Gruppentabelle...";
             await Task.Delay(500);
+            int grpAddr = -1;
 
-            CatalogContext context = new CatalogContext();
-            ApplicationViewModel appModel = context.Applications.Single(a => a.Id.StartsWith(appId)); //TODO check if now complete appid is returned
-            int grpAddr;
+            if (context.Applications.Any(a => a.Id.StartsWith(appId)))
+            {
+                ApplicationViewModel appModel = context.Applications.Single(a => a.Id.StartsWith(appId)); //TODO check if now complete appid is returned
 
-            if (appModel.Table_Group != "" || appModel.Table_Group != null)
-            {
-                AppAbsoluteSegmentViewModel segmentModel = context.AppAbsoluteSegments.Single(s => s.Id == appModel.Table_Group);
-                grpAddr = segmentModel.Address;
-            }
-            else
-            {
-                //byte[] addrbyte = await dev.PropertyRead(_data.MaskVersion, "GroupAddressTable");
-                //TODO check if returned value is plausible
-                //grpAddr = Convert.ToInt16(addrbyte);
-                grpAddr = await dev.PropertyRead<int>(_data.MaskVersion, "GroupAddressTable");
+                if (appModel.Table_Group != "" || appModel.Table_Group != null)
+                {
+                    AppAbsoluteSegmentViewModel segmentModel = context.AppAbsoluteSegments.Single(s => s.Id == appModel.Table_Group);
+                    grpAddr = segmentModel.Address;
+                }
             }
 
-            byte[] datax = await dev.MemoryRead(grpAddr, 1);
-            int length = Convert.ToInt16(datax) -1;
-
-            datax = await dev.MemoryRead(grpAddr + 3, length * 2);
-            List<MulticastAddress> addresses = new List<MulticastAddress>();
-            for (int i = 0; i < ((datax.Length - 2) / 2); i++)
+            if(grpAddr == -1)
             {
-                int offset = (i * 2) + 2;
-                addresses.Add(MulticastAddress.FromByteArray(new byte[] { datax[offset], datax[offset + 1] }));
+                try
+                {
+                    grpAddr = await dev.PropertyRead<int>(_data.MaskVersion, "GroupAddressTable");
+                }
+                catch { 
+                }
             }
 
-            _data.GroupTable = addresses;
+
+            if(grpAddr != -1)
+            {
+                byte[] datax = await dev.MemoryRead(grpAddr, 1);
+
+                if(datax.Length > 0)
+                {
+                    int length = Convert.ToInt16(datax[0]) - 1;
+
+                    datax = await dev.MemoryRead(grpAddr + 3, length * 2);
+                    List<MulticastAddress> addresses = new List<MulticastAddress>();
+                    for (int i = 0; i < (datax.Length / 2); i++)
+                    {
+                        int offset = i * 2;
+                        addresses.Add(MulticastAddress.FromByteArray(new byte[] { datax[offset], datax[offset + 1] }));
+                    }
+
+                    _data.GroupTable = addresses;
+                }
+            }
 
             Finish();
         }
 
-
-        private async void Start()
-        {
-            TodoText = "Lese Maskenversion...";
-            // Connect
-            TunnelRequest builder = new TunnelRequest();
-            builder.Build(UnicastAddress.FromString("0.0.0"), UnicastAddress.FromString(Device.LineName), Knx.Parser.ApciTypes.Connect, _sequence, 255, null);
-            Connection.Send(builder);
-            await Task.Delay(100);
-            _sequence++;
-
-            // Read Property (MaskVersion)
-            builder = new TunnelRequest();
-            builder.Build(UnicastAddress.FromString("0.0.0"), UnicastAddress.FromString(Device.LineName), Knx.Parser.ApciTypes.DeviceDescriptorRead, _sequence, 0);
-            Connection.Send(builder);
-            _state = 1;
-        }
-
-        // 
-        private async void State1(TunnelResponse response)
-        {
-            ProgressValue = 10;
-            _data.MaskVersion = BitConverter.ToString(response.Data).Replace("-", "");
-
-            TodoText = "Lese Seriennummer...";
-            await Task.Delay(500);
-            _sequence++;
-            TunnelRequest builder = new TunnelRequest();
-            byte[] data = { 0, 11, 0x01 << 4, 0x01 };
-            builder.Build(UnicastAddress.FromString("0.0.0"), UnicastAddress.FromString(Device.LineName), Knx.Parser.ApciTypes.PropertyValueRead, _sequence, 1, data);
-            Connection.Send(builder);
-            _state = 2;
-        }
-
-        private async void State2(TunnelResponse response)
-        {
-            ProgressValue = 20;
-            _data.SerialNumber = BitConverter.ToString(response.Data).Replace("-", "").Substring(8);
-
-            TodoText = "Lese Applikations Id...";
-            await Task.Delay(500);
-
-            _sequence++;
-            TunnelRequest builder = new TunnelRequest();
-            byte[] data = { 3, 13, 0x01 << 4, 0x01 };
-            builder.Build(UnicastAddress.FromString("0.0.0"), UnicastAddress.FromString(Device.LineName), Knx.Parser.ApciTypes.PropertyValueRead, _sequence, 2, data);
-            Connection.Send(builder);
-            _state = 3;
-        }
-
-        private async void State3(TunnelResponse response) 
-        {
-            ProgressValue = 30;
-            string appId = BitConverter.ToString(response.Data).Replace("-", "").Substring(8);
-            appId = "M-" + appId.Substring(0, 4) + "_A-" + appId.Substring(4, 4) + "-" + appId.Substring(8, 2) + "-";
-            _data.ApplicationId = appId + "XXXX";
-
-            TodoText = "Lese Gruppentabelle...";
-            await Task.Delay(500);
-
-            _sequence++;
-            TunnelRequest builder = new TunnelRequest();
-            List<byte> data = new List<byte> { 9 };
-
-
-            CatalogContext context = new CatalogContext();
-            ApplicationViewModel appModel = context.Applications.Single(a => a.Id.StartsWith(appId));
-
-            if (appModel.Table_Group != "" || appModel.Table_Group != null)
-            {
-                AppAbsoluteSegmentViewModel segmentModel = context.AppAbsoluteSegments.Single(s => s.Id == appModel.Table_Group);
-                GroupAddress = segmentModel.Address;
-            } else
-            {
-                //TODO hinzufügen von Adresse aus der Maske holen!
-            }
-
-
-            byte[] address = BitConverter.GetBytes(Convert.ToInt16(GroupAddress));
-            Array.Reverse(address);
-            data.AddRange(address);
-
-            builder.Build(UnicastAddress.FromString("0.0.0"), UnicastAddress.FromString(Device.LineName), Knx.Parser.ApciTypes.MemoryRead, _sequence, 3, data.ToArray());
-            Connection.Send(builder);
-            _state = 4;
-
-        }
-
-        private void State4(TunnelResponse response)
-        {
-            TodoText = "Verarbeite Gruppentabelle...";
-            int length = BitConverter.ToUInt16(new byte[] { response.Data[2], 0x00 }, 0);
-
-            if (length <= 1)
-            {
-                Finish();
-                return;
-            }
-
-
-
-            _sequence++;
-            TunnelRequest builder = new TunnelRequest();
-            List<byte> data = new List<byte>();
-
-            data.Add(BitConverter.GetBytes((length - 1)*2)[0]);
-
-            byte[] address = BitConverter.GetBytes(Convert.ToInt16(GroupAddress + 3));
-            Array.Reverse(address);
-            data.AddRange(address);
-
-            //TODO check needed changes
-
-            builder.Build(UnicastAddress.FromString("0.0.0"), UnicastAddress.FromString(Device.LineName), Knx.Parser.ApciTypes.MemoryRead, _sequence, 4, data.ToArray());
-            Connection.Send(builder);
-            _state = 5;
-        }
-
-        private void State5(TunnelResponse response)
-        {
-            List<MulticastAddress> addresses = new List<MulticastAddress>();
-
-            for (int i = 0; i < ((response.Data.Length-2) / 2); i++)
-            {
-                int offset = (i*2)+2;
-                addresses.Add(MulticastAddress.FromByteArray(new byte[] { response.Data[offset], response.Data[offset + 1] }));
-            }
-
-            _data.GroupTable = addresses;
-
-            Finish();
-        }
 
         private void Finish()
         {
-            Connection.OnTunnelRequest -= Conn_OnTunnelResponse;
-
             ProgressValue = 100;
             TodoText = "Erfolgreich";
             Finished?.Invoke(_data, new EventArgs());
@@ -302,6 +172,25 @@ namespace METS.Classes.Bus.Actions
                     PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
                 });
             }
+        }
+
+        private async Task<XDocument> GetKnxMaster()
+        {
+            StorageFile masterFile;
+
+            try
+            {
+                masterFile = await ApplicationData.Current.LocalFolder.GetFileAsync("knx_master.xml");
+            }
+            catch
+            {
+                StorageFile defaultFile = await StorageFile.GetFileFromApplicationUriAsync(new Uri("ms-appx:///Data/knx_master.xml"));
+                masterFile = await ApplicationData.Current.LocalFolder.CreateFileAsync("knx_master.xml");
+                await FileIO.WriteTextAsync(masterFile, await FileIO.ReadTextAsync(defaultFile));
+            }
+
+            XDocument masterXml = XDocument.Load(await masterFile.OpenStreamForReadAsync());
+            return masterXml;
         }
     }
 }
