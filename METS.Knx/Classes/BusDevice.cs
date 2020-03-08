@@ -18,15 +18,24 @@ namespace METS.Knx.Classes
         private UnicastAddress _address;
         private Connection _conn;
         private Dictionary<int, TunnelResponse> responses = new Dictionary<int, TunnelResponse>();
+        private List<int> acks = new List<int>();
 
         private int _currentSeqNum = 0;
         private bool _connected = false;
+        private int lastReceivedNumber;
 
         public BusDevice(string address, Connection conn)
         {
             _address = UnicastAddress.FromString(address);
             _conn = conn;
             _conn.OnTunnelResponse += OnTunnelResponse;
+            _conn.OnTunnelRequest += _conn_OnTunnelRequest;
+        }
+
+        private void _conn_OnTunnelRequest(TunnelResponse response)
+        {
+            acks.Add(response.SequenceNumber);
+            Debug.WriteLine(response.SequenceNumber + ": " + response.APCI);
         }
 
         private void OnTunnelResponse(TunnelResponse response)
@@ -56,6 +65,13 @@ namespace METS.Knx.Classes
             var resp = responses[seq];
             responses.Remove(seq);
             return resp;
+        }
+
+        private async Task WaitForAck(int seq)
+        {
+            while (!acks.Contains(seq))
+                await Task.Delay(10); // TODO maybe erhöhen
+            acks.Remove(seq);
         }
 
 
@@ -166,7 +182,7 @@ namespace METS.Knx.Classes
             start = 1;
 
             int x1 = length << 12;
-            start = start & 0xFFF;
+            start &= 0xFFF;
             int x2 = x1 | start;
 
             byte[] data_temp = BitConverter.GetBytes(Convert.ToInt16(x2));
@@ -189,11 +205,8 @@ namespace METS.Knx.Classes
                     byte[] datai = resp.Data.Skip(2).ToArray();
                     byte[] xint = new byte[4];
 
-                    for (int i = 0; i < 4; i++)
+                    for (int i = 0; i < datai.Length; i++)
                     {
-                        if (i >= datai.Length)
-                            xint[i] = 0;
-                        else
                             xint[i] = datai[i];
                     }
                     return (T)Convert.ChangeType(BitConverter.ToUInt32(xint, 0), typeof(T));
@@ -216,7 +229,7 @@ namespace METS.Knx.Classes
         /// </summary>
         /// <param name="address">Start Adresse</param>
         /// <param name="databytes">Daten zum Schreiben</param>
-        public async void MemoryWrite(int address, byte[] databytes)
+        public void MemoryWrite(int address, byte[] databytes)
         {
             List<byte> datalist = databytes.ToList();
 
@@ -239,10 +252,44 @@ namespace METS.Knx.Classes
                 Array.Reverse(addr);
                 data.AddRange(addr);
                 data.AddRange(data_temp);
-                _currentSeqNum++;
                 builder.Build(UnicastAddress.FromString("0.0.0"), _address, Knx.Parser.ApciTypes.MemoryWrite, _currentSeqNum, data.ToArray());
+                _currentSeqNum++;
                 _conn.Send(builder);
-                await Task.Delay(100);
+            }
+
+        }
+
+        public async Task MemoryWriteSync(int address, byte[] databytes)
+        {
+            List<byte> datalist = databytes.ToList();
+
+            while (datalist.Count != 0)
+            {
+                List<byte> data_temp = new List<byte>();
+                if (datalist.Count >= 14)
+                {
+                    data_temp.AddRange(datalist.Take(14));
+                    datalist.RemoveRange(0, 14);
+                }
+                else
+                {
+                    data_temp.AddRange(datalist.Take(datalist.Count));
+                    datalist.RemoveRange(0, datalist.Count);
+                }
+
+                TunnelRequest builder = new TunnelRequest();
+                List<byte> data = new List<byte> { Convert.ToByte(data_temp.Count) };
+                byte[] addr = BitConverter.GetBytes(Convert.ToInt16(address));
+                Array.Reverse(addr);
+                data.AddRange(addr);
+                data.AddRange(data_temp);
+
+                var seq = _currentSeqNum;
+                _currentSeqNum++;
+                builder.Build(UnicastAddress.FromString("0.0.0"), _address, Knx.Parser.ApciTypes.MemoryWrite, seq, data.ToArray());
+                _conn.Send(builder);
+                Debug.WriteLine("Warten auf: " + seq);
+                await WaitForAck(seq);
             }
 
         }
@@ -270,15 +317,16 @@ namespace METS.Knx.Classes
         public async Task<T> MemoryRead<T>(int address, int length)
         {
             List<byte> data = new List<byte> { Convert.ToByte(length) };
-            byte[] addr = BitConverter.GetBytes(Convert.ToInt16(address));
-            Array.Reverse(addr);
-            data.AddRange(addr);
+            byte[] addr = BitConverter.GetBytes(address);
+            data.Add(addr[1]);
+            data.Add(addr[0]);
 
             TunnelRequest builder = new TunnelRequest();
-            builder.Build(UnicastAddress.FromString("0.0.0"), _address, Knx.Parser.ApciTypes.MemoryRead, _currentSeqNum, data.ToArray());
             var seq = _currentSeqNum;
             _currentSeqNum++;
+            builder.Build(UnicastAddress.FromString("0.0.0"), _address, Knx.Parser.ApciTypes.MemoryRead, seq, data.ToArray());
             _conn.Send(builder);
+            Debug.WriteLine("Warten auf: " + seq);
             TunnelResponse resp = await WaitForData(seq);
 
             switch (Type.GetTypeCode(typeof(T)))
@@ -291,12 +339,9 @@ namespace METS.Knx.Classes
                     byte[] datai = resp.Data.Skip(2).ToArray();
                     byte[] xint = new byte[4];
 
-                    for(int i = 0; i < 4; i++)
+                    for(int i = 0; i < datai.Length; i++)
                     {
-                        if (i >= datai.Length)
-                            xint[i] = 0;
-                        else
-                            xint[i] = datai[i];
+                        xint[i] = datai[i];
                     }
                     return (T)Convert.ChangeType(BitConverter.ToUInt32(xint, 0), typeof(T));
 
@@ -319,11 +364,11 @@ namespace METS.Knx.Classes
         public async Task<string> DeviceDescriptorRead()
         {
             TunnelRequest builder = new TunnelRequest();
-            builder.Build(UnicastAddress.FromString("0.0.0"), _address, Knx.Parser.ApciTypes.DeviceDescriptorRead,_currentSeqNum);
             var seq = _currentSeqNum;
             _currentSeqNum++;
+            builder.Build(UnicastAddress.FromString("0.0.0"), _address, Knx.Parser.ApciTypes.DeviceDescriptorRead, seq);
             _conn.Send(builder);
-            Debug.WriteLine("waiting for: " + seq);
+            Debug.WriteLine("Warten auf: " + seq);
             TunnelResponse resp = await WaitForData(seq); 
             return BitConverter.ToString(resp.Data).Replace("-", "");
         }

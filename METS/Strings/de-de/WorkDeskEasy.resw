@@ -141,4 +141,10 @@
   <data name="MenuTopologie.Content" xml:space="preserve">
     <value>Topologie</value>
   </data>
+  <data name="TooltipInfoChange.ToolTipService.ToolTip" xml:space="preserve">
+    <value>Änderungen</value>
+  </data>
+  <data name="TooltipInfoUpdate.ToolTipService.ToolTip" xml:space="preserve">
+    <value>Updates</value>
+  </data>
 </root>

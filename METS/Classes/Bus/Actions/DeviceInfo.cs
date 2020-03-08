@@ -13,6 +13,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Xml.Linq;
 using Windows.Storage;
+using static METS.Classes.Bus.Actions.IBusAction;
 
 namespace METS.Classes.Bus.Actions
 {
@@ -21,7 +22,6 @@ namespace METS.Classes.Bus.Actions
         private int _progress;
         private bool _progressIsIndeterminate;
         private string _todoText;
-        private byte _sequence = 0x00;
         private DeviceInfoData _data = new DeviceInfoData();
         private CancellationToken _token;
 
@@ -33,11 +33,8 @@ namespace METS.Classes.Bus.Actions
 
         public Connection Connection { get; set; }
 
-        public event EventHandler Finished;
+        public event ActionFinishedHandler Finished;
         public event PropertyChangedEventHandler PropertyChanged;
-
-        private int _state = 0;
-        private int GroupAddress;
 
         public DeviceInfo()
         { 
@@ -46,16 +43,12 @@ namespace METS.Classes.Bus.Actions
         public void Run(CancellationToken token)
         {
             _token = token; // TODO implement cancellation
-            _state = 0;
             TodoText = "Lese Geräteinfo...";
 
-            Start2();
-
-
-            //Start();
+            Start();
         }
 
-        private async void Start2()
+        private async void Start()
         {
             BusDevice dev = new BusDevice(Device.LineName, Connection);
             TodoText = "Lese Maskenversion...";
@@ -94,7 +87,8 @@ namespace METS.Classes.Bus.Actions
             {
                 Hardware2AppModel h2a = context.Hardware2App.First(h => h.ApplicationId.StartsWith(appId));
                 DeviceViewModel dvm = context.Devices.First(d => d.HardwareId == h2a.HardwareId);
-                _data.Device = dvm.Name + Environment.NewLine + h2a.Name + " " + h2a.VersionString;
+                _data.DeviceName = dvm.Name;
+                _data.ApplicationName = h2a.Name + " " + h2a.VersionString;
             }
             catch { }
 
@@ -156,7 +150,7 @@ namespace METS.Classes.Bus.Actions
         {
             ProgressValue = 100;
             TodoText = "Erfolgreich";
-            Finished?.Invoke(_data, new EventArgs());
+            Finished?.Invoke(this, _data);
         }
 
         private void Changed(string name)

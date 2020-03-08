@@ -25,9 +25,9 @@ namespace METS.Knx.Classes
         {
             responses.Add(response.SequenceCounter, response);
             //TODO move ack to connection class!
-            TunnelRequest builder = new TunnelRequest();
-            builder.Build(UnicastAddress.FromString("0.0.0"), from, Parser.ApciTypes.Ack, Convert.ToByte(response.SequenceNumber));
-            _conn.Send(builder);
+            //TunnelRequest builder = new TunnelRequest();
+            //builder.Build(UnicastAddress.FromString("0.0.0"), from, Parser.ApciTypes.Ack, Convert.ToByte(response.SequenceNumber));
+            //_conn.Send(builder);
         }
 
 
@@ -50,6 +50,17 @@ namespace METS.Knx.Classes
             builder.Build(from, to, Parser.ApciTypes.IndividualAddressRead);
             _conn.Send(builder);
         }
+
+        public void IndividualAddressWrite(UnicastAddress newAddr)
+        {
+            TunnelRequest builder = new TunnelRequest();
+            builder.Build(MulticastAddress.FromString("0/0/0"), MulticastAddress.FromString("0/0/0"), Knx.Parser.ApciTypes.IndividualAddressWrite, 255, newAddr.GetBytes());
+            builder.SetPriority(Prios.System);
+            _conn.Send(builder);
+        }
+
+
+
 
         public void GroupValueWrite(MulticastAddress ga, byte[] data)
         {

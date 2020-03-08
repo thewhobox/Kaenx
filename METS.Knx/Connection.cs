@@ -25,6 +25,7 @@ namespace METS.Knx
         public delegate void TunnelRequestHandler(Builders.TunnelResponse response);
         public event TunnelRequestHandler OnTunnelRequest;
         public event TunnelRequestHandler OnTunnelResponse;
+        public event TunnelRequestHandler OnTunnelAck;
 
         private readonly IPEndPoint _receiveEndPoint;
         private readonly IPEndPoint _sendEndPoint;
@@ -162,15 +163,18 @@ namespace METS.Knx
                                 _sendMessages.Add(new Responses.TunnelResponse(0x06, 0x10, 0x0A, 0x04, _communicationChannel, tunnelResponse.SequenceCounter, 0x00).GetBytes());
 
 
-                                Debug.WriteLine(tunnelResponse.SequenceCounter + "." + tunnelResponse.SequenceNumber + ": " + tunnelResponse.APCI + " - " + tunnelResponse.Data.Length);
-
-                                if(tunnelResponse.APCI.ToString().EndsWith("Response"))
+                                if (tunnelResponse.APCI.ToString().EndsWith("Response"))
                                 {
                                     TunnelRequest builder = new TunnelRequest();
                                     builder.Build(UnicastAddress.FromString("0.0.0"), tunnelResponse.SourceAddress, Parser.ApciTypes.Ack, tunnelResponse.SequenceNumber);
                                     Send(builder);
                                     OnTunnelResponse?.Invoke(tunnelResponse);
-                                } else
+                                }
+                                else if (tunnelResponse.APCI == ApciTypes.Ack)
+                                {
+                                    OnTunnelAck?.Invoke(tunnelResponse);
+                                }
+                                else
                                 {
                                     OnTunnelRequest?.Invoke(tunnelResponse);
                                 }

@@ -58,15 +58,26 @@
 
 
 
-                    <Button x:Uid="/WorkDesk/TooltipInfoBus" Grid.Column="1" Style="{StaticResource InfobarButton}">
-                        <TextBlock>
-                            <Run x:Uid="/WorkDesk/InfoBus" />
-                            <Run x:Uid="/WorkDesk/InfoBusState" x:Name="InfoBus" />
-                        </TextBlock>
+                    <Button x:Name="InfoBus" x:Uid="/WorkDeskEasy/TooltipInfoBus" ToolTipService.ToolTip="Bus" Grid.Column="1" Style="{StaticResource InfobarButton}" Click="InfoBus_Click">
+                        <Button.ContextFlyout>
+                            <MenuFlyout>
+                                <MenuFlyoutItem Icon="Cancel" Text="Aktion abbrechen" />
+                            </MenuFlyout>
+                        </Button.ContextFlyout>
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Margin="0 0 5 0">
+                                <Run Text="{Binding CurrentAction.Device.LineName}" />
+                                <Run Text="{Binding CurrentAction.TodoText}" />
+                            </TextBlock>
+                            <Viewbox Height="12" Margin="0 0 5 0">
+                                <SymbolIcon Symbol="Bullets" />
+                            </Viewbox>
+                            <TextBlock Text="{Binding busActions.Count}" />
+                        </StackPanel>
                     </Button>
 
 
-                    <Button x:Uid="/WorkDesk/TooltipInfoUpdate" x:Name="InfoUpdate" Grid.Column="2" Style="{StaticResource InfobarButton}" >
+                    <Button x:Uid="/WorkDeskEasy/TooltipInfoUpdate" x:Name="InfoUpdate" Grid.Column="2" Style="{StaticResource InfobarButton}" >
                         <StackPanel Orientation="Horizontal" Margin="3 0">
                             <Viewbox Height="12" Margin="0 0 5 0">
                                 <SymbolIcon Symbol="Upload" />
@@ -75,7 +86,7 @@
                         </StackPanel>
                     </Button>
 
-                    <Button x:Uid="/WorkDesk/TooltipInfoChange" x:Name="InfoChange" Grid.Column="3" Style="{StaticResource InfobarButton}">
+                    <Button x:Uid="/WorkDeskEasy/TooltipInfoChange" x:Name="InfoChange" Grid.Column="3" Style="{StaticResource InfobarButton}">
                         <StackPanel Orientation="Horizontal" Margin="3 0">
                             <Viewbox Height="12" Margin="0 0 5 0">
                                 <SymbolIcon Symbol="Edit" />
