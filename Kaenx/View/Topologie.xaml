@@ -68,23 +68,24 @@
             </StackPanel>
         </Border>
 
-        <TreeView x:Name="TreeV" Grid.Row="2" ItemsSource="{Binding}" CanReorderItems="False" ItemInvoked="TreeV_ItemInvoked"  VerticalAlignment="Stretch" Background="LightGray">
+        <TreeView x:Name="TreeV" Grid.Row="2" ItemsSource="{Binding}" CanDrag="False" CanReorderItems="False" ItemInvoked="TreeV_ItemInvoked"  VerticalAlignment="Stretch" Background="LightGray">
             <TreeView.ItemTemplate>
                 <DataTemplate x:DataType="local:Line">
-                    <TreeViewItem Margin="-20 0 0 0" CanDrag="False" ToolTipService.ToolTip="{Binding Name}" DoubleTapped="TreeViewItem_DoubleTapped" Background="Transparent" BorderThickness="0" AllowDrop="True" Content="{Binding}" ItemsSource="{Binding Subs}" IsExpanded="{Binding IsExpanded, Mode=TwoWay}" DragOver="TreeViewItem_DragOver" Drop="TreeViewItem_Drop">
+                    <TreeViewItem Margin="-20 0 0 0" CanDrag="False" ToolTipService.ToolTip="{Binding Name}" DoubleTapped="TreeViewItem_DoubleTapped" Background="{Binding CurrentBackBrush}" BorderThickness="0" AllowDrop="True" Content="{Binding}" ItemsSource="{Binding Subs}" IsExpanded="{Binding IsExpanded, Mode=TwoWay}" DragOver="TreeViewItem_DragOver" Drop="TreeViewItem_Drop">
                         <TreeViewItem.ContextFlyout>
                             <MenuFlyout Opening="MenuFlyout_Opening">
-                                <MenuFlyoutItem x:Uid="/Topologie/MenAdd" Icon="Add" Click="ClickAddSub" />
-                                <MenuFlyoutSubItem x:Uid="/Topologie/MenProg" Icon="PostUpdate">
+                                <MenuFlyoutItem x:Name="MFI_Add" x:Uid="/Topologie/MenAdd" Icon="Add" Click="ClickAddSub" />
+                                <MenuFlyoutSubItem x:Name="MFI_Prog" x:Uid="/Topologie/MenProg" Icon="PostUpdate">
                                     <MenuFlyoutItem x:Uid="/Topologie/MenProgPh" Icon="MapPin" Click="ClickProAddr" />
                                     <MenuFlyoutSeparator />
-                                    <MenuFlyoutItem x:Uid="/Topologie/MenProgAppK" Text="Applikation (Komplett)" Icon="FourBars" Tag="0" Click="ClickProApp" />
-                                    <MenuFlyoutItem x:Uid="/Topologie/MenProgAppP" Text="Applikation (Partiell)" Icon="ThreeBars" Tag="1" Click="ClickProApp" />
+                                    <MenuFlyoutItem x:Uid="/Topologie/MenProgAppK" Icon="FourBars" Tag="0" Click="ClickProApp" />
+                                    <MenuFlyoutItem x:Uid="/Topologie/MenProgAppP" Icon="ThreeBars" Tag="1" Click="ClickProApp" />
                                     <MenuFlyoutItem x:Uid="/Topologie/MenProgAppM" Icon="Onebar" Tag="2" Click="ClickProApp" />
                                 </MenuFlyoutSubItem>
-                                <MenuFlyoutItem x:Uid="/Topologie/MenOpenPara" Icon="Bookmarks" Click="ClickOpenParas" />
-                                <MenuFlyoutItem x:Uid="/Topologie/MenRename" Icon="Rename" Click="ClickAddRename" />
-                                <MenuFlyoutItem x:Uid="/Topologie/MenDelete" Icon="Delete" Click="ClickAddDelete" />
+                                <MenuFlyoutItem x:Name="MFI_Para" x:Uid="/Topologie/MenOpenPara" Icon="Bookmarks" Click="ClickOpenParas" />
+                                <MenuFlyoutItem x:Name="MFI_Toggle" x:Uid="/Topologie/MenToggle" Icon="DisconnectDrive" Click="ClickToggle" />
+                                <MenuFlyoutItem x:Name="MFI_Rename" x:Uid="/Topologie/MenRename" Icon="Rename" Click="ClickRename" />
+                                <MenuFlyoutItem x:Name="MFI_Delete" x:Uid="/Topologie/MenDelete" Icon="Delete" Click="ClickDelete" />
                             </MenuFlyout>
                         </TreeViewItem.ContextFlyout>
                         <TreeViewItem.ContentTemplate>

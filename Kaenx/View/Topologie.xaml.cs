@@ -53,7 +53,7 @@ namespace Kaenx.View
             CalcCounts();
         }
 
-        private async void ClickAddRename(object sender, RoutedEventArgs e)
+        private async void ClickRename(object sender, RoutedEventArgs e)
         {
             TopologieBase item = (TopologieBase)((MenuFlyoutItem)e.OriginalSource).DataContext;
             DiagNewName diag = new DiagNewName();
@@ -112,7 +112,7 @@ namespace Kaenx.View
             CalcCounts();
         }
 
-        private void ClickAddDelete(object sender, RoutedEventArgs e)
+        private void ClickDelete(object sender, RoutedEventArgs e)
         {
             TopologieBase item = (TopologieBase)((MenuFlyoutItem)e.OriginalSource).DataContext;
 
@@ -287,13 +287,31 @@ namespace Kaenx.View
             line.IsExpanded = true;
             e.Handled = true;
 
-            AppAdditional adds = _context.AppAdditionals.Single(a => a.Id == device.ApplicationId);
-            device.ComObjects = SaveHelper.ByteArrayToObject<ObservableCollection<DeviceComObject>>(adds.ComsDefault);
+
+
+            if(_context.AppAdditionals.Any(a => a.Id == device.ApplicationId))
+            {
+                AppAdditional adds = _context.AppAdditionals.Single(a => a.Id == device.ApplicationId);
+                device.ComObjects = SaveHelper.ByteArrayToObject<ObservableCollection<DeviceComObject>>(adds.ComsDefault);
+            } else
+            {
+                device.ComObjects = new ObservableCollection<DeviceComObject>();
+            }
 
 
             SaveHelper.CalculateLineCurrent(line);
             UpdateManager.Instance.CountUpdates();
             CalcCounts();
+        }
+
+        private async void ClickToggle(object sender, RoutedEventArgs e)
+        {
+            MenuFlyoutItem item = (MenuFlyoutItem)sender;
+            LineDevice dev = (LineDevice)item.DataContext;
+
+            //Classes.Bus.Actions.DeviceDeactivate action = new Classes.Bus.Actions.DeviceDeactivate();
+            //action.Device = dev;
+            //BusConnection.Instance.AddAction(action);
         }
 
         private void MenuFlyout_Opening(object sender, object e)
@@ -302,27 +320,37 @@ namespace Kaenx.View
 
             TopologieBase line = (TopologieBase)((TreeViewItem)menu.Target).DataContext;
 
+            MenuFlyoutItemBase mAdd = menu.Items.Single(i => i.Name == "MFI_Add");
+            MenuFlyoutItemBase mProg = menu.Items.Single(i => i.Name == "MFI_Prog");
+            MenuFlyoutItemBase mPara = menu.Items.Single(i => i.Name == "MFI_Para");
+            MenuFlyoutItemBase mToggle = menu.Items.Single(i => i.Name == "MFI_Toggle");
+
             switch (line.Type)
             {
                 case TopologieType.Device:
-                    menu.Items[0].Visibility = Visibility.Collapsed;
-                    menu.Items[1].Visibility = Visibility.Visible;
-                    menu.Items[2].Visibility = Visibility.Visible;
-                    menu.Items[3].Visibility = Visibility.Visible;
+
+                    LineDevice dev = (LineDevice)line;
+
+                    MenuFlyoutItem itemT = (MenuFlyoutItem)mToggle;
+                    itemT.Text = dev.IsDeactivated ? loader.GetString("MenToggle_Activate") : loader.GetString("MenToggle_Deactivate");
+
+                    mAdd.Visibility = Visibility.Collapsed;
+                    mProg.Visibility = Visibility.Visible;
+                    mPara.Visibility = Visibility.Visible;
                     break;
 
                 case TopologieType.LineMiddle:
-                    menu.Items[0].Visibility = Visibility.Collapsed;
-                    menu.Items[1].Visibility = Visibility.Collapsed;
-                    menu.Items[2].Visibility = Visibility.Visible;
-                    menu.Items[2].Visibility = Visibility.Visible;
+                    mAdd.Visibility = Visibility.Collapsed;
+                    mProg.Visibility = Visibility.Collapsed;
+                    mPara.Visibility = Visibility.Collapsed;
+                    mToggle.Visibility = Visibility.Collapsed;
                     break;
 
                 case TopologieType.Line:
-                    menu.Items[0].Visibility = Visibility.Visible;
-                    menu.Items[1].Visibility = Visibility.Collapsed;
-                    menu.Items[2].Visibility = Visibility.Visible;
-                    menu.Items[2].Visibility = Visibility.Visible;
+                    mAdd.Visibility = Visibility.Visible;
+                    mProg.Visibility = Visibility.Collapsed;
+                    mPara.Visibility = Visibility.Collapsed;
+                    mToggle.Visibility = Visibility.Collapsed;
                     break;
 
             }

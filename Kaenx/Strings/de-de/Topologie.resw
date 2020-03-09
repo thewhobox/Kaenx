@@ -186,6 +186,12 @@
   <data name="MenRename.Text" xml:space="preserve">
     <value>Umbenennen</value>
   </data>
+  <data name="MenToggle_Activate" xml:space="preserve">
+    <value>Aktivieren</value>
+  </data>
+  <data name="MenToggle_Deactivate" xml:space="preserve">
+    <value>Deaktivieren</value>
+  </data>
   <data name="NewLineMain" xml:space="preserve">
     <value>Neuer Bereich</value>
   </data>

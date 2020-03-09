@@ -24,9 +24,11 @@ namespace Kaenx.Classes
         private bool _loadedGroups = false;
         private bool _loadedApplication = false;
         private bool _loadedPA = false;
+        private bool _isDeactivated = false;
         public bool LoadedGroup { get { return _loadedGroups; } set { _loadedGroups = value; Changed("LoadedGroups"); } }
         public bool LoadedApplication { get { return _loadedApplication; } set { _loadedApplication = value; Changed("LoadedApplication"); } }
-        public bool LoadedPA{ get { return _loadedPA; } set { _loadedPA = value; Changed("LoadedPA"); } }
+        public bool LoadedPA { get { return _loadedPA; } set { _loadedPA = value; Changed("LoadedPA"); } }
+        public bool IsDeactivated { get { return _isDeactivated; } set { _isDeactivated = value; Changed("CurrentBackBrush"); } }
         public bool IsExpanded { get { return false; } }
         public List<string> Subs { get; }
 
@@ -34,6 +36,8 @@ namespace Kaenx.Classes
 
         [XmlIgnore]
         public SolidColorBrush CurrentBrush { get; set; } = new SolidColorBrush(Windows.UI.Colors.Black);
+        [XmlIgnore]
+        public SolidColorBrush CurrentBackBrush { get { if (_isDeactivated) return new SolidColorBrush(Windows.UI.Colors.LightYellow); else return new SolidColorBrush(Windows.UI.Colors.Transparent); } }
         public int Id
         {
             get { return _id; }
