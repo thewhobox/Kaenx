@@ -47,6 +47,16 @@ namespace Kaenx
             this.InitializeComponent();
             this.Suspending += OnSuspending;
 
+            // Required for XBOX
+            try
+            {
+                this.RequiresPointerMode = Windows.UI.Xaml.ApplicationRequiresPointerMode.WhenRequested;
+                bool result = Windows.UI.ViewManagement.ApplicationViewScaling.TrySetDisableLayoutScaling(true);
+                Windows.UI.ViewManagement.ApplicationView.GetForCurrentView().SetDesiredBoundsMode(Windows.UI.ViewManagement.ApplicationViewBoundsMode.UseCoreWindow);
+            }
+            catch { }
+
+
             using (var db = new CatalogContext())
             {
                 db.Database.Migrate();
