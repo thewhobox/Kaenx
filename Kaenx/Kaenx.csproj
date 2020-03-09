@@ -474,9 +474,9 @@
       <Project>{d466ab55-6de4-46e6-af51-9720cccb940a}</Project>
       <Name>Kaenx.Konnect</Name>
     </ProjectReference>
-    <ProjectReference Include="..\METS.Context\METS.Context.csproj">
+    <ProjectReference Include="..\Kaenx.DataContext\Kaenx.DataContext.csproj">
       <Project>{b5a8a078-65e2-4621-9d3c-1c7ce248926d}</Project>
-      <Name>METS.Context</Name>
+      <Name>Kaenx.DataContext</Name>
     </ProjectReference>
   </ItemGroup>
   <PropertyGroup Condition=" '$(VisualStudioVersion)' == '' or '$(VisualStudioVersion)' &lt; '14.0' ">

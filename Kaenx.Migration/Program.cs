@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace METS.Migration
+namespace Kaenx.Migration
 {
     class Program
     {

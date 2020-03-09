@@ -3,11 +3,11 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.29324.140
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "METS", "METS\METS.csproj", "{1F03C6F1-E08B-4546-B13D-2C808F6FBC79}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Kaenx", "Kaenx\Kaenx.csproj", "{1F03C6F1-E08B-4546-B13D-2C808F6FBC79}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "METS.Context", "METS.Context\METS.Context.csproj", "{B5A8A078-65E2-4621-9D3C-1C7CE248926D}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Kaenx.DataContext", "Kaenx.DataContext\Kaenx.DataContext.csproj", "{B5A8A078-65E2-4621-9D3C-1C7CE248926D}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "METS.Migration", "METS.Migration\METS.Migration.csproj", "{D3C64DED-EA8A-4B09-AD04-C8637BADE8F8}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Kaenx.Migration", "Kaenx.Migration\Kaenx.Migration.csproj", "{D3C64DED-EA8A-4B09-AD04-C8637BADE8F8}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Kaenx.Konnect", "Kaenx.Konnect\Kaenx.Konnect.csproj", "{D466AB55-6DE4-46E6-AF51-9720CCCB940A}"
 EndProject
