@@ -15,7 +15,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Include="..\METS\Assets\FileLogo.png">
+    <None Include="..\Kaenx\Assets\FileLogo.png">
       <Pack>True</Pack>
       <PackagePath></PackagePath>
     </None>
