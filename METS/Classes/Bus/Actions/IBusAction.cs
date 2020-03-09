@@ -10,7 +10,8 @@ namespace METS.Classes.Bus.Actions
 {
     public interface IBusAction
     {
-        event EventHandler Finished;
+        delegate void ActionFinishedHandler(IBusAction action, object data);
+        event ActionFinishedHandler Finished;
 
         METS.Knx.Connection Connection { get; set; }
         int ProgressValue { get; set; }

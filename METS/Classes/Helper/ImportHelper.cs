@@ -1366,6 +1366,16 @@ namespace METS.Classes.Helper
                 Log.Error(e, "Applikation speichern Fehler!");
             }
 
+            Log.Information("LoadProcedures werden gespeichert");
+            XElement prods = doc.Descendants(GetXName("LoadProcedures"))?.ElementAt(0);
+            if(prods != null)
+            {
+                StorageFolder folder = await ApplicationData.Current.LocalFolder.GetFolderAsync("Dynamic");
+                StorageFile file = await folder.CreateFileAsync(app.Id + "-LP.xml", CreationCollisionOption.ReplaceExisting);
+                await FileIO.WriteTextAsync(file, prods.ToString());
+            }
+
+
             Log.Information("Standard ComObjects werden generiert");
             ProgressChanged?.Invoke(3);
             OnDeviceChanged(currentAppName + " - Generiere ComObjects");

@@ -8,6 +8,7 @@ using METS.Knx.Classes;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -15,6 +16,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Xml.Linq;
 using Windows.Storage;
+using static METS.Classes.Bus.Actions.IBusAction;
 
 namespace METS.Classes.Bus.Actions
 {
@@ -32,7 +34,7 @@ namespace METS.Classes.Bus.Actions
         private List<string> addedGroups;
         private CatalogContext _context = new CatalogContext();
 
-        public string Type { get; } = "Geräte Info";
+        public string Type { get; } = "Applikation";
         public LineDevice Device { get; set; }
         public int ProgressValue { get { return _progress; } set { _progress = value; Changed("ProgressValue"); } }
         public bool ProgressIsIndeterminate { get { return _progressIsIndeterminate; } set { _progressIsIndeterminate = value; Changed("ProgressIsIndeterminate"); } }
@@ -40,7 +42,7 @@ namespace METS.Classes.Bus.Actions
 
         public Connection Connection { get; set; }
 
-        public event EventHandler Finished;
+        public event ActionFinishedHandler Finished;
         public event PropertyChangedEventHandler PropertyChanged;
 
         public ProgApplication(ProgAppType type)
@@ -48,41 +50,95 @@ namespace METS.Classes.Bus.Actions
             _type = type;
         }
 
-        private void _conn_OnTunnelResponse(TunnelResponse response)
-        {
-            bool sendAck = true;
-
-            if (_state == 1 && response.APCI == Knx.Parser.ApciTypes.PropertyValueResponse)
-            {
-                State1(response);
-            }
-            else if(_state == 3 && response.APCI == Knx.Parser.ApciTypes.MemoryResponse)
-            {
-                
-            }
-            else
-            {
-                sendAck = false;
-            }
-
-            if (!sendAck) return;
-            _sequence++;
-            TunnelRequest builder = new TunnelRequest();
-            builder.Build(UnicastAddress.FromString("0.0.0"), UnicastAddress.FromString(Device.LineName), Knx.Parser.ApciTypes.Ack, _sequence, BitConverter.GetBytes(response.SequenceNumber)[0]);
-            Connection.Send(builder);
-        }
-
         public void Run(CancellationToken token)
         {
-            //Connection.OnTunnelRequest += _conn_OnTunnelResponse;
             _token = token;
             _state = 0;
 
 
-            Start2();
+            Start3();
 
             //Start();
         }
+
+
+        private async void Start3()
+        {
+            BusDevice dev = new BusDevice(Device.LineName, Connection);
+
+            TodoText = "Applikation schreiben";
+
+            //StorageFolder appdata = 
+            //Device.ApplicationId
+            StorageFolder folder = await ApplicationData.Current.LocalFolder.GetFolderAsync("Dynamic");
+            StorageFile file = await folder.GetFileAsync(Device.ApplicationId + "-LP.xml");
+            XElement prod =XDocument.Load(await file.OpenStreamForReadAsync()).Root;
+            prod = prod.Element(XName.Get("LoadProcedure", prod.Name.NamespaceName));
+
+
+            float stepSize = 100 / prod.Elements().Count();
+            float currentProg = 0;
+            Debug.WriteLine("StepSize: " + stepSize + " - " + prod.Elements().Count());
+
+            foreach(XElement ctrl in prod.Elements())
+            {
+                switch(ctrl.Name.LocalName)
+                {
+                    case "LdCtrlConnect":
+                        dev.Connect();
+                        await Task.Delay(100);
+                        break;
+
+                    case "LdCtrlDisconnect":
+                        //dev.Disconnect();
+                        break;
+
+                    case "LdCtrlCompareProp":
+                        int obj = int.Parse(ctrl.Attribute("ObjIdx").Value);
+                        int pid = int.Parse(ctrl.Attribute("PropId").Value);
+                        byte[] prop = await dev.PropertyRead(Convert.ToByte(obj), Convert.ToByte(pid), 0);
+                        string dataCP = ctrl.Attribute("InlineData").Value;
+
+                        if(!dataCP.StartsWith(BitConverter.ToString(prop).Replace("-", "")))
+                        {
+                            TodoText = "Fehler beim schreiben! PAx01";
+                            dev.Disconnect();
+                            Finished?.Invoke(this, null);
+                            return;
+                        }
+                        break;
+
+                    case "LdCtrlUnload":
+                        byte[] dataU = new byte[11];
+                        int lsmIdxU = int.Parse(ctrl.Attribute("LsmIdx").Value);
+                        int stateU = (int)LoadStateMachineState.Unloaded;
+                        int endU = (lsmIdxU << 4) | stateU;
+                        dataU[0] = Convert.ToByte(endU);
+                        await dev.MemoryWriteSync(260, dataU);
+                        await Task.Delay(50);
+                        dataU = await dev.MemoryRead(46825 + lsmIdxU, 1);
+                        break;
+
+                    case "LdCtrlLoad":
+                        byte[] dataL = new byte[11];
+                        int lsmIdxL = int.Parse(ctrl.Attribute("LsmIdx").Value);
+                        int stateL = (int)LoadStateMachineState.Loading;
+                        int endL = (lsmIdxL << 4) | stateL;
+                        dataL[0] = Convert.ToByte(endL);
+                        await dev.MemoryWriteSync(260, dataL);
+                        await Task.Delay(50);
+                        break;
+                }
+
+                currentProg += stepSize;
+                ProgressValue = (int)currentProg;
+            }
+
+            TodoText = "Abgeschlossen";
+
+            //Finished?.Invoke(this, null);
+        }
+
 
         private async void Start2()
         {
@@ -405,10 +461,6 @@ namespace METS.Classes.Bus.Actions
         private void Finish()
         {
 
-            //ProjectContext context = new ProjectContext();
-            //LineDeviceModel model = context.LineDevices.Single(d => d.UId == Device.UId);
-
-            //TodoText = "Erfolgreich abgeschlossen";
             Finished(this, null);
         }
 
@@ -449,6 +501,15 @@ namespace METS.Classes.Bus.Actions
             return masterXml;
         }
 
+
+       private enum LoadStateMachineState
+        {
+            Undefined,
+            Loading,
+            Loaded,
+            Error,
+            Unloaded
+        }
 
         public enum ProgAppType
         {

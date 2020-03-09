@@ -13,6 +13,7 @@ using Kaenx.Konnect.Responses;
 using Kaenx.Konnect.Parser;
 using System.Net.NetworkInformation;
 using System.Linq;
+using System.Diagnostics;
 
 namespace Kaenx.Konnect
 {
@@ -23,6 +24,8 @@ namespace Kaenx.Konnect
 
         public delegate void TunnelRequestHandler(Builders.TunnelResponse response);
         public event TunnelRequestHandler OnTunnelRequest;
+        public event TunnelRequestHandler OnTunnelResponse;
+        public event TunnelRequestHandler OnTunnelAck;
 
         private readonly IPEndPoint _receiveEndPoint;
         private readonly IPEndPoint _sendEndPoint;
@@ -157,9 +160,26 @@ namespace Kaenx.Konnect
 
                                 break;
                             case Builders.TunnelResponse tunnelResponse:
-                                //TODO check if ack works correct
                                 _sendMessages.Add(new Responses.TunnelResponse(0x06, 0x10, 0x0A, 0x04, _communicationChannel, tunnelResponse.SequenceCounter, 0x00).GetBytes());
-                                OnTunnelRequest?.Invoke(tunnelResponse);
+
+
+                                if (tunnelResponse.APCI.ToString().EndsWith("Response"))
+                                {
+                                    TunnelRequest builder = new TunnelRequest();
+                                    builder.Build(UnicastAddress.FromString("0.0.0"), tunnelResponse.SourceAddress, Parser.ApciTypes.Ack, tunnelResponse.SequenceNumber);
+                                    Send(builder);
+                                    OnTunnelResponse?.Invoke(tunnelResponse);
+                                }
+                                else if (tunnelResponse.APCI == ApciTypes.Ack)
+                                {
+                                    OnTunnelAck?.Invoke(tunnelResponse);
+                                }
+                                else
+                                {
+                                    OnTunnelRequest?.Invoke(tunnelResponse);
+                                }
+
+
                                 break;
 
                             case TunnelAckResponse tunnelAck:

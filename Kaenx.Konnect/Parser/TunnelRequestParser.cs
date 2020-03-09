@@ -5,6 +5,7 @@ using Kaenx.Konnect.Responses;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Text;
 
@@ -118,6 +119,17 @@ namespace Kaenx.Konnect.Parser
             } else
             {
                 data = new byte[0];
+                int apci3 = npdu[0] & 3;
+
+                switch(apci3)
+                {
+                    case 2:
+                        type = ApciTypes.Ack;
+                        break;
+                    default:
+                        Debug.WriteLine("Unbekantes NPDU: " + apci3);
+                        break;
+                }
             }
 
 

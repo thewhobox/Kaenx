@@ -8,11 +8,29 @@
     xmlns:toolkit="using:Microsoft.Toolkit.Uwp.UI.Controls"
     mc:Ignorable="d"
     Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+    <Page.Resources>
+        <DataTemplate x:Key="RowDetailsTemplate">
+            <StackPanel Orientation="Vertical" Padding="10" ScrollViewer.HorizontalScrollMode="Auto">
+                <toolkit:HeaderedContentControl Header="Applikations Id" Margin="0 5">
+                    <TextBlock Text="{Binding ApplicationId}" />
+                </toolkit:HeaderedContentControl>
+                <toolkit:HeaderedContentControl Header="Applikations Name" Margin="0 5">
+                    <TextBlock Text="{Binding ApplicationName}" />
+                </toolkit:HeaderedContentControl>
+                <toolkit:HeaderedContentControl Header="Geräte Name" Margin="0 5">
+                    <TextBlock Text="{Binding DeviceName}" />
+                </toolkit:HeaderedContentControl>
+                <toolkit:HeaderedContentControl Header="Masken Version" Margin="0 5">
+                    <TextBlock Text="{Binding MaskVersion}" />
+                </toolkit:HeaderedContentControl>
+            </StackPanel>
+        </DataTemplate>
+    </Page.Resources>
 
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="auto" />
-            <ColumnDefinition Width="auto" />
+            <ColumnDefinition />
         </Grid.ColumnDefinitions>
 
         <toolkit:TabView>
@@ -125,53 +143,45 @@
             </toolkit:TabViewItem>
         </toolkit:TabView>
 
-        <Grid Grid.Column="1" Margin="5 0" x:Name="GridOutput">
-            <Grid.Background>
+
+        <toolkit:TabView Grid.Column="1" Margin="5 0">
+            <toolkit:TabView.Background>
                 <SolidColorBrush Color="#FFE0E0E0" />
-            </Grid.Background>
-            
-            <Grid.RowDefinitions>
-                <RowDefinition Height="auto" />
-                <RowDefinition Height="auto" />
-            </Grid.RowDefinitions>
+            </toolkit:TabView.Background>
 
-            <StackPanel Orientation="Horizontal">
-                <TextBlock Text="Adresse:" Margin="10 0 10 0" VerticalAlignment="Center" />
-                <TextBox x:Name="InAddress2" Text="1.1.1" Width="200" />
-                <Button x:Name="BtnGetInfo" Content="Auslesen" Click="ReadInfo" />
-            </StackPanel>
+            <toolkit:TabViewItem Header="Busmonitor">
+                <TextBlock Text="Hier kommt was tolles hin" />
+            </toolkit:TabViewItem>
 
-            <Grid Grid.Row="1">
-                <Grid.Resources>
-                    <Style TargetType="toolkit:HeaderedContentControl">
-                        <Setter Property="Margin" Value="20 5" />
-                    </Style>
-                </Grid.Resources>
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="auto" />
-                    <RowDefinition Height="auto" />
-                    <RowDefinition Height="auto" />
-                    <RowDefinition Height="auto" />
-                    <RowDefinition Height="auto" />
-                    <RowDefinition Height="auto" />
-                </Grid.RowDefinitions>
+            <toolkit:TabViewItem Header="Auslesen">
+                <Grid x:Name="GridOutput">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="auto" />
+                        <RowDefinition Height="auto" />
+                    </Grid.RowDefinitions>
 
-                <toolkit:HeaderedContentControl Header="MaskVersion:">
-                    <TextBlock Text="{Binding MaskVersion}" />
-                </toolkit:HeaderedContentControl>
+                    <StackPanel Orientation="Horizontal" Margin="10">
+                        <TextBlock Text="Adresse:" Margin="10 0 10 0" VerticalAlignment="Center" />
+                        <TextBox x:Name="InAddress2" Text="1.1.1" Width="200" />
+                        <Button x:Name="BtnGetInfo" Content="Auslesen" Click="ReadInfo" />
+                    </StackPanel>
 
-                <toolkit:HeaderedContentControl Grid.Row="1" Header="Seriennummer:">
-                    <TextBlock Text="{Binding SerialNumber}" />
-                </toolkit:HeaderedContentControl>
+                    <toolkit:DataGrid x:Name="GridReads" Grid.Row="1" ItemsSource="{Binding}" IsReadOnly="True" AutoGenerateColumns="False" AreRowDetailsFrozen="True" RowDetailsVisibilityMode="VisibleWhenSelected" RowDetailsTemplate="{StaticResource RowDetailsTemplate}" >
+                        <toolkit:DataGrid.Columns>
+                            <toolkit:DataGridTextColumn Header="Geräte Id" Width="SizeToCells" Binding="{Binding Device.LineName}" />
+                            <toolkit:DataGridTextColumn Header="Hersteller" Binding="{Binding Manufacturer}" />
+                            <toolkit:DataGridTextColumn Header="Seriennummer" Binding="{Binding SerialNumber}" />
+                            <toolkit:DataGridTextColumn Header="Applikation" Binding="{Binding ApplicationName}" />
+                        </toolkit:DataGrid.Columns>
+                    </toolkit:DataGrid>
 
-                <toolkit:HeaderedContentControl Grid.Row="2" Header="Applikation:">
-                    <TextBlock Text="{Binding ApplicationId}" />
-                </toolkit:HeaderedContentControl>
 
-                <toolkit:HeaderedContentControl Grid.Row="3" Header="Grouptable:">
-                    <ListBox ItemsSource="{Binding GroupTable}" />
-                </toolkit:HeaderedContentControl>
-            </Grid>
-        </Grid>
+
+
+                </Grid>
+            </toolkit:TabViewItem>
+        </toolkit:TabView>
+
+
     </Grid>
 </Page>

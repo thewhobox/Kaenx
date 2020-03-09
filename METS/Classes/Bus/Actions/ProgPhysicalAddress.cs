@@ -1,6 +1,7 @@
 ﻿using METS.Knx;
 using METS.Knx.Addresses;
 using METS.Knx.Builders;
+using METS.Knx.Classes;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -8,6 +9,7 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using static METS.Classes.Bus.Actions.IBusAction;
 
 namespace METS.Classes.Bus.Actions
 {
@@ -16,9 +18,9 @@ namespace METS.Classes.Bus.Actions
         private int _progress;
         private bool _progressIsIndeterminate;
         private string _todoText;
-        private byte _sequence = 0x00;
         private List<string> progDevices = new List<string>();
         private CancellationToken _token;
+        private BusCommon bus;
 
         public string Type { get; } = "Physikalische Adresse";
         public LineDevice Device { get; set; }
@@ -28,7 +30,7 @@ namespace METS.Classes.Bus.Actions
 
         public Connection Connection { get; set; }
 
-        public event EventHandler Finished;
+        public event ActionFinishedHandler Finished;
         public event PropertyChangedEventHandler PropertyChanged;
 
         public ProgPhysicalAddress()
@@ -49,13 +51,23 @@ namespace METS.Classes.Bus.Actions
 
         public void Run(CancellationToken token)
         {
-            Connection.OnTunnelRequest += _conn_OnTunnelResponse;
+            Connection.OnTunnelResponse += _conn_OnTunnelResponse;
             _token = token;
+            bus = new BusCommon(Connection);
+
             CheckProgMode();
         }
 
         private async void CheckProgMode()
         {
+
+            await Task.Delay(1000);
+
+            bus.IndividualAddressRead();
+
+            await Task.Delay(3000);
+
+
             TodoText = "Bitte Programmierknopf drücken...";
             ProgressIsIndeterminate = true;
             progDevices.Clear();
@@ -74,6 +86,7 @@ namespace METS.Classes.Bus.Actions
                     {
                         TodoText = "Gerät hat bereits die Adresse";
                         Device.LoadedPA = true;
+                        await Task.Delay(1000);
                         await RestartCommands();
                         Finished?.Invoke(this, new EventArgs());
                         break;
@@ -95,12 +108,9 @@ namespace METS.Classes.Bus.Actions
                     threeshold++;
                     continue;
                 }
-                progDevices.Clear();
-                TunnelRequest builder = new TunnelRequest();
-                builder.Build(UnicastAddress.FromString("0.0.0"), MulticastAddress.FromString("0/0/0"), Knx.Parser.ApciTypes.IndividualAddressRead, _sequence, 255);
-                Connection.Send(builder);
-                _sequence++;
 
+                progDevices.Clear();
+                bus.IndividualAddressRead();
                 await Task.Delay(2000);
             }
         }
@@ -110,17 +120,8 @@ namespace METS.Classes.Bus.Actions
             TodoText = "Adresse wird programmiert";
             ProgressIsIndeterminate = false;
             ProgressValue = 33;
-            UnicastAddress newAddr = UnicastAddress.FromString(Device.LineName);
 
-
-
-            TunnelRequest builder = new TunnelRequest();
-            byte[] apci = { 0x00, 0xc0 };
-            builder.Build(MulticastAddress.FromString("0/0/0"), MulticastAddress.FromString("0/0/0"), Knx.Parser.ApciTypes.IndividualAddressWrite, _sequence, 255, newAddr.GetBytes());
-            builder.SetPriority(Prios.System);
-            Connection.Send(builder);
-            _sequence++;
-
+            bus.IndividualAddressWrite(UnicastAddress.FromString(Device.LineName));
             await Task.Delay(500);
 
             CheckNewAddr();
@@ -155,48 +156,40 @@ namespace METS.Classes.Bus.Actions
                     Finished?.Invoke(this, new EventArgs());
                     break;
                 }
+
                 progDevices.Clear();
-                TunnelRequest builder = new TunnelRequest();
-                byte[] apci = { 0x01, 0x00 };
-                builder.Build(UnicastAddress.FromString("0.0.0"), MulticastAddress.FromString("0/0/0"), Knx.Parser.ApciTypes.IndividualAddressRead, _sequence, 255);
-                Connection.Send(builder);
-                _sequence++;
+                bus.IndividualAddressRead();
                 await Task.Delay(500);
             }
         }
 
         private async void RestartDevice()
         {
-            TodoText = "Gerät wird neu gestartet";
             ProgressValue = 95;
 
 
             await RestartCommands();
+
+            TodoText = "Erfolgreich abgeschlossen";
 
             _ = App._dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Low, () =>
             {
                 Device.LoadedPA = true;
             });
 
-            Finished?.Invoke(this, new EventArgs());
+            Finished?.Invoke(this, null);
         }
 
         private async Task RestartCommands()
         {
-            TunnelRequest builder = new TunnelRequest();
-            builder.Build(UnicastAddress.FromString("0.0.0"), UnicastAddress.FromString(Device.LineName), Knx.Parser.ApciTypes.Connect, _sequence, 255);
-            Connection.Send(builder);
-            _sequence++;
-            await Task.Delay(200);
-
-            builder = new TunnelRequest();
-            builder.Build(UnicastAddress.FromString("0.0.0"), UnicastAddress.FromString(Device.LineName), Knx.Parser.ApciTypes.Restart, _sequence, 0);
-            Connection.Send(builder);
-            _sequence++;
-            await Task.Delay(200);
+            TodoText = "Gerät wird neu gestartet";
+            BusDevice dev = new BusDevice(Device.LineName, Connection);
+            dev.Connect();
+            await Task.Delay(100);
+            dev.Restart();
 
             ProgressValue = 100;
-            TodoText = "Erfolgreich abgeschlossen";
+            //TodoText = "Erfolgreich abgeschlossen";
             await Task.Delay(2000);
         }
 

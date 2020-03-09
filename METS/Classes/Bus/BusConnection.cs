@@ -55,6 +55,13 @@ namespace METS.Classes.Bus
             }
         }
 
+        private string _currentProgressText = "Getrennt";
+        public string CurrentProgressText
+        {
+            get { return _currentProgressText; }
+            set { _currentProgressText = value; Changed("CurrentProgressText"); }
+        }
+
 
         public BusConnection()
         {
@@ -125,6 +132,7 @@ namespace METS.Classes.Bus
             CurrentAction.Connection.ConnectionChanged += Connection_ConnectionChanged;
             
             CurrentAction.ProgressIsIndeterminate = true;
+            CurrentProgressText = "Verbindung wird hergestellt...";
             CurrentAction.TodoText = "Verbindung wird hergestellt...";
             _cancelTokenSource = new CancellationTokenSource();
 
@@ -141,6 +149,8 @@ namespace METS.Classes.Bus
                     return;
                 }
             }
+            CurrentProgressText = "Verbunden";
+
             CurrentAction.ProgressIsIndeterminate = false;
             CurrentAction.Finished += CurrentAction_Finished;
 
@@ -165,10 +175,11 @@ namespace METS.Classes.Bus
             }
         }
 
-        private async void CurrentAction_Finished(object sender, EventArgs e)
+        private async void CurrentAction_Finished(IBusAction sender, object data)
         {
             _cancelTokenSource?.Cancel();
             CurrentAction.Connection.Disconnect();
+            CurrentProgressText = "Getrennt";
             await Task.Delay(500);
             _ = App._dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Low, () =>
             {

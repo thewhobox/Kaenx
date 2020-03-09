@@ -1,8 +1,10 @@
 ﻿using METS.Classes;
 using METS.Classes.Bus;
 using METS.Classes.Bus.Actions;
+using METS.Classes.Helper;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices.WindowsRuntime;
@@ -25,16 +27,23 @@ namespace METS.View
     /// </summary>
     public sealed partial class Bus : Page
     {
+        public ObservableCollection<DeviceInfoData> ReadList { get; set; } = new ObservableCollection<DeviceInfoData>();
+
         public Bus()
         {
             this.InitializeComponent();
+            GridReads.DataContext = ReadList;
         }
 
         private void ReadInfo(object sender, RoutedEventArgs e)
         {
-            //BtnGetInfo.IsEnabled = false;
-
             string[] address = InAddress2.Text.Split(".");
+
+            if(address.Length != 3)
+            {
+                ViewHelper.Instance.ShowNotification("Ungültige Adresse!", 3000, ViewHelper.MessageType.Error);
+                return;
+            }
 
             DeviceInfo action = new DeviceInfo();
             Line dM = new Line { Id = int.Parse(address[0]) };
@@ -45,18 +54,19 @@ namespace METS.View
         
         }
 
-        private void ClickCancel(object sender, RoutedEventArgs e)
-        {
-            BusConnection.Instance.CancelCurrent();
-        }
-
-        private void Action_Finished(object sender, EventArgs e)
+        private void Action_Finished(IBusAction action, object data)
         {
             _ = this.Dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Normal, () =>
             {
-                //BtnGetInfo.IsEnabled = true;
-                GridOutput.DataContext = sender;
+                DeviceInfoData d = (DeviceInfoData)data;
+                d.Device = action.Device;
+                ReadList.Add(d);
             });
+        }
+
+        private void ClickCancel(object sender, RoutedEventArgs e)
+        {
+            BusConnection.Instance.CancelCurrent();
         }
     }
 }

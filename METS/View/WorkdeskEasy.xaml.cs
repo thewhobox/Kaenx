@@ -53,12 +53,6 @@ namespace METS.View
 
             InfoUpdate.DataContext = Classes.Project.UpdateManager.Instance;
             InfoChange.DataContext = Classes.Project.ChangeHandler.Instance;
-            Classes.Bus.BusConnection.Instance.ConnectionChanged += Instance_ConnectionChanged;
-        }
-
-        private void Instance_ConnectionChanged(bool isConnected)
-        {
-            _ = this.Dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Normal, () => InfoBus.Text = isConnected ? loader.GetString("BusConnTrue") : loader.GetString("BusConnFalse"));
         }
 
         protected override void OnNavigatedTo(NavigationEventArgs e)
@@ -77,6 +71,9 @@ namespace METS.View
             _pages.Add("groups", new Groups() { DataContext = CurrentProject });
             _pages.Add("bus", new Bus() { DataContext = Classes.Bus.BusConnection.Instance });
             _pages.Add("settings", new Settings());
+
+
+            InfoBus.DataContext = Classes.Bus.BusConnection.Instance;
 
             ContentFrame.Content = _pages["home"];
         }
@@ -107,6 +104,11 @@ namespace METS.View
                 tag = "settings";
 
             ContentFrame.Content = _pages[tag];
+        }
+
+        private void InfoBus_Click(object sender, RoutedEventArgs e)
+        {
+            NavView.SelectedItem = NavView.MenuItems[4];
         }
     }
 }
