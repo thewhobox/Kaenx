@@ -8,6 +8,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
+using System.Runtime.Serialization.Formatters.Binary;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
@@ -352,16 +353,10 @@ namespace Kaenx.Classes.Helper
 
 
 
-        public static async Task GenerateDefaultComs(string appId)
+        public static void GenerateDefaultComs(string appId, AppAdditional adds)
         {
             List<DeviceComObject> comObjects = new List<DeviceComObject>();
-
-            StorageFolder folder = await ApplicationData.Current.LocalFolder.GetFolderAsync("Dynamic");
-            StorageFile fileDEF = await folder.CreateFileAsync(appId + "-CO-Default.json", CreationCollisionOption.ReplaceExisting);
-            StorageFile fileJSON = await folder.CreateFileAsync(appId + "-CO-All.json", CreationCollisionOption.ReplaceExisting);
-            StorageFile file = await folder.GetFileAsync(appId + ".xml");
-
-            XDocument dynamic = XDocument.Load(await file.OpenStreamForReadAsync());
+            XDocument dynamic = XDocument.Parse(System.Text.Encoding.UTF8.GetString(adds.Dynamic));
             string xmlns = dynamic.Root.Name.NamespaceName;
 
             IEnumerable<XElement> elements = dynamic.Root.Descendants(XName.Get("ComObjectRefRef", xmlns));
@@ -376,23 +371,25 @@ namespace Kaenx.Classes.Helper
                 comObjects.Add(comobject);
             }
 
-            string json = Newtonsoft.Json.JsonConvert.SerializeObject(comObjects);
-            await FileIO.WriteTextAsync(fileJSON, json);
-
-            json = Newtonsoft.Json.JsonConvert.SerializeObject(GetDefaultComs(comObjects));
-            await FileIO.WriteTextAsync(fileDEF, json);
+            adds.ComsAll = ObjectToByteArray(comObjects);
+            adds.ComsDefault = ObjectToByteArray(GetDefaultComs(comObjects));
         }
 
-        public static async Task GenerateVisibleProps(string appId)
+        public static byte[] ObjectToByteArray(object obj)
+        {
+            string text = Newtonsoft.Json.JsonConvert.SerializeObject(obj);
+            return System.Text.Encoding.UTF8.GetBytes(text);
+        }
+        public static T ByteArrayToObject<T>(byte[] obj)
+        {
+            string text = Encoding.UTF8.GetString(obj);
+            return Newtonsoft.Json.JsonConvert.DeserializeObject<T>(text);
+        }
+
+        public static void GenerateVisibleProps(string appId, AppAdditional adds)
         {
             List<ParamVisHelper> paras = new List<ParamVisHelper>();
-
-            StorageFolder folder = await ApplicationData.Current.LocalFolder.GetFolderAsync("Dynamic");
-            StorageFile fileAll = await folder.CreateFileAsync(appId + "-PA-All.json", CreationCollisionOption.ReplaceExisting);
-            StorageFile fileDef = await folder.CreateFileAsync(appId + "-PA-Default.json", CreationCollisionOption.ReplaceExisting);
-            StorageFile file = await folder.GetFileAsync(appId + ".xml");
-
-            XDocument dynamic = XDocument.Load(await file.OpenStreamForReadAsync());
+            XDocument dynamic = XDocument.Parse(System.Text.Encoding.UTF8.GetString(adds.Dynamic));
             string xmlns = dynamic.Root.Name.NamespaceName;
 
             IEnumerable<XElement> elements = dynamic.Root.Descendants(XName.Get("ParameterRefRef", xmlns));
@@ -408,11 +405,8 @@ namespace Kaenx.Classes.Helper
                 paras.Add(para);
             }
 
-            string json = Newtonsoft.Json.JsonConvert.SerializeObject(paras);
-            await FileIO.WriteTextAsync(fileAll, json);
-
-            json = Newtonsoft.Json.JsonConvert.SerializeObject(GetDefaultParams(paras));
-            await FileIO.WriteTextAsync(fileDef, json);
+            adds.ParameterAll = ObjectToByteArray(paras);
+            adds.ParameterDefault = ObjectToByteArray(GetDefaultParams(paras));
         }
 
         public static List<ParamCondition> GetConditions(XElement xele, ParamVisHelper helper = null, bool isParam = false)

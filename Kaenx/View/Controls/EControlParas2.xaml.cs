@@ -88,16 +88,13 @@ namespace Kaenx.Views.Easy.Controls
 
         private async Task Load()
         {
-            StorageFolder folder = await ApplicationData.Current.LocalFolder.GetFolderAsync("Dynamic");
-            StorageFile file = await folder.GetFileAsync(device.ApplicationId + ".xml");
-            StorageFile filePA = await folder.GetFileAsync(device.ApplicationId + "-PA-All.json");
-
-            XDocument dynamic = XDocument.Load(await file.OpenStreamForReadAsync());
+            AppAdditional adds = _context.AppAdditionals.Single(a => a.Id == device.ApplicationId);
+            XDocument dynamic = XDocument.Parse(Encoding.UTF8.GetString(adds.Dynamic));
 
 
-            await PrepareComObject(dynamic.Root);
+            PrepareComObject(dynamic.Root);
 
-            conditions = Newtonsoft.Json.JsonConvert.DeserializeObject<List<ParamVisHelper>>(await FileIO.ReadTextAsync(filePA));
+            conditions = SaveHelper.ByteArrayToObject<List<ParamVisHelper>>(adds.ParameterAll);
             try
             {
                 await ParseRoot(dynamic.Root, Visibility.Visible);
@@ -654,37 +651,34 @@ namespace Kaenx.Views.Easy.Controls
             device.ComObjects.Sort(s => s.Number);
         }
 
-        private async Task PrepareComObject(XElement xele)
+        private void PrepareComObject(XElement xele)
         {
             try
             {
+                AppAdditional adds = _context.AppAdditionals.Single(a => a.Id == device.ApplicationId);
 
-            StorageFolder folder = await ApplicationData.Current.LocalFolder.GetFolderAsync("Dynamic");
-            StorageFile fileJSON = await folder.GetFileAsync(device.ApplicationId + "-CO-All.json");
-
-            string json = await FileIO.ReadTextAsync(fileJSON);
-            comObjects = Newtonsoft.Json.JsonConvert.DeserializeObject<List<DeviceComObject>>(json);
+                comObjects = SaveHelper.ByteArrayToObject<List<DeviceComObject>>(adds.ComsAll);
 
 
-            foreach (DeviceComObject com in comObjects)
-            {
-                if (com.Name.Contains("{{"))
+                foreach (DeviceComObject com in comObjects)
                 {
-                    Regex reg = new Regex("{{((.+):(.+))}}");
-                    Match m = reg.Match(com.Name);
-                    if (m.Success)
+                    if (com.Name.Contains("{{"))
                     {
-                        Binding bind = new Binding()
+                        Regex reg = new Regex("{{((.+):(.+))}}");
+                        Match m = reg.Match(com.Name);
+                        if (m.Success)
                         {
-                            Id = m.Groups[2].Value,
-                            DefaultText = m.Groups[3].Value,
-                            TextPlaceholder = reg.Replace(com.Name, "{{dyn}}")
-                        };
-                        if (device.ComObjects.Any(c => c.Id == com.Id))
-                            bind.Item = device.ComObjects.Single(c => c.Id == com.Id);
-                        bindings.Add(bind);
+                            Binding bind = new Binding()
+                            {
+                                Id = m.Groups[2].Value,
+                                DefaultText = m.Groups[3].Value,
+                                TextPlaceholder = reg.Replace(com.Name, "{{dyn}}")
+                            };
+                            if (device.ComObjects.Any(c => c.Id == com.Id))
+                                bind.Item = device.ComObjects.Single(c => c.Id == com.Id);
+                            bindings.Add(bind);
+                        }
                     }
-                }
                 }
             }catch(Exception e)
             {
@@ -720,5 +714,13 @@ namespace Kaenx.Views.Easy.Controls
                 ListNavBlock.Add(block);
             }
         }
+    }
+
+    public class Binding
+    {
+        public string Id { get; set; }
+        public string DefaultText { get; set; }
+        public string TextPlaceholder { get; set; }
+        public object Item { get; set; }
     }
 }

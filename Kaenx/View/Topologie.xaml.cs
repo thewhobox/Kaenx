@@ -145,23 +145,6 @@ namespace Kaenx.View
         private async void ClickOpenParas(object sender, RoutedEventArgs e)
         {
             LineDevice device = (LineDevice)((MenuFlyoutItem)e.OriginalSource).DataContext;
-            EControlParas paras = new EControlParas(device);
-            //paras.DataContext = device; 
-
-            TabViewItem item = new TabViewItem();
-            item.Icon = new SymbolIcon(Symbol.AllApps);
-            item.Header = $"{device.LineName} {device.Name}";
-            item.Content = paras;
-            tabView.Items.Add(item);
-            tabView.SelectedItem = item;
-
-            await Task.Delay(100);
-            paras.Load();
-        }
-
-        private async void ClickOpenParas2(object sender, RoutedEventArgs e)
-        {
-            LineDevice device = (LineDevice)((MenuFlyoutItem)e.OriginalSource).DataContext;
             EControlParas2 paras = new EControlParas2(device);
             //paras.DataContext = device; 
 
@@ -270,11 +253,6 @@ namespace Kaenx.View
                 }
             }
 
-
-            StorageFolder folder = await ApplicationData.Current.LocalFolder.GetFolderAsync("Dynamic");
-            StorageFolder folderP = await ApplicationData.Current.LocalFolder.GetFolderAsync("Projects");
-            folderP = await folderP.GetFolderAsync(_project.Id.ToString());
-
             if (model.HasApplicationProgram)
             {
                 int apps = context.Hardware2App.Count(h => h.HardwareId == model.HardwareId);
@@ -292,8 +270,6 @@ namespace Kaenx.View
                 }
             }
 
-
-
             ProjectContext _contextP = new ProjectContext();
 
             LineDeviceModel linedevmodel = new LineDeviceModel();
@@ -306,29 +282,19 @@ namespace Kaenx.View
             _contextP.SaveChanges();
             device.UId = linedevmodel.UId;
 
-            if(model.HasApplicationProgram)
-            {
-                StorageFile file = await folder.GetFileAsync(device.ApplicationId + "-PA-Default.json");
-                await file.CopyAsync(folderP, "Device_" + device.UId + "-PA.json");
-            }
-
             line.Subs.Add(device);
             line.Subs.Sort(l => l.Id);
             line.IsExpanded = true;
             e.Handled = true;
 
-            StorageFile fileJSON = await folder.GetFileAsync(device.ApplicationId + "-CO-Default.json");
-
-            string json = await FileIO.ReadTextAsync(fileJSON);
-            device.ComObjects = Newtonsoft.Json.JsonConvert.DeserializeObject<ObservableCollection<DeviceComObject>>(json);
+            AppAdditional adds = _context.AppAdditionals.Single(a => a.Id == device.ApplicationId);
+            device.ComObjects = SaveHelper.ByteArrayToObject<ObservableCollection<DeviceComObject>>(adds.ComsDefault);
 
 
             SaveHelper.CalculateLineCurrent(line);
             UpdateManager.Instance.CountUpdates();
-            //SaveHelper.SaveProject();
             CalcCounts();
         }
-
 
         private void MenuFlyout_Opening(object sender, object e)
         {

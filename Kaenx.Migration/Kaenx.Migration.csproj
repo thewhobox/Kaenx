@@ -13,7 +13,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\METS.Context\Kaenx.DataContext.csproj" />
+    <ProjectReference Include="..\Kaenx.DataContext\Kaenx.DataContext.csproj" />
   </ItemGroup>
 
 </Project>

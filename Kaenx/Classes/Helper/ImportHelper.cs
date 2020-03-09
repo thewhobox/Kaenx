@@ -818,16 +818,6 @@ namespace Kaenx.Classes.Helper
 
         private async Task ReadApplication(XElement doc, ApplicationViewModel app, int maxcount)
         {
-            try
-            {
-                StorageFolder folder = await ApplicationData.Current.LocalFolder.CreateFolderAsync("Dynamic", CreationCollisionOption.OpenIfExists);
-            } catch(Exception e) {
-                Log.Error(e, "Applikation Dynamic Ordner Fehler!");
-            }
-
-
-            //_context.ChangeTracker.AutoDetectChangesEnabled = false;
-
             List<AppError> Errors = new List<AppError>();
             Dictionary<string, AppParameter> Params = new Dictionary<string, AppParameter>();
             Dictionary<string, AppComObject> ComObjects = new Dictionary<string, AppComObject>();
@@ -1280,27 +1270,6 @@ namespace Kaenx.Classes.Helper
                 Log.Information("Kein AssociationTable vorhanden");
 
 
-            if (doc.Descendants(GetXName("Dynamic")).Count() != 0)
-            {
-                Log.Information("Dynamic wird gespeichert");
-                table = doc.Descendants(GetXName("Dynamic")).ElementAt(0);
-
-                try
-                {
-                    StorageFolder folder = await ApplicationData.Current.LocalFolder.GetFolderAsync("Dynamic");
-                    StorageFile file = await folder.CreateFileAsync(app.Id + ".xml", CreationCollisionOption.ReplaceExisting);
-                    await FileIO.WriteTextAsync(file, table.ToString());
-                }
-                catch (Exception e)
-                {
-                    Log.Error(e, "Dynamic konnte nicht gespeichert werden!");
-                    Errors.Add(new AppError("dynamic1", "create", "file", "none", e.Message));
-                }
-            }
-            else
-                Log.Information("Kein Dynamic vorhanden");
-
-
             if (doc.Descendants(GetXName("Code")).Count() != 0)
             {
                 Log.Information("Code Segmente werden eingelesen");
@@ -1366,24 +1335,49 @@ namespace Kaenx.Classes.Helper
                 Log.Error(e, "Applikation speichern Fehler!");
             }
 
+
+            AppAdditional adds;
+            bool existedAdds = _context.AppAdditionals.Any(a => a.Id == app.Id);
+            if (existedAdds)
+                adds = _context.AppAdditionals.Single(a => a.Id == app.Id);
+            else
+            {
+                adds = new AppAdditional();
+                adds.Id = app.Id;
+            }
+
             Log.Information("LoadProcedures werden gespeichert");
             XElement prods = doc.Descendants(GetXName("LoadProcedures"))?.ElementAt(0);
             if(prods != null)
             {
-                StorageFolder folder = await ApplicationData.Current.LocalFolder.GetFolderAsync("Dynamic");
-                StorageFile file = await folder.CreateFileAsync(app.Id + "-LP.xml", CreationCollisionOption.ReplaceExisting);
-                await FileIO.WriteTextAsync(file, prods.ToString());
+                adds.LoadProcedures = System.Text.Encoding.UTF8.GetBytes(prods.ToString());
             }
 
+            if (doc.Descendants(GetXName("Dynamic")).Count() != 0)
+            {
+                Log.Information("Dynamic wird gespeichert");
+                table = doc.Descendants(GetXName("Dynamic")).ElementAt(0);
+                adds.Dynamic = System.Text.Encoding.UTF8.GetBytes(table.ToString());
+            }
+            else
+                Log.Information("Kein Dynamic vorhanden");
 
             Log.Information("Standard ComObjects werden generiert");
             ProgressChanged?.Invoke(3);
             OnDeviceChanged(currentAppName + " - Generiere ComObjects");
-            await SaveHelper.GenerateDefaultComs(app.Id);
+            SaveHelper.GenerateDefaultComs(app.Id, adds);
+
             Log.Information("Standard Props werden generiert");
             ProgressChanged?.Invoke(4);
             OnDeviceChanged(currentAppName + " - Generiere Props");
-            await SaveHelper.GenerateVisibleProps(app.Id);
+            SaveHelper.GenerateVisibleProps(app.Id, adds);
+
+            if (existedAdds)
+                _context.AppAdditionals.Update(adds);
+            else
+                _context.AppAdditionals.Add(adds);
+
+            _context.SaveChanges();
         }
 
         private bool GetAttributeAsBool(XElement ele, string attr)

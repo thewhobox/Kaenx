@@ -83,7 +83,6 @@
                                     <MenuFlyoutItem x:Uid="/Topologie/MenProgAppM" Icon="Onebar" Tag="2" Click="ClickProApp" />
                                 </MenuFlyoutSubItem>
                                 <MenuFlyoutItem x:Uid="/Topologie/MenOpenPara" Icon="Bookmarks" Click="ClickOpenParas" />
-                                <MenuFlyoutItem x:Uid="/Topologie/MenOpenPara2" Icon="Bookmarks" Click="ClickOpenParas2" />
                                 <MenuFlyoutItem x:Uid="/Topologie/MenRename" Icon="Rename" Click="ClickAddRename" />
                                 <MenuFlyoutItem x:Uid="/Topologie/MenDelete" Icon="Delete" Click="ClickAddDelete" />
                             </MenuFlyout>

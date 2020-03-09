@@ -17,6 +17,7 @@ namespace Kaenx.DataContext.Catalog
 
         public DbSet<AppComObject> AppComObjects { get; set; }
         public DbSet<AppParameter> AppParameters { get; set; }
+        public DbSet<AppAdditional> AppAdditionals { get; set; }
         public DbSet<AppAbsoluteSegmentViewModel> AppAbsoluteSegments { get; set; }
         public DbSet<AppParameterTypeViewModel> AppParameterTypes { get; set; }
         public DbSet<AppParameterTypeEnumViewModel> AppParameterTypeEnums { get; set; }

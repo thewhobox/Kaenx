@@ -21,8 +21,8 @@
     <RuntimeIdentifiers>win10-arm;win10-arm-aot;win10-x86;win10-x86-aot;win10-x64;win10-x64-aot</RuntimeIdentifiers>
     <GenerateAppInstallerFile>False</GenerateAppInstallerFile>
     <AppxAutoIncrementPackageRevision>False</AppxAutoIncrementPackageRevision>
-    <AppxBundle>Never</AppxBundle>
-    <AppxBundlePlatforms>arm</AppxBundlePlatforms>
+    <AppxBundle>Always</AppxBundle>
+    <AppxBundlePlatforms>x86|arm</AppxBundlePlatforms>
     <AppInstallerUpdateFrequency>0</AppInstallerUpdateFrequency>
     <AppInstallerCheckForUpdateFrequency>OnApplicationRun</AppInstallerCheckForUpdateFrequency>
     <PackageCertificateThumbprint>B0C09E073CE8A96E017E971C00FD2540563CFC5B</PackageCertificateThumbprint>
@@ -215,9 +215,6 @@
     <Compile Include="View\Controls\EControlBusAction.xaml.cs">
       <DependentUpon>EControlBusAction.xaml</DependentUpon>
     </Compile>
-    <Compile Include="View\Controls\EControlParas.xaml.cs">
-      <DependentUpon>EControlParas.xaml</DependentUpon>
-    </Compile>
     <Compile Include="View\Groups.xaml.cs">
       <DependentUpon>Groups.xaml</DependentUpon>
     </Compile>
@@ -392,10 +389,6 @@
     <Page Include="View\Controls\EControlBusAction.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="View\Controls\EControlParas.xaml">
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
     </Page>
     <Page Include="View\Groups.xaml">
       <SubType>Designer</SubType>

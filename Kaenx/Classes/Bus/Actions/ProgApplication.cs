@@ -68,11 +68,8 @@ namespace Kaenx.Classes.Bus.Actions
 
             TodoText = "Applikation schreiben";
 
-            //StorageFolder appdata = 
-            //Device.ApplicationId
-            StorageFolder folder = await ApplicationData.Current.LocalFolder.GetFolderAsync("Dynamic");
-            StorageFile file = await folder.GetFileAsync(Device.ApplicationId + "-LP.xml");
-            XElement prod =XDocument.Load(await file.OpenStreamForReadAsync()).Root;
+            AppAdditional adds = _context.AppAdditionals.Single(a => a.Id == Device.ApplicationId);
+            XElement prod =XDocument.Parse(Encoding.UTF8.GetString(adds.Dynamic)).Root;
             prod = prod.Element(XName.Get("LoadProcedure", prod.Name.NamespaceName));
 
 

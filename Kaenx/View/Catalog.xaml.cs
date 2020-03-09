@@ -373,17 +373,8 @@ namespace Kaenx.View
                         }
                         _context.RemoveRange(toDelete);
 
-                        StorageFolder dyn = await ApplicationData.Current.LocalFolder.GetFolderAsync("Dynamic");
-                        StorageFile file = await dyn.GetFileAsync(h2a.ApplicationId + ".xml");
-                        await file.DeleteAsync();
-                        file = await dyn.GetFileAsync(h2a.ApplicationId + "-CO-All.json");
-                        await file.DeleteAsync();
-                        file = await dyn.GetFileAsync(h2a.ApplicationId + "-CO-Default.json");
-                        await file.DeleteAsync();
-                        file = await dyn.GetFileAsync(h2a.ApplicationId + "-PA-All.json");
-                        await file.DeleteAsync();
-                        file = await dyn.GetFileAsync(h2a.ApplicationId + "-PA-Default.json");
-                        await file.DeleteAsync();
+                        AppAdditional adds = _context.AppAdditionals.Single(a => a.Id == h2a.ApplicationId);
+                        _context.AppAdditionals.Remove(adds);
                     }
                 }
             }
