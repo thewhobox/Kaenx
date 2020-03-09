@@ -1,13 +1,13 @@
-﻿using METS.Knx.Addresses;
-using METS.Knx.Classes;
-using METS.Knx.Responses;
+﻿using Kaenx.Konnect.Addresses;
+using Kaenx.Konnect.Classes;
+using Kaenx.Konnect.Responses;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Text;
 
-namespace METS.Knx.Parser
+namespace Kaenx.Konnect.Parser
 {
     public class ConnectResponseParser : IReceiveParser
     {

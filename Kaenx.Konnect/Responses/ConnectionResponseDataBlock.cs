@@ -1,9 +1,9 @@
-﻿using METS.Knx.Addresses;
+﻿using Kaenx.Konnect.Addresses;
 using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace METS.Knx.Responses
+namespace Kaenx.Konnect.Responses
 {
     public class ConnectionResponseDataBlock
     {

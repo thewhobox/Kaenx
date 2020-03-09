@@ -120,32 +120,7 @@
     <RestoreProjectStyle>PackageReference</RestoreProjectStyle>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="Addresses\IKnxAddress.cs" />
-    <Compile Include="Addresses\MulticastAddress.cs" />
-    <Compile Include="Addresses\UnicastAddress.cs" />
-    <Compile Include="Builders\ConnectionRequest.cs" />
-    <Compile Include="Builders\DisconnectRequest.cs" />
-    <Compile Include="Builders\HelperRequest.cs" />
-    <Compile Include="Builders\IRequestBuilder.cs" />
-    <Compile Include="Builders\TunnelRequest.cs" />
-    <Compile Include="Builders\TunnelRequestBuilder.cs" />
-    <Compile Include="Classes\BusCommon.cs" />
-    <Compile Include="Classes\BusDevice.cs" />
-    <Compile Include="Classes\HostProtocolAddressInformation.cs" />
-    <Compile Include="Classes\IReceiveParser.cs" />
-    <Compile Include="Classes\ReceiverParserDispatcher.cs" />
-    <Compile Include="Connection.cs" />
-    <Compile Include="Parser\ConnectResponseParser.cs" />
-    <Compile Include="Parser\DisconnectResponseParser.cs" />
-    <Compile Include="Parser\TunnelAckParser.cs" />
-    <Compile Include="Parser\TunnelRequestParser.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Responses\ConnectionResponseDataBlock.cs" />
-    <Compile Include="Responses\ConnectResponse.cs" />
-    <Compile Include="Responses\DisconnectResponse.cs" />
-    <Compile Include="Responses\IResponse.cs" />
-    <Compile Include="Responses\TunnelAckResponse.cs" />
-    <Compile Include="Responses\TunnelResponse.cs" />
     <EmbeddedResource Include="Properties\METS.Knx.rd.xml" />
   </ItemGroup>
   <ItemGroup>

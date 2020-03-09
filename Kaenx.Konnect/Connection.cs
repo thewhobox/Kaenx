@@ -1,5 +1,5 @@
-﻿using METS.Knx.Builders;
-using METS.Knx.Addresses;
+﻿using Kaenx.Konnect.Builders;
+using Kaenx.Konnect.Addresses;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -8,13 +8,13 @@ using System.Net.Sockets;
 using System.Text;
 using System.Threading.Tasks;
 using System.Reflection;
-using METS.Knx.Classes;
-using METS.Knx.Responses;
-using METS.Knx.Parser;
+using Kaenx.Konnect.Classes;
+using Kaenx.Konnect.Responses;
+using Kaenx.Konnect.Parser;
 using System.Net.NetworkInformation;
 using System.Linq;
 
-namespace METS.Knx
+namespace Kaenx.Konnect
 {
     public class Connection
     {

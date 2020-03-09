@@ -1,12 +1,12 @@
-﻿using METS.Knx.Addresses;
-using METS.Knx.Builders;
+﻿using Kaenx.Konnect.Addresses;
+using Kaenx.Konnect.Builders;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace METS.Knx.Classes
+namespace Kaenx.Konnect.Classes
 {
     public class BusCommon
     {

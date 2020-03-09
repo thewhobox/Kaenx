@@ -470,13 +470,13 @@
     <WCFMetadata Include="Connected Services\" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\Kaenx.Konnect\Kaenx.Konnect.csproj">
+      <Project>{d466ab55-6de4-46e6-af51-9720cccb940a}</Project>
+      <Name>Kaenx.Konnect</Name>
+    </ProjectReference>
     <ProjectReference Include="..\METS.Context\METS.Context.csproj">
       <Project>{b5a8a078-65e2-4621-9d3c-1c7ce248926d}</Project>
       <Name>METS.Context</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\METS.Knx\METS.Knx.csproj">
-      <Project>{7430744c-b172-4b02-8a44-e192a2f3ad61}</Project>
-      <Name>METS.Knx</Name>
     </ProjectReference>
   </ItemGroup>
   <PropertyGroup Condition=" '$(VisualStudioVersion)' == '' or '$(VisualStudioVersion)' &lt; '14.0' ">

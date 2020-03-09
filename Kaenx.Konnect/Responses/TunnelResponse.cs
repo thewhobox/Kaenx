@@ -1,9 +1,9 @@
-﻿using METS.Knx.Responses;
+﻿using Kaenx.Konnect.Responses;
 using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace METS.Knx.Responses
+namespace Kaenx.Konnect.Responses
 {
     public class TunnelResponse : IResponse
     {

@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace METS.Knx.Responses
+namespace Kaenx.Konnect.Responses
 {
     public class DisconnectResponse : IResponse
     {

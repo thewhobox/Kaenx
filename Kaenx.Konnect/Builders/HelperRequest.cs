@@ -2,9 +2,9 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace METS.Knx.Responses
+namespace Kaenx.Konnect.Builders
 {
-    public interface IResponse
+    class HelperRequest
     {
     }
 }

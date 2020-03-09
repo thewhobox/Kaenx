@@ -1,5 +1,5 @@
-﻿using METS.Knx.Addresses;
-using METS.Knx.Builders;
+﻿using Kaenx.Konnect.Addresses;
+using Kaenx.Konnect.Builders;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 using System.Xml.Linq;
 using Windows.Storage;
 
-namespace METS.Knx.Classes
+namespace Kaenx.Konnect.Classes
 {
     public class BusDevice
     {

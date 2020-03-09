@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Net;
 using System.Text;
 
-namespace METS.Knx.Builders
+namespace Kaenx.Konnect.Builders
 {
     public interface IRequestBuilder
     {

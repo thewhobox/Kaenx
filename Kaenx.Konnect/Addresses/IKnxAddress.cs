@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace METS.Knx.Addresses
+namespace Kaenx.Konnect.Addresses
 {
     public interface IKnxAddress
     {

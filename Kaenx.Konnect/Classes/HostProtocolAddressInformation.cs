@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Net;
 using System.Text;
 
-namespace METS.Knx.Classes
+namespace Kaenx.Konnect.Classes
 {
     public class HostProtocolAddressInformation
     {

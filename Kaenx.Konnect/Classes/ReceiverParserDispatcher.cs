@@ -1,11 +1,11 @@
-﻿using METS.Knx.Responses;
+﻿using Kaenx.Konnect.Responses;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Text;
 
-namespace METS.Knx.Classes
+namespace Kaenx.Konnect.Classes
 {
     public class ReceiverParserDispatcher
     {
@@ -19,7 +19,7 @@ namespace METS.Knx.Classes
 
             foreach (Type type in types)
             {
-                if (type.IsClass && !type.IsNested && type.Namespace == "METS.Knx.Parser")
+                if (type.IsClass && !type.IsNested && type.Namespace == "Kaenx.Konnect.Parser")
                     parsers.Add(type);
             }
 

@@ -1,5 +1,5 @@
-﻿using METS.Knx.Addresses;
-using METS.Knx.Parser;
+﻿using Kaenx.Konnect.Addresses;
+using Kaenx.Konnect.Parser;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -7,7 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace METS.Knx.Builders
+namespace Kaenx.Konnect.Builders
 {
     public class TunnelRequest : IRequestBuilder
     {

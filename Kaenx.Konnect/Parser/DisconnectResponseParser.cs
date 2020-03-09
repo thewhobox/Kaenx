@@ -1,12 +1,12 @@
-﻿using METS.Knx.Classes;
-using METS.Knx.Responses;
+﻿using Kaenx.Konnect.Classes;
+using Kaenx.Konnect.Responses;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace METS.Knx.Parser
+namespace Kaenx.Konnect.Parser
 {
     public class DisconnectResponseParser : IReceiveParser
     {
