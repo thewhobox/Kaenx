@@ -1,11 +1,11 @@
-﻿using METS.Knx.Addresses;
+﻿using Kaenx.Konnect.Addresses;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace METS.Classes.Bus.Actions
+namespace Kaenx.Classes.Bus.Actions
 {
     public class DeviceInfoData
     {

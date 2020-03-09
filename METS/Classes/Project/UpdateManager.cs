@@ -1,4 +1,4 @@
-﻿using METS.Context.Catalog;
+﻿using Kaenx.DataContext.Catalog;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -6,7 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace METS.Classes.Project
+namespace Kaenx.Classes.Project
 {
     public class UpdateManager : INotifyPropertyChanged
     {

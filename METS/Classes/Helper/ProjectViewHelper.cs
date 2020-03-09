@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using Windows.UI.Xaml.Media;
 using Windows.UI.Xaml.Media.Imaging;
 
-namespace METS.Classes.Helper
+namespace Kaenx.Classes.Helper
 {
     public class ProjectViewHelper
     {

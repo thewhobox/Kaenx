@@ -1,4 +1,4 @@
-﻿using METS.Context.Catalog;
+﻿using Kaenx.DataContext.Catalog;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -16,7 +16,7 @@ using Windows.UI.Xaml.Navigation;
 
 // Die Elementvorlage "Inhaltsdialogfeld" wird unter https://go.microsoft.com/fwlink/?LinkId=234238 dokumentiert.
 
-namespace METS.Classes.Controls
+namespace Kaenx.Classes.Controls
 {
     public sealed partial class DiagSelectApp : ContentDialog
     {

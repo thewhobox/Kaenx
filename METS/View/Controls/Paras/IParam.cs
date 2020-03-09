@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Windows.UI.Xaml;
 
-namespace METS.Classes.Controls.Paras
+namespace Kaenx.Classes.Controls.Paras
 {
     public interface IParam
     {

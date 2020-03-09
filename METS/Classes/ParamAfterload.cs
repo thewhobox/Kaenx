@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using System.Xml.Linq;
 using Windows.UI.Xaml.Controls;
 
-namespace METS.Classes
+namespace Kaenx.Classes
 {
     public class ParamAfterload
     {

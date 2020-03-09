@@ -1,6 +1,6 @@
-﻿using METS.Classes.Project;
-using METS.Context.Catalog;
-using METS.Context.Project;
+﻿using Kaenx.Classes.Project;
+using Kaenx.DataContext.Catalog;
+using Kaenx.DataContext.Project;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -19,7 +19,7 @@ using Windows.UI.Xaml.Navigation;
 
 // Die Elementvorlage "Benutzersteuerelement" wird unter https://go.microsoft.com/fwlink/?LinkId=234236 dokumentiert.
 
-namespace METS.Classes.Controls
+namespace Kaenx.Classes.Controls
 {
     public sealed partial class ControlUpdate : UserControl
     {

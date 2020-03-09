@@ -1,7 +1,7 @@
-﻿using METS.Classes.Controls.Paras;
-using METS.Classes.Project;
-using METS.Context.Catalog;
-using METS.Context.Project;
+﻿using Kaenx.Classes.Controls.Paras;
+using Kaenx.Classes.Project;
+using Kaenx.DataContext.Catalog;
+using Kaenx.DataContext.Project;
 using Serilog;
 using System;
 using System.Collections.Generic;
@@ -14,7 +14,7 @@ using System.Threading.Tasks;
 using System.Xml.Linq;
 using Windows.Storage;
 
-namespace METS.Classes.Helper
+namespace Kaenx.Classes.Helper
 {
     public class SaveHelper
     {

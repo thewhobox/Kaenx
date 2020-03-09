@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace METS.View.Controls
+namespace Kaenx.View.Controls
 {
     public class ListChannelModel
     {

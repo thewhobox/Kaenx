@@ -6,19 +6,19 @@ using System.Threading.Tasks;
 using System.Xml;
 using System.Xml.Linq;
 using Windows.Storage;
-using METS.Context.Catalog;
+using Kaenx.DataContext.Catalog;
 using Serilog;
-using METS.MVVM;
+using Kaenx.MVVM;
 using System.Collections.ObjectModel;
-using METS.View.Controls;
-using METS.Classes.Controls;
+using Kaenx.View.Controls;
+using Kaenx.Classes.Controls;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Media;
 using System.Diagnostics;
 using Windows.ApplicationModel.Resources;
 using System.IO;
 
-namespace METS.Classes.Helper
+namespace Kaenx.Classes.Helper
 {
     public class ImportHelper
     {

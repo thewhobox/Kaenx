@@ -1,4 +1,4 @@
-﻿using METS.Context;
+﻿using Kaenx.DataContext;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -16,21 +16,20 @@ using Windows.UI.Xaml.Data;
 using Windows.UI.Xaml.Input;
 using Windows.UI.Xaml.Media;
 using Windows.UI.Xaml.Navigation;
-using METS.Context.Catalog;
-using METS.Context.Project;
+using Kaenx.DataContext.Catalog;
+using Kaenx.DataContext.Project;
 using Windows.UI.Core;
 using Windows.Storage;
 using System.Runtime.InteropServices;
-using METS.Classes;
+using Kaenx.Classes;
 using Serilog;
-
 using Microsoft.AppCenter;
 using Microsoft.AppCenter.Analytics;
 using Microsoft.AppCenter.Crashes;
 using Microsoft.AppCenter.Push;
 using Windows.UI.StartScreen;
 
-namespace METS
+namespace Kaenx
 {
     /// <summary>
     /// Provides application-specific behavior to supplement the default Application class.

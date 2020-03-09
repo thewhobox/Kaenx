@@ -7,7 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Xml.Serialization;
 
-namespace METS.Context.Project
+namespace Kaenx.DataContext.Project
 {
     public class LineDeviceModel
     {

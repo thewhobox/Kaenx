@@ -1,10 +1,10 @@
-﻿using METS.Classes;
-using METS.Classes.Controls.Paras;
-using METS.Classes.Helper;
-using METS.Classes.Project;
-using METS.Context.Catalog;
-using METS.Context.Project;
-using METS.View.Controls;
+﻿using Kaenx.Classes;
+using Kaenx.Classes.Controls.Paras;
+using Kaenx.Classes.Helper;
+using Kaenx.Classes.Project;
+using Kaenx.DataContext.Catalog;
+using Kaenx.DataContext.Project;
+using Kaenx.View.Controls;
 using Serilog;
 using System;
 using System.Collections.Generic;
@@ -30,7 +30,7 @@ using Windows.UI.Xaml.Navigation;
 
 // Die Elementvorlage "Benutzersteuerelement" wird unter https://go.microsoft.com/fwlink/?LinkId=234236 dokumentiert.
 
-namespace METS.Views.Easy.Controls
+namespace Kaenx.Views.Easy.Controls
 {
     public sealed partial class EControlParas2 : UserControl
     {

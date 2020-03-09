@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Data;
 
-namespace METS.Classes.Converter
+namespace Kaenx.Classes.Converter
 {
     public class Checked2VisibilityConverter : IValueConverter
     {

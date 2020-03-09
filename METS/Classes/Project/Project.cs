@@ -6,7 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace METS.Classes.Project
+namespace Kaenx.Classes.Project
 {
     public class Project : INotifyPropertyChanged
     {

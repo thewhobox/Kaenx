@@ -7,10 +7,10 @@ using System.Net;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using METS.Classes.Bus.Actions;
-using METS.Knx.Builders;
+using Kaenx.Classes.Bus.Actions;
+using Kaenx.Konnect.Builders;
 
-namespace METS.Classes.Bus
+namespace Kaenx.Classes.Bus
 {
     public class BusConnection :INotifyPropertyChanged
     {
@@ -128,7 +128,7 @@ namespace METS.Classes.Bus
 
         private async void ExecuteAction()
         {
-            CurrentAction.Connection = new METS.Knx.Connection(new IPEndPoint(IPAddress.Parse("192.168.0.108"), Convert.ToInt32(3671)));
+            CurrentAction.Connection = new Kaenx.Konnect.Connection(new IPEndPoint(IPAddress.Parse("192.168.0.108"), Convert.ToInt32(3671)));
             CurrentAction.Connection.ConnectionChanged += Connection_ConnectionChanged;
             
             CurrentAction.ProgressIsIndeterminate = true;

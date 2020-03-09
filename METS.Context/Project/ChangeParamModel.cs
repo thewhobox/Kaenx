@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace METS.Context.Project
+namespace Kaenx.DataContext.Project
 {
     public class ChangeParamModel
     {

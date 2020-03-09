@@ -1,11 +1,11 @@
-﻿using METS.Classes;
-using METS.Classes.Bus;
-using METS.Classes.Controls;
-using METS.Classes.Helper;
-using METS.Classes.Project;
-using METS.Context.Catalog;
-using METS.Context.Project;
-using METS.Views.Easy.Controls;
+﻿using Kaenx.Classes;
+using Kaenx.Classes.Bus;
+using Kaenx.Classes.Controls;
+using Kaenx.Classes.Helper;
+using Kaenx.Classes.Project;
+using Kaenx.DataContext.Catalog;
+using Kaenx.DataContext.Project;
+using Kaenx.Views.Easy.Controls;
 using Microsoft.Toolkit.Uwp.UI.Controls;
 using System;
 using System.Collections.Generic;
@@ -30,7 +30,7 @@ using Windows.UI.Xaml.Navigation;
 
 // Die Elementvorlage "Leere Seite" wird unter https://go.microsoft.com/fwlink/?LinkId=234238 dokumentiert.
 
-namespace METS.View
+namespace Kaenx.View
 {
     /// <summary>
     /// Eine leere Seite, die eigenständig verwendet oder zu der innerhalb eines Rahmens navigiert werden kann.
@@ -100,7 +100,7 @@ namespace METS.View
 
             switch (data.GetType().ToString())
             {
-                case "METS.Classes.Line":
+                case "Kaenx.Classes.Line":
                     Line main = (Line)data;
                     LineMiddle line = new LineMiddle(getFirstFreeIdSub(main), loader.GetString("NewLineMiddle"), main);
                     main.Subs.Add(line);
@@ -118,17 +118,17 @@ namespace METS.View
 
             switch (item.GetType().ToString())
             {
-                case "METS.Classes.Line":
+                case "Kaenx.Classes.Line":
                     ObservableCollection<Line> coll = (ObservableCollection<Line>)this.DataContext;
                     coll.Remove((Line)item);
                     break;
 
-                case "METS.Classes.LineMiddle":
+                case "Kaenx.Classes.LineMiddle":
                     LineMiddle line = (LineMiddle)item;
                     line.Parent.Subs.Remove(line);
                     break;
 
-                case "METS.Classes.LineDevice":
+                case "Kaenx.Classes.LineDevice":
                     LineDevice device = (LineDevice)item;
                     device.Parent.Subs.Remove(device);
                     SaveHelper.CalculateLineCurrent(device.Parent);
@@ -216,7 +216,7 @@ namespace METS.View
             if (e.Handled == true) return;
 
             TopologieBase tbase = (TopologieBase)((TreeViewItem)e.OriginalSource).DataContext;
-            if (tbase.Type == TopologieType.LineMiddle && ViewHelper.Instance.DragItem?.GetType() == typeof(Context.Catalog.DeviceViewModel))
+            if (tbase.Type == TopologieType.LineMiddle && ViewHelper.Instance.DragItem?.GetType() == typeof(DataContext.Catalog.DeviceViewModel))
             {
                 LineMiddle line = (LineMiddle)tbase;
                 e.AcceptedOperation = Windows.ApplicationModel.DataTransfer.DataPackageOperation.Link;

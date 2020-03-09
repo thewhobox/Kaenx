@@ -1,9 +1,9 @@
-﻿using METS.Classes;
-using METS.Classes.Controls;
-using METS.Classes.Helper;
-using METS.Classes.Project;
-using METS.Context.Project;
-using METS.View.Controls;
+﻿using Kaenx.Classes;
+using Kaenx.Classes.Controls;
+using Kaenx.Classes.Helper;
+using Kaenx.Classes.Project;
+using Kaenx.DataContext.Project;
+using Kaenx.View.Controls;
 using Microsoft.AppCenter.Crashes;
 using Serilog;
 using System;
@@ -34,7 +34,7 @@ using Windows.UI.Xaml.Navigation;
 
 // The Blank Page item template is documented at http://go.microsoft.com/fwlink/?LinkId=402352&clcid=0x409
 
-namespace METS.View
+namespace Kaenx.View
 {
     /// <summary>
     /// An empty page that can be used on its own or navigated to within a Frame.

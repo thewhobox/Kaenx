@@ -1,6 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore.Migrations;
 
-namespace METS.Context.Migrations.Project
+namespace Kaenx.DataContext.Migrations.Project
 {
     public partial class Init : Migration
     {

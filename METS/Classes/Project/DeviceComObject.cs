@@ -1,5 +1,5 @@
-﻿using METS.Classes.Controls.Paras;
-using METS.Context.Catalog;
+﻿using Kaenx.Classes.Controls.Paras;
+using Kaenx.DataContext.Catalog;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
@@ -10,7 +10,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Windows.UI.Xaml;
 
-namespace METS.Classes.Project
+namespace Kaenx.Classes.Project
 {
     public class DeviceComObject : INotifyPropertyChanged
     {

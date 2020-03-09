@@ -1,13 +1,13 @@
 ﻿<Page
-    x:Class="METS.View.Topologie"
+    x:Class="Kaenx.View.Topologie"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:local="using:METS.Classes"
+    xmlns:local="using:Kaenx.Classes"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:toolkit="using:Microsoft.Toolkit.Uwp.UI.Controls"
-    xmlns:controls="using:METS.View.Controls"
-    xmlns:converter="using:METS.Classes.Converter"
+    xmlns:controls="using:Kaenx.View.Controls"
+    xmlns:converter="using:Kaenx.Classes.Converter"
     mc:Ignorable="d"
     Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
     <Page.Resources>

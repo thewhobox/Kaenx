@@ -18,7 +18,7 @@ using Windows.UI.Xaml.Navigation;
 
 // Die Elementvorlage "Inhaltsdialogfeld" wird unter https://go.microsoft.com/fwlink/?LinkId=234238 dokumentiert.
 
-namespace METS.View.Controls
+namespace Kaenx.View.Controls
 {
     public sealed partial class DiagLanguage : ContentDialog, INotifyPropertyChanged
     {

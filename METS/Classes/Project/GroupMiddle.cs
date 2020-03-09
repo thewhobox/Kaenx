@@ -1,4 +1,4 @@
-﻿using METS.Context.Project;
+﻿using Kaenx.DataContext.Project;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Media;
 
-namespace METS.Classes.Project
+namespace Kaenx.Classes.Project
 {
     public class GroupMiddle : INotifyPropertyChanged
     {

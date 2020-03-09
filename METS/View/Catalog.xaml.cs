@@ -1,8 +1,8 @@
-﻿using METS.Classes;
-using METS.Classes.Controls;
-using METS.Context;
-using METS.Classes.Helper;
-using METS.MVVM;
+﻿using Kaenx.Classes;
+using Kaenx.Classes.Controls;
+using Kaenx.DataContext;
+using Kaenx.Classes.Helper;
+using Kaenx.MVVM;
 using Microsoft.Toolkit.Uwp.UI.Controls;
 using System;
 using System.Collections.ObjectModel;
@@ -19,18 +19,18 @@ using Windows.UI.Xaml.Input;
 using Windows.UI.Xaml.Media;
 using System.Collections.Generic;
 using Windows.UI.Xaml.Navigation;
-using METS.Context.Catalog;
+using Kaenx.DataContext.Catalog;
 using System.Diagnostics;
 using System.ComponentModel;
 using System.Text.RegularExpressions;
-using METS.View.Controls;
+using Kaenx.View.Controls;
 using Windows.UI.Core;
 using Windows.ApplicationModel.Resources;
 using Windows.UI.ViewManagement;
 
 // The Blank Page item template is documented at http://go.microsoft.com/fwlink/?LinkId=234238
 
-namespace METS.View
+namespace Kaenx.View
 {
     /// <summary>
     /// An empty page that can be used on its own or navigated to within a Frame.

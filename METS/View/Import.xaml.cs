@@ -1,7 +1,7 @@
-﻿using METS.Classes;
-using METS.Classes.Helper;
-using METS.Context.Catalog;
-using METS.MVVM;
+﻿using Kaenx.Classes;
+using Kaenx.Classes.Helper;
+using Kaenx.DataContext.Catalog;
+using Kaenx.MVVM;
 using Microsoft.AppCenter.Analytics;
 using Serilog;
 using System;
@@ -23,7 +23,7 @@ using Windows.UI.Xaml.Navigation;
 
 // Die Elementvorlage "Leere Seite" wird unter https://go.microsoft.com/fwlink/?LinkId=234238 dokumentiert.
 
-namespace METS.View
+namespace Kaenx.View
 {
     /// <summary>
     /// Eine leere Seite, die eigenständig verwendet oder zu der innerhalb eines Rahmens navigiert werden kann.

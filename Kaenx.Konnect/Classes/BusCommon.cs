@@ -54,7 +54,7 @@ namespace Kaenx.Konnect.Classes
         public void IndividualAddressWrite(UnicastAddress newAddr)
         {
             TunnelRequest builder = new TunnelRequest();
-            builder.Build(MulticastAddress.FromString("0/0/0"), MulticastAddress.FromString("0/0/0"), Knx.Parser.ApciTypes.IndividualAddressWrite, 255, newAddr.GetBytes());
+            builder.Build(MulticastAddress.FromString("0/0/0"), MulticastAddress.FromString("0/0/0"), Parser.ApciTypes.IndividualAddressWrite, 255, newAddr.GetBytes());
             builder.SetPriority(Prios.System);
             _conn.Send(builder);
         }

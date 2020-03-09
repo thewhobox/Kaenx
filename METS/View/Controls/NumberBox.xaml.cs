@@ -16,7 +16,7 @@ using Windows.UI.Xaml.Navigation;
 
 // Die Elementvorlage "Benutzersteuerelement" wird unter https://go.microsoft.com/fwlink/?LinkId=234236 dokumentiert.
 
-namespace METS.View.Controls
+namespace Kaenx.View.Controls
 {
     public sealed partial class NumberBox : UserControl, INotifyPropertyChanged
     {

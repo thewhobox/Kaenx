@@ -1,6 +1,6 @@
-﻿using METS.Classes.Helper;
-using METS.Classes.Project;
-using METS.Context.Project;
+﻿using Kaenx.Classes.Helper;
+using Kaenx.Classes.Project;
+using Kaenx.DataContext.Project;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -12,7 +12,7 @@ using System.Xml.Serialization;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Media;
 
-namespace METS.Classes
+namespace Kaenx.Classes
 {
     public class LineDevice : INotifyPropertyChanged, TopologieBase
     {
@@ -68,7 +68,7 @@ namespace METS.Classes
         public string ApplicationId { get; set; }
 
         public LineDevice() { }
-        public LineDevice(Context.Catalog.DeviceViewModel model, LineMiddle parent)
+        public LineDevice(DataContext.Catalog.DeviceViewModel model, LineMiddle parent)
         {
             Name = model.Name;
             Parent = parent;

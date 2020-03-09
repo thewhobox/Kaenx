@@ -1,4 +1,4 @@
-﻿using METS.Context.Project;
+﻿using Kaenx.DataContext.Project;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 using System.Xml.Serialization;
 using Windows.UI.Xaml.Controls;
 
-namespace METS.Classes.Project
+namespace Kaenx.Classes.Project
 {
     public class Group : INotifyPropertyChanged
     {

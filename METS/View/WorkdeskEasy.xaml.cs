@@ -1,4 +1,4 @@
-﻿using METS.Classes.Helper;
+﻿using Kaenx.Classes.Helper;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -19,7 +19,7 @@ using Windows.UI.Xaml.Navigation;
 
 // Die Elementvorlage "Leere Seite" wird unter https://go.microsoft.com/fwlink/?LinkId=234238 dokumentiert.
 
-namespace METS.View
+namespace Kaenx.View
 {
     /// <summary>
     /// Eine leere Seite, die eigenständig verwendet oder zu der innerhalb eines Rahmens navigiert werden kann.
@@ -27,11 +27,11 @@ namespace METS.View
     public sealed partial class WorkdeskEasy : Page, INotifyPropertyChanged
     {
         private ResourceLoader loader = ResourceLoader.GetForCurrentView("WorkDeskEasy");
-        private METS.Classes.Project.Project _project;
+        private Kaenx.Classes.Project.Project _project;
 
         public event PropertyChangedEventHandler PropertyChanged;
 
-        private METS.Classes.Project.Project CurrentProject
+        private Kaenx.Classes.Project.Project CurrentProject
         {
             get
             {
@@ -58,7 +58,7 @@ namespace METS.View
         protected override void OnNavigatedTo(NavigationEventArgs e)
         {
             base.OnNavigatedTo(e);
-            CurrentProject = (METS.Classes.Project.Project)e.Parameter;
+            CurrentProject = (Kaenx.Classes.Project.Project)e.Parameter;
             ApplicationView.GetForCurrentView().Title = CurrentProject.Name;
 
             ViewHelper.Instance.OnShowNotification += Instance_OnShowNotification;

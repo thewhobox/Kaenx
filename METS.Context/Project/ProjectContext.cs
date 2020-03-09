@@ -3,7 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace METS.Context.Project
+namespace Kaenx.DataContext.Project
 {
     public class ProjectContext : DbContext
     {

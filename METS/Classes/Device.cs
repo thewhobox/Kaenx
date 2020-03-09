@@ -1,4 +1,4 @@
-﻿using METS.Classes.Controls;
+﻿using Kaenx.Classes.Controls;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -6,7 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Input;
 
-namespace METS.Classes
+namespace Kaenx.Classes
 {
     public class Device
     {

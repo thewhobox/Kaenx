@@ -1,4 +1,4 @@
-﻿using METS.Context.Catalog;
+﻿using Kaenx.DataContext.Catalog;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -17,7 +17,7 @@ using Windows.UI.Xaml.Navigation;
 
 // Die Elementvorlage "Benutzersteuerelement" wird unter https://go.microsoft.com/fwlink/?LinkId=234236 dokumentiert.
 
-namespace METS.Classes.Controls.Paras
+namespace Kaenx.Classes.Controls.Paras
 {
     public sealed partial class ParamPicture : UserControl, IParam
     {

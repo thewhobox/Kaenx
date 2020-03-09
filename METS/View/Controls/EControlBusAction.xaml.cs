@@ -15,7 +15,7 @@ using Windows.UI.Xaml.Navigation;
 
 // Die Elementvorlage "Benutzersteuerelement" wird unter https://go.microsoft.com/fwlink/?LinkId=234236 dokumentiert.
 
-namespace METS.View.Easy.Controls
+namespace Kaenx.View.Easy.Controls
 {
     public sealed partial class EControlBusAction : UserControl
     {

@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 
-namespace METS.View.Controls
+namespace Kaenx.View.Controls
 {
     public class ListBlockModel
     {

@@ -1,4 +1,4 @@
-﻿using METS.Classes;
+﻿using Kaenx.Classes;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -7,7 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Windows.ApplicationModel.Resources;
 
-namespace METS.MVVM
+namespace Kaenx.MVVM
 {
     public class Lines
     {

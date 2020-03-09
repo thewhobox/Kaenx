@@ -6,7 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Windows.Storage;
 
-namespace METS.Classes.Helper
+namespace Kaenx.Classes.Helper
 {
     public class SettingsHelper
     {

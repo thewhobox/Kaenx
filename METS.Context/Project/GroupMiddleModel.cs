@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Text;
 
-namespace METS.Context.Project
+namespace Kaenx.DataContext.Project
 {
     public class GroupMiddleModel
     {

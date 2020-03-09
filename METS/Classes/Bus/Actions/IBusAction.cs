@@ -6,14 +6,14 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace METS.Classes.Bus.Actions
+namespace Kaenx.Classes.Bus.Actions
 {
     public interface IBusAction
     {
         delegate void ActionFinishedHandler(IBusAction action, object data);
         event ActionFinishedHandler Finished;
 
-        METS.Knx.Connection Connection { get; set; }
+        Kaenx.Konnect.Connection Connection { get; set; }
         int ProgressValue { get; set; }
         bool ProgressIsIndeterminate { get; set; }
         string TodoText { get; set; }

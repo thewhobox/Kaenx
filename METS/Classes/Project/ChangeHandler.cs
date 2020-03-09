@@ -1,5 +1,5 @@
-﻿using METS.Context.Catalog;
-using METS.Context.Project;
+﻿using Kaenx.DataContext.Catalog;
+using Kaenx.DataContext.Project;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -8,7 +8,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace METS.Classes.Project
+namespace Kaenx.Classes.Project
 {
     public class ChangeHandler : INotifyPropertyChanged
     {

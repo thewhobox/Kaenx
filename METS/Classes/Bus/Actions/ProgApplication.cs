@@ -1,10 +1,10 @@
-﻿using METS.Classes.Project;
-using METS.Context.Catalog;
-using METS.Context.Project;
-using METS.Knx;
-using METS.Knx.Addresses;
-using METS.Knx.Builders;
-using METS.Knx.Classes;
+﻿using Kaenx.Classes.Project;
+using Kaenx.DataContext.Catalog;
+using Kaenx.DataContext.Project;
+using Kaenx.Konnect;
+using Kaenx.Konnect.Addresses;
+using Kaenx.Konnect.Builders;
+using Kaenx.Konnect.Classes;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -16,9 +16,9 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Xml.Linq;
 using Windows.Storage;
-using static METS.Classes.Bus.Actions.IBusAction;
+using static Kaenx.Classes.Bus.Actions.IBusAction;
 
-namespace METS.Classes.Bus.Actions
+namespace Kaenx.Classes.Bus.Actions
 {
     public class ProgApplication : IBusAction, INotifyPropertyChanged
     {
@@ -181,14 +181,14 @@ namespace METS.Classes.Bus.Actions
             TodoText = "Überprüfe Kompatibilität...";
             // Connect
             TunnelRequest builder = new TunnelRequest();
-            builder.Build(UnicastAddress.FromString("0.0.0"), UnicastAddress.FromString(Device.LineName), Knx.Parser.ApciTypes.Connect, _sequence, 255);
+            //builder.Build(UnicastAddress.FromString("0.0.0"), UnicastAddress.FromString(Device.LineName), Parser.ApciTypes.Connect, _sequence, 255);
             Connection.Send(builder);
             await Task.Delay(100);
             _sequence++;
 
             builder = new TunnelRequest();
             byte[] data = { 3, 13, 0x01 << 4, 0x01 }; // TODO probiere 5 ob ganze appID und Start bei 0!
-            builder.Build(UnicastAddress.FromString("0.0.0"), UnicastAddress.FromString(Device.LineName), Knx.Parser.ApciTypes.PropertyValueRead, _sequence, _currentSeqNum, data);
+            //builder.Build(UnicastAddress.FromString("0.0.0"), UnicastAddress.FromString(Device.LineName), Parser.ApciTypes.PropertyValueRead, _sequence, _currentSeqNum, data);
             Connection.Send(builder);
             _state = 1;
         }
@@ -280,7 +280,7 @@ namespace METS.Classes.Bus.Actions
             Array.Reverse(address);
             data.AddRange(address);
             data.Add(1);
-            builder.Build(UnicastAddress.FromString("0.0.0"), UnicastAddress.FromString(Device.LineName), Knx.Parser.ApciTypes.MemoryWrite, _sequence, _currentSeqNum++, data.ToArray());
+            builder.Build(UnicastAddress.FromString("0.0.0"), UnicastAddress.FromString(Device.LineName), Kaenx.Konnect.Parser.ApciTypes.MemoryWrite, _sequence, _currentSeqNum++, data.ToArray());
             Connection.Send(builder);
 
             await Task.Delay(100);
@@ -302,7 +302,7 @@ namespace METS.Classes.Bus.Actions
             //Datenlänge richtig setzen
             data[0] = BitConverter.GetBytes(addedGroups.Count * 2)[0];
 
-            builder.Build(UnicastAddress.FromString("0.0.0"), UnicastAddress.FromString(Device.LineName), Knx.Parser.ApciTypes.MemoryWrite, _sequence, _currentSeqNum++, data.ToArray());
+            //builder.Build(UnicastAddress.FromString("0.0.0"), UnicastAddress.FromString(Device.LineName), Parser.ApciTypes.MemoryWrite, _sequence, _currentSeqNum++, data.ToArray());
             Connection.Send(builder);
 
             await Task.Delay(1000);
@@ -314,7 +314,7 @@ namespace METS.Classes.Bus.Actions
             Array.Reverse(address);
             data.AddRange(address);
             data.Add(BitConverter.GetBytes(addedGroups.Count)[0]);
-            builder.Build(UnicastAddress.FromString("0.0.0"), UnicastAddress.FromString(Device.LineName), Knx.Parser.ApciTypes.MemoryWrite, _sequence, _currentSeqNum++, data.ToArray());
+            //builder.Build(UnicastAddress.FromString("0.0.0"), UnicastAddress.FromString(Device.LineName), Parser.ApciTypes.MemoryWrite, _sequence, _currentSeqNum++, data.ToArray());
             Connection.Send(builder);
 
 
@@ -371,7 +371,7 @@ namespace METS.Classes.Bus.Actions
             Array.Reverse(address);
             data.AddRange(address);
             data.Add(0);
-            builder.Build(UnicastAddress.FromString("0.0.0"), UnicastAddress.FromString(Device.LineName), Knx.Parser.ApciTypes.MemoryWrite, _sequence, _currentSeqNum++, data.ToArray());
+            //builder.Build(UnicastAddress.FromString("0.0.0"), UnicastAddress.FromString(Device.LineName), Knx.Parser.ApciTypes.MemoryWrite, _sequence, _currentSeqNum++, data.ToArray());
             Connection.Send(builder);
 
             await Task.Delay(100);
@@ -403,7 +403,7 @@ namespace METS.Classes.Bus.Actions
             address = BitConverter.GetBytes(Convert.ToInt16(AssoAddress + 1));
             Array.Reverse(address);
             data.AddRange(address);
-            builder.Build(UnicastAddress.FromString("0.0.0"), UnicastAddress.FromString(Device.LineName), Knx.Parser.ApciTypes.MemoryWrite, _sequence, _currentSeqNum++, data.ToArray());
+            //builder.Build(UnicastAddress.FromString("0.0.0"), UnicastAddress.FromString(Device.LineName), Knx.Parser.ApciTypes.MemoryWrite, _sequence, _currentSeqNum++, data.ToArray());
             Connection.Send(builder);
 
             //Länge der Tabelle korrekt setzen
@@ -414,7 +414,7 @@ namespace METS.Classes.Bus.Actions
             Array.Reverse(address);
             data.AddRange(address);
             data.Add(BitConverter.GetBytes(sizeCounter)[0]);
-            builder.Build(UnicastAddress.FromString("0.0.0"), UnicastAddress.FromString(Device.LineName), Knx.Parser.ApciTypes.MemoryWrite, _sequence, _currentSeqNum++, data.ToArray());
+            //builder.Build(UnicastAddress.FromString("0.0.0"), UnicastAddress.FromString(Device.LineName), Knx.Parser.ApciTypes.MemoryWrite, _sequence, _currentSeqNum++, data.ToArray());
             Connection.Send(builder);
 
 

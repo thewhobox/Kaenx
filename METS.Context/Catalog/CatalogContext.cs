@@ -7,7 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 
-namespace METS.Context.Catalog
+namespace Kaenx.DataContext.Catalog
 {
     public class CatalogContext : DbContext
     {

@@ -1,8 +1,8 @@
-﻿using METS.Context.Catalog;
-using METS.Knx;
-using METS.Knx.Addresses;
-using METS.Knx.Builders;
-using METS.Knx.Classes;
+﻿using Kaenx.DataContext.Catalog;
+using Kaenx.Konnect;
+using Kaenx.Konnect.Addresses;
+using Kaenx.Konnect.Builders;
+using Kaenx.Konnect.Classes;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -13,9 +13,9 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Xml.Linq;
 using Windows.Storage;
-using static METS.Classes.Bus.Actions.IBusAction;
+using static Kaenx.Classes.Bus.Actions.IBusAction;
 
-namespace METS.Classes.Bus.Actions
+namespace Kaenx.Classes.Bus.Actions
 {
     public class DeviceInfo : IBusAction, INotifyPropertyChanged
     {

@@ -1,7 +1,7 @@
-﻿using METS.Classes;
-using METS.Classes.Bus;
-using METS.Classes.Bus.Actions;
-using METS.Classes.Helper;
+﻿using Kaenx.Classes;
+using Kaenx.Classes.Bus;
+using Kaenx.Classes.Bus.Actions;
+using Kaenx.Classes.Helper;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -20,7 +20,7 @@ using Windows.UI.Xaml.Navigation;
 
 // Die Elementvorlage "Leere Seite" wird unter https://go.microsoft.com/fwlink/?LinkId=234238 dokumentiert.
 
-namespace METS.View
+namespace Kaenx.View
 {
     /// <summary>
     /// Eine leere Seite, die eigenständig verwendet oder zu der innerhalb eines Rahmens navigiert werden kann.

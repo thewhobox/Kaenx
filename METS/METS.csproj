@@ -7,8 +7,8 @@
     <ProjectGuid>{1F03C6F1-E08B-4546-B13D-2C808F6FBC79}</ProjectGuid>
     <OutputType>AppContainerExe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>METS</RootNamespace>
-    <AssemblyName>METS</AssemblyName>
+    <RootNamespace>Kaenx</RootNamespace>
+    <AssemblyName>Kaenx</AssemblyName>
     <DefaultLanguage>de-DE</DefaultLanguage>
     <TargetPlatformIdentifier>UAP</TargetPlatformIdentifier>
     <TargetPlatformVersion>10.0.18362.0</TargetPlatformVersion>

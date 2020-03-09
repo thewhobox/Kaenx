@@ -1,7 +1,7 @@
-﻿using METS.Knx;
-using METS.Knx.Addresses;
-using METS.Knx.Builders;
-using METS.Knx.Classes;
+﻿using Kaenx.Konnect;
+using Kaenx.Konnect.Addresses;
+using Kaenx.Konnect.Builders;
+using Kaenx.Konnect.Classes;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -9,9 +9,9 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using static METS.Classes.Bus.Actions.IBusAction;
+using static Kaenx.Classes.Bus.Actions.IBusAction;
 
-namespace METS.Classes.Bus.Actions
+namespace Kaenx.Classes.Bus.Actions
 {
     public class ProgPhysicalAddress : IBusAction, INotifyPropertyChanged
     {
@@ -43,7 +43,7 @@ namespace METS.Classes.Bus.Actions
         {
             devices.Add(response);
 
-            if(response.APCI == Knx.Parser.ApciTypes.IndividualAddressResponse && response.SourceAddress.Area != 0 && !progDevices.Contains(response.SourceAddress.ToString()))
+            if(response.APCI == Kaenx.Konnect.Parser.ApciTypes.IndividualAddressResponse && response.SourceAddress.Area != 0 && !progDevices.Contains(response.SourceAddress.ToString()))
             {
                 progDevices.Add(response.SourceAddress.ToString());
             }

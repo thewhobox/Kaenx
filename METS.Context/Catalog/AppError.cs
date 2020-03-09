@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace METS.Context.Catalog
+namespace Kaenx.DataContext.Catalog
 {
     public class AppError
     {

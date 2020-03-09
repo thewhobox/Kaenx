@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Text;
 
-namespace METS.Context.Catalog
+namespace Kaenx.DataContext.Catalog
 {
     public class Hardware2AppModel
     {

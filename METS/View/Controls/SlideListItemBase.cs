@@ -8,7 +8,7 @@ using System.Windows.Input;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Media;
 
-namespace METS.Classes.Controls
+namespace Kaenx.Classes.Controls
 {
     public class SlideListItemBase : INotifyPropertyChanged
     {
