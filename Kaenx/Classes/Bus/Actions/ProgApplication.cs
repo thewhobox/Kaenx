@@ -68,6 +68,13 @@ namespace Kaenx.Classes.Bus.Actions
 
             TodoText = "Applikation schreiben";
 
+            CatalogContext _context = new CatalogContext();
+            ApplicationViewModel app = _context.Applications.Single(a => a.Id == Device.ApplicationId);
+            XDocument master = await GetKnxMaster();
+            XElement mask = master.Descendants(XName.Get("MaskVersion", master.Root.Name.NamespaceName)).Single(m => m.Attribute("Id").Value == app.Mask);
+            XElement procedure = mask.Descendants(XName.Get("Procedure", master.Root.Name.NamespaceName)).Single(m => m.Attribute("ProcedureType").Value == "Load");
+
+
             AppAdditional adds = _context.AppAdditionals.Single(a => a.Id == Device.ApplicationId);
             XElement prod =XDocument.Parse(Encoding.UTF8.GetString(adds.Dynamic)).Root;
             prod = prod.Element(XName.Get("LoadProcedure", prod.Name.NamespaceName));

@@ -1,13 +1,17 @@
-﻿using Kaenx.Konnect;
+﻿using Kaenx.DataContext.Catalog;
+using Kaenx.Konnect;
 using Kaenx.Konnect.Classes;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Xml.Linq;
+using Windows.Storage;
 using static Kaenx.Classes.Bus.Actions.IBusAction;
 
 namespace Kaenx.Classes.Bus.Actions
@@ -45,16 +49,27 @@ namespace Kaenx.Classes.Bus.Actions
             dev.Connect();
             await Task.Delay(50);
 
-            for (int i = 1; i < 6; i++)
+            CatalogContext _context = new CatalogContext();
+            ApplicationViewModel app = _context.Applications.Single(a => a.Id == Device.ApplicationId);
+
+
+            XDocument master = await GetKnxMaster();
+            XElement mask = master.Descendants(XName.Get("MaskVersion", master.Root.Name.NamespaceName)).Single(m => m.Attribute("Id").Value == app.Mask);
+            XElement procedure = mask.Descendants(XName.Get("Procedure", master.Root.Name.NamespaceName)).Single(m => m.Attribute("ProcedureType").Value == "Unload");
+
+            foreach (XElement ele in procedure.Elements())
             {
+                if (ele.Name.LocalName != "LdCtrlUnload") continue;
+
+                int lsmIdx = int.Parse(ele.Attribute("LsmIdx").Value);
                 byte[] data = new byte[11];
-                int state = (int)LoadStateMachineState.Unloaded;
-                int end = (i << 4) | state;
+                int state = Device.IsDeactivated ? (int)LoadStateMachineState.Loaded : (int)LoadStateMachineState.Unloaded;
+                int end = (lsmIdx << 4) | state;
                 data[0] = Convert.ToByte(end);
                 await dev.MemoryWriteSync(260, data);
                 await Task.Delay(50);
-                data = await dev.MemoryRead(46825 + i, 1);
-                Debug.WriteLine(i + ": " + BitConverter.ToString(data).Replace("-", ""));
+                data = await dev.MemoryRead(46825 + lsmIdx, 1);
+                Debug.WriteLine(lsmIdx + ": " + BitConverter.ToString(data).Replace("-", ""));
             }
 
             TodoText = "Gerät neu starten...";
@@ -80,6 +95,28 @@ namespace Kaenx.Classes.Bus.Actions
                     PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
                 });
             }
+        }
+
+
+
+        private async Task<XDocument> GetKnxMaster()
+        {
+            StorageFile masterFile;
+
+            try
+            {
+                masterFile = await ApplicationData.Current.LocalFolder.GetFileAsync("knx_master.xml");
+            }
+            catch
+            {
+                StorageFile defaultFile = await StorageFile.GetFileFromApplicationUriAsync(new Uri("ms-appx:///Data/knx_master.xml"));
+                masterFile = await ApplicationData.Current.LocalFolder.CreateFileAsync("knx_master.xml");
+                await FileIO.WriteTextAsync(masterFile, await FileIO.ReadTextAsync(defaultFile));
+            }
+
+
+            XDocument masterXml = XDocument.Load(await masterFile.OpenStreamForReadAsync());
+            return masterXml;
         }
 
 

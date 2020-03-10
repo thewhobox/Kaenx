@@ -25,11 +25,12 @@ namespace Kaenx.DataContext.Catalog
 
 
         private string _connectionString;
-        private DbConnectionType _connectionType;
+        private DbConnectionType _connectionType = DbConnectionType.MySQL;
 
         public CatalogContext()
         {
-            _connectionString = "Data Source=" + "Catalog.db";
+            //_connectionString = "Data Source=" + "Catalog.db";
+            _connectionString = "Server=mikegerst.de;Database=kaenx_mike;Uid=mike;Pwd=Passwortneu1;";
         }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
