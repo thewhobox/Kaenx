@@ -125,6 +125,11 @@ namespace Kaenx.Classes.Bus.Actions
                         await dev.MemoryWriteSync(260, dataL);
                         await Task.Delay(50);
                         break;
+
+                    case "LdCtrlDelay":
+                        int ms = int.Parse(ctrl.Attribute("MilliSeconds").Value);
+                        await Task.Delay(ms);
+                        break;
                 }
 
                 currentProg += stepSize;
