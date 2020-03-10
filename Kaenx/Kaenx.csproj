@@ -22,7 +22,7 @@
     <GenerateAppInstallerFile>False</GenerateAppInstallerFile>
     <AppxAutoIncrementPackageRevision>False</AppxAutoIncrementPackageRevision>
     <AppxBundle>Always</AppxBundle>
-    <AppxBundlePlatforms>x86</AppxBundlePlatforms>
+    <AppxBundlePlatforms>x86|x64|arm</AppxBundlePlatforms>
     <AppInstallerUpdateFrequency>0</AppInstallerUpdateFrequency>
     <AppInstallerCheckForUpdateFrequency>OnApplicationRun</AppInstallerCheckForUpdateFrequency>
     <PackageCertificateThumbprint>B0C09E073CE8A96E017E971C00FD2540563CFC5B</PackageCertificateThumbprint>
@@ -125,6 +125,7 @@
     <Compile Include="App.xaml.cs">
       <DependentUpon>App.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Classes\Bus\Actions\DeviceDeActivate.cs" />
     <Compile Include="Classes\Bus\Actions\IBusAction.cs" />
     <Compile Include="Classes\Bus\Actions\DeviceInfo.cs" />
     <Compile Include="Classes\Bus\Actions\DeviceInfoData.cs" />

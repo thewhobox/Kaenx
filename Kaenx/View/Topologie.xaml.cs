@@ -309,9 +309,9 @@ namespace Kaenx.View
             MenuFlyoutItem item = (MenuFlyoutItem)sender;
             LineDevice dev = (LineDevice)item.DataContext;
 
-            //Classes.Bus.Actions.DeviceDeactivate action = new Classes.Bus.Actions.DeviceDeactivate();
-            //action.Device = dev;
-            //BusConnection.Instance.AddAction(action);
+            Classes.Bus.Actions.DeviceDeactivate action = new Classes.Bus.Actions.DeviceDeactivate();
+            action.Device = dev;
+            BusConnection.Instance.AddAction(action);
         }
 
         private void MenuFlyout_Opening(object sender, object e)
