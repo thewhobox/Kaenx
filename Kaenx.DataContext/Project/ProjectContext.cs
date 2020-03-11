@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Kaenx.DataContext.Local;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -20,10 +21,26 @@ namespace Kaenx.DataContext.Project
         public DbSet<GroupAddressModel> GroupAddress { get; set; }
 
 
+        private LocalConnectionProject _conn;
+
+        public ProjectContext()
+        {
+            _conn = new LocalConnectionProject() { DbHostname = "Projects.sb", Type = LocalConnectionProject.DbConnectionType.SqlLite };
+        }
+        public ProjectContext(LocalConnectionProject conn) => _conn = conn;
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            optionsBuilder.UseSqlite("Data Source=" + "Project.db");
+            switch (_conn.Type)
+            {
+                case LocalConnectionProject.DbConnectionType.SqlLite:
+                    optionsBuilder.UseSqlite($"Data Source={_conn.DbHostname}");
+                    break;
+
+                case LocalConnectionProject.DbConnectionType.MySQL:
+                    optionsBuilder.UseMySQL($"Server={_conn.DbHostname};Database={_conn.DbName};Uid={_conn.DbUsername};Pwd={_conn.DbPassword};");
+                    break;
+            }
             //optionsBuilder.UseMySql("");   
         }
     }

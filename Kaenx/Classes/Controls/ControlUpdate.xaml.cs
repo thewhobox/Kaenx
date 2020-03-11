@@ -1,4 +1,5 @@
-﻿using Kaenx.Classes.Project;
+﻿using Kaenx.Classes.Helper;
+using Kaenx.Classes.Project;
 using Kaenx.DataContext.Catalog;
 using Kaenx.DataContext.Project;
 using System;
@@ -24,7 +25,6 @@ namespace Kaenx.Classes.Controls
     public sealed partial class ControlUpdate : UserControl
     {
         private CatalogContext _context = new CatalogContext();
-        private ProjectContext _contextP = new ProjectContext();
 
         public ObservableCollection<DeviceUpdate> Devices { get; set; } = new ObservableCollection<DeviceUpdate>();
 
@@ -86,10 +86,10 @@ namespace Kaenx.Classes.Controls
         private void UpdateDevice(DeviceUpdate update)
         {
             Devices.Remove(update);
-            LineDeviceModel device = _contextP.LineDevices.Single(d => d.UId == update.DeviceUid);
+            LineDeviceModel device = SaveHelper.contextProject.LineDevices.Single(d => d.UId == update.DeviceUid);
             device.ApplicationId = update.NewApplicationId;
-            _contextP.LineDevices.Update(device);
-            _contextP.SaveChanges();
+            SaveHelper.contextProject.LineDevices.Update(device);
+            SaveHelper.contextProject.SaveChanges();
             update.Device.ApplicationId = update.NewApplicationId;
             UpdateManager.Instance.CountUpdates();
         }

@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Kaenx.DataContext.Local;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -24,41 +25,27 @@ namespace Kaenx.DataContext.Catalog
         public DbSet<Hardware2AppModel> Hardware2App { get; set; }
 
 
-        private string _connectionString;
-        private DbConnectionType _connectionType = DbConnectionType.MySQL;
+        private LocalConnectionCatalog _conn;
 
         public CatalogContext()
         {
             //_connectionString = "Data Source=" + "Catalog.db";
-            _connectionString = "Server=mikegerst.de;Database=kaenx_mike;Uid=mike;Pwd=Passwortneu1;";
+            _conn = new LocalConnectionCatalog() { DbHostname = "Catalog.db", Type = LocalConnectionCatalog.DbConnectionType.SqlLite };
         }
+        public CatalogContext(LocalConnectionCatalog conn) => _conn = conn;
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            switch(_connectionType)
+            switch (_conn.Type)
             {
-                case DbConnectionType.SqlLite:
-                    optionsBuilder.UseSqlite(_connectionString);
+                case LocalConnectionCatalog.DbConnectionType.SqlLite:
+                    optionsBuilder.UseSqlite($"Data Source={_conn.DbHostname}");
                     break;
 
-                case DbConnectionType.MySQL:
-                    optionsBuilder.UseMySQL(_connectionString);
+                case LocalConnectionCatalog.DbConnectionType.MySQL:
+                    optionsBuilder.UseMySQL($"Server={_conn.DbHostname};Database={_conn.DbName};Uid={_conn.DbUsername};Pwd={_conn.DbPassword};");
                     break;
-
-            } 
-        }
-
-        public enum DbConnectionType
-        {
-            SqlLite,
-            MySQL
-        }
-
-        public enum DbType
-        {
-            Local,
-            Online,
-            Same
+            }  
         }
     }
 }

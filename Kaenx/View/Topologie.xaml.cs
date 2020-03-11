@@ -270,7 +270,7 @@ namespace Kaenx.View
                 }
             }
 
-            ProjectContext _contextP = new ProjectContext();
+            ProjectContext _contextP = SaveHelper.contextProject;
 
             LineDeviceModel linedevmodel = new LineDeviceModel();
             linedevmodel.Id = device.Id;

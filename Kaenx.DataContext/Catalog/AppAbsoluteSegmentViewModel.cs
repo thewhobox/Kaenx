@@ -10,6 +10,7 @@ namespace Kaenx.DataContext.Catalog
     public class AppAbsoluteSegmentViewModel
     {
         [Key]
+        [MaxLength(255)]
         public string Id { get; set; }
         public string ApplicationId { get; set; }
         public int Address { get; set; }

@@ -31,7 +31,7 @@ namespace Kaenx.View
     /// </summary>
     public sealed partial class Groups : Page, INotifyPropertyChanged
     {
-        private ProjectContext context = new ProjectContext();
+        private ProjectContext context = SaveHelper.contextProject;
 
         private LineDevice defaultDevice = new LineDevice() { Name = "Bitte Gerät auswählen" };
         private GroupAddress defaultGroup = new GroupAddress() { Name = "Bitte Gruppe auswählen", Id = -1 };

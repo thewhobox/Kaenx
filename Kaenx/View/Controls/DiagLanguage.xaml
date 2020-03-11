@@ -20,6 +20,6 @@
         </Grid.ColumnDefinitions>
         
         <TextBlock Text="Sprache: " VerticalAlignment="Center" Margin="0 0 10 0" />
-        <ComboBox x:Name="InSelectLang" Grid.Column="1" VerticalAlignment="Center" Width="200" ItemsSource="{Binding Languages}" SelectedItem="{Binding SelectedLanguage, Mode=TwoWay}" />
+        <ComboBox x:Name="InSelectLang" Grid.Column="1" DisplayMemberPath="Local" VerticalAlignment="Center" Width="200" ItemsSource="{Binding Languages}" SelectionChanged="InSelectLang_SelectionChanged" />
     </Grid>
 </ContentDialog>

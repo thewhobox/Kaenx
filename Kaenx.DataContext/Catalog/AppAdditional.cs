@@ -1,11 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Text;
 
 namespace Kaenx.DataContext.Catalog
 {
     public class AppAdditional
     {
+        [Key]
+        [MaxLength(255)]
         public string Id { get; set; }
         public byte[] LoadProcedures { get; set; }
         public byte[] Dynamic { get; set; }

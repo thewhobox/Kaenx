@@ -87,7 +87,7 @@ namespace Kaenx.View
                 currentView.AppViewBackButtonVisibility = AppViewBackButtonVisibility.Visible;
                 currentView.BackRequested += CurrentView_BackRequested;
                 Import.wasFromMain = true;
-                ApplicationView.GetForCurrentView().Title = "Katalog";
+                ApplicationView.GetForCurrentView().Title = loader.GetString("WindowTitle");
             }
         }
 
@@ -120,17 +120,14 @@ namespace Kaenx.View
             }
             
             StorageFile file2 = await ApplicationData.Current.TemporaryFolder.GetFileAsync("temp.knxprod");
-
-
             Import.Archive = ZipFile.Open(file2.Path, ZipArchiveMode.Read);
-
             ImportHelper helper = new ImportHelper();
-
             bool success = await helper.GetDeviceList(Import);
 
             if (!success)
             {
                 //todo blabla
+                ViewHelper.Instance.ShowNotification("Es trat ein Fehler beim auslesen der Geräte auf.", 3000, ViewHelper.MessageType.Error);
                 return;
             }
 
@@ -144,7 +141,7 @@ namespace Kaenx.View
 
 
             if (!string.IsNullOrEmpty(Import.SelectedLanguage))
-                OutSelectedLang.Text = Import.SelectedLanguage;
+                OutSelectedLang.Text = new System.Globalization.CultureInfo(Import.SelectedLanguage).DisplayName;
 
         }
 
@@ -403,7 +400,7 @@ namespace Kaenx.View
                     await diaglang.ShowAsync();
                     Import.SelectedLanguage = diaglang.SelectedLanguage;
                     await ImportHelper.TranslateXml(catXML.Root, diaglang.SelectedLanguage);
-                    OutSelectedLang.Text = Import.SelectedLanguage;
+                    OutSelectedLang.Text = new System.Globalization.CultureInfo(Import.SelectedLanguage).DisplayName;
                     XElement catalogXML = catXML.Descendants(XName.Get("Catalog", ns)).ElementAt<XElement>(0);
                     Import.DeviceList = CatalogHelper.GetDevicesFromCatalog(catalogXML);
 

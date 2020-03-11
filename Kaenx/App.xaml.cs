@@ -28,6 +28,7 @@ using Microsoft.AppCenter.Analytics;
 using Microsoft.AppCenter.Crashes;
 using Microsoft.AppCenter.Push;
 using Windows.UI.StartScreen;
+using Kaenx.DataContext.Local;
 
 namespace Kaenx
 {
@@ -50,21 +51,51 @@ namespace Kaenx
             // Required for XBOX
             try
             {
-                this.RequiresPointerMode = Windows.UI.Xaml.ApplicationRequiresPointerMode.WhenRequested;
+                //this.RequiresPointerMode = Windows.UI.Xaml.ApplicationRequiresPointerMode.WhenRequested;
                 bool result = Windows.UI.ViewManagement.ApplicationViewScaling.TrySetDisableLayoutScaling(true);
                 Windows.UI.ViewManagement.ApplicationView.GetForCurrentView().SetDesiredBoundsMode(Windows.UI.ViewManagement.ApplicationViewBoundsMode.UseCoreWindow);
             }
             catch { }
 
 
-            using (var db = new CatalogContext())
+            using (var db = new LocalContext())
             {
                 db.Database.Migrate();
+                if (db.ConnsProject.Count() == 0)
+                {
+                    LocalConnectionProject connP = new LocalConnectionProject()
+                    {
+                        Type = LocalConnectionProject.DbConnectionType.SqlLite,
+                        Name = "Lokal",
+                        DbHostname = "Projects.db"
+                    };
+                    db.ConnsProject.Add(connP);
+                    db.SaveChanges();
+                    ProjectContext conP = new ProjectContext(connP);
+                    conP.Database.Migrate();
+                }
+                if (db.ConnsCatalog.Count() == 0)
+                {
+                    LocalConnectionCatalog connC = new LocalConnectionCatalog()
+                    {
+                        Type = LocalConnectionCatalog.DbConnectionType.SqlLite,
+                        Name = "Lokal",
+                        DbHostname = "Catalog.db"
+                    };
+                    db.ConnsCatalog.Add(connC);
+                    db.SaveChanges();
+                    CatalogContext conC = new CatalogContext(connC);
+                    conC.Database.Migrate();
+                }
             }
-            using (var db = new ProjectContext())
-            {
-                db.Database.Migrate();
-            }
+            //using (var db = new CatalogContext())
+            //{
+            //    db.Database.Migrate();
+            //}
+            //using (var db = new ProjectContext())
+            //{
+            //    db.Database.Migrate();
+            //}
             CreateLogger();
 
 

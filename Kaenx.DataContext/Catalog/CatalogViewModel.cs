@@ -10,6 +10,7 @@ namespace Kaenx.DataContext.Catalog
     public class CatalogViewModel
     {
         [Key]
+        [MaxLength(255)]
         public string Id { get; set; }
         [MaxLength(100)]
         public string ParentId { get; set; }

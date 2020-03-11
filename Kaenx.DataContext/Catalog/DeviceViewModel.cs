@@ -10,6 +10,7 @@ namespace Kaenx.DataContext.Catalog
     public class DeviceViewModel
     {
         [Key]
+        [MaxLength(255)]
         public string Id { get; set; }
         [MaxLength(7)]
         public string ManufacturerId { get; set; }

@@ -117,82 +117,16 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="BarDelete.Label" xml:space="preserve">
-    <value>Löschen</value>
+  <data name="MainTabs.Title" xml:space="preserve">
+    <value>Einstellungen</value>
   </data>
-  <data name="BarExport.Label" xml:space="preserve">
-    <value>Exportieren</value>
+  <data name="TabConnections.Header" xml:space="preserve">
+    <value>Verbindungen</value>
   </data>
-  <data name="BarImport.Label" xml:space="preserve">
-    <value>Importieren</value>
-  </data>
-  <data name="BarSearch.PlaceholderText" xml:space="preserve">
-    <value>Suchen...</value>
-  </data>
-  <data name="BarSort.Text" xml:space="preserve">
-    <value>Sortieren:</value>
-  </data>
-  <data name="DeviceInfoAddress.Text" xml:space="preserve">
-    <value>Ph. Adresse:</value>
-  </data>
-  <data name="DeviceInfoApp.Text" xml:space="preserve">
-    <value>Aktuellste Applikation:</value>
-  </data>
-  <data name="DeviceInfoCoupler.Text" xml:space="preserve">
-    <value>Koppler:</value>
-  </data>
-  <data name="DeviceInfoCurrent.Text" xml:space="preserve">
-    <value>Busstrom:</value>
-  </data>
-  <data name="DeviceInfoHasApp.Text" xml:space="preserve">
-    <value>Applikation:</value>
-  </data>
-  <data name="DeviceInfoHeader2.Text" xml:space="preserve">
-    <value>Geräte Informationen</value>
-  </data>
-  <data name="DeviceInfoName.Text" xml:space="preserve">
-    <value>Name:</value>
-  </data>
-  <data name="DeviceInfoOrder.Text" xml:space="preserve">
-    <value>Bestellnummer:</value>
-  </data>
-  <data name="DeviceInfoSupply.Text" xml:space="preserve">
-    <value>Netzteil:</value>
-  </data>
-  <data name="DListDesc.Header" xml:space="preserve">
-    <value>Beschreibung</value>
-  </data>
-  <data name="DListName.Header" xml:space="preserve">
-    <value>Name</value>
-  </data>
-  <data name="DListNumb.Header" xml:space="preserve">
-    <value>Bestellnummer</value>
-  </data>
-  <data name="ImportAll.Content" xml:space="preserve">
-    <value>Alle</value>
-  </data>
-  <data name="ImportCancel.Content" xml:space="preserve">
-    <value>Abbrechen</value>
-  </data>
-  <data name="ImportChangeLange.Text" xml:space="preserve">
-    <value>Ändern</value>
-  </data>
-  <data name="ImportHeader.Text" xml:space="preserve">
-    <value>Welche Geräte sollen importiert werden?</value>
-  </data>
-  <data name="ImportSelected.Content" xml:space="preserve">
-    <value>Ausgewählte</value>
-  </data>
-  <data name="ImportSelectedLang.Text" xml:space="preserve">
-    <value>Sprache: </value>
-  </data>
-  <data name="MansListAll" xml:space="preserve">
-    <value>Alle Hersteller</value>
-  </data>
-  <data name="MsgNotCopied" xml:space="preserve">
-    <value>Die Datei konnte nicht kopiert werden.</value>
+  <data name="TabGeneral.Header" xml:space="preserve">
+    <value>Allgemein</value>
   </data>
   <data name="WindowTitle" xml:space="preserve">
-    <value>Katalog</value>
+    <value>Einstellungen</value>
   </data>
 </root>

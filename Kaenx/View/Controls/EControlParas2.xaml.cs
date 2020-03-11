@@ -40,7 +40,7 @@ namespace Kaenx.Views.Easy.Controls
 
         public LineDevice device { get; }
         private CatalogContext _context = new CatalogContext();
-        private ProjectContext _contextP = new ProjectContext();
+        private ProjectContext _contextP = Classes.Helper.SaveHelper.contextProject;
 
         private List<BlockVisHelper> helperBlock = new List<BlockVisHelper>();
         private List<Binding> bindings = new List<Binding>();

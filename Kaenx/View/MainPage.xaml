@@ -83,7 +83,7 @@
                 </StackPanel>
             </Button>
             
-            <Button Grid.Column="4" BorderBrush="White" Background="Transparent" Padding="20" >
+            <Button Grid.Column="4" Click="OpenSettings" BorderBrush="White" Background="Transparent" Padding="20" >
                 <StackPanel>
                     <Viewbox x:Name="VB4" Height="70">
                         <SymbolIcon Symbol="Setting" Foreground="Gray" />
@@ -166,7 +166,7 @@
                 <Grid.RowDefinitions>
                     <RowDefinition Height="auto" />
                     <RowDefinition Height="auto" />
-                    <RowDefinition Height="10" />
+                    <RowDefinition Height="auto" />
                     <RowDefinition Height="auto" />
                     <RowDefinition  />
                     <RowDefinition Height="auto" />
@@ -177,6 +177,9 @@
 
                 <TextBlock Grid.Row="1" Text="Name:" />
                 <TextBox Grid.Row="1" Grid.Column="1" x:Name="InName" Text="Neues Projekt" />
+
+                <TextBlock Grid.Row="2" Text="Speicherort:" />
+                <ComboBox  Grid.Row="2" Grid.Column="1" x:Name="InConn" Margin="0 5" ItemsSource="{Binding ConnectionsList}" DisplayMemberPath="Name" /> 
 
                 <TextBlock Grid.Row="3" Text="Bild:" />
                 <StackPanel Grid.Row="3" Grid.Column="1" Orientation="Horizontal">

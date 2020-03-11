@@ -2,6 +2,7 @@
 using Kaenx.Classes.Controls;
 using Kaenx.Classes.Helper;
 using Kaenx.Classes.Project;
+using Kaenx.DataContext.Local;
 using Kaenx.DataContext.Project;
 using Kaenx.View.Controls;
 using Microsoft.AppCenter.Crashes;
@@ -43,12 +44,14 @@ namespace Kaenx.View
     public sealed partial class MainPage : Page, INotifyPropertyChanged
     {
         public ObservableCollection<ProjectViewHelper> ProjectList { get; set; } = new ObservableCollection<ProjectViewHelper>();
+        public ObservableCollection<LocalConnectionProject> ConnectionsList { get; set; } = new ObservableCollection<LocalConnectionProject>();
 
         private ResourceLoader loader = ResourceLoader.GetForCurrentView("MainPage");
         private ResourceLoader loaderG = ResourceLoader.GetForCurrentView("Global");
         private ResourceLoader loaderD = ResourceLoader.GetForCurrentView("Dialogs");
 
         private bool _projectSelected = false;
+        private LocalContext _contextL = new LocalContext();
 
         public event PropertyChangedEventHandler PropertyChanged;
 
@@ -75,18 +78,20 @@ namespace Kaenx.View
 
         private async void LoadProjects()
         {
-            foreach(ProjectModel model in SaveHelper.GetProjects())
+            LocalContext context = new LocalContext();
+            foreach(LocalProject model in context.Projects.ToList())
             {
                 ProjectViewHelper helper = new ProjectViewHelper();
                 helper.Id = model.Id;
                 helper.Name = model.Name;
+                helper.Local = model;
 
-                if(model.Image != null)
+                if(model.Thumbnail != null)
                 {
-                    var wb = new WriteableBitmap(model.ImageW, model.ImageH);
+                    var wb = new WriteableBitmap(model.ThumbWidth, model.ThumbHeight);
                     using (Stream stream = wb.PixelBuffer.AsStream())
                     {
-                        await stream.WriteAsync(model.Image, 0, model.Image.Length);
+                        await stream.WriteAsync(model.Thumbnail, 0, model.Thumbnail.Length);
                     }
 
                     helper.Image = wb;
@@ -114,8 +119,18 @@ namespace Kaenx.View
             App.Navigate(typeof(Catalog), "main");
         }
 
+        private void OpenSettings(object sender, RoutedEventArgs e)
+        {
+            Serilog.Log.Debug("Einstellungen öffnen");
+            App.Navigate(typeof(Settings), "main");
+        }
+
         private void OpenNewProjekt(object sender, RoutedEventArgs e)
         {
+            ConnectionsList.Clear();
+            foreach (LocalConnectionProject conn in _contextL.ConnsProject)
+                ConnectionsList.Add(conn);
+            InConn.SelectedIndex = 0;
             DiagNew.Visibility = Visibility;
             InName.Focus(FocusState.Pointer);
             InName.SelectAll();
@@ -127,9 +142,14 @@ namespace Kaenx.View
             LoadScreen.IsLoading = true;
             await Task.Delay(200);
 
-            Project project = SaveHelper.LoadProject(((ProjectViewHelper)TestGrid.SelectedItem).Id);
-            ChangeHandler.Instance = new ChangeHandler(project.Id);
+            Project project = SaveHelper.LoadProject((ProjectViewHelper)TestGrid.SelectedItem);
+            if(project == null)
+            {
+                LoadScreen.IsLoading = true;
+                return;
+            }
 
+            ChangeHandler.Instance = new ChangeHandler(project.Id);
             Serilog.Log.Debug("Neues Projekt erstellt: " + project.Id + " - " + project.Name);
 
             App.AppFrame.Navigate(typeof(WorkdeskEasy), project);
@@ -210,6 +230,7 @@ namespace Kaenx.View
             await Task.Delay(1000);
 
             Project proj = new Project(InName.Text);
+            proj.Connection = (LocalConnectionProject)InConn.SelectedItem;
             Line Backbone = new Line(1, loaderG.GetString("Area"));
             Backbone.Subs.Add(new LineMiddle(1, loaderG.GetString("Line") + " 1", Backbone));
             proj.Lines.Add(Backbone);
@@ -301,7 +322,18 @@ namespace Kaenx.View
             proj.Image = pixels;
             proj.ImageH = image.PixelHeight;
             proj.ImageW = image.PixelWidth;
+
             proj.Id = SaveHelper.SaveProject(proj).Id;
+
+
+            LocalProject lp = new LocalProject();
+            lp.Name = proj.Name;
+            lp.Thumbnail = proj.Image;
+            lp.ThumbHeight = proj.ImageH;
+            lp.ThumbWidth = proj.ImageW;
+            lp.ConnectionId = proj.Connection.Id;
+            _contextL.Projects.Add(lp);
+            _contextL.SaveChanges();
 
 
             StorageFolder folder = await ApplicationData.Current.LocalFolder.CreateFolderAsync("Projects", CreationCollisionOption.OpenIfExists);

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices.WindowsRuntime;
@@ -20,10 +21,17 @@ using Windows.UI.Xaml.Navigation;
 
 namespace Kaenx.View.Controls
 {
+    public class LangHelper
+    {
+        public LangHelper(string code) => Code = code;
+        public string Code { get; set; }
+        public string Local { get { return new CultureInfo(Code).DisplayName; } }
+    }
+
     public sealed partial class DiagLanguage : ContentDialog, INotifyPropertyChanged
     {
-        private ObservableCollection<string> languages = new ObservableCollection<string>();
-        public ObservableCollection<string> Languages
+        private ObservableCollection<LangHelper> languages = new ObservableCollection<LangHelper>();
+        public ObservableCollection<LangHelper> Languages
         {
             get
             {
@@ -56,19 +64,35 @@ namespace Kaenx.View.Controls
         {
             this.InitializeComponent();
             this.DataContext = this;
-            Languages = langs;
+
+            foreach(string lang in langs)
+            {
+                Languages.Add(new LangHelper(lang));
+            }
 
             string current = System.Globalization.CultureInfo.CurrentCulture.Name;
 
-            if (Languages.Contains(current))
-                SelectedLanguage = current;
+            if (Languages.Any(x => x.Code == current))
+            {
+                LangHelper h = Languages.First(l => l.Code == current);
+                InSelectLang.SelectedItem = h;
+                SelectedLanguage = h.Code;
+            }
             else
             {
                 current = current.Substring(0, 2);
-                if (Languages.Any(l => l.StartsWith(current)))
-                    SelectedLanguage = Languages.First(l => l.StartsWith(current));
+                if (Languages.Any(l => l.Code.StartsWith(current)))
+                {
+                    LangHelper h = Languages.First(l => l.Code.StartsWith(current));
+                    InSelectLang.SelectedItem = h;
+                    SelectedLanguage = h.Code;
+                }
                 else
-                    SelectedLanguage = Languages[0];
+                {
+                    LangHelper h = Languages[0];
+                    InSelectLang.SelectedItem = h;
+                    SelectedLanguage = h.Code;
+                }
             }
         }
 
@@ -88,6 +112,11 @@ namespace Kaenx.View.Controls
         private void Update(string name)
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
+        }
+
+        private void InSelectLang_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            SelectedLanguage = ((LangHelper)InSelectLang.SelectedItem).Code;
         }
     }
 }

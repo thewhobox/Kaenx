@@ -1347,10 +1347,11 @@ namespace Kaenx.Classes.Helper
             }
 
             Log.Information("LoadProcedures werden gespeichert");
-            XElement prods = doc.Descendants(GetXName("LoadProcedures"))?.ElementAt(0);
-            if(prods != null)
+            IEnumerable<XElement> loads = doc.Descendants(GetXName("LoadProcedures"));
+            if(loads.Count() != 0)
             {
-                adds.LoadProcedures = System.Text.Encoding.UTF8.GetBytes(prods.ToString());
+                XElement procedures = doc.Descendants(GetXName("LoadProcedures"))?.ElementAt(0);
+                adds.LoadProcedures = System.Text.Encoding.UTF8.GetBytes(procedures.ToString());
             }
 
             if (doc.Descendants(GetXName("Dynamic")).Count() != 0)

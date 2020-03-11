@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Kaenx.DataContext.Local;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
@@ -15,6 +16,7 @@ namespace Kaenx.Classes.Project
         public byte[] Image { get; set; }
         public int ImageH { get; set; }
         public int ImageW { get; set; }
+        public LocalConnectionProject Connection { get; set; }
 
         private ObservableCollection<Group> _groups = new ObservableCollection<Group>();
 
