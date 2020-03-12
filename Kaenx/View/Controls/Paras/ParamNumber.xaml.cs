@@ -21,18 +21,18 @@ namespace Kaenx.Classes.Controls.Paras
 {
     public sealed partial class ParamNumber : UserControl, IParam
     {
-        public string hash { get; set; }
-        public delegate void ParamChangedHandler(string source, string value, string hash);
+        public string Hash { get; set; }
+        public string ParamId { get; }
+        public delegate void ParamChangedHandler(IParam param);
         public event ParamChangedHandler ParamChanged;
 
-        private string paraId;
 
         public ParamNumber(AppParameter param, AppParameterTypeViewModel type)
         {
             this.InitializeComponent();
 
             ParaValue.Value = int.Parse(param.Value);
-            paraId = param.Id;
+            ParamId = param.Id;
             ParaName.Text = param.Text;
 
             //ParaValue.ValueChanged += ParaValue_ValueChanged;
@@ -46,12 +46,12 @@ namespace Kaenx.Classes.Controls.Paras
 
         private void ParaValue_LostFocus(object sender, RoutedEventArgs e)
         {
-            ParamChanged?.Invoke(paraId, ParaValue.Value.ToString(), hash);
+            ParamChanged?.Invoke(this);
         }
 
         private void ParaValue_ValueChanged()
         {
-            ParamChanged?.Invoke(paraId, ParaValue.Value.ToString(), hash);
+            ParamChanged?.Invoke(this);
         }
 
         public string GetValue()
@@ -62,6 +62,11 @@ namespace Kaenx.Classes.Controls.Paras
         public void SetVisibility(Visibility visible)
         {
             this.Visibility = visible;
+        }
+
+        public void SetValue(string val)
+        {
+            ParaValue.Value = int.Parse(val);
         }
     }
 }

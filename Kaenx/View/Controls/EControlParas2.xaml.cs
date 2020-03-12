@@ -98,9 +98,13 @@ namespace Kaenx.Views.Easy.Controls
             try
             {
                 await ParseRoot(dynamic.Root, Visibility.Visible);
-            } catch
-            {
-
+            } catch(Exception e)
+            { 
+                watch.Stop();
+                Log.Error(e, "Fehler beim Laden der ControlParas");
+                LoadRing.Visibility = Visibility.Collapsed;
+                ViewHelper.Instance.ShowNotification("Es trat ein Fehler beim Laden auf: " + e.Message, 3000, ViewHelper.MessageType.Error);
+                return;
             }
 
             NavChannel.SelectedIndex = 0;
@@ -296,16 +300,14 @@ namespace Kaenx.Views.Easy.Controls
                         switch (paraType.Type)
                         {
                             case ParamTypes.Picture:
-                                ParamPicture paraviewP = new ParamPicture(para, paraType);
-                                paraviewP.hash = hash;
+                                ParamPicture paraviewP = new ParamPicture(para, paraType) { Hash = hash };
                                 paraviewP.SetVisibility(vis2vis(visibility));
                                 parent.Children.Add(paraviewP);
                                 Params.Add(hash, paraviewP);
                                 break;
                             case ParamTypes.NumberInt:
                             case ParamTypes.NumberUInt:
-                                ParamNumber paraviewN = new ParamNumber(para, paraType);
-                                paraviewN.hash = hash;
+                                ParamNumber paraviewN = new ParamNumber(para, paraType) { Hash = hash };
                                 paraviewN.SetVisibility(vis2vis(visibility));
                                 paraviewN.ParamChanged += ParamChanged;
                                 parent.Children.Add(paraviewN);
@@ -321,8 +323,7 @@ namespace Kaenx.Views.Easy.Controls
                                 }
                                 else
                                 {
-                                    ParamInput paraviewI = new ParamInput(para, paraType) { Name = para.Id };
-                                    paraviewI.hash = hash;
+                                    ParamInput paraviewI = new ParamInput(para, paraType) { Name = para.Id, Hash = hash };
                                     paraviewI.ParamChanged += ParamChanged;
                                     paraviewI.SetVisibility(vis2vis(visibility));
                                     parent.Children.Add(paraviewI);
@@ -345,8 +346,7 @@ namespace Kaenx.Views.Easy.Controls
                                 }
                                 else if (enums.Count() > 2)
                                 {
-                                    ParamEnum paraviewE = new ParamEnum(para, paraType, enums) { Name = para.Id };
-                                    paraviewE.hash = hash;
+                                    ParamEnum paraviewE = new ParamEnum(para, paraType, enums) { Name = para.Id, Hash = hash };
                                     paraviewE.ParamChanged += ParamChanged;
                                     paraviewE.SetVisibility(vis2vis(visibility));
                                     parent.Children.Add(paraviewE);
@@ -354,8 +354,7 @@ namespace Kaenx.Views.Easy.Controls
                                 }
                                 else
                                 {
-                                    ParamEnum2 paraviewE2 = new ParamEnum2(para, paraType, enums) { Name = para.Id };
-                                    paraviewE2.hash = hash;
+                                    ParamEnum2 paraviewE2 = new ParamEnum2(para, paraType, enums) { Name = para.Id, Hash = hash };
                                     paraviewE2.ParamChanged += ParamChanged;
                                     paraviewE2.SetVisibility(vis2vis(visibility));
                                     parent.Children.Add(paraviewE2);
@@ -441,9 +440,25 @@ namespace Kaenx.Views.Easy.Controls
                 }
             }
         }
-
-        private void ParamChanged(string source, string value, string hash)
+        
+        private async void ParamChanged(IParam param)
         {
+            string source = param.ParamId;
+            string value = param.GetValue();
+            List<DeviceComObject> deleteList = CheckRemoveComObjects(source, value);
+
+            if(deleteList.Count != 0)
+            {
+                DiagComsDeleted dcoms = new DiagComsDeleted();
+                dcoms.SetComs(deleteList);
+                await dcoms.ShowAsync();
+                if (dcoms.DoDelete == false)
+                {
+                    param.SetValue(AppParas[param.ParamId].Value);
+                    return;
+                }
+            }
+
             AppParameter para = AppParas[source];
             para.Value = value;
             IEnumerable<ParamVisHelper> helpers = conditions.Where(h => h.Conditions.Any(c => c.SourceId == source));
@@ -519,10 +534,6 @@ namespace Kaenx.Views.Easy.Controls
             device.LoadedApplication = false;
             ChangeHandler.Instance.ChangedParam(change);
             CheckComObjects();
-            //SaveHelper.SaveProject();
-
-
-            //TODO set para value if no connected comobj is affected
         }
 
         private AppParameterTypeViewModel GetParamType(string id)
@@ -545,6 +556,37 @@ namespace Kaenx.Views.Easy.Controls
 
 
 
+        private List<DeviceComObject> CheckRemoveComObjects(string paraId, string paraValue)
+        {
+            List<DeviceComObject> newObjs = new List<DeviceComObject>();
+
+            foreach (DeviceComObject obj in comObjects)
+            {
+                if (obj.Conditions.Count == 0)
+                {
+                    newObjs.Add(obj);
+                    continue;
+                }
+
+                bool flag = true;
+                foreach (ParamCondition cond in obj.Conditions)
+                {
+                    string val = cond.SourceId == paraId ? paraValue : AppParas[cond.SourceId].Value;
+                    if (!cond.Values.Contains(val))
+                        flag = false;
+                }
+                if (flag)
+                    newObjs.Add(obj);
+            }
+
+            List<DeviceComObject> toDelete = new List<DeviceComObject>();
+            foreach (DeviceComObject cobj in device.ComObjects)
+                if (!newObjs.Any(co => co.Id == cobj.Id) && cobj.Groups.Count != 0)
+                    toDelete.Add(cobj);
+
+            return toDelete;
+        }
+
         private void CheckComObjects()
         {
             List<DeviceComObject> newObjs = new List<DeviceComObject>();
@@ -561,25 +603,6 @@ namespace Kaenx.Views.Easy.Controls
                 foreach (ParamCondition cond in obj.Conditions)
                 {
                     string val = AppParas[cond.SourceId].Value;
-                    //if (tempValues.ContainsKey(cond.SourceId))
-                    //    val = tempValues[cond.SourceId];
-                    //else
-                    //{
-                    //    AppParameter pbPara = _context.AppParameters.Single(p => p.Id == cond.SourceId);
-                    //    ChangeParamModel change = null;
-                    //    try
-                    //    {
-                    //        change = _contextP.ChangesParam.Where(c => c.DeviceId == device.UId && c.ParamId == pbPara.Id).OrderByDescending(c => c.StateId).First();
-                    //    }
-                    //    catch { }
-                    //    if (change == null)
-                    //        val = pbPara.Value;
-                    //    else
-                    //        val = change.Value;
-
-                    //    tempValues.Add(cond.SourceId, val);
-                    //}
-
                     if (!cond.Values.Contains(val))
                         flag = false;
                 }
@@ -599,16 +622,12 @@ namespace Kaenx.Views.Easy.Controls
             foreach (DeviceComObject cobj in device.ComObjects)
             {
                 if (!newObjs.Any(co => co.Id == cobj.Id))
-                {
-                    if (cobj.Groups.Count != 0)
-                    {
-                        //TODO frage ob verbundene Kommunikationsobjekte gelöscht werden sollen, sonst zurück setzen
-                    }
                     toDelete.Add(cobj);
-                }
             }
+
             foreach (DeviceComObject cobj in toDelete)
             {
+
                 device.ComObjects.Remove(cobj);
             }
             foreach (DeviceComObject cobj in toAdd)

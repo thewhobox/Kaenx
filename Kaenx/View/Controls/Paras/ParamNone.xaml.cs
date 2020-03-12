@@ -20,7 +20,9 @@ namespace Kaenx.Classes.Controls.Paras
 {
     public sealed partial class ParamNone : UserControl, IParam
     {
-        public string hash { get; set; }
+        public string Hash { get; set; }
+
+        public string ParamId => throw new NotImplementedException();
 
         public ParamNone(AppParameter param, AppParameterTypeViewModel type)
         {
@@ -46,6 +48,11 @@ namespace Kaenx.Classes.Controls.Paras
         public void SetVisibility(Visibility visible)
         {
             this.Visibility = visible;
+        }
+
+        public void SetValue(string val)
+        {
+            throw new NotImplementedException();
         }
     }
 }

@@ -71,7 +71,7 @@
         <TreeView x:Name="TreeV" Grid.Row="2" ItemsSource="{Binding}" CanReorderItems="False" ItemInvoked="TreeV_ItemInvoked"  VerticalAlignment="Stretch" Background="LightGray">
             <TreeView.ItemTemplate>
                 <DataTemplate x:DataType="local:Line">
-                    <TreeViewItem Margin="-20 0 0 0" ToolTipService.ToolTip="{Binding Name}" DoubleTapped="TreeViewItem_DoubleTapped" Background="{Binding CurrentBackBrush}" BorderThickness="0" AllowDrop="True" Content="{Binding}" ItemsSource="{Binding Subs}" IsExpanded="{Binding IsExpanded, Mode=TwoWay}" DragOver="TreeViewItem_DragOver" Drop="TreeViewItem_Drop">
+                    <TreeViewItem Margin="-20 0 0 0" AllowDrop="True" HorizontalContentAlignment="Stretch" HorizontalAlignment="Stretch" DragEnter="TreeViewItem_DragEnter" ToolTipService.ToolTip="{Binding Name}" DoubleTapped="TreeViewItem_DoubleTapped" Background="{Binding CurrentBackBrush}" BorderThickness="0" Content="{Binding}" ItemsSource="{Binding Subs}" IsExpanded="{Binding IsExpanded, Mode=TwoWay}" Drop="TreeViewItem_Drop">
                         <TreeViewItem.ContextFlyout>
                             <MenuFlyout Opening="MenuFlyout_Opening">
                                 <MenuFlyoutItem x:Name="MFI_Add" x:Uid="/Topologie/MenAdd" Icon="Add" Click="ClickAddSub" />
@@ -90,7 +90,7 @@
                         </TreeViewItem.ContextFlyout>
                         <TreeViewItem.ContentTemplate>
                             <DataTemplate x:DataType="local:TopologieBase">
-                                <StackPanel Orientation="Horizontal">
+                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Stretch">
                                     <Viewbox Height="15">
                                         <SymbolIcon Symbol="{Binding Icon}" Foreground="{Binding CurrentBrush}" />
                                     </Viewbox>

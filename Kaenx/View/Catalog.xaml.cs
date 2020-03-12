@@ -320,6 +320,9 @@ namespace Kaenx.View
 
         private void RowDragStarting(UIElement sender, DragStartingEventArgs args)
         {
+            ((DataGridRow)sender).CanDrag = true;
+            args.AllowedOperations = Windows.ApplicationModel.DataTransfer.DataPackageOperation.Link;
+            args.Data.RequestedOperation = Windows.ApplicationModel.DataTransfer.DataPackageOperation.Link;
             ViewHelper.Instance.DragItem = ((DataGridRow)sender).DataContext;
         }
 

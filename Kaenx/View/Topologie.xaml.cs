@@ -196,15 +196,20 @@ namespace Kaenx.View
 
         private void TreeViewItem_DragOver(object sender, DragEventArgs e)
         {
-            if (e.Handled == true) return;
+            return;
+            e.AcceptedOperation = Windows.ApplicationModel.DataTransfer.DataPackageOperation.Link;
+            e.DragUIOverride.Caption = "Huhu";
+            e.Handled = true;
+            return;
 
             TopologieBase tbase = (TopologieBase)((TreeViewItem)e.OriginalSource).DataContext;
             if (tbase.Type == TopologieType.LineMiddle && ViewHelper.Instance.DragItem?.GetType() == typeof(DataContext.Catalog.DeviceViewModel))
             {
                 LineMiddle line = (LineMiddle)tbase;
                 e.AcceptedOperation = Windows.ApplicationModel.DataTransfer.DataPackageOperation.Link;
-                e.DragUIOverride.Caption = string.Format(loader.GetString("DragConnect"), line.Parent.Id, line.Id);
-                e.Handled = true;
+                //e.AcceptedOperation = Windows.ApplicationModel.DataTransfer.DataPackageOperation.Link;
+                //e.DragUIOverride.Caption = string.Format(loader.GetString("DragConnect"), line.Parent.Id, line.Id);
+                //e.Handled = true;
             }
         }
 
@@ -550,6 +555,20 @@ namespace Kaenx.View
                     ColsPara.Width = new GridLength(0, GridUnitType.Star);
                     ColsSett.Width = new GridLength(1, GridUnitType.Star);
                     break;
+            }
+        }
+
+        private void TreeViewItem_DragEnter(object sender, DragEventArgs e)
+        {
+            //e.AcceptedOperation = Windows.ApplicationModel.DataTransfer.DataPackageOperation.Link;
+
+            TopologieBase tbase = (TopologieBase)((TreeViewItem)e.OriginalSource).DataContext;
+            if (tbase.Type == TopologieType.LineMiddle && ViewHelper.Instance.DragItem?.GetType() == typeof(DataContext.Catalog.DeviceViewModel))
+            {
+                LineMiddle line = (LineMiddle)tbase;
+                e.AcceptedOperation = Windows.ApplicationModel.DataTransfer.DataPackageOperation.Link;
+                e.DragUIOverride.Caption = string.Format(loader.GetString("DragConnect"), line.Parent.Id, line.Id);
+                e.Handled = true;
             }
         }
     }

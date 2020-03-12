@@ -20,13 +20,18 @@ namespace Kaenx.Classes.Controls.Paras
 {
     public sealed partial class ParamText : UserControl, IParam
     {
-        public string hash { get; set; }
+        public string Hash { get; set; }
+
+        public string Value { get { return ParaValue.Text; } }
+
+        public string ParamId { get; }
 
         public ParamText(AppParameter param, AppParameterTypeViewModel type)
         {
             this.InitializeComponent();
             ParaName.Text = param.Text;
             ParaValue.Text = param.Value;
+            ParamId = param.Id;
         }
 
         public string GetValue()
@@ -37,6 +42,13 @@ namespace Kaenx.Classes.Controls.Paras
         public void SetVisibility(Visibility visible)
         {
             this.Visibility = visible;
+        }
+
+        public void Undo() { }
+
+        public void SetValue(string val)
+        {
+            ParaValue.Text = val;
         }
     }
 }

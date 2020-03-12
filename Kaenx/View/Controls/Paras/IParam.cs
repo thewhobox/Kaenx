@@ -10,7 +10,9 @@ namespace Kaenx.Classes.Controls.Paras
     public interface IParam
     {
         string GetValue();
-        public string hash { get; set; }
+        void SetValue(string val);
+        public string Hash { get; set; }
+        public string ParamId { get; }
         void SetVisibility(Visibility visible);
     }
 }

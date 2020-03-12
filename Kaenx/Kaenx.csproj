@@ -145,6 +145,9 @@
     <Compile Include="Classes\Project\DeviceComObject.cs" />
     <Compile Include="Classes\Project\GroupAddress.cs" />
     <Compile Include="Classes\Project\GroupMiddle.cs" />
+    <Compile Include="View\Controls\DiagComsDeleted.xaml.cs">
+      <DependentUpon>DiagComsDeleted.xaml</DependentUpon>
+    </Compile>
     <Compile Include="View\Controls\DiagLanguage.xaml.cs">
       <DependentUpon>DiagLanguage.xaml</DependentUpon>
     </Compile>
@@ -329,6 +332,10 @@
       <SubType>Designer</SubType>
     </ApplicationDefinition>
     <Page Include="Classes\Controls\ControlUpdate.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="View\Controls\DiagComsDeleted.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

@@ -41,7 +41,7 @@ namespace Kaenx.Classes.Helper
             ProjectModel model;
 
             if (!contextProject.Projects.Any(p => p.Id == _project.Id))
-            {
+            { 
                 model = new ProjectModel();
                 contextProject.Projects.Add(model);
                 contextProject.SaveChanges();
@@ -366,8 +366,6 @@ namespace Kaenx.Classes.Helper
 
             List<LineDeviceModel> lds = contextProject.LineDevices.Where(l => l.ProjectId == id).ToList();
             contextProject.LineDevices.RemoveRange(lds);
-
-            //TODO projectordner löschen
 
             contextProject.SaveChanges();
         }

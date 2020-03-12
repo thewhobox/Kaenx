@@ -43,7 +43,7 @@ namespace Kaenx.DataContext.Catalog
                     break;
 
                 case LocalConnectionCatalog.DbConnectionType.MySQL:
-                    optionsBuilder.UseMySQL($"Server={_conn.DbHostname};Database={_conn.DbName};Uid={_conn.DbUsername};Pwd={_conn.DbPassword};");
+                    optionsBuilder.UseMySql($"Server={_conn.DbHostname};Database={_conn.DbName};Uid={_conn.DbUsername};Pwd={_conn.DbPassword};");
                     break;
             }  
         }

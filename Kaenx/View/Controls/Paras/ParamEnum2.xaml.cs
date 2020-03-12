@@ -22,11 +22,11 @@ namespace Kaenx.Classes.Controls.Paras
 {
     public sealed partial class ParamEnum2 : UserControl, IParam
     {
-        public string hash { get; set; }
-        public delegate void ParamChangedHandler(string source, string value, string hash);
+        public string Hash { get; set; }
+        public string ParamId { get; }
+        public delegate void ParamChangedHandler(IParam param);
         public event ParamChangedHandler ParamChanged;
         
-        private string paramId;
         private string value;
 
         public ParamEnum2(AppParameter param, AppParameterTypeViewModel type, IEnumerable<AppParameterTypeEnumViewModel> enums)
@@ -34,12 +34,12 @@ namespace Kaenx.Classes.Controls.Paras
             this.InitializeComponent();
             ToolTip toolTip = new ToolTip();
 
-            paramId = param.Id;
+            ParamId = param.Id;
             ParaName.Text = param.Text;
             value = param.Value;
 
             ParaValue1.Content = enums.ElementAt(0).Text;
-            ParaValue1.GroupName = paramId;
+            ParaValue1.GroupName = ParamId;
             ParaValue1.Tag = enums.ElementAt(0).Value;
             ParaValue1.IsChecked = value == enums.ElementAt(0).Value;
             ParaValue1.Checked += ParaValue_Checked;
@@ -47,7 +47,7 @@ namespace Kaenx.Classes.Controls.Paras
                 toolTip.Content = "Default: " + enums.ElementAt(0).Text;
 
             ParaValue2.Content = enums.ElementAt(1).Text;
-            ParaValue2.GroupName = paramId;
+            ParaValue2.GroupName = ParamId;
             ParaValue2.Tag = enums.ElementAt(1).Value;
             ParaValue2.IsChecked = value == enums.ElementAt(1).Value;
             ParaValue2.Checked += ParaValue_Checked;
@@ -68,12 +68,20 @@ namespace Kaenx.Classes.Controls.Paras
         private void ParaValue_Checked(object sender, RoutedEventArgs e)
         {
             value = ((RadioButton)sender).Tag.ToString();
-            ParamChanged?.Invoke(paramId, value, hash);
+            ParamChanged?.Invoke(this);
         }
 
         public void SetVisibility(Visibility visible)
         {
             this.Visibility = visible;
+        }
+
+        public void SetValue(string val)
+        {
+            if (ParaValue1.Tag.ToString() == val)
+                ParaValue1.IsChecked = true;
+            if (ParaValue2.Tag.ToString() == val)
+                ParaValue2.IsChecked = true;
         }
     }
 }

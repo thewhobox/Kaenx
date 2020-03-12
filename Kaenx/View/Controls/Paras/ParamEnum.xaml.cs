@@ -24,20 +24,20 @@ namespace Kaenx.Classes.Controls.Paras
 {
     public sealed partial class ParamEnum : UserControl, IParam
     {
-        public string hash { get; set; }
-        public delegate void ParamChangedHandler(string source, string value, string hash);
+        public string Hash { get; set; }
+        public string ParamId { get; }
+        public delegate void ParamChangedHandler(IParam param);
         public event ParamChangedHandler ParamChanged;
 
         private ObservableCollection<AppParameterTypeEnumViewModel> EnumList { get; set; } = new ObservableCollection<AppParameterTypeEnumViewModel>();
 
-        private string paramId;
 
         public ParamEnum(AppParameter param, AppParameterTypeViewModel type, IEnumerable<AppParameterTypeEnumViewModel> enums)
         {
             this.InitializeComponent();
             this.DataContext = EnumList;
 
-            paramId = param.Id;
+            ParamId = param.Id;
             ParaName.Text = param.Text;
 
             foreach (AppParameterTypeEnumViewModel model in enums)
@@ -53,15 +53,13 @@ namespace Kaenx.Classes.Controls.Paras
                 if (e.Value == param.Value) toolTip.Content = "Default: " + e.Text;
             }
 
-
             ToolTipService.SetToolTip(ParaValue, toolTip);
-
             ParaValue.SelectionChanged += ParaValue_SelectionChanged;
         }
 
         private void ParaValue_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            ParamChanged?.Invoke(paramId, ParaValue.SelectedValue.ToString(), hash);
+            ParamChanged?.Invoke(this);
         }
 
         public string GetValue()
@@ -72,6 +70,11 @@ namespace Kaenx.Classes.Controls.Paras
         public void SetVisibility(Visibility visible)
         {
             this.Visibility = visible;
+        }
+
+        public void SetValue(string val)
+        {
+            ParaValue.SelectedValue = val;
         }
     }
 }

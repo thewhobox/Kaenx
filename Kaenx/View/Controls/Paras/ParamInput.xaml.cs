@@ -22,11 +22,10 @@ namespace Kaenx.Classes.Controls.Paras
 {
     public sealed partial class ParamInput : UserControl, IParam
     {
-        public string hash { get; set; }
-        public delegate void ParamChangedHandler(string source, string value, string hash);
+        public string Hash { get; set; }
+        public string ParamId { get; }
+        public delegate void ParamChangedHandler(IParam param);
         public event ParamChangedHandler ParamChanged;
-
-        private string paraId;
 
         public string Name2
         {
@@ -34,12 +33,15 @@ namespace Kaenx.Classes.Controls.Paras
             set { ParaName.Text = value; }
         }
 
+
+        public string Value { get { return ParaValue.Text; } }
+
         public ParamInput(AppParameter param, AppParameterTypeViewModel type)
         {
             this.InitializeComponent();
             ParaName.Text = param.Text;
             ParaValue.Text = param.Value;
-            paraId = param.Id;
+            ParamId = param.Id;
 
             ParaValue.KeyUp += ParaValue_KeyUp;
             ParaValue.LostFocus += ParaValue_LostFocus;
@@ -47,13 +49,13 @@ namespace Kaenx.Classes.Controls.Paras
 
         private void ParaValue_LostFocus(object sender, RoutedEventArgs e)
         {
-            ParamChanged?.Invoke(paraId, ParaValue.Text, hash);
+            ParamChanged?.Invoke(this);
         }
 
         private void ParaValue_KeyUp(object sender, KeyRoutedEventArgs e)
         {
             if (e.Key == Windows.System.VirtualKey.Enter)
-                ParamChanged?.Invoke(paraId, ParaValue.Text, hash);
+                ParamChanged?.Invoke(this);
         }
 
         public string GetValue()
@@ -64,6 +66,11 @@ namespace Kaenx.Classes.Controls.Paras
         public void SetVisibility(Visibility visible)
         {
             this.Visibility = visible;
+        }
+
+        public void SetValue(string val)
+        {
+            ParaValue.Text = val;
         }
     }
 }
