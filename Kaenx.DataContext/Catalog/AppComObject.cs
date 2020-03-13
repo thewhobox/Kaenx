@@ -16,13 +16,9 @@ namespace Kaenx.DataContext.Catalog
         public string ApplicationId { get; set; }
 
         [MaxLength(100)]
-        public string Text_DE { get; set; }
+        public string Text { get; set; }
         [MaxLength(100)]
-        public string Text_EN { get; set; }
-        [MaxLength(100)]
-        public string FunctionText_DE { get; set; }
-        [MaxLength(100)]
-        public string FunctionText_EN { get; set; }
+        public string FunctionText { get; set; }
 
         public bool Flag_Read { get; set; }
         public bool Flag_Write { get; set; }
@@ -40,10 +36,8 @@ namespace Kaenx.DataContext.Catalog
         {
             Id = com.Id;
             ApplicationId = com.ApplicationId;
-            Text_DE = com.Text_DE;
-            Text_EN = com.Text_EN;
-            FunctionText_DE = com.FunctionText_DE;
-            FunctionText_EN = com.FunctionText_EN;
+            Text = com.Text;
+            FunctionText = com.FunctionText;
             Flag_Read = com.Flag_Read;
             Flag_Write = com.Flag_Write;
             Flag_Communicate = com.Flag_Communicate;
@@ -53,22 +47,6 @@ namespace Kaenx.DataContext.Catalog
             Size = com.Size;
             Datapoint = com.Datapoint;
             DatapointSub = com.DatapointSub;
-        }
-
-        public void SetText(string text, string lang = null)
-        {
-            if (lang == "de" || lang == null)
-                Text_DE = text;
-            if (lang == "en" || lang == null)
-                Text_EN = text;
-        }
-
-        public void SetFunction(string text, string lang = null)
-        {
-            if (lang == "de" || lang == null)
-                FunctionText_DE = text;
-            if (lang == "en" || lang == null)
-                FunctionText_EN = text;
         }
 
         public void SetSize(string size)
@@ -108,21 +86,6 @@ namespace Kaenx.DataContext.Catalog
                 Datapoint = int.Parse(splitted[1]);
                 DatapointSub = int.Parse(splitted[2]);
             }
-        }
-
-        public string GetText()
-        {
-            if (System.Globalization.CultureInfo.CurrentCulture.Parent.Name == "de")
-                return Text_DE;
-            else
-                return Text_EN;
-        }
-        public string GetFunctionText()
-        {
-            if (System.Globalization.CultureInfo.CurrentCulture.Parent.Name == "de")
-                return FunctionText_DE;
-            else
-                return FunctionText_EN;
         }
     }
 }

@@ -23,8 +23,8 @@ namespace Kaenx.Classes.Project
         {
             Id = comObj.Id;
             Number = comObj.Number;
-            Name = comObj.Text_DE;
-            Function = comObj.FunctionText_DE;
+            Name = comObj.Text;
+            Function = comObj.FunctionText;
 
             Datapoint = comObj.Datapoint;
             DatapointSub = comObj.DatapointSub;

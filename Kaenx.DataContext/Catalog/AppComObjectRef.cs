@@ -14,10 +14,8 @@ namespace Kaenx.DataContext.Catalog
         public string Id { get; set; }
         public string RefId { get; set; }
 
-        public string Text_DE { get; set; }
-        public string Text_EN { get; set; }
-        public string FunctionText_DE { get; set; }
-        public string FunctionText_EN { get; set; }
+        public string Text { get; set; }
+        public string FunctionText { get; set; }
 
         public bool? Flag_Read { get; set; }
         public bool? Flag_Write { get; set; }
@@ -30,22 +28,6 @@ namespace Kaenx.DataContext.Catalog
         public int Size { get; set; }
         public int Datapoint { get; set; }
         public int DatapointSub { get; set; }
-
-        public void SetText(string text, string lang = null)
-        {
-            if (lang == "de" || lang == null)
-                Text_DE = text;
-            if (lang == "en" || lang == null)
-                Text_EN = text;
-        }
-
-        public void SetFunction(string text, string lang = null)
-        {
-            if (lang == "de" || lang == null)
-                FunctionText_DE = text;
-            if (lang == "en" || lang == null)
-                FunctionText_EN = text;
-        }
 
         public void SetSize(string size)
         {

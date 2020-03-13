@@ -24,6 +24,7 @@ using Windows.Graphics.Imaging;
 using Windows.Storage;
 using Windows.Storage.Pickers;
 using Windows.Storage.Streams;
+using Windows.UI.StartScreen;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Controls.Primitives;
@@ -142,7 +143,9 @@ namespace Kaenx.View
             LoadScreen.IsLoading = true;
             await Task.Delay(200);
 
-            Project project = SaveHelper.LoadProject((ProjectViewHelper)TestGrid.SelectedItem);
+            ProjectViewHelper helper = (ProjectViewHelper)TestGrid.SelectedItem;
+
+            Project project = SaveHelper.LoadProject(helper);
             if(project == null)
             {
                 LoadScreen.IsLoading = true;
@@ -151,6 +154,31 @@ namespace Kaenx.View
 
             ChangeHandler.Instance = new ChangeHandler(project.Id);
             Serilog.Log.Debug("Neues Projekt erstellt: " + project.Id + " - " + project.Name);
+
+            if (JumpList.IsSupported())
+            {
+                JumpList jumpList = await JumpList.LoadCurrentAsync();
+                //jumpList.Items.Clear();
+                jumpList.SystemGroupKind = JumpListSystemGroupKind.None;
+
+
+                if(jumpList.Items.Any(i => i.Arguments == "open:" + helper.Id))
+                {
+                    JumpListItem itemN = jumpList.Items.Single(i => i.Arguments == "open:" + helper.Id);
+                    jumpList.Items.Remove(itemN);
+                    jumpList.Items.Insert(0, itemN);
+                } else
+                {
+                    JumpListItem itemN = JumpListItem.CreateWithArguments("open:" + helper.Id, helper.Name);
+                    itemN.GroupName = "Projekte";
+                    jumpList.Items.Insert(0, itemN);
+                }
+
+                await jumpList.SaveAsync();
+            }
+
+
+
 
             App.AppFrame.Navigate(typeof(WorkdeskEasy), project);
         }

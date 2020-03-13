@@ -100,10 +100,12 @@ namespace Kaenx.Classes.Helper
             List<string> loadedIds = new List<string>();
             Dictionary<string, XElement> hards = new Dictionary<string, XElement>();
 
+            Stopwatch w = new Stopwatch();
+
             foreach (DeviceImportInfo device in deviceList)
             {
                 //ViewDevicesList.SelectedItem = device;
-
+                w.Start();
                 ProgressChanged?.Invoke(0);
                 await Task.Delay(1000);
 
@@ -163,11 +165,11 @@ namespace Kaenx.Classes.Helper
                     try
                     {
                         XElement doc = XDocument.Load(appEntry.Open()).Root;
-                        OnDeviceChanged?.Invoke("Übersetzen"); //TODO localisation
+                        OnDeviceChanged?.Invoke(resourceLoader.GetString("StateTranslate"));
                         await TranslateXml(doc, Imports.SelectedLanguage, ProgressAppMaxChanged, ProgressAppChanged);
                         ProgressChanged?.Invoke(2);
                         XElement appXml = doc.Descendants(XName.Get("ApplicationProgram", doc.Name.Namespace.NamespaceName)).First();
-                        OnDeviceChanged?.Invoke("Applikation importieren"); //TODO localisation
+                        OnDeviceChanged?.Invoke(resourceLoader.GetString("StateAppImport"));
                         await ImportApplications(appXml, device);
                     }
                     catch (Exception e)
@@ -189,6 +191,9 @@ namespace Kaenx.Classes.Helper
                 ProgressChanged?.Invoke(6);
 
                 device.Icon = Symbol.Like;
+                w.Stop();
+                OnError?.Invoke("Zeit: " + w.Elapsed.TotalSeconds + "s");
+                w.Reset();
                 await Task.Delay(2000);
 
             }
@@ -852,10 +857,9 @@ namespace Kaenx.Classes.Helper
                     if(file != null && time <= file.DateCreated)
                     {
                         flagSaveBag = false;
-                        //TODO check if file is newer
                     } else
                     {
-                        file = await appData.CreateFileAsync(bagId);
+                        file = await appData.CreateFileAsync(bagId, CreationCollisionOption.ReplaceExisting);
                         File.SetCreationTime(file.Path, time);
                     }
 
@@ -874,6 +878,9 @@ namespace Kaenx.Classes.Helper
             else
                 Log.Information("Keine Baggages vorhanden");
 
+
+            List<object> bulkInsert = new List<object>();
+            List<object> bulkUpdate = new List<object>();
 
             Log.Information("Parameter Typen werden eingelesen");
             tempList = doc.Descendants(GetXName("ParameterType")).ToList();
@@ -1124,8 +1131,8 @@ namespace Kaenx.Classes.Helper
                 {
                     AppComObject cobj = new AppComObject();
                     cobj.Id = com.Attribute("Id").Value;
-                    cobj.SetText(com.Attribute("Text")?.Value);
-                    cobj.SetFunction(com.Attribute("FunctionText")?.Value);
+                    cobj.Text = com.Attribute("Text")?.Value;
+                    cobj.FunctionText = com.Attribute("FunctionText")?.Value;
                     cobj.SetSize(com.Attribute("ObjectSize")?.Value);
                     cobj.SetDatapoint(com.Attribute("DatapointType")?.Value);
                     cobj.Number = int.Parse(com.Attribute("Number").Value);
@@ -1154,8 +1161,8 @@ namespace Kaenx.Classes.Helper
                 cobjr.RefId = cref.Attribute("RefId").Value;
 
                 //TODO implement auto translate
-                cobjr.SetText(cref.Attribute("Text")?.Value);
-                cobjr.SetFunction(cref.Attribute("FunctionText")?.Value);
+                cobjr.Text = cref.Attribute("Text")?.Value;
+                cobjr.FunctionText = cref.Attribute("FunctionText")?.Value;
                 cobjr.SetSize(cref.Attribute("ObjectSize")?.Value);
                 cobjr.SetDatapoint(cref.Attribute("DatapointType")?.Value);
                 cobjr.Number = cref.Attribute("Number") == null ? -1 : int.Parse(cref.Attribute("Number").Value);
@@ -1200,10 +1207,8 @@ namespace Kaenx.Classes.Helper
                 }
 
                 obj.ApplicationId = app.Id;
-                if (cobjr.FunctionText_DE != null) obj.FunctionText_DE = cobjr.FunctionText_DE;
-                if (cobjr.FunctionText_EN != null) obj.FunctionText_EN = cobjr.FunctionText_EN;
-                if (cobjr.Text_DE != null) obj.Text_DE = cobjr.Text_DE;
-                if (cobjr.Text_EN != null) obj.Text_EN = cobjr.Text_EN;
+                if (cobjr.FunctionText != null) obj.FunctionText = cobjr.FunctionText;
+                if (cobjr.Text != null) obj.Text = cobjr.Text;
                 if (cobjr.Datapoint != -1) obj.Datapoint = cobjr.Datapoint;
                 if (cobjr.DatapointSub != -1) obj.DatapointSub = cobjr.DatapointSub;
                 if (cobjr.Size != -1) obj.Size = cobjr.Size;

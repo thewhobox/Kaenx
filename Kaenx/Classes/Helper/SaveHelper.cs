@@ -253,6 +253,8 @@ namespace Kaenx.Classes.Helper
 
             //Catalog mit in das Project machen!
             contextC = new CatalogContext(new LocalConnectionCatalog() { DbHostname = "Catalog.db", Type = LocalConnectionCatalog.DbConnectionType.SqlLite });
+            contextC.Database.Migrate();
+            //TODO do when project is opening
 
             ProjectModel pm = contextProject.Projects.Single(p => p.Id == helper.Id);
             project.Name = pm.Name;
@@ -383,7 +385,7 @@ namespace Kaenx.Classes.Helper
             foreach (XElement xcom in elements)
             {
                 AppComObject appCom = contextC.AppComObjects.Single(c => c.Id == xcom.Attribute("RefId").Value);
-                if (appCom.Text_DE == "Dummy") continue;
+                if (appCom.Text == "Dummy") continue;
 
                 DeviceComObject comobject = new DeviceComObject(appCom);
                 comobject.Conditions = GetConditions(xcom);

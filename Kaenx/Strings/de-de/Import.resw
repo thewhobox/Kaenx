@@ -129,6 +129,9 @@
   <data name="StateApp" xml:space="preserve">
     <value>Lade Applikation...</value>
   </data>
+  <data name="StateAppImport" xml:space="preserve">
+    <value>Applikation importieren</value>
+  </data>
   <data name="StateCat" xml:space="preserve">
     <value>Lade Katalogeinträge...</value>
   </data>
@@ -146,5 +149,8 @@
   </data>
   <data name="StateProj" xml:space="preserve">
     <value>Lade Projektdatenbank...</value>
+  </data>
+  <data name="StateTranslate" xml:space="preserve">
+    <value>Übersetzen</value>
   </data>
 </root>
