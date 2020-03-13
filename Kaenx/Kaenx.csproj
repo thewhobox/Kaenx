@@ -142,6 +142,7 @@
     <Compile Include="Classes\Helper\BlockVisHelper.cs" />
     <Compile Include="Classes\Helper\ParamVisHelper.cs" />
     <Compile Include="Classes\Helper\ProjectViewHelper.cs" />
+    <Compile Include="Classes\MonitorTelegram.cs" />
     <Compile Include="Classes\Project\DeviceComObject.cs" />
     <Compile Include="Classes\Project\GroupAddress.cs" />
     <Compile Include="Classes\Project\GroupMiddle.cs" />

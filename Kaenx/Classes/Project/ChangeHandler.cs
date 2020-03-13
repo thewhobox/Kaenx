@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -35,8 +36,9 @@ namespace Kaenx.Classes.Project
             {
                 StateModel state = _context.States.Where(s => s.ProjectId == projectId).OrderByDescending(s => s.Id).First();
                 _currentStateId = state.Id;
-            } catch
+            } catch(Exception e)
             {
+                Debug.WriteLine(e.Message);
                 StateModel state = new StateModel();
                 state.Name = "Neuer State";
                 state.Description = "Keine Beschreibung";

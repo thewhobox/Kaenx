@@ -17,6 +17,7 @@ using Windows.UI.Xaml.Media;
 using System.Diagnostics;
 using Windows.ApplicationModel.Resources;
 using System.IO;
+using System.Text;
 
 namespace Kaenx.Classes.Helper
 {
@@ -59,7 +60,7 @@ namespace Kaenx.Classes.Helper
 
             maxH?.Invoke(trans.Count);
 
-            await Task.Delay(100);
+            await Task.Delay(10);
 
             int c = 0;
             foreach(XElement translate in trans)
@@ -100,19 +101,14 @@ namespace Kaenx.Classes.Helper
             List<string> loadedIds = new List<string>();
             Dictionary<string, XElement> hards = new Dictionary<string, XElement>();
 
-            Stopwatch w = new Stopwatch();
-
             foreach (DeviceImportInfo device in deviceList)
             {
                 //ViewDevicesList.SelectedItem = device;
-                w.Start();
                 ProgressChanged?.Invoke(0);
-                await Task.Delay(1000);
 
                 OnDeviceChanged?.Invoke(resourceLoader.GetString("StateHard"));
                 Log.Information("---- Hardware wird importiert");
-
-
+            
                 string manu = device.Id.Substring(0, 6);
                 XElement xml;
 
@@ -139,7 +135,7 @@ namespace Kaenx.Classes.Helper
 
                 ImportHardware(xml, device);
 
-                await Task.Delay(2000);
+                await Task.Delay(10);
                 ProgressChanged?.Invoke(1);
 
                 if (!loadedIds.Contains(device.ApplicationId))
@@ -160,7 +156,7 @@ namespace Kaenx.Classes.Helper
                         continue;
                     }
 
-                    await Task.Delay(1000);
+                    await Task.Delay(10);
 
                     try
                     {
@@ -187,14 +183,11 @@ namespace Kaenx.Classes.Helper
 
                 OnDeviceChanged?.Invoke(resourceLoader.GetString("StateCheck"));
                 //TODO check wirklich implementieren
-                await Task.Delay(2000);
+                await Task.Delay(10);
                 ProgressChanged?.Invoke(6);
 
                 device.Icon = Symbol.Like;
-                w.Stop();
-                OnError?.Invoke("Zeit: " + w.Elapsed.TotalSeconds + "s");
-                w.Reset();
-                await Task.Delay(2000);
+                await Task.Delay(10);
 
             }
 
@@ -204,7 +197,7 @@ namespace Kaenx.Classes.Helper
             await file.DeleteAsync();
 
 
-            await Task.Delay(1000);
+            await Task.Delay(10);
             OnStateChanged?.Invoke(resourceLoader.GetString("StateFin"));
 
             Log.Information("Import abgeschlossen");
@@ -521,10 +514,7 @@ namespace Kaenx.Classes.Helper
             Log.Information("Applikation wird nun eingelesen...");
             OnDeviceChanged(currentAppName + " - Einlesen");
             await Task.Delay(10);
-            Stopwatch sw = new Stopwatch();
-            sw.Start();
             await ReadApplication(appXml, app, cmax);
-            sw.Stop();
 
             Log.Information("Applikation wurde eingelesen...");
         }
@@ -828,7 +818,7 @@ namespace Kaenx.Classes.Helper
             Dictionary<string, AppComObject> ComObjects = new Dictionary<string, AppComObject>();
             currentNamespace = doc.Name.NamespaceName;
             int position = 0;
-            int iterationToWait = 50;
+            int iterationToWait = 100;
 
             List<XElement> tempList;
 
@@ -878,20 +868,20 @@ namespace Kaenx.Classes.Helper
             else
                 Log.Information("Keine Baggages vorhanden");
 
+            CatalogContext context = new CatalogContext();
+            context.ChangeTracker.AutoDetectChangesEnabled = false;
 
-            List<object> bulkInsert = new List<object>();
-            List<object> bulkUpdate = new List<object>();
-
+            OnDeviceChanged?.Invoke(currentAppName + " ParameterTypes");
             Log.Information("Parameter Typen werden eingelesen");
             tempList = doc.Descendants(GetXName("ParameterType")).ToList();
             foreach(XElement type in tempList)
             {
-                bool existed = _context.AppParameterTypes.Any(p => p.Id == type.Attribute("Id").Value);
+                bool existed = context.AppParameterTypes.Any(p => p.Id == type.Attribute("Id").Value);
                 XElement child = type.Elements().ElementAt(0);
                 AppParameterTypeViewModel paramt;
 
                 if (existed)
-                    paramt = _context.AppParameterTypes.Single(p => p.Id == type.Attribute("Id").Value);
+                    paramt = context.AppParameterTypes.Single(p => p.Id == type.Attribute("Id").Value);
                 else
                     paramt = new AppParameterTypeViewModel() { Id = type.Attribute("Id").Value };
 
@@ -926,12 +916,12 @@ namespace Kaenx.Classes.Helper
                             AppParameterTypeEnumViewModel enu = new AppParameterTypeEnumViewModel();
                             enu.ParameterId = paramt.Id;
                             enu.Id = en.Attribute("Id").Value;
-                            if (!_context.AppParameterTypeEnums.Any(p => p.Id == enu.Id))
+                            if (!context.AppParameterTypeEnums.Any(p => p.Id == enu.Id))
                             {
                                 enu.Value = en.Attribute(_base).Value;
                                 enu.Text = en.Attribute("Text").Value;
                                 enu.Order = (en.Attribute("DisplayOrder") == null) ? cenu : int.Parse(en.Attribute("DisplayOrder").Value);
-                                _context.AppParameterTypeEnums.Add(enu);
+                                context.AppParameterTypeEnums.Add(enu);
                                 cenu++;
                             }
                             
@@ -973,15 +963,17 @@ namespace Kaenx.Classes.Helper
                 }
 
                 if (existed)
-                    _context.AppParameterTypes.Update(paramt);
+                    context.AppParameterTypes.Update(paramt);
                 else
-                    _context.AppParameterTypes.Add(paramt);
+                    context.AppParameterTypes.Add(paramt);
                 position++;
                 ProgressAppChanged(position);
                 if (position % iterationToWait == 0) await Task.Delay(1);
             }
 
 
+
+            OnDeviceChanged?.Invoke(currentAppName + " Parameter");
             Log.Information("Parameter werden eingelesen");
             tempList = doc.Descendants(GetXName("Parameter")).ToList();
             foreach(XElement para in tempList)
@@ -1019,6 +1011,8 @@ namespace Kaenx.Classes.Helper
             }
 
 
+
+            OnDeviceChanged?.Invoke(currentAppName + " ParameterUnions");
             Log.Information("Unions werden eingelesen");
             tempList = doc.Descendants(GetXName("Union")).ToList();
             foreach (XElement union in tempList)
@@ -1070,22 +1064,23 @@ namespace Kaenx.Classes.Helper
             }
 
 
+
+            OnDeviceChanged?.Invoke(currentAppName + " ParameterRefs");
             Log.Information("ParameterRefs werden eingelesen");
             tempList = doc.Descendants(GetXName("ParameterRef")).ToList();
             foreach (XElement pref in tempList)
             {
-                AppParameter old = Params[pref.Attribute("RefId").Value];
-                bool existed = _context.AppParameters.Any(p => p.Id == pref.Attribute("Id").Value);
-                AppParameter final;
+                position++;
+                ProgressAppChanged(position);
+                if (position % iterationToWait == 0) await Task.Delay(1);
 
-                if (existed)
-                    final = _context.AppParameters.Single(p => p.Id == pref.Attribute("Id").Value);
-                else
-                {
-                    final = new AppParameter();
-                    final.LoadPara(old);
-                    final.Id = pref.Attribute("Id").Value;
-                }
+                AppParameter old = Params[pref.Attribute("RefId").Value];
+                bool existed = context.AppParameters.Any(p => p.Id == pref.Attribute("Id").Value);
+                if (existed) continue;
+
+                AppParameter final = new AppParameter();
+                final.LoadPara(old);
+                final.Id = pref.Attribute("Id").Value;
                 final.ApplicationId = app.Id;
 
                 string text = pref.Attribute("Text")?.Value;
@@ -1097,15 +1092,11 @@ namespace Kaenx.Classes.Helper
                 AccessType access = (pref.Attribute("Access")) == null ? AccessType.Null : ((pref.Attribute("Access").Value == "None") ? AccessType.None : AccessType.Full);
                 final.Access = access == AccessType.Null ? old.Access : access;
 
-                if (existed)
-                    _context.AppParameters.Update(final);
-                else
-                    _context.AppParameters.Add(final);
-
-                position++;
-                ProgressAppChanged(position);
-                if (position % iterationToWait == 0) await Task.Delay(1);
+                context.AppParameters.Add(final);
             }
+
+
+
 
             XElement table = null;
             Log.Information("ComObjectTable wird eingelesen");
@@ -1126,6 +1117,7 @@ namespace Kaenx.Classes.Helper
                     Log.Information("Für ComObjectTable kein CodeSegment gefunden");
                 }
 
+                OnDeviceChanged?.Invoke(currentAppName + " ComObjects");
                 Log.Information("ComObjects werden eingelesen");
                 foreach (XElement com in table.Elements())
                 {
@@ -1150,17 +1142,24 @@ namespace Kaenx.Classes.Helper
                     if (position % iterationToWait == 0) await Task.Delay(1);
                 }
             }
-            
+
             //TODO zusammenbringen mit ComObject auslesen
+            OnDeviceChanged?.Invoke(currentAppName + " ComObjectRefs");
             Log.Information("ComObjectRefs werden eingelesen");
             tempList = doc.Descendants(GetXName("ComObjectRef")).ToList();
             foreach (XElement cref in tempList)
             {
+                position++;
+                ProgressAppChanged(position);
+                if (position % iterationToWait == 0) await Task.Delay(1);
+
+                bool existed = context.AppComObjects.Any(c => c.Id == cref.Attribute("Id").Value);
+                if (existed) continue;
+
                 AppComObjectRef cobjr = new AppComObjectRef();
                 cobjr.Id = cref.Attribute("Id").Value;
                 cobjr.RefId = cref.Attribute("RefId").Value;
 
-                //TODO implement auto translate
                 cobjr.Text = cref.Attribute("Text")?.Value;
                 cobjr.FunctionText = cref.Attribute("FunctionText")?.Value;
                 cobjr.SetSize(cref.Attribute("ObjectSize")?.Value);
@@ -1193,18 +1192,10 @@ namespace Kaenx.Classes.Helper
                     cobjr.Flag_Write = false;
 
 
-                AppComObject old = ComObjects[cobjr.RefId];
-                bool existed = _context.AppComObjects.Any(c => c.Id == cref.Attribute("Id").Value);
-                AppComObject obj;
-
-                if (existed)
-                    obj = _context.AppComObjects.Single(c => c.Id == cref.Attribute("Id").Value);
-                else
-                {
-                    obj = new AppComObject();
-                    obj.LoadComp(old);
-                    obj.Id = cobjr.Id;
-                }
+                AppComObject obj= new AppComObject();
+                obj.LoadComp(ComObjects[cobjr.RefId]);
+                obj.Id = cobjr.Id;
+                
 
                 obj.ApplicationId = app.Id;
                 if (cobjr.FunctionText != null) obj.FunctionText = cobjr.FunctionText;
@@ -1220,15 +1211,9 @@ namespace Kaenx.Classes.Helper
                 if (cobjr.Flag_Update != null) obj.Flag_Update = (bool)cobjr.Flag_Update;
                 if (cobjr.Flag_Write != null) obj.Flag_Write = (bool)cobjr.Flag_Write;
 
-                if (existed)
-                    _context.AppComObjects.Update(obj);
-                else
-                    _context.AppComObjects.Add(obj);
-
-                position++;
-                ProgressAppChanged(position);
-                if (position % iterationToWait == 0) await Task.Delay(1);
+                context.AppComObjects.Add(obj);
             }
+
 
 
             if (doc.Descendants(GetXName("AddressTable")).Count() != 0)
@@ -1286,10 +1271,10 @@ namespace Kaenx.Classes.Helper
                     {
                         case "AbsoluteSegment":
                             AppAbsoluteSegmentViewModel aas;
-                            bool existed = _context.AppAbsoluteSegments.Any(a => a.Id == seg.Attribute("Id").Value);
+                            bool existed = context.AppAbsoluteSegments.Any(a => a.Id == seg.Attribute("Id").Value);
 
                             if (existed)
-                                aas = _context.AppAbsoluteSegments.Single(a => a.Id == seg.Attribute("Id").Value);
+                                aas = context.AppAbsoluteSegments.Single(a => a.Id == seg.Attribute("Id").Value);
                             else
                                 aas = new AppAbsoluteSegmentViewModel() { Id = seg.Attribute("Id").Value };
                             
@@ -1300,9 +1285,9 @@ namespace Kaenx.Classes.Helper
                             aas.Mask = seg.Element(GetXName("Mask"))?.Value;
 
                             if (existed)
-                                _context.AppAbsoluteSegments.Update(aas);
+                                context.AppAbsoluteSegments.Update(aas);
                             else
-                                _context.AppAbsoluteSegments.Add(aas);
+                                context.AppAbsoluteSegments.Add(aas);
                             break;
                         default:
                             Log.Error("Unbekanntes Segment!", seg.ToString());
@@ -1314,10 +1299,10 @@ namespace Kaenx.Classes.Helper
                 Log.Information("Keine Code Segmente vorhanden");
 
             Log.Information("Applikation in Datenbank speichern");
-            if (!_context.Applications.Any(a => a.Id == app.Id))
-                _context.Applications.Add(app);
+            if (!context.Applications.Any(a => a.Id == app.Id))
+                context.Applications.Add(app);
             else
-                _context.Applications.Update(app);
+                context.Applications.Update(app);
 
             if (Errors.Count != 0)
             {
@@ -1330,9 +1315,9 @@ namespace Kaenx.Classes.Helper
 
             try
             {
-                //_context.ChangeTracker.AutoDetectChangesEnabled = true;
-                //_context.ChangeTracker.DetectChanges();
-                _context.SaveChanges();
+                //context.ChangeTracker.AutoDetectChangesEnabled = true;
+                //context.ChangeTracker.DetectChanges();
+                context.SaveChanges();
                 ProgressAppChanged(maxcount);
             }
             catch (Exception e)
@@ -1342,9 +1327,9 @@ namespace Kaenx.Classes.Helper
 
 
             AppAdditional adds;
-            bool existedAdds = _context.AppAdditionals.Any(a => a.Id == app.Id);
+            bool existedAdds = context.AppAdditionals.Any(a => a.Id == app.Id);
             if (existedAdds)
-                adds = _context.AppAdditionals.Single(a => a.Id == app.Id);
+                adds = context.AppAdditionals.Single(a => a.Id == app.Id);
             else
             {
                 adds = new AppAdditional();
@@ -1379,11 +1364,11 @@ namespace Kaenx.Classes.Helper
             SaveHelper.GenerateVisibleProps(app.Id, adds);
 
             if (existedAdds)
-                _context.AppAdditionals.Update(adds);
+                context.AppAdditionals.Update(adds);
             else
-                _context.AppAdditionals.Add(adds);
+                context.AppAdditionals.Add(adds);
 
-            _context.SaveChanges();
+            context.SaveChanges();
         }
 
         private bool GetAttributeAsBool(XElement ele, string attr)

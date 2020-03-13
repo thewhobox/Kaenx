@@ -49,7 +49,7 @@ namespace Kaenx.Konnect
             ProcessSendMessages();
         }
 
-        private int GetFreePort()
+        public int GetFreePort()
         {
             TcpListener l = new TcpListener(IPAddress.Loopback, 0);
             l.Start();

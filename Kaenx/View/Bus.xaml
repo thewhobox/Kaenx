@@ -150,7 +150,24 @@
             </toolkit:TabView.Background>
 
             <toolkit:TabViewItem Header="Busmonitor">
-                <TextBlock Text="Hier kommt was tolles hin" />
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="auto" />
+                        <RowDefinition />
+                    </Grid.RowDefinitions>
+
+                    <Button Content="Starten/Anhalten" Click="Monitor_Toggle" />
+
+                    <toolkit:DataGrid x:Name="GridBusMonitor" Grid.Row="1"  AutoGenerateColumns="False" IsReadOnly="True" ItemsSource="{Binding}">
+                        <toolkit:DataGrid.Columns>
+                            <toolkit:DataGridTextColumn Header="Zeit" Binding="{Binding Time}" />
+                            <toolkit:DataGridTextColumn Header="Von" Binding="{Binding From}" />
+                            <toolkit:DataGridTextColumn Header="An" Binding="{Binding To}" />
+                            <toolkit:DataGridTextColumn Header="Typ" Binding="{Binding Type}" />
+                            <toolkit:DataGridTextColumn Header="Daten" Binding="{Binding Data}" />
+                        </toolkit:DataGrid.Columns>
+                    </toolkit:DataGrid>
+                </Grid>
             </toolkit:TabViewItem>
 
             <toolkit:TabViewItem Header="Auslesen">

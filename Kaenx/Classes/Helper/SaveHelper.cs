@@ -256,7 +256,7 @@ namespace Kaenx.Classes.Helper
             contextC.Database.Migrate();
             //TODO do when project is opening
 
-            ProjectModel pm = contextProject.Projects.Single(p => p.Id == helper.Id);
+            ProjectModel pm = contextProject.Projects.Single(p => p.Id == helper.ProjectId);
             project.Name = pm.Name;
             project.Id = pm.Id;
             project.Image = pm.Image;

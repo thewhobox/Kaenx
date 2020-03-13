@@ -86,6 +86,7 @@ namespace Kaenx.View
                 helper.Id = model.Id;
                 helper.Name = model.Name;
                 helper.Local = model;
+                helper.ProjectId = model.ProjectId;
 
                 if(model.Thumbnail != null)
                 {
@@ -352,9 +353,9 @@ namespace Kaenx.View
             proj.ImageW = image.PixelWidth;
 
             proj.Id = SaveHelper.SaveProject(proj).Id;
-
-
+            
             LocalProject lp = new LocalProject();
+            lp.ProjectId = proj.Id;
             lp.Name = proj.Name;
             lp.Thumbnail = proj.Image;
             lp.ThumbHeight = proj.ImageH;
@@ -362,10 +363,6 @@ namespace Kaenx.View
             lp.ConnectionId = proj.Connection.Id;
             _contextL.Projects.Add(lp);
             _contextL.SaveChanges();
-
-
-            StorageFolder folder = await ApplicationData.Current.LocalFolder.CreateFolderAsync("Projects", CreationCollisionOption.OpenIfExists);
-            await folder.CreateFolderAsync(proj.Id.ToString(), CreationCollisionOption.ReplaceExisting);
 
             ChangeHandler.Instance = new ChangeHandler(proj.Id);
 
