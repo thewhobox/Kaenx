@@ -46,7 +46,7 @@ namespace Kaenx.Konnect.Parser
             }
 
 
-            byte[] data;
+            byte[] data = null;
             int seqNumb = 0x0;
             ApciTypes type = ApciTypes.Undefined;
 
@@ -72,6 +72,13 @@ namespace Kaenx.Konnect.Parser
                         break;
                     case 2:
                         type = ApciTypes.GroupValueWrite;
+                        int datai = npdu[1] & 63;
+                        data = new byte[responseBytes.Length - 15 + 1];
+                        data[0] = Convert.ToByte(datai);
+                        for(int i = 1; i< responseBytes.Length - 15 + 1; i++)
+                        {
+                            data[i] = responseBytes[i];
+                        }
                         break;
                     case 3:
                         type = ApciTypes.IndividualAddressWrite;
@@ -98,23 +105,24 @@ namespace Kaenx.Konnect.Parser
                     case 10:
                         type = ApciTypes.MemoryWrite;
                         break;
+
+
+                    default:
+                        apci1 = ((npdu[0] & 3) << 8) | npdu[1];
+                        type = (ApciTypes)apci1;
+                        break;
                 }
 
-                if(type == ApciTypes.Undefined)
+                if(data == null)
                 {
-                    apci1 = ((npdu[0] & 3) << 8) | npdu[1];
-                    type = (ApciTypes)apci1;
-                }
+                    data = new byte[responseBytes.Length - 15];
 
-
-                data = new byte[responseBytes.Length - 15];
-
-
-                int c = 0;
-                for (int i = 15; i < responseBytes.Length; i++)
-                {
-                    data[c] = responseBytes[i];
-                    c++;
+                    int c = 0;
+                    for (int i = 15; i < responseBytes.Length; i++)
+                    {
+                        data[c] = responseBytes[i];
+                        c++;
+                    }
                 }
             } else
             {
@@ -213,6 +221,7 @@ namespace Kaenx.Konnect.Parser
         DomainAddressSerialNumberResponse,
         DomainAddressSerialNumberWrite,
         FileStreamInfoReport,
-        Connect = 32768
+        Connect = 32768,
+        Disconnect = 32769
     }
 }

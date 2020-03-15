@@ -21,7 +21,7 @@ namespace Kaenx.Konnect.Classes
 
         private int _currentSeqNum = 0;
         private bool _connected = false;
-        private int lastReceivedNumber;
+        private int lastReceivedNumber = -1;
 
         public BusDevice(string address, Connection conn)
         {
