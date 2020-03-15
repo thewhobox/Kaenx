@@ -477,7 +477,7 @@ namespace Kaenx.Classes.Helper
                             }
                             else
                             {
-                                Log.Warning("Unbekanntes when! " + xele.ToString());
+                                Log.Warning("Unbekanntes when! " + xele.Attribute("test").Value);
                             }
 
                             cond.SourceId = xele.Parent.Attribute("ParamRefId").Value;

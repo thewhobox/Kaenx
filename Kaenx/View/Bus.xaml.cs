@@ -105,7 +105,10 @@ namespace Kaenx.View
             tel.Time = DateTime.Now;
             tel.Data = "0x" + BitConverter.ToString(response.Data).Replace("-", "");
             tel.Type = response.APCI;
-            TelegramList.Add(tel);
+            _=App._dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Normal, () =>
+            {
+                TelegramList.Add(tel);
+            });
         }
     }
 }
