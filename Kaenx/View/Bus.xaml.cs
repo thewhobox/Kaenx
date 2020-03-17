@@ -94,6 +94,12 @@ namespace Kaenx.View
             {
                 _conn.Disconnect();
                 _conn = null;
+                MonitorTelegram tel = new MonitorTelegram();
+                tel.From = Konnect.Addresses.UnicastAddress.FromString("0.0.0");
+                tel.To = Konnect.Addresses.UnicastAddress.FromString("0.0.0");
+                tel.Time = DateTime.Now;
+                tel.Type = Konnect.Parser.ApciTypes.Disconnect;
+                TelegramList.Add(tel);
             }
         }
 

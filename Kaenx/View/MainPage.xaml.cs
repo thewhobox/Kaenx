@@ -21,6 +21,7 @@ using Windows.ApplicationModel.Resources;
 using Windows.Foundation;
 using Windows.Foundation.Collections;
 using Windows.Graphics.Imaging;
+using Windows.Services.Store;
 using Windows.Storage;
 using Windows.Storage.Pickers;
 using Windows.Storage.Streams;
@@ -112,6 +113,23 @@ namespace Kaenx.View
                 ErrorReport report = await Crashes.GetLastSessionCrashReportAsync();
                 Log.Error("App ist in letzter Sitzung abgestürzt!", report.StackTrace);
                 Notify.Show(loader.GetString("AppCrashed"));
+            }
+
+
+            var c = StoreContext.GetDefault();
+            StoreAppLicense appLicense = await c.GetAppLicenseAsync();
+
+            string[] productKinds = { "Durable" };
+            List<String> filterList = new List<string>(productKinds);
+            string[] storeIds = new string[] { "9PJ8W7H9QSR3", "9PB1ZQ9903WT" };
+            StoreProductQueryResult queryResult = await c.GetAssociatedStoreProductsAsync(filterList);
+
+            foreach (KeyValuePair<string, StoreProduct> item in queryResult.Products)
+            {
+                // Access the Store info for the product.
+                StoreProduct product = item.Value;
+
+                // Use members of the product object to access info for the product...
             }
         }
 
