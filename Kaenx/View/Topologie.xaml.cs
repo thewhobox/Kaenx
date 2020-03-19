@@ -194,25 +194,6 @@ namespace Kaenx.View
             frame.Navigate(typeof(Catalog));
         }
 
-        private void TreeViewItem_DragOver(object sender, DragEventArgs e)
-        {
-            return;
-            e.AcceptedOperation = Windows.ApplicationModel.DataTransfer.DataPackageOperation.Link;
-            e.DragUIOverride.Caption = "Huhu";
-            e.Handled = true;
-            return;
-
-            TopologieBase tbase = (TopologieBase)((TreeViewItem)e.OriginalSource).DataContext;
-            if (tbase.Type == TopologieType.LineMiddle && ViewHelper.Instance.DragItem?.GetType() == typeof(DataContext.Catalog.DeviceViewModel))
-            {
-                LineMiddle line = (LineMiddle)tbase;
-                e.AcceptedOperation = Windows.ApplicationModel.DataTransfer.DataPackageOperation.Link;
-                //e.AcceptedOperation = Windows.ApplicationModel.DataTransfer.DataPackageOperation.Link;
-                //e.DragUIOverride.Caption = string.Format(loader.GetString("DragConnect"), line.Parent.Id, line.Id);
-                //e.Handled = true;
-            }
-        }
-
         private async void TreeViewItem_Drop(object sender, DragEventArgs e)
         {
             CatalogContext context = new CatalogContext();
@@ -309,7 +290,7 @@ namespace Kaenx.View
             CalcCounts();
         }
 
-        private async void ClickToggle(object sender, RoutedEventArgs e)
+        private void ClickToggle(object sender, RoutedEventArgs e)
         {
             MenuFlyoutItem item = (MenuFlyoutItem)sender;
             LineDevice dev = (LineDevice)item.DataContext;

@@ -331,7 +331,7 @@ namespace Kaenx.View
             e.Row.DragStarting += RowDragStarting;
         }
 
-        private async void ClickDelete(object sender, RoutedEventArgs e)
+        private void ClickDelete(object sender, RoutedEventArgs e)
         {
             DeviceViewModel device = CatalogDeviceList.SelectedItem as DeviceViewModel;
             _context.Devices.Remove(device);

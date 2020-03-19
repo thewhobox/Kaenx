@@ -166,6 +166,24 @@ namespace Kaenx.Classes.Helper
             return model;
         }
 
+
+        public static void UpdateDevice(LineDevice dev)
+        {
+            LineDeviceModel model = contextProject.LineDevices.Single(d => d.UId == dev.UId);
+            model.ApplicationId = dev.ApplicationId;
+            model.DeviceId = dev.DeviceId;
+            model.Id = dev.Id;
+            model.Name = dev.Name;
+            model.ParentId = dev.Parent.UId;
+            model.LoadedApp = dev.LoadedApplication;
+            model.LoadedGA = dev.LoadedGroup;
+            model.LoadedPA = dev.LoadedPA;
+
+            contextProject.LineDevices.Update(model);
+            contextProject.SaveChanges();
+        }
+
+
         public static void SaveGroups()
         {
             contextProject.SaveChanges();
@@ -248,6 +266,7 @@ namespace Kaenx.Classes.Helper
                     return null;
                 }
                 contextProject = new ProjectContext(lconn);
+                contextProject.Database.Migrate();
                 project.Connection = lconn;
             }
 
@@ -296,7 +315,7 @@ namespace Kaenx.Classes.Helper
 
                     foreach (LineDeviceModel ldm in contextProject.LineDevices.Where(l => l.ProjectId == helper.Id && l.ParentId == lm.Id).OrderBy(l => l.Id))
                     {
-                        LineDevice ld = new LineDevice(ldm, lm);
+                        LineDevice ld = new LineDevice(ldm, lm, true);
                         ld.DeviceId = ldm.DeviceId;
 
 
@@ -343,6 +362,7 @@ namespace Kaenx.Classes.Helper
                         }
                         ld.ComObjects.Sort(co => co.Number);
                         lm.Subs.Add(ld);
+                        ld.IsInit = false;
                     }
 
                     CalculateLineCurrent(lm);

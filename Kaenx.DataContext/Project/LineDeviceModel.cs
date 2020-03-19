@@ -19,6 +19,9 @@ namespace Kaenx.DataContext.Project
         public string Name { get; set; }
         public string DeviceId { get; set; }
         public string ApplicationId { get; set; }
+        public bool LoadedGA { get; set; }
+        public bool LoadedApp { get; set; }
+        public bool LoadedPA { get; set; }
 
         public LineDeviceModel() { }
         public LineDeviceModel(int projId) { ProjectId = projId; }

@@ -16,6 +16,8 @@ namespace Kaenx.Classes
 {
     public class LineDevice : INotifyPropertyChanged, TopologieBase
     {
+        public bool IsInit = false;
+
         private int _id;
         private string _name;
         private ObservableCollection<DeviceComObject> _comObjects = new ObservableCollection<DeviceComObject>();
@@ -25,10 +27,10 @@ namespace Kaenx.Classes
         private bool _loadedApplication = false;
         private bool _loadedPA = false;
         private bool _isDeactivated = false;
-        public bool LoadedGroup { get { return _loadedGroups; } set { _loadedGroups = value; Changed("LoadedGroups"); } }
-        public bool LoadedApplication { get { return _loadedApplication; } set { _loadedApplication = value; Changed("LoadedApplication"); } }
-        public bool LoadedPA { get { return _loadedPA; } set { _loadedPA = value; Changed("LoadedPA"); } }
-        public bool IsDeactivated { get { return _isDeactivated; } set { _isDeactivated = value; Changed("CurrentBackBrush"); } }
+        public bool LoadedGroup { get { return _loadedGroups; } set { _loadedGroups = value; Changed("LoadedGroups"); if(!IsInit) SaveHelper.UpdateDevice(this); } }
+        public bool LoadedApplication { get { return _loadedApplication; } set { _loadedApplication = value; Changed("LoadedApplication"); if (!IsInit) SaveHelper.UpdateDevice(this); } }
+        public bool LoadedPA { get { return _loadedPA; } set { _loadedPA = value; Changed("LoadedPA"); if (!IsInit) SaveHelper.UpdateDevice(this); } }
+        public bool IsDeactivated { get { return _isDeactivated; } set { _isDeactivated = value; Changed("CurrentBackBrush"); if (!IsInit) SaveHelper.UpdateDevice(this); } }
         public bool IsExpanded { get { return false; } }
         public List<string> Subs { get; }
 
@@ -41,7 +43,7 @@ namespace Kaenx.Classes
         public int Id
         {
             get { return _id; }
-            set { _id = value; Changed("Id"); Changed("LineName"); LoadedPA = false; Parent?.Subs.Sort(x => x.Id); SaveHelper.SaveProject(); }
+            set { _id = value; Changed("Id"); Changed("LineName"); LoadedPA = false; Parent?.Subs.Sort(x => x.Id); if (!IsInit) SaveHelper.UpdateDevice(this); }
         }
         public ObservableCollection<DeviceComObject> ComObjects
         {
@@ -54,7 +56,7 @@ namespace Kaenx.Classes
         public string Name
         {
             get { return _name; }
-            set { _name = value; Changed("Name"); SaveHelper.SaveProject(); }
+            set { _name = value; Changed("Name"); if (!IsInit) SaveHelper.UpdateDevice(this); }
         }
         [XmlIgnore]
         public LineMiddle Parent { get; set; }
@@ -71,9 +73,11 @@ namespace Kaenx.Classes
         public string DeviceId { get; set; }
         public string ApplicationId { get; set; }
 
-        public LineDevice() { }
-        public LineDevice(DataContext.Catalog.DeviceViewModel model, LineMiddle parent)
+        public LineDevice(bool isInit = false) => IsInit = isInit;
+
+        public LineDevice(DataContext.Catalog.DeviceViewModel model, LineMiddle parent, bool isInit = false)
         {
+            IsInit = isInit;
             Name = model.Name;
             Parent = parent;
             Parent.PropertyChanged += Parent_PropertyChanged;
@@ -85,13 +89,19 @@ namespace Kaenx.Classes
                 Changed("LineName");
         }
 
-        public LineDevice(LineDeviceModel model, LineMiddle line)
+        public LineDevice(LineDeviceModel model, LineMiddle line, bool isInit = false)
         {
+            IsInit = isInit;
             Id = model.Id;
             UId = model.UId;
             Name = model.Name;
             Parent = line;
             ApplicationId = model.ApplicationId;
+
+            LoadedApplication = model.LoadedApp;
+            LoadedGroup = model.LoadedGA;
+            LoadedPA = model.LoadedPA;
+
             Parent.PropertyChanged += Parent_PropertyChanged;
         }
 

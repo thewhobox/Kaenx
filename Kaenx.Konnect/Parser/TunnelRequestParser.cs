@@ -131,6 +131,12 @@ namespace Kaenx.Konnect.Parser
 
                 switch(apci3)
                 {
+                    case 0:
+                        type = ApciTypes.Connect;
+                        break;
+                    case 1:
+                        type = ApciTypes.Disconnect;
+                        break;
                     case 2:
                         type = ApciTypes.Ack;
                         break;
@@ -138,6 +144,14 @@ namespace Kaenx.Konnect.Parser
                         Debug.WriteLine("Unbekantes NPDU: " + apci3);
                         break;
                 }
+
+                BitArray bitsNpdu = new BitArray(npdu);
+                if (bitsNpdu.Get(6))
+                {
+                    seqNumb = npdu[0] >> 2;
+                    seqNumb = seqNumb & 0xF;
+                }
+
             }
 
 

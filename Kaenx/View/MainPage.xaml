@@ -33,6 +33,7 @@
                         <Setter Target="VB2.Height" Value="100" />
                         <Setter Target="VB3.Height" Value="100" />
                         <Setter Target="VB4.Height" Value="100" />
+                        <Setter Target="VB5.Height" Value="100" />
                         <Setter Target="TestGrid.VerticalAlignment" Value="Bottom" />
                         <Setter Target="WrapGrid.Orientation" Value="Vertical" />
                         <Setter Target="WrapGrid.MaximumRowsOrColumns" Value="1" />
@@ -53,6 +54,7 @@
                 <ColumnDefinition Width="auto" />
                 <ColumnDefinition Width="auto" />
                 <ColumnDefinition Width="auto" />
+                <ColumnDefinition Width="auto" />
                 <ColumnDefinition />
             </Grid.ColumnDefinitions>
 
@@ -68,7 +70,7 @@
             <Button Grid.Column="2" Click="OpenCatalog" BorderBrush="White" Background="Transparent" Padding="20" >
                 <StackPanel>
                     <Viewbox x:Name="VB2" Height="70">
-                        <SymbolIcon Symbol="Shop" Foreground="Gray" />
+                        <SymbolIcon Symbol="World" Foreground="Gray" />
                     </Viewbox>
                     <TextBlock x:Uid="/MainPage/BtnCatalog" HorizontalAlignment="Center" Margin="0 5 0 0" Foreground="Gray" />
                 </StackPanel>
@@ -82,10 +84,20 @@
                     <TextBlock x:Uid="/MainPage/BtnArchiv" HorizontalAlignment="Center" Margin="0 5 0 0" Foreground="Gray" />
                 </StackPanel>
             </Button>
-            
-            <Button Grid.Column="4" Click="OpenSettings" BorderBrush="White" Background="Transparent" Padding="20" >
+
+
+            <Button Grid.Column="4" Click="OpenStore" BorderBrush="White" Background="Transparent" Padding="20" >
                 <StackPanel>
                     <Viewbox x:Name="VB4" Height="70">
+                        <SymbolIcon Symbol="Shop" Foreground="Gray" />
+                    </Viewbox>
+                    <TextBlock x:Uid="/MainPage/BtnStore" HorizontalAlignment="Center" Margin="0 5 0 0" Foreground="Gray" />
+                </StackPanel>
+            </Button>
+            
+            <Button Grid.Column="5" Click="OpenSettings" BorderBrush="White" Background="Transparent" Padding="20" >
+                <StackPanel>
+                    <Viewbox x:Name="VB5" Height="70">
                         <SymbolIcon Symbol="Setting" Foreground="Gray" />
                     </Viewbox>
                     <TextBlock x:Uid="/MainPage/BtnSettings" HorizontalAlignment="Center" Margin="0 5 0 0" Foreground="Gray" />

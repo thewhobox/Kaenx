@@ -29,12 +29,19 @@ namespace Kaenx.Konnect.Classes
             _conn = conn;
             _conn.OnTunnelResponse += OnTunnelResponse;
             _conn.OnTunnelRequest += _conn_OnTunnelRequest;
+            _conn.OnTunnelAck += _conn_OnTunnelAck;
+        }
+
+        private void _conn_OnTunnelAck(TunnelResponse response)
+        {
+            acks.Add(response.SequenceNumber);
+            Debug.WriteLine("Ack-" + response.SequenceCounter + "." + response.SequenceNumber + ": " + response.APCI);
         }
 
         private void _conn_OnTunnelRequest(TunnelResponse response)
         {
-            acks.Add(response.SequenceNumber);
-            Debug.WriteLine(response.SequenceNumber + ": " + response.APCI);
+            //acks.Add(response.SequenceNumber);
+            Debug.WriteLine("Req-" + response.SequenceCounter + "." + response.SequenceNumber + ": " +  response.APCI);
         }
 
         private void OnTunnelResponse(TunnelResponse response)
@@ -42,7 +49,7 @@ namespace Kaenx.Konnect.Classes
             responses.Add(response.SequenceNumber, response);
             lastReceivedNumber = response.SequenceNumber;
 
-            Debug.WriteLine(response.SequenceNumber + ": " + response.APCI + " - " + response.Data.Length);
+            Debug.WriteLine("Res-" + response.SequenceCounter + "." +response.SequenceNumber + ": " + response.APCI + " - L" + response.Data.Length);
         }
 
         public BusDevice(UnicastAddress address, Connection conn)
@@ -97,7 +104,7 @@ namespace Kaenx.Konnect.Classes
 
             TunnelRequest builder = new TunnelRequest();
             builder.Build(UnicastAddress.FromString("0.0.0"), _address, Parser.ApciTypes.Restart, _currentSeqNum);
-            _currentSeqNum++;
+            IncreaseSeqNumber();
             _conn.Send(builder);
         }
 
@@ -189,9 +196,10 @@ namespace Kaenx.Konnect.Classes
             byte[] data = { objIdx, propId, data_temp[1], data_temp[0] };
 
             builder.Build(UnicastAddress.FromString("0.0.0"), _address, ApciTypes.PropertyValueRead, _currentSeqNum, data);
-            var seq = lastReceivedNumber + 1;
-            _currentSeqNum++;
+            var seq = GetNextReceivedNumber();
+            IncreaseSeqNumber();
             _conn.Send(builder);
+            Debug.WriteLine("Warten auf Data: " + seq);
             TunnelResponse resp = await WaitForData(seq);
 
 
@@ -253,7 +261,7 @@ namespace Kaenx.Konnect.Classes
                 data.AddRange(addr);
                 data.AddRange(data_temp);
                 builder.Build(UnicastAddress.FromString("0.0.0"), _address, Parser.ApciTypes.MemoryWrite, _currentSeqNum, data.ToArray());
-                _currentSeqNum++;
+                IncreaseSeqNumber();
                 _conn.Send(builder);
             }
 
@@ -284,15 +292,16 @@ namespace Kaenx.Konnect.Classes
                 data.AddRange(addr);
                 data.AddRange(data_temp);
 
-                var seq = lastReceivedNumber + 1;
+                var seq = _currentSeqNum;
                 builder.Build(UnicastAddress.FromString("0.0.0"), _address, ApciTypes.MemoryWrite, _currentSeqNum, data.ToArray());
-                _currentSeqNum++;
+                IncreaseSeqNumber();
                 _conn.Send(builder);
-                Debug.WriteLine("Warten auf: " + seq);
+                Debug.WriteLine("Warten auf Ack MS: " + seq);
                 await WaitForAck(seq);
             }
 
         }
+
 
 
 
@@ -323,10 +332,10 @@ namespace Kaenx.Konnect.Classes
 
             TunnelRequest builder = new TunnelRequest();
             builder.Build(UnicastAddress.FromString("0.0.0"), _address, ApciTypes.MemoryRead, _currentSeqNum, data.ToArray());
-            _currentSeqNum++;
-            var seq = lastReceivedNumber + 1;
+            IncreaseSeqNumber();
+            var seq = GetNextReceivedNumber();
             _conn.Send(builder);
-            Debug.WriteLine("Warten auf: " + seq);
+            Debug.WriteLine("Warten auf Data: " + seq);
             TunnelResponse resp = await WaitForData(seq);
 
             switch (Type.GetTypeCode(typeof(T)))
@@ -359,6 +368,27 @@ namespace Kaenx.Konnect.Classes
 
 
 
+
+
+        private void IncreaseSeqNumber()
+        {
+            if (_currentSeqNum == 15)
+                _currentSeqNum = 0;
+            else
+                _currentSeqNum++;
+        }
+
+        private int GetNextReceivedNumber()
+        {
+            if (lastReceivedNumber == 15)
+                return 0;
+            else
+                return lastReceivedNumber + 1;
+        }
+
+
+
+
         public async Task<string> DeviceDescriptorRead()
         {
             TunnelRequest builder = new TunnelRequest();
@@ -366,7 +396,7 @@ namespace Kaenx.Konnect.Classes
             _currentSeqNum++;
             var seq = lastReceivedNumber + 1;
             _conn.Send(builder);
-            Debug.WriteLine("Warten auf: " + seq);
+            Debug.WriteLine("Warten auf Data: " + seq);
             TunnelResponse resp = await WaitForData(seq); 
             return BitConverter.ToString(resp.Data).Replace("-", "");
         }

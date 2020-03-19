@@ -25,11 +25,11 @@
     <AppxBundlePlatforms>x86|x64|arm</AppxBundlePlatforms>
     <AppInstallerUpdateFrequency>0</AppInstallerUpdateFrequency>
     <AppInstallerCheckForUpdateFrequency>OnApplicationRun</AppInstallerCheckForUpdateFrequency>
-    <PackageCertificateThumbprint>B0C09E073CE8A96E017E971C00FD2540563CFC5B</PackageCertificateThumbprint>
+    <PackageCertificateThumbprint>C554126408FAF38E210787F6EC62EC5E77D59B00</PackageCertificateThumbprint>
     <AppxPackageSigningTimestampDigestAlgorithm>SHA256</AppxPackageSigningTimestampDigestAlgorithm>
     <GenerateTestArtifacts>False</GenerateTestArtifacts>
     <HoursBetweenUpdateChecks>0</HoursBetweenUpdateChecks>
-    <AppxPackageSigningEnabled>False</AppxPackageSigningEnabled>
+    <AppxPackageSigningEnabled>True</AppxPackageSigningEnabled>
     <AppxSymbolPackageEnabled>False</AppxSymbolPackageEnabled>
     <AppInstallerUri>https://kaenx.000webhostapp.com/</AppInstallerUri>
   </PropertyGroup>
@@ -146,6 +146,7 @@
     <Compile Include="Classes\Project\DeviceComObject.cs" />
     <Compile Include="Classes\Project\GroupAddress.cs" />
     <Compile Include="Classes\Project\GroupMiddle.cs" />
+    <Compile Include="MVVM\StoreItem.cs" />
     <Compile Include="View\Controls\DiagComsDeleted.xaml.cs">
       <DependentUpon>DiagComsDeleted.xaml</DependentUpon>
     </Compile>
@@ -228,6 +229,9 @@
     </Compile>
     <Compile Include="View\Settings.xaml.cs">
       <DependentUpon>Settings.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="View\Store.xaml.cs">
+      <DependentUpon>Store.xaml</DependentUpon>
     </Compile>
     <Compile Include="View\Topologie.xaml.cs">
       <DependentUpon>Topologie.xaml</DependentUpon>
@@ -409,6 +413,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="View\Settings.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="View\Store.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

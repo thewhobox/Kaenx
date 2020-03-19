@@ -33,7 +33,7 @@ namespace Kaenx.View
     {
         private ProjectContext context = SaveHelper.contextProject;
 
-        private LineDevice defaultDevice = new LineDevice() { Name = "Bitte Gerät auswählen" };
+        private LineDevice defaultDevice = new LineDevice(true) { Name = "Bitte Gerät auswählen" };
         private GroupAddress defaultGroup = new GroupAddress() { Name = "Bitte Gruppe auswählen", Id = -1 };
 
         private ResourceLoader loader = ResourceLoader.GetForCurrentView("Groups");

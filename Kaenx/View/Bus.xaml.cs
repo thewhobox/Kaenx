@@ -55,7 +55,7 @@ namespace Kaenx.View
             DeviceInfo action = new DeviceInfo();
             Line dM = new Line { Id = int.Parse(address[0]) };
             LineMiddle dL = new LineMiddle { Id = int.Parse(address[1]), Parent = dM };
-            action.Device = new LineDevice { Name = "Unbekannt", Id = int.Parse(address[2]), Parent = dL };
+            action.Device = new LineDevice(true) { Name = "Unbekannt", Id = int.Parse(address[2]), Parent = dL };
             action.Finished += Action_Finished;
             BusConnection.Instance.AddAction(action);
         

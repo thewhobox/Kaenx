@@ -10,20 +10,29 @@
     Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
     <Page.Resources>
         <DataTemplate x:Key="RowDetailsTemplate">
-            <StackPanel Orientation="Vertical" Padding="10" ScrollViewer.HorizontalScrollMode="Auto">
-                <toolkit:HeaderedContentControl Header="Applikations Id" Margin="0 5">
-                    <TextBlock Text="{Binding ApplicationId}" />
-                </toolkit:HeaderedContentControl>
-                <toolkit:HeaderedContentControl Header="Applikations Name" Margin="0 5">
-                    <TextBlock Text="{Binding ApplicationName}" />
-                </toolkit:HeaderedContentControl>
-                <toolkit:HeaderedContentControl Header="Geräte Name" Margin="0 5">
-                    <TextBlock Text="{Binding DeviceName}" />
-                </toolkit:HeaderedContentControl>
-                <toolkit:HeaderedContentControl Header="Masken Version" Margin="0 5">
-                    <TextBlock Text="{Binding MaskVersion}" />
-                </toolkit:HeaderedContentControl>
-            </StackPanel>
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="auto" />
+                    <ColumnDefinition />
+                </Grid.ColumnDefinitions>
+
+                <StackPanel Orientation="Vertical" Padding="10" ScrollViewer.HorizontalScrollMode="Auto">
+                    <toolkit:HeaderedContentControl Header="Applikations Id" Margin="0 5">
+                        <TextBlock Text="{Binding ApplicationId}" />
+                    </toolkit:HeaderedContentControl>
+                    <toolkit:HeaderedContentControl Header="Applikations Name" Margin="0 5">
+                        <TextBlock Text="{Binding ApplicationName}" />
+                    </toolkit:HeaderedContentControl>
+                    <toolkit:HeaderedContentControl Header="Geräte Name" Margin="0 5">
+                        <TextBlock Text="{Binding DeviceName}" />
+                    </toolkit:HeaderedContentControl>
+                    <toolkit:HeaderedContentControl Header="Masken Version" Margin="0 5">
+                        <TextBlock Text="{Binding MaskVersion}" />
+                    </toolkit:HeaderedContentControl>
+                </StackPanel>
+
+                <ListView Grid.Column="1" ItemsSource="{Binding GroupTable}" />
+            </Grid>
         </DataTemplate>
     </Page.Resources>
 

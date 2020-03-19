@@ -29,6 +29,7 @@ using Microsoft.AppCenter.Crashes;
 using Microsoft.AppCenter.Push;
 using Windows.UI.StartScreen;
 using Kaenx.DataContext.Local;
+using Windows.UI.Xaml.Media.Animation;
 
 namespace Kaenx
 {
@@ -166,11 +167,16 @@ namespace Kaenx
             }
         }
 
-        public static void Navigate(Type target, object param = null)
+        public static void Navigate(Type target, object param = null, NavigationTransitionInfo info = null)
         {
-            AppFrame.Navigate(target, param);
+            AppFrame.Navigate(target, param, info);
         }
-        
+
+        public static void Goback()
+        {
+            AppFrame.GoBack();
+        }
+
         /// <summary>
         /// Invoked when the application is launched normally by the end user.  Other entry points
         /// will be used such as when the application is launched to open a specific file.

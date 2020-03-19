@@ -23,7 +23,6 @@ namespace Kaenx.Classes.Bus.Actions
     public class ProgApplication : IBusAction, INotifyPropertyChanged
     {
         private ProgAppType _type;
-        private int _state = 0;
         private int _progress;
         private bool _progressIsIndeterminate;
         private string _todoText;
@@ -42,6 +41,7 @@ namespace Kaenx.Classes.Bus.Actions
 
         public Connection Connection { get; set; }
 
+        private BusDevice dev;
         public event ActionFinishedHandler Finished;
         public event PropertyChangedEventHandler PropertyChanged;
 
@@ -53,7 +53,6 @@ namespace Kaenx.Classes.Bus.Actions
         public void Run(CancellationToken token)
         {
             _token = token;
-            _state = 0;
 
 
             Start3();
@@ -64,27 +63,32 @@ namespace Kaenx.Classes.Bus.Actions
 
         private async void Start3()
         {
-            BusDevice dev = new BusDevice(Device.LineName, Connection);
-
+            dev = new BusDevice(Device.LineName, Connection);
             TodoText = "Applikation schreiben";
 
+            XElement merges = null;
+            XElement loadprocedures = null;
             CatalogContext _context = new CatalogContext();
             ApplicationViewModel app = _context.Applications.Single(a => a.Id == Device.ApplicationId);
-            XDocument master = await GetKnxMaster();
-            XElement mask = master.Descendants(XName.Get("MaskVersion", master.Root.Name.NamespaceName)).Single(m => m.Attribute("Id").Value == app.Mask);
-            XElement procedure = mask.Descendants(XName.Get("Procedure", master.Root.Name.NamespaceName)).Single(m => m.Attribute("ProcedureType").Value == "Load");
-
 
             AppAdditional adds = _context.AppAdditionals.Single(a => a.Id == Device.ApplicationId);
-            XElement prod =XDocument.Parse(Encoding.UTF8.GetString(adds.Dynamic)).Root;
-            prod = prod.Element(XName.Get("LoadProcedure", prod.Name.NamespaceName));
+            XElement prod = XDocument.Parse(Encoding.UTF8.GetString(adds.LoadProcedures)).Root;
+            loadprocedures = prod.Element(XName.Get("LoadProcedure", prod.Name.NamespaceName));
+
+            if(prod.Elements().Any(e => e.Attribute("MergeId") != null))
+            {
+                merges = prod;
+                XDocument master = await GetKnxMaster();
+                XElement mask = master.Descendants(XName.Get("MaskVersion", master.Root.Name.NamespaceName)).Single(m => m.Attribute("Id").Value == app.Mask);
+                loadprocedures = mask.Descendants(XName.Get("Procedure", master.Root.Name.NamespaceName)).Single(m => m.Attribute("ProcedureType").Value == "Load");
+            }
 
 
-            float stepSize = 100 / prod.Elements().Count();
+            float stepSize = 100 / loadprocedures.Elements().Count();
             float currentProg = 0;
             Debug.WriteLine("StepSize: " + stepSize + " - " + prod.Elements().Count());
 
-            foreach(XElement ctrl in prod.Elements())
+            foreach(XElement ctrl in loadprocedures.Elements())
             {
                 switch(ctrl.Name.LocalName)
                 {
@@ -113,24 +117,17 @@ namespace Kaenx.Classes.Bus.Actions
                         break;
 
                     case "LdCtrlUnload":
-                        byte[] dataU = new byte[11];
-                        int lsmIdxU = int.Parse(ctrl.Attribute("LsmIdx").Value);
-                        int stateU = (int)LoadStateMachineState.Unloaded;
-                        int endU = (lsmIdxU << 4) | stateU;
-                        dataU[0] = Convert.ToByte(endU);
-                        await dev.MemoryWriteSync(260, dataU);
-                        await Task.Delay(50);
-                        dataU = await dev.MemoryRead(46825 + lsmIdxU, 1);
+                    case "LdCtrlLoad":
+                    case "LdCtrlLoadCompleted":
+                        await LsmState(ctrl);
                         break;
 
-                    case "LdCtrlLoad":
-                        byte[] dataL = new byte[11];
-                        int lsmIdxL = int.Parse(ctrl.Attribute("LsmIdx").Value);
-                        int stateL = (int)LoadStateMachineState.Loading;
-                        int endL = (lsmIdxL << 4) | stateL;
-                        dataL[0] = Convert.ToByte(endL);
-                        await dev.MemoryWriteSync(260, dataL);
-                        await Task.Delay(50);
+                    case "LdCtrlTaskSegment":
+                        //TODO verstehen was hier gemacht wird
+                        break;
+
+                    case "LdCtrlAbsSegment":
+                        await WriteAbsSegment(ctrl);
                         break;
 
                     case "LdCtrlDelay":
@@ -147,6 +144,89 @@ namespace Kaenx.Classes.Bus.Actions
 
             //Finished?.Invoke(this, null);
         }
+
+
+        private async Task WriteAbsSegment(XElement ctrl)
+        {
+            if (ctrl.Attribute("Access") != null && ctrl.Attribute("Access").Value == "0") return;
+
+            int addr = int.Parse(ctrl.Attribute("Address").Value);
+            CatalogContext context = new CatalogContext();
+            AppAbsoluteSegmentViewModel seg = context.AppAbsoluteSegments.Single(s => s.Address == addr && s.ApplicationId == Device.ApplicationId);
+            ApplicationViewModel app = context.Applications.Single(a => a.Id == Device.ApplicationId);
+
+            if(app.Table_Group == seg.Id)
+            {
+                await WriteTableGroup(addr);
+            } else if(app.Table_Assosiations == seg.Id)
+            {
+
+            } else if(app.Table_Object == seg.Id)
+            {
+
+            }
+        }
+
+
+
+        private async Task WriteTableGroup(int addr)
+        {
+            //Alle verbundenen GAs finden und sortieren
+            addedGroups = new List<string> { "" };
+            foreach (DeviceComObject com in Device.ComObjects)
+                foreach (GroupAddress group in com.Groups)
+                    if (!addedGroups.Contains(group.GroupName))
+                        addedGroups.Add(group.GroupName);
+
+            addedGroups.Sort();
+
+            //länge der Tabelle erstmal auf 1 setzen
+            await dev.MemoryWriteSync(addr, new byte[] { 0x01 });
+
+            await Task.Delay(100);
+            //Gruppenadressen in Tabelle eintragen
+            List<byte> data = new List<byte>(); //Länge wird später richtig gesetzt
+            foreach (string group in addedGroups) //Liste zum Datenpaket hinzufügen
+                if (group != "") data.AddRange(MulticastAddress.FromString(group).GetBytes());
+            await dev.MemoryWriteSync(addr + 3, data.ToArray());
+
+            await Task.Delay(100);
+
+            await dev.MemoryWriteSync(addr, new byte[] { BitConverter.GetBytes(addedGroups.Count + 1)[0] });
+
+            _ = App._dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Low, () =>
+            {
+                Device.LoadedGroup = true;
+            });
+        }
+
+
+
+        private async Task LsmState(XElement ctrl)
+        {
+            byte[] dataU = new byte[11];
+            int lsmIdxU = int.Parse(ctrl.Attribute("LsmIdx").Value);
+            int stateU = 1;
+            switch (ctrl.Name.LocalName)
+            {
+                case "LdCtrlUnload":
+                    stateU = (int)LoadStateMachineState.Unloaded;
+                    break;
+                case "LdCtrlLoad":
+                    stateU = (int)LoadStateMachineState.Loading;
+                    break;
+                case "LdCtrlLoadCompleted":
+                    stateU = (int)LoadStateMachineState.Loaded;
+                    break;
+            }
+            int endU = (lsmIdxU << 4) | stateU;
+            dataU[0] = Convert.ToByte(endU);
+            await dev.MemoryWriteSync(260, dataU);
+            await Task.Delay(50);
+            dataU = await dev.MemoryRead(46825 + lsmIdxU, 1);
+        }
+
+
 
 
         private async void Start2()
@@ -199,7 +279,6 @@ namespace Kaenx.Classes.Bus.Actions
             byte[] data = { 3, 13, 0x01 << 4, 0x01 }; // TODO probiere 5 ob ganze appID und Start bei 0!
             //builder.Build(UnicastAddress.FromString("0.0.0"), UnicastAddress.FromString(Device.LineName), Parser.ApciTypes.PropertyValueRead, _sequence, _currentSeqNum, data);
             Connection.Send(builder);
-            _state = 1;
         }
 
 
