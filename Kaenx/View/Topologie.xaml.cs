@@ -290,6 +290,17 @@ namespace Kaenx.View
             CalcCounts();
         }
 
+
+        private void ClickRestart(object sender, RoutedEventArgs e)
+        {
+            MenuFlyoutItem item = (MenuFlyoutItem)sender;
+            LineDevice dev = (LineDevice)item.DataContext;
+
+            Classes.Bus.Actions.DeviceRestart action = new Classes.Bus.Actions.DeviceRestart();
+            action.Device = dev;
+            BusConnection.Instance.AddAction(action);
+        }
+
         private void ClickToggle(object sender, RoutedEventArgs e)
         {
             MenuFlyoutItem item = (MenuFlyoutItem)sender;
@@ -309,7 +320,8 @@ namespace Kaenx.View
             MenuFlyoutItemBase mAdd = menu.Items.Single(i => i.Name == "MFI_Add");
             MenuFlyoutItemBase mProg = menu.Items.Single(i => i.Name == "MFI_Prog");
             MenuFlyoutItemBase mPara = menu.Items.Single(i => i.Name == "MFI_Para");
-            MenuFlyoutItemBase mToggle = menu.Items.Single(i => i.Name == "MFI_Toggle");
+            MenuFlyoutSubItem mActions = (MenuFlyoutSubItem)menu.Items.Single(i => i.Name == "MFI_Actions");
+            MenuFlyoutItemBase mToggle = mActions.Items.Single(i => i.Name == "MFI_Toggle");
 
             switch (line.Type)
             {
@@ -323,20 +335,21 @@ namespace Kaenx.View
                     mAdd.Visibility = Visibility.Collapsed;
                     mProg.Visibility = Visibility.Visible;
                     mPara.Visibility = Visibility.Visible;
+                    mActions.Visibility = Visibility.Visible;
                     break;
 
                 case TopologieType.LineMiddle:
                     mAdd.Visibility = Visibility.Collapsed;
                     mProg.Visibility = Visibility.Collapsed;
                     mPara.Visibility = Visibility.Collapsed;
-                    mToggle.Visibility = Visibility.Collapsed;
+                    mActions.Visibility = Visibility.Collapsed;
                     break;
 
                 case TopologieType.Line:
                     mAdd.Visibility = Visibility.Visible;
                     mProg.Visibility = Visibility.Collapsed;
                     mPara.Visibility = Visibility.Collapsed;
-                    mToggle.Visibility = Visibility.Collapsed;
+                    mActions.Visibility = Visibility.Collapsed;
                     break;
 
             }
@@ -552,5 +565,6 @@ namespace Kaenx.View
                 e.Handled = true;
             }
         }
+
     }
 }

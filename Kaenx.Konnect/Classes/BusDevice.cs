@@ -298,6 +298,7 @@ namespace Kaenx.Konnect.Classes
                 _conn.Send(builder);
                 Debug.WriteLine("Warten auf Ack MS: " + seq);
                 await WaitForAck(seq);
+                await Task.Delay(100);
             }
 
         }

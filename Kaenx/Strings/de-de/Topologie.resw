@@ -156,6 +156,9 @@
   <data name="InfoLine.Text" xml:space="preserve">
     <value>Linien: </value>
   </data>
+  <data name="MenActions.Text" xml:space="preserve">
+    <value>Aktionen</value>
+  </data>
   <data name="MenAdd.Text" xml:space="preserve">
     <value>Hinzufügen</value>
   </data>
@@ -185,6 +188,9 @@
   </data>
   <data name="MenRename.Text" xml:space="preserve">
     <value>Umbenennen</value>
+  </data>
+  <data name="MenRestart.Text" xml:space="preserve">
+    <value>Neustarten</value>
   </data>
   <data name="MenToggle_Activate" xml:space="preserve">
     <value>Aktivieren</value>

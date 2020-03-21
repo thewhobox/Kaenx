@@ -5,6 +5,7 @@ using Kaenx.Konnect;
 using Kaenx.Konnect.Addresses;
 using Kaenx.Konnect.Builders;
 using Kaenx.Konnect.Classes;
+using Serilog;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -84,13 +85,16 @@ namespace Kaenx.Classes.Bus.Actions
             }
 
 
-            float stepSize = 100 / loadprocedures.Elements().Count();
-            float currentProg = 0;
+            double stepSize = 100.0 / loadprocedures.Elements().Count();
+            double currentProg = 0;
             Debug.WriteLine("StepSize: " + stepSize + " - " + prod.Elements().Count());
 
             foreach(XElement ctrl in loadprocedures.Elements())
             {
-                switch(ctrl.Name.LocalName)
+                currentProg += stepSize;
+                ProgressValue = (int)currentProg;
+
+                switch (ctrl.Name.LocalName)
                 {
                     case "LdCtrlConnect":
                         dev.Connect();
@@ -98,7 +102,11 @@ namespace Kaenx.Classes.Bus.Actions
                         break;
 
                     case "LdCtrlDisconnect":
-                        //dev.Disconnect();
+                        dev.Disconnect();
+                        break;
+
+                    case "LdCtrlRestart":
+                        dev.Restart();
                         break;
 
                     case "LdCtrlCompareProp":
@@ -119,14 +127,17 @@ namespace Kaenx.Classes.Bus.Actions
                     case "LdCtrlUnload":
                     case "LdCtrlLoad":
                     case "LdCtrlLoadCompleted":
+                        //if (ctrl.Attribute("LsmIdx").Value == "3") continue;
                         await LsmState(ctrl);
                         break;
 
                     case "LdCtrlTaskSegment":
-                        //TODO verstehen was hier gemacht wird
+                        //if (ctrl.Attribute("LsmIdx").Value == "3") continue;
+                        await AllocSegment(ctrl, 2);
                         break;
 
                     case "LdCtrlAbsSegment":
+                        //if (ctrl.Attribute("LsmIdx").Value == "3") continue;
                         await WriteAbsSegment(ctrl);
                         break;
 
@@ -135,12 +146,10 @@ namespace Kaenx.Classes.Bus.Actions
                         await Task.Delay(ms);
                         break;
                 }
-
-                currentProg += stepSize;
-                ProgressValue = (int)currentProg;
             }
 
             TodoText = "Abgeschlossen";
+            ProgressValue = 100;
 
             //Finished?.Invoke(this, null);
         }
@@ -148,25 +157,97 @@ namespace Kaenx.Classes.Bus.Actions
 
         private async Task WriteAbsSegment(XElement ctrl)
         {
+            await AllocSegment(ctrl, int.Parse(ctrl.Attribute("SegType").Value));
+
+
             if (ctrl.Attribute("Access") != null && ctrl.Attribute("Access").Value == "0") return;
-
             int addr = int.Parse(ctrl.Attribute("Address").Value);
-            CatalogContext context = new CatalogContext();
-            AppAbsoluteSegmentViewModel seg = context.AppAbsoluteSegments.Single(s => s.Address == addr && s.ApplicationId == Device.ApplicationId);
-            ApplicationViewModel app = context.Applications.Single(a => a.Id == Device.ApplicationId);
 
-            if(app.Table_Group == seg.Id)
-            {
-                await WriteTableGroup(addr);
-            } else if(app.Table_Assosiations == seg.Id)
-            {
 
-            } else if(app.Table_Object == seg.Id)
+            switch (ctrl.Attribute("LsmIdx").Value)
             {
+                case "1":
+                    await WriteTableGroup(addr);
+                    break;
 
+                case "2":
+                    await WriteAssociationTable(addr);
+                    break;
+
+                case "3":
+                    //TODO später
+                    break;
+
+                case "4":
+                    //TODO später
+                    break;
             }
         }
 
+        private async Task AllocSegment(XElement ctrl, int segType, int counter = 0)
+        {
+            string addr = ctrl.Attribute("Address").Value;
+            string LsmId = ctrl.Attribute("LsmIdx").Value;
+
+            byte[] tempBytes;
+            List<byte> data = new List<byte>();
+            int lsmIdx = int.Parse(LsmId);
+            lsmIdx = (lsmIdx << 4) | 0x03;
+            data.Add(Convert.ToByte(lsmIdx));
+            data.Add(Convert.ToByte(segType)); // Segment Type
+            data.Add(0x00); // Segment Id
+
+            switch (segType)
+            {
+                case 0:
+                    tempBytes = BitConverter.GetBytes(Convert.ToUInt16(addr));
+                    data.AddRange(tempBytes.Reverse()); // Start Address
+                    tempBytes = BitConverter.GetBytes(Convert.ToUInt16(ctrl.Attribute("Size").Value));
+                    data.AddRange(tempBytes.Reverse()); // Length
+                    data.Add(Convert.ToByte(ctrl.Attribute("Access").Value)); // Access Attributes
+                    data.Add(Convert.ToByte(ctrl.Attribute("MemType").Value)); // Memory Type
+                    data.Add(Convert.ToByte(ctrl.Attribute("SegFlags").Value)); // Memory Attributes
+                    data.Add(0x00); // Reserved
+                    break;
+
+                case 2:
+                    tempBytes = BitConverter.GetBytes(Convert.ToUInt16(addr));
+                    data.AddRange(tempBytes.Reverse()); // Start Address
+                    data.Add(0x01); //PEI Type //TODO check to find out
+
+                    string[] appid = Device.ApplicationId.Split('-');
+                    int version = int.Parse(appid[3], System.Globalization.NumberStyles.HexNumber);
+                    int appnr = int.Parse(appid[2], System.Globalization.NumberStyles.HexNumber);
+                    int manu = int.Parse(appid[1].Substring(0,4), System.Globalization.NumberStyles.HexNumber);
+
+                    tempBytes = BitConverter.GetBytes(Convert.ToUInt16(manu));
+                    data.AddRange(tempBytes.Reverse());
+                    tempBytes = BitConverter.GetBytes(Convert.ToUInt16(appnr));
+                    data.AddRange(tempBytes.Reverse());
+                    data.Add(Convert.ToByte(version));
+                    break;
+
+                default:
+                    Debug.WriteLine("Unsupported SegType: " + ctrl.Attribute("SegType").Value);
+                    Log.Error("Unsupported SegType: " + ctrl.Attribute("SegType").Value);
+                    break;
+            }
+
+            await dev.MemoryWriteSync(260, data.ToArray());
+
+            byte[] data2 = await dev.MemoryRead(46825 + int.Parse(LsmId), 1);
+
+            Dictionary<string, byte> map = new Dictionary<string, byte>() { { "4", 0x00 }, { "3", 0x02 }, { "2", 0x01 }, { "1", 0x02 } };
+            if (data2[0] != map[LsmId])
+            {
+                if (counter > 3)
+                {
+                    Debug.WriteLine("Fehlgeschlagen!");
+                }
+                else
+                    await AllocSegment(ctrl, segType, counter + 1);
+            }
+        }
 
 
         private async Task WriteTableGroup(int addr)
@@ -177,7 +258,6 @@ namespace Kaenx.Classes.Bus.Actions
                 foreach (GroupAddress group in com.Groups)
                     if (!addedGroups.Contains(group.GroupName))
                         addedGroups.Add(group.GroupName);
-
             addedGroups.Sort();
 
             //länge der Tabelle erstmal auf 1 setzen
@@ -185,14 +265,50 @@ namespace Kaenx.Classes.Bus.Actions
 
             await Task.Delay(100);
             //Gruppenadressen in Tabelle eintragen
-            List<byte> data = new List<byte>(); //Länge wird später richtig gesetzt
+            List<byte> data = new List<byte>();
             foreach (string group in addedGroups) //Liste zum Datenpaket hinzufügen
                 if (group != "") data.AddRange(MulticastAddress.FromString(group).GetBytes());
             await dev.MemoryWriteSync(addr + 3, data.ToArray());
 
-            await Task.Delay(100);
+            //await Task.Delay(100);
 
-            await dev.MemoryWriteSync(addr, new byte[] { BitConverter.GetBytes(addedGroups.Count + 1)[0] });
+            await dev.MemoryWriteSync(addr, new byte[] { BitConverter.GetBytes(addedGroups.Count)[0] });
+
+            _ = App._dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Low, () =>
+            {
+                Device.LoadedGroup = true;
+                Device.LoadedPA = true;
+            });
+        }
+
+
+        private async Task WriteAssociationTable(int addr)
+        {
+            await dev.MemoryWriteSync(addr, new byte[] { 0x00 });
+
+
+            //Erstelle Assoziationstabelle
+            List<byte> data = new List<byte>();
+            int sizeCounter = 0;
+
+            foreach (DeviceComObject com in Device.ComObjects)
+            {
+                foreach (GroupAddress group in com.Groups)
+                {
+                    int indexG = addedGroups.IndexOf(group.GroupName) + 1;
+                    int indexC = com.Number;
+
+                    byte bIndexG = BitConverter.GetBytes(indexG)[0];
+                    byte bIndexC = BitConverter.GetBytes(indexC)[0];
+                    data.Add(bIndexG);
+                    data.Add(bIndexC);
+                    sizeCounter++;
+                }
+            }
+
+            await dev.MemoryWriteSync(addr + 1, data.ToArray());
+
+            await dev.MemoryWriteSync(addr, new byte[] { Convert.ToByte(sizeCounter) });
 
             _ = App._dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Low, () =>
             {
@@ -201,29 +317,37 @@ namespace Kaenx.Classes.Bus.Actions
         }
 
 
-
-        private async Task LsmState(XElement ctrl)
+        private async Task LsmState(XElement ctrl, int counter = 0)
         {
-            byte[] dataU = new byte[11];
-            int lsmIdxU = int.Parse(ctrl.Attribute("LsmIdx").Value);
-            int stateU = 1;
+            byte[] data = new byte[11];
+            int lsmIdx = int.Parse(ctrl.Attribute("LsmIdx").Value);
+            int state = 1;
             switch (ctrl.Name.LocalName)
             {
                 case "LdCtrlUnload":
-                    stateU = (int)LoadStateMachineState.Unloaded;
+                    state = (int)LoadStateMachineState.Unloaded;
                     break;
                 case "LdCtrlLoad":
-                    stateU = (int)LoadStateMachineState.Loading;
+                    state = (int)LoadStateMachineState.Loading;
                     break;
                 case "LdCtrlLoadCompleted":
-                    stateU = (int)LoadStateMachineState.Loaded;
+                    state = (int)LoadStateMachineState.Loaded;
                     break;
             }
-            int endU = (lsmIdxU << 4) | stateU;
-            dataU[0] = Convert.ToByte(endU);
-            await dev.MemoryWriteSync(260, dataU);
+            int endU = (lsmIdx << 4) | state;
+            data[0] = Convert.ToByte(endU);
+            await dev.MemoryWriteSync(260, data);
             await Task.Delay(50);
-            dataU = await dev.MemoryRead(46825 + lsmIdxU, 1);
+            data = await dev.MemoryRead(46825 + lsmIdx, 1);
+
+            Dictionary<int, byte> map = new Dictionary<int, byte>() { { 4, 0x00 }, { 3, 0x02 }, { 2, 0x01 }, { 1, 0x02 } };
+            if(data[0] != map[(int)state]){
+                if(counter > 3)
+                {
+                    Debug.WriteLine("Fehlgeschlagen!");
+                } else
+                    await LsmState(ctrl, counter + 1);
+            }
         }
 
 

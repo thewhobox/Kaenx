@@ -126,6 +126,7 @@
       <DependentUpon>App.xaml</DependentUpon>
     </Compile>
     <Compile Include="Classes\Bus\Actions\DeviceDeActivate.cs" />
+    <Compile Include="Classes\Bus\Actions\DeviceRestart.cs" />
     <Compile Include="Classes\Bus\Actions\IBusAction.cs" />
     <Compile Include="Classes\Bus\Actions\DeviceInfo.cs" />
     <Compile Include="Classes\Bus\Actions\DeviceInfoData.cs" />
