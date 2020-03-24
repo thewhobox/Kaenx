@@ -12,8 +12,9 @@
         <DataTemplate x:Key="RowDetailsTemplate">
             <Grid>
                 <Grid.ColumnDefinitions>
+                    <ColumnDefinition  />
+                    <ColumnDefinition Width="150" />
                     <ColumnDefinition Width="auto" />
-                    <ColumnDefinition />
                 </Grid.ColumnDefinitions>
 
                 <StackPanel Orientation="Vertical" Padding="10" ScrollViewer.HorizontalScrollMode="Auto">
@@ -31,7 +32,14 @@
                     </toolkit:HeaderedContentControl>
                 </StackPanel>
 
-                <ListView Grid.Column="1" ItemsSource="{Binding GroupTable}" />
+                <ListView Grid.Column="1" ItemsSource="{Binding GroupTable}" Visibility="Collapsed" />
+
+                <toolkit:DataGrid Grid.Column="2" ItemsSource="{Binding AssociationTable}" AutoGenerateColumns="False" IsReadOnly="False">
+                    <toolkit:DataGrid.Columns>
+                        <toolkit:DataGridTextColumn Header="Gruppenadresse" Binding="{Binding GroupIndex}" />
+                        <toolkit:DataGridTextColumn Header="KO Nr." Binding="{Binding ObjectIndex}" />
+                    </toolkit:DataGrid.Columns>
+                </toolkit:DataGrid>
             </Grid>
         </DataTemplate>
     </Page.Resources>

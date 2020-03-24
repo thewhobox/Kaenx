@@ -200,6 +200,7 @@ namespace Kaenx.Classes.Bus.Actions
             switch (segType)
             {
                 case 0:
+                case 1:
                     tempBytes = BitConverter.GetBytes(Convert.ToUInt16(addr));
                     data.AddRange(tempBytes.Reverse()); // Start Address
                     tempBytes = BitConverter.GetBytes(Convert.ToUInt16(ctrl.Attribute("Size").Value));
@@ -237,8 +238,8 @@ namespace Kaenx.Classes.Bus.Actions
 
             byte[] data2 = await dev.MemoryRead(46825 + int.Parse(LsmId), 1);
 
-            Dictionary<string, byte> map = new Dictionary<string, byte>() { { "4", 0x00 }, { "3", 0x02 }, { "2", 0x01 }, { "1", 0x02 } };
-            if (data2[0] != map[LsmId])
+            Dictionary<int, byte> map = new Dictionary<int, byte>() { { 4, 0x00 }, { 3, 0x02 }, { 2, 0x01 }, { 1, 0x02 } };
+            if (data2[0] != map[int.Parse(LsmId)])
             {
                 if (counter > 3)
                 {
@@ -295,7 +296,7 @@ namespace Kaenx.Classes.Bus.Actions
             {
                 foreach (GroupAddress group in com.Groups)
                 {
-                    int indexG = addedGroups.IndexOf(group.GroupName) + 1;
+                    int indexG = addedGroups.IndexOf(group.GroupName);
                     int indexC = com.Number;
 
                     byte bIndexG = BitConverter.GetBytes(indexG)[0];

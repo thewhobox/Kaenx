@@ -19,5 +19,14 @@ namespace Kaenx.Classes.Bus.Actions
 
 
         public List<MulticastAddress> GroupTable { get; set; }
+
+        public List<AssociationHelper> AssociationTable { get; set; }
+    }
+
+
+    public class AssociationHelper
+    {
+        public string GroupIndex { get; set; }
+        public int ObjectIndex { get; set; }
     }
 }

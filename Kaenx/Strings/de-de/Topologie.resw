@@ -165,6 +165,9 @@
   <data name="MenDelete.Text" xml:space="preserve">
     <value>Löschen</value>
   </data>
+  <data name="MenInfo.Text" xml:space="preserve">
+    <value>Info auslesen</value>
+  </data>
   <data name="MenOpenPara.Text" xml:space="preserve">
     <value>Parameter</value>
   </data>

@@ -52,7 +52,15 @@ namespace Kaenx.Classes.Project
             Id = id;
             Name = name;
             Parent = parent;
+            ComObjects.CollectionChanged += ComObjects_CollectionChanged;
         }
+
+        private void ComObjects_CollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
+        {
+            Changed("DPT");
+            Changed("DPST");
+        }
+
         public GroupAddress(GroupAddressModel model, GroupMiddle parent)
         {
             Id = model.Id;
@@ -60,6 +68,10 @@ namespace Kaenx.Classes.Project
             Parent = parent;
             UId = model.UId;
         }
+
+
+        public int DPT { get { if (ComObjects.Count != 0) return ComObjects[0].Datapoint; else return 0; } }
+        public int DPST { get { if (ComObjects.Count != 0) return ComObjects[0].DatapointSub; else return 0; } }
 
         private void Changed(string name)
         {

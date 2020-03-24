@@ -64,6 +64,8 @@ namespace Kaenx.View
             ListGroupComs.DataContext = this;
             OutDeviceName.DataContext = this;
             OutGroupName.DataContext = this;
+            GroupsInfo.DataContext = this;
+
             LoadContext();
         }
 

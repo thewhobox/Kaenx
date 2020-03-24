@@ -184,7 +184,10 @@ namespace Kaenx.Classes.Bus
             _ = App._dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Low, () =>
             {
                 History.Insert(0, CurrentAction);
-                CurrentAction.Finished -= CurrentAction_Finished;
+                try
+                {
+                    CurrentAction.Finished -= CurrentAction_Finished;
+                } catch { }
                 CurrentAction = null;
                 Changed("CurrentAction");
             });

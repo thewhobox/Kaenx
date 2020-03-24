@@ -73,6 +73,13 @@ namespace Kaenx.View
             BusConnection.Instance.AddAction(action);
         }
 
+        private void ClickInfo(object sender, RoutedEventArgs e)
+        {
+            Classes.Bus.Actions.DeviceInfo action = new Classes.Bus.Actions.DeviceInfo();
+            action.Device = (LineDevice)((MenuFlyoutItem)e.OriginalSource).DataContext;
+            BusConnection.Instance.AddAction(action);
+        }
+
         private void ClickProApp(object sender, RoutedEventArgs e)
         {
             string type = ((MenuFlyoutItem)sender).Tag.ToString();
@@ -201,7 +208,7 @@ namespace Kaenx.View
             DeviceViewModel model = (DeviceViewModel)ViewHelper.Instance.DragItem;
             LineMiddle line = (LineMiddle)((TreeViewItem)e.OriginalSource).DataContext;
 
-            LineDevice device = new LineDevice(model, line);
+            LineDevice device = new LineDevice(model, line, true);
             device.DeviceId = model.Id;
 
             if (model.IsCoupler)
@@ -284,6 +291,7 @@ namespace Kaenx.View
                 device.ComObjects = new ObservableCollection<DeviceComObject>();
             }
 
+            device.IsInit = false;
 
             SaveHelper.CalculateLineCurrent(line);
             UpdateManager.Instance.CountUpdates();
@@ -565,6 +573,5 @@ namespace Kaenx.View
                 e.Handled = true;
             }
         }
-
     }
 }

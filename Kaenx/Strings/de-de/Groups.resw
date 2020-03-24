@@ -123,6 +123,9 @@
   <data name="CListContextUnlink.Text" xml:space="preserve">
     <value>Trennen</value>
   </data>
+  <data name="CListDPT.Header" xml:space="preserve">
+    <value>Datentyp</value>
+  </data>
   <data name="CListFunc.Header" xml:space="preserve">
     <value>Funktion</value>
   </data>

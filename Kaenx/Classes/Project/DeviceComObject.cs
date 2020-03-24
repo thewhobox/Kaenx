@@ -50,6 +50,7 @@ namespace Kaenx.Classes.Project
         public string Id { get; set; }
         public int Datapoint { get; set; }
         public int DatapointSub { get; set; }
+        public string DP_Full { get { if (Datapoint == -1) return "-"; else { if (DatapointSub == -1) return Datapoint + ".0"; else return Datapoint + "." + DatapointSub; } } }
         public int Number { get; set; }
         public string Name { get { return _name; } set { _name = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Name")); } }
         public string Function { get; set; }

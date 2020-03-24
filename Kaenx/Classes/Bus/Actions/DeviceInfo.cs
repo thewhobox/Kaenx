@@ -100,9 +100,11 @@ namespace Kaenx.Classes.Bus.Actions
             await Task.Delay(500);
             int grpAddr = -1;
 
+            ApplicationViewModel appModel = null;
+
             if (context.Applications.Any(a => a.Id.StartsWith(appId)))
             {
-                ApplicationViewModel appModel = context.Applications.Single(a => a.Id.StartsWith(appId)); //TODO check if now complete appid is returned
+                appModel = context.Applications.Single(a => a.Id.StartsWith(appId)); //TODO check if now complete appid is returned
 
                 if (appModel.Table_Group != "" || appModel.Table_Group != null)
                 {
@@ -129,8 +131,8 @@ namespace Kaenx.Classes.Bus.Actions
                 if(datax.Length > 0)
                 {
                     int length = Convert.ToInt16(datax[0]) - 1;
-
                     datax = await dev.MemoryRead(grpAddr + 3, length * 2);
+
                     List<MulticastAddress> addresses = new List<MulticastAddress>();
                     for (int i = 0; i < (datax.Length / 2); i++)
                     {
@@ -141,6 +143,53 @@ namespace Kaenx.Classes.Bus.Actions
                     _data.GroupTable = addresses;
                 }
             }
+
+
+            ProgressValue = 30;
+            TodoText = "Lese Assoziationstabelle...";
+            await Task.Delay(500);
+
+            if(appModel != null)
+            {
+                if (appModel.Table_Assosiations != "" || appModel.Table_Assosiations != null)
+                {
+                    AppAbsoluteSegmentViewModel segmentModel = context.AppAbsoluteSegments.Single(s => s.Id == appModel.Table_Assosiations);
+                    int assoAddr = segmentModel.Address;
+
+                    byte[] datax = await dev.MemoryRead(assoAddr, 1);
+                    if (datax.Length > 0)
+                    {
+                        int length = Convert.ToInt16(datax[0]);
+
+                        datax = await dev.MemoryRead(assoAddr + 1, length * 2);
+                        List<AssociationHelper> table = new List<AssociationHelper>();
+                        for (int i = 0; i < length; i++)
+                        {
+                            int offset = i * 2;
+
+                            AssociationHelper helper = new AssociationHelper()
+                            {
+                                ObjectIndex = datax[offset + 1]
+                            };
+
+                            if (_data.GroupTable.Count > 0)
+                                helper.GroupIndex = _data.GroupTable[datax[offset] - 1].ToString();
+                            else
+                                helper.GroupIndex = datax[offset].ToString();
+
+                            table.Add(helper);
+                        }
+
+                        _data.AssociationTable = table;
+                    }
+
+                }
+
+                
+            }
+
+
+
 
             Finish();
         }

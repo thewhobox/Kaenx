@@ -394,71 +394,98 @@ namespace Kaenx.Classes.Helper
 
 
 
-        public static void GenerateDefaultComs(string appId, AppAdditional adds)
+        public static void GenerateDefaultComs(AppAdditional adds)
         {
             List<DeviceComObject> comObjects = new List<DeviceComObject>();
             XDocument dynamic = XDocument.Parse(System.Text.Encoding.UTF8.GetString(adds.Dynamic));
             string xmlns = dynamic.Root.Name.NamespaceName;
 
             IEnumerable<XElement> elements = dynamic.Root.Descendants(XName.Get("ComObjectRefRef", xmlns));
+            Dictionary<string, AppComObject> comobjects = new Dictionary<string, AppComObject>();
+            List<string> addedHashes = new List<string>();
+
+            foreach (AppComObject com in contextC.AppComObjects)
+                comobjects.Add(com.Id, com);
 
             foreach (XElement xcom in elements)
             {
-                AppComObject appCom = contextC.AppComObjects.Single(c => c.Id == xcom.Attribute("RefId").Value);
+                AppComObject appCom = comobjects[xcom.Attribute("RefId").Value];
                 if (appCom.Text == "Dummy") continue;
 
-                DeviceComObject comobject = new DeviceComObject(appCom);
-                comobject.Conditions = GetConditions(xcom);
-                comObjects.Add(comobject);
+
+                (List<ParamCondition> list, string ids) result = GetConditions(xcom, true);
+
+                foreach (XElement xele in xcom.Parent.Elements(XName.Get("ComObjectRefRef", xcom.Name.NamespaceName)))
+                {
+                    string comId = xele.Attribute("RefId").Value;
+                    string hash = Convert.ToBase64String(Encoding.UTF8.GetBytes(result.ids + comId));
+                    if (addedHashes.Contains(hash)) continue;
+
+                    DeviceComObject comobject = new DeviceComObject(comobjects[comId]);
+                    comobject.Conditions = result.list;
+                    comObjects.Add(comobject);
+                    addedHashes.Add(hash);
+                }
+
+                    
             }
 
             adds.ComsAll = ObjectToByteArray(comObjects);
             adds.ComsDefault = ObjectToByteArray(GetDefaultComs(comObjects));
         }
 
-        public static byte[] ObjectToByteArray(object obj)
-        {
-            string text = Newtonsoft.Json.JsonConvert.SerializeObject(obj);
-            return System.Text.Encoding.UTF8.GetBytes(text);
-        }
-        public static T ByteArrayToObject<T>(byte[] obj)
-        {
-            string text = Encoding.UTF8.GetString(obj);
-            return Newtonsoft.Json.JsonConvert.DeserializeObject<T>(text);
-        }
-
-        public static void GenerateVisibleProps(string appId, AppAdditional adds)
+        public static void GenerateVisibleProps(AppAdditional adds)
         {
             List<ParamVisHelper> paras = new List<ParamVisHelper>();
             XDocument dynamic = XDocument.Parse(System.Text.Encoding.UTF8.GetString(adds.Dynamic));
             string xmlns = dynamic.Root.Name.NamespaceName;
 
             IEnumerable<XElement> elements = dynamic.Root.Descendants(XName.Get("ParameterRefRef", xmlns));
+            Dictionary<string, AppParameter> parameters = new Dictionary<string, AppParameter>();
+            List<string> addedHashes = new List<string>();
+
+            foreach (AppParameter para in contextC.AppParameters)
+                parameters.Add(para.Id, para);
+
 
             foreach (XElement xpara in elements)
             {
-                AppParameter appParam = contextC.AppParameters.Single(c => c.Id == xpara.Attribute("RefId").Value);
+                AppParameter appParam = parameters[xpara.Attribute("RefId").Value];
                 if (appParam.Text == "Dummy") continue;
 
+                (List<ParamCondition> list, string ids) result = GetConditions(xpara, true);
 
-                ParamVisHelper para = new ParamVisHelper(appParam);
-                para.Conditions = GetConditions(xpara, para, true);
-                paras.Add(para);
+                foreach (XElement xele in xpara.Parent.Elements(XName.Get("ParameterRefRef", xpara.Name.NamespaceName)))
+                {
+                    string paraId = xele.Attribute("RefId").Value;
+                    string hash = Convert.ToBase64String(Encoding.UTF8.GetBytes(result.ids + paraId));
+                    if (addedHashes.Contains(hash)) continue;
+
+                    ParamVisHelper para = new ParamVisHelper(parameters[paraId]);
+                    para.Conditions = result.list;
+                    para.Hash = hash;
+                    paras.Add(para);
+                    addedHashes.Add(hash);
+                }
+
             }
 
             adds.ParameterAll = ObjectToByteArray(paras);
             adds.ParameterDefault = ObjectToByteArray(GetDefaultParams(paras));
         }
 
-        public static List<ParamCondition> GetConditions(XElement xele, ParamVisHelper helper = null, bool isParam = false)
+
+        public static List<ParamCondition> GetConditions(XElement xele)
+        {
+            return GetConditions(xele, false).paramList;
+        }
+
+        public static (List<ParamCondition> paramList, string hash) GetConditions(XElement xele, bool isParam)
         {
             List<ParamCondition> conds = new List<ParamCondition>();
             try
             {
-
-                string ids = xele.Attribute("RefId")?.Value;
-                if (ids == null) ids = xele.Attribute("Id")?.Value;
-                string paraId = ids;
+                string ids = "";
                 bool finished = false;
                 while (true)
                 {
@@ -513,19 +540,15 @@ namespace Kaenx.Classes.Helper
                             break;
 
                         case "Dynamic":
-                            if (helper != null)
-                            {
-                                helper.Hash = Convert.ToBase64String(Encoding.UTF8.GetBytes(ids));
-                            }
-                            return conds;
+                            return (conds, ids);
                     }
                 }
             }
-            catch
+            catch(Exception e)
             {
-
+                Log.Error(e, "Generiere Konditionen ist fehlgeschlagen");
             }
-            return conds;
+            return (conds, "");
         }
 
         private static List<AppParameter> GetDefaultParams(List<ParamVisHelper> paras)
@@ -683,5 +706,17 @@ namespace Kaenx.Classes.Helper
 
             return current;
         }
+
+        public static byte[] ObjectToByteArray(object obj)
+        {
+            string text = Newtonsoft.Json.JsonConvert.SerializeObject(obj);
+            return System.Text.Encoding.UTF8.GetBytes(text);
+        }
+        public static T ByteArrayToObject<T>(byte[] obj)
+        {
+            string text = Encoding.UTF8.GetString(obj);
+            return Newtonsoft.Json.JsonConvert.DeserializeObject<T>(text);
+        }
+
     }
 }
