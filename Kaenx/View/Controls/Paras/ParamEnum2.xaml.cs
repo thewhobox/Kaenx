@@ -76,6 +76,11 @@ namespace Kaenx.Classes.Controls.Paras
             this.Visibility = visible;
         }
 
+        public Visibility GetVisibility()
+        {
+            return this.Visibility;
+        }
+
         public void SetValue(string val)
         {
             if (ParaValue1.Tag.ToString() == val)

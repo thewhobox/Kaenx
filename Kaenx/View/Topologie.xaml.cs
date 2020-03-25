@@ -77,6 +77,21 @@ namespace Kaenx.View
         {
             Classes.Bus.Actions.DeviceInfo action = new Classes.Bus.Actions.DeviceInfo();
             action.Device = (LineDevice)((MenuFlyoutItem)e.OriginalSource).DataContext;
+            action.Finished += (action, obj) => { 
+                ((Classes.Bus.Actions.DeviceInfoData)obj).Device = action.Device; 
+                ((Bus)App._pages["bus"]).AddReadData((Classes.Bus.Actions.DeviceInfoData)obj); 
+            };
+            BusConnection.Instance.AddAction(action);
+        }
+
+        private void ClickMemory(object sender, RoutedEventArgs e)
+        {
+            Classes.Bus.Actions.DeviceMemory action = new Classes.Bus.Actions.DeviceMemory();
+            action.Device = (LineDevice)((MenuFlyoutItem)e.OriginalSource).DataContext;
+            action.Finished += (action, obj) => {
+                ((Classes.Bus.Actions.DeviceInfoData)obj).Device = action.Device;
+                ((Bus)App._pages["bus"]).AddReadData((Classes.Bus.Actions.DeviceInfoData)obj);
+            };
             BusConnection.Instance.AddAction(action);
         }
 

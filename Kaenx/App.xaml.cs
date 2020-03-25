@@ -39,6 +39,7 @@ namespace Kaenx
     sealed partial class App : Application
     {
         public static CoreDispatcher _dispatcher;
+        public static Dictionary<string, Page> _pages;
 
         /// <summary>
         /// Initializes the singleton application object.  This is the first line of authored code

@@ -61,6 +61,14 @@ namespace Kaenx.View
         
         }
 
+        public void AddReadData(DeviceInfoData info)
+        {
+            _ = this.Dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Normal, () =>
+            {
+                ReadList.Add(info);
+            });
+        }
+
         private void Action_Finished(IBusAction action, object data)
         {
             _ = this.Dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Normal, () =>

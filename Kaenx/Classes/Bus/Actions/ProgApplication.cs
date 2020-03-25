@@ -1,4 +1,5 @@
-﻿using Kaenx.Classes.Project;
+﻿using Kaenx.Classes.Helper;
+using Kaenx.Classes.Project;
 using Kaenx.DataContext.Catalog;
 using Kaenx.DataContext.Project;
 using Kaenx.Konnect;
@@ -138,7 +139,7 @@ namespace Kaenx.Classes.Bus.Actions
 
                     case "LdCtrlAbsSegment":
                         //if (ctrl.Attribute("LsmIdx").Value == "3") continue;
-                        await WriteAbsSegment(ctrl);
+                        await WriteAbsSegment(ctrl, adds);
                         break;
 
                     case "LdCtrlDelay":
@@ -155,7 +156,7 @@ namespace Kaenx.Classes.Bus.Actions
         }
 
 
-        private async Task WriteAbsSegment(XElement ctrl)
+        private async Task WriteAbsSegment(XElement ctrl, AppAdditional adds)
         {
             await AllocSegment(ctrl, int.Parse(ctrl.Attribute("SegType").Value));
 
@@ -175,7 +176,7 @@ namespace Kaenx.Classes.Bus.Actions
                     break;
 
                 case "3":
-                    //TODO später
+                    await WriteApplication(adds);
                     break;
 
                 case "4":
@@ -183,6 +184,210 @@ namespace Kaenx.Classes.Bus.Actions
                     break;
             }
         }
+
+        private async Task WriteApplication(AppAdditional adds)
+        {
+            TodoText = "Berechne Speicher...";
+            List<AppParameter> paras = GetVisibleParams(adds);
+            Dictionary<string, byte[]> memsData = new Dictionary<string, byte[]>();
+            Dictionary<string, AppAbsoluteSegmentViewModel> mems = new Dictionary<string, AppAbsoluteSegmentViewModel>();
+            Dictionary<string, AppParameterTypeViewModel> types = new Dictionary<string, AppParameterTypeViewModel>();
+            List<int> changed = new List<int>();
+
+            foreach (AppParameterTypeViewModel type in _context.AppParameterTypes)
+                types.Add(type.Id, type);
+
+            foreach(AppParameter para in paras)
+            {
+                if (para.SegmentId == null) continue;
+                if (!mems.ContainsKey(para.SegmentId))
+                {
+                    AppAbsoluteSegmentViewModel seg = _context.AppAbsoluteSegments.Single(a => a.Id == para.SegmentId);
+                    memsData[para.SegmentId] = Convert.FromBase64String(seg.Data);
+                    mems[para.SegmentId] = seg;
+                }
+
+                AppParameterTypeViewModel type = types[para.ParameterTypeId];
+
+                byte[] paraData = type.Size >= 8 ? new byte[type.Size / 8] : new byte[1];
+
+                switch (type.Type)
+                {
+                    case ParamTypes.Enum:
+                    case ParamTypes.NumberUInt:
+                        paraData = BitConverter.GetBytes(Convert.ToUInt32(para.Value)).Take(type.Size / 8).ToArray();
+                        Array.Reverse(paraData);
+                        break;
+                    case ParamTypes.NumberInt:
+                        paraData = BitConverter.GetBytes(Convert.ToInt32(para.Value)).Take(type.Size / 8).ToArray();
+                        Array.Reverse(paraData);
+                        break;
+
+                    case ParamTypes.Text:
+                        paraData = Encoding.UTF8.GetBytes(para.Value);
+                        break;
+                }
+
+
+
+                if(type.Size >= 8)
+                {
+                    byte[] memory = memsData[para.SegmentId];
+                    for (int i = 0; i < type.Size / 8; i++)
+                    {
+                        memory[para.Offset + i] = paraData[i];
+                        changed.Add(para.Offset + i);
+                    }
+                }
+            }
+
+            switch (_type)
+            {
+                case ProgAppType.Komplett:
+                    foreach (AppAbsoluteSegmentViewModel seg in mems.Values)
+                    {
+                        await dev.MemoryWriteSync(seg.Address, memsData[seg.Id]);
+                    }
+                    break;
+
+                case ProgAppType.Minimal:
+                    break;
+
+                case ProgAppType.Partiell:
+                    break;
+            }
+
+            
+
+
+            
+
+        }
+
+
+
+
+        private List<AppParameter> GetVisibleParams(AppAdditional adds)
+        {
+            Dictionary<string, AppParameter> AppParas = new Dictionary<string, AppParameter>();
+            List<AppParameter> paras = new List<AppParameter>();
+            XDocument dynamic = XDocument.Parse(Encoding.UTF8.GetString(adds.Dynamic));
+
+            foreach (AppParameter para in _context.AppParameters.Where(p => p.ApplicationId == Device.ApplicationId))
+                AppParas.Add(para.Id, para);
+
+            ProjectContext _contextP = SaveHelper.contextProject;
+
+            if (_contextP.ChangesParam.Any(c => c.DeviceId == Device.UId))
+            {
+                List<string> updated = new List<string>();
+                var changes = _contextP.ChangesParam.Where(c => c.DeviceId == Device.UId).OrderByDescending(c => c.StateId);
+                foreach (ChangeParamModel model in changes)
+                {
+                    if (updated.Contains(model.ParamId)) continue;
+                    AppParas[model.ParamId].Value = model.Value;
+                    updated.Add(model.ParamId);
+                }
+            }
+
+            Dictionary<string, ParamVisHelper> conditions = new Dictionary<string, ParamVisHelper>();
+            foreach (ParamVisHelper helper in SaveHelper.ByteArrayToObject<List<ParamVisHelper>>(adds.ParameterAll))
+                conditions.Add(helper.Parameter.Id, helper);
+
+            int visibleBlocks = 0;
+            foreach (XElement paraBlock in dynamic.Descendants(XName.Get("ParameterBlock", dynamic.Root.Name.NamespaceName)))
+            {
+                XElement parent = paraBlock;
+                XElement lastWhen = null;
+                bool stop = false;
+                bool isVisibleBlock = true;
+                int lastNr;
+
+                while (!stop)
+                {
+                    parent = parent.Parent;
+
+                    switch (parent.Name.LocalName)
+                    {
+                        case "Dynamic":
+                            stop = true;
+                            break;
+
+                        case "when":
+                            lastWhen = parent;
+                            break;
+
+                        case "choose":
+                            //TODO choose ausweiten auf < > <= >=
+                            AppParameter cPara = AppParas[parent.Attribute("ParamRefId").Value];
+                            if (lastWhen.Attribute("default") != null) //Test default
+                            {
+
+                            }
+                            else if (int.TryParse(lastWhen.Attribute("test")?.Value, out lastNr)) //Test isequal
+                            {
+                                if (cPara.Value != lastWhen.Attribute("test").Value)
+                                {
+                                    isVisibleBlock = false;
+                                    stop = true;
+                                }
+                            }
+                            else if (lastWhen.Attribute("test").Value.Contains(" "))
+                            {
+                                if (!lastWhen.Attribute("test").Value.Split(" ").Contains(cPara.Value)) //Test contains
+                                {
+                                    isVisibleBlock = false;
+                                    stop = true;
+                                }
+                            }
+                            break;
+                    }
+                }
+
+                if (!isVisibleBlock) continue;
+                visibleBlocks++;
+
+                foreach(XElement param in paraBlock.Descendants(XName.Get("ParameterRefRef", paraBlock.Name.NamespaceName)))
+                {
+                    string paraId = param.Attribute("RefId").Value;
+                    ParamVisHelper helper = conditions[paraId];
+
+                    if (CheckConditions(AppParas, helper.Conditions))
+                        paras.Add(AppParas[paraId]);
+                }
+            }
+
+
+
+
+
+            return paras;
+        }
+
+
+
+        private bool CheckConditions(Dictionary<string, AppParameter> paras, List<Controls.Paras.ParamCondition> conds)
+        {
+            bool isVisible = true;
+
+            foreach (Controls.Paras.ParamCondition cond in conds)
+            {
+                if (!isVisible) break;
+
+                AppParameter para = paras[cond.SourceId];
+                switch (cond.Operation)
+                {
+                    case Controls.Paras.ConditionOperation.IsInValue:
+                        if (!cond.Values.Split(",").Contains(para.Value))
+                            isVisible = false;
+                        break;
+                }
+            }
+
+            return isVisible;
+        }
+
+
 
         private async Task AllocSegment(XElement ctrl, int segType, int counter = 0)
         {
@@ -238,10 +443,10 @@ namespace Kaenx.Classes.Bus.Actions
 
             byte[] data2 = await dev.MemoryRead(46825 + int.Parse(LsmId), 1);
 
-            Dictionary<int, byte> map = new Dictionary<int, byte>() { { 4, 0x00 }, { 3, 0x02 }, { 2, 0x01 }, { 1, 0x02 } };
+            Dictionary<int, byte> map = new Dictionary<int, byte>() { { 4, 0x00 }, { 3, 0x02 }, { 2, 0x02 }, { 1, 0x02 } };
             if (data2[0] != map[int.Parse(LsmId)])
             {
-                if (counter > 3)
+                if (counter > 2)
                 {
                     Debug.WriteLine("Fehlgeschlagen!");
                 }
@@ -253,6 +458,8 @@ namespace Kaenx.Classes.Bus.Actions
 
         private async Task WriteTableGroup(int addr)
         {
+            TodoText = "Schreibe Gruppentabelle...";
+
             //Alle verbundenen GAs finden und sortieren
             addedGroups = new List<string> { "" };
             foreach (DeviceComObject com in Device.ComObjects)
@@ -285,6 +492,8 @@ namespace Kaenx.Classes.Bus.Actions
 
         private async Task WriteAssociationTable(int addr)
         {
+            TodoText = "Schreibe Assozationstabelle...";
+
             await dev.MemoryWriteSync(addr, new byte[] { 0x00 });
 
 
@@ -349,323 +558,6 @@ namespace Kaenx.Classes.Bus.Actions
                 } else
                     await LsmState(ctrl, counter + 1);
             }
-        }
-
-
-
-
-        private async void Start2()
-        {
-            BusDevice dev = new BusDevice(Device.LineName, Connection);
-            dev.Connect();
-            byte[] data = await dev.PropertyRead(3, 13, 5, 1);
-
-            ProgressValue = 10;
-            appId = BitConverter.ToString(data).Replace("-", "").Substring(8);
-            appId = "M-" + appId.Substring(0, 4) + "_A-" + appId.Substring(4, 4) + "-" + appId.Substring(8, 2) + "-";
-
-            //TODO Versionen beachten
-            if (!Device.ApplicationId.StartsWith(appId))
-            {
-                TodoText = "Inkompatible Applikation";
-                Finish();
-                return;
-            }
-
-
-            addedGroups = new List<string> { "" };
-            foreach (DeviceComObject com in Device.ComObjects)
-                foreach (GroupAddress group in com.Groups)
-                    if (!addedGroups.Contains(group.GroupName))
-                        addedGroups.Add(group.GroupName);
-
-            addedGroups.Sort();
-
-
-            if (_type != ProgAppType.Komplett && Device.LoadedGroup)
-            {
-                State3();
-                return;
-            }
-        }
-
-
-        private async void Start()
-        {
-            TodoText = "Überprüfe Kompatibilität...";
-            // Connect
-            TunnelRequest builder = new TunnelRequest();
-            //builder.Build(UnicastAddress.FromString("0.0.0"), UnicastAddress.FromString(Device.LineName), Parser.ApciTypes.Connect, _sequence, 255);
-            Connection.Send(builder);
-            await Task.Delay(100);
-            _sequence++;
-
-            builder = new TunnelRequest();
-            byte[] data = { 3, 13, 0x01 << 4, 0x01 }; // TODO probiere 5 ob ganze appID und Start bei 0!
-            //builder.Build(UnicastAddress.FromString("0.0.0"), UnicastAddress.FromString(Device.LineName), Parser.ApciTypes.PropertyValueRead, _sequence, _currentSeqNum, data);
-            Connection.Send(builder);
-        }
-
-
-        private async void State1(TunnelResponse response)
-        {
-            ProgressValue = 10;
-            appId = BitConverter.ToString(response.Data).Replace("-", "").Substring(8);
-            appId = "M-" + appId.Substring(0, 4) + "_A-" + appId.Substring(4, 4) + "-" + appId.Substring(8, 2) + "-";
-
-            //TODO Versionen beachten
-            if (!Device.ApplicationId.StartsWith(appId))
-            {
-                TodoText = "Inkompatible Applikation";
-                Finish();
-                return;
-            }
-
-
-            addedGroups = new List<string> { "" };
-            foreach (DeviceComObject com in Device.ComObjects)
-                foreach (GroupAddress group in com.Groups)
-                    if (!addedGroups.Contains(group.GroupName))
-                        addedGroups.Add(group.GroupName);
-
-            addedGroups.Sort();
-
-
-            if (_type != ProgAppType.Komplett && Device.LoadedGroup)
-            {
-                State3();
-                return;
-            }
-
-
-
-            CatalogContext context = new CatalogContext();
-            ApplicationViewModel appModel = context.Applications.Single(a => a.Id.StartsWith(appId));
-            int GroupAddress = 0;
-
-            if (appModel.Table_Group != "" || appModel.Table_Group != null)
-            {
-                AppAbsoluteSegmentViewModel segmentModel = context.AppAbsoluteSegments.Single(s => s.Id == appModel.Table_Group);
-                GroupAddress = segmentModel.Address;
-            }
-            else
-            {
-                //TODO hinzufügen von Adresse aus der Maske holen!
-                XDocument master = await GetKnxMaster();
-                XElement mask = master.Descendants(XName.Get("MaskVersion", master.Root.Name.NamespaceName)).Single(m => m.Attribute("Id").Value == appModel.Mask);
-                XElement resource = mask.Descendants(XName.Get("Resource", master.Root.Name.NamespaceName)).Single(l => l.Attribute("Name").Value == "GroupAssociationTable"); // "GroupAddressTable");
-                XElement location = resource.Element(XName.Get("Location", master.Root.Name.NamespaceName));
-
-                switch (location.Attribute("AddressSpace").Value)
-                {
-                    case "StandardMemory":
-                        bool flag = int.TryParse(location.Attribute("StartAddress").Value, out GroupAddress);
-                        if (!flag)
-                        {
-                            State2();
-                            return;
-                        }
-                        break;
-
-                    case "Pointer":
-                        string pointer = location.Attribute("PtrResource").Value;
-                        resource = mask.Descendants(XName.Get("Resource", master.Root.Name.NamespaceName)).Single(l => l.Attribute("Name").Value == pointer);
-                        location = resource.Element(XName.Get("Location", master.Root.Name.NamespaceName));
-                        //TODO: Property auslesen
-                        break;
-
-
-                    default:
-                        throw new NotImplementedException(location.Attribute("AddressSpace").Value + "; " + resource.ToString());
-
-                }
-
-            }
-
-            TodoText = "Schreibe Gruppentabelle....";
-            ProgressValue = 20;
-
-            //Länge der Tabelle auf 1 stellen
-            _sequence++;
-            TunnelRequest builder = new TunnelRequest();
-            List<byte> data = new List<byte> { 1 };
-            byte[] address = BitConverter.GetBytes(Convert.ToInt16(GroupAddress));
-            Array.Reverse(address);
-            data.AddRange(address);
-            data.Add(1);
-            builder.Build(UnicastAddress.FromString("0.0.0"), UnicastAddress.FromString(Device.LineName), Kaenx.Konnect.Parser.ApciTypes.MemoryWrite, _sequence, _currentSeqNum++, data.ToArray());
-            Connection.Send(builder);
-
-            await Task.Delay(100);
-
-
-            //Tabelle mit den Gruppenadressen füllen
-            _sequence++;
-            builder = new TunnelRequest();
-            data = new List<byte> { 0 }; //Länge wird später richtig gesetzt
-            address = BitConverter.GetBytes(Convert.ToInt16(GroupAddress + 3));
-            Array.Reverse(address);
-            data.AddRange(address);
-
-            //Liste zum Datenpaket hinzufügen
-            foreach (string group in addedGroups)
-                if(group != "")
-                    data.AddRange(MulticastAddress.FromString(group).GetBytes());
-
-            //Datenlänge richtig setzen
-            data[0] = BitConverter.GetBytes(addedGroups.Count * 2)[0];
-
-            //builder.Build(UnicastAddress.FromString("0.0.0"), UnicastAddress.FromString(Device.LineName), Parser.ApciTypes.MemoryWrite, _sequence, _currentSeqNum++, data.ToArray());
-            Connection.Send(builder);
-
-            await Task.Delay(1000);
-
-            _sequence++;
-            builder = new TunnelRequest();
-            data = new List<byte> { 1 };
-            address = BitConverter.GetBytes(Convert.ToInt16(GroupAddress));
-            Array.Reverse(address);
-            data.AddRange(address);
-            data.Add(BitConverter.GetBytes(addedGroups.Count)[0]);
-            //builder.Build(UnicastAddress.FromString("0.0.0"), UnicastAddress.FromString(Device.LineName), Parser.ApciTypes.MemoryWrite, _sequence, _currentSeqNum++, data.ToArray());
-            Connection.Send(builder);
-
-
-            _ = App._dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Low, () =>
-            {
-                Device.LoadedGroup = true;
-            });
-
-
-            State2();
-        }
-
-
-        private async void State2()
-        {
-            TodoText = "Schreibe Assoziationstabelle....";
-            ProgressValue = 30;
-
-
-            //check if table already written
-
-            
-            ApplicationViewModel appModel = _context.Applications.Single(a => a.Id.StartsWith(appId));
-            int AssoAddress = 0;
-
-            if (appModel.Table_Group != "" || appModel.Table_Group != null)
-            {
-                AppAbsoluteSegmentViewModel segmentModel = _context.AppAbsoluteSegments.Single(s => s.Id == appModel.Table_Assosiations);
-                AssoAddress = segmentModel.Address;
-            }
-            else
-            {
-                
-            }
-
-
-            //_sequence++;
-            //TunnelRequest builder = new TunnelRequest();
-            //List<byte> data = new List<byte> { 12 };
-            //byte[] address = BitConverter.GetBytes(Convert.ToInt16(AssoAddress));
-            //Array.Reverse(address);
-            //data.AddRange(address);
-            //builder.Build(UnicastAddress.FromString("0.0.0"), UnicastAddress.FromString(Device.LineName), Knx.Parser.ApciTypes.MemoryRead, _sequence, _currentSeqNum++, data.ToArray());
-            //Connection.Send(builder);
-            //_state = 3;
-
-
-
-            //Länge der Tabelle auf 0 setzen.
-            _sequence++;
-            TunnelRequest builder = new TunnelRequest();
-            List<byte> data = new List<byte> { 1 };
-            byte[] address = BitConverter.GetBytes(Convert.ToInt16(AssoAddress));
-            Array.Reverse(address);
-            data.AddRange(address);
-            data.Add(0);
-            //builder.Build(UnicastAddress.FromString("0.0.0"), UnicastAddress.FromString(Device.LineName), Knx.Parser.ApciTypes.MemoryWrite, _sequence, _currentSeqNum++, data.ToArray());
-            Connection.Send(builder);
-
-            await Task.Delay(100);
-
-
-            //Erstelle Assoziationstabelle
-            data = new List<byte>();
-            int sizeCounter = 0;
-
-
-            foreach (DeviceComObject com in Device.ComObjects)
-            {
-                foreach (GroupAddress group in com.Groups)
-                {
-                    int indexG = addedGroups.IndexOf(group.GroupName) + 1;
-                    int indexC = com.Number;
-
-                    byte bIndexG = BitConverter.GetBytes(indexG)[0];
-                    byte bIndexC = BitConverter.GetBytes(indexC)[0];
-                    data.Add(bIndexG);
-                    data.Add(bIndexC);
-                    sizeCounter++;
-                }
-            }
-
-            //Schreibe Tabelle
-            _sequence++;
-            builder = new TunnelRequest();
-            address = BitConverter.GetBytes(Convert.ToInt16(AssoAddress + 1));
-            Array.Reverse(address);
-            data.AddRange(address);
-            //builder.Build(UnicastAddress.FromString("0.0.0"), UnicastAddress.FromString(Device.LineName), Knx.Parser.ApciTypes.MemoryWrite, _sequence, _currentSeqNum++, data.ToArray());
-            Connection.Send(builder);
-
-            //Länge der Tabelle korrekt setzen
-            _sequence++;
-            builder = new TunnelRequest();
-            data = new List<byte> { 1 };
-            address = BitConverter.GetBytes(Convert.ToInt16(AssoAddress));
-            Array.Reverse(address);
-            data.AddRange(address);
-            data.Add(BitConverter.GetBytes(sizeCounter)[0]);
-            //builder.Build(UnicastAddress.FromString("0.0.0"), UnicastAddress.FromString(Device.LineName), Knx.Parser.ApciTypes.MemoryWrite, _sequence, _currentSeqNum++, data.ToArray());
-            Connection.Send(builder);
-
-
-            _ = App._dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Low, () =>
-              {
-                  Device.LoadedGroup = true;
-              });
-
-            State3();
-        }
-
-
-        private async void State3()
-        {
-
-            if (_type != ProgAppType.Komplett && Device.LoadedApplication)
-            {
-                Finish();
-                return;
-            }
-
-
-            if(_type == ProgAppType.Komplett)
-            {
-                AppAbsoluteSegmentViewModel segment = _context.AppAbsoluteSegments.Single(a => a.Id == "M-0083_A-000D-11-B2F5_AS-4400");
-                byte[] data = Convert.FromBase64String(segment.Data);
-
-
-            }
-
-
-            _ = App._dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Low, () =>
-            {
-                Device.LoadedApplication = true;
-            });
-
-
-            Finish();
         }
 
 

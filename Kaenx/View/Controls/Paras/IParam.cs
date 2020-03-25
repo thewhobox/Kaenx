@@ -14,5 +14,6 @@ namespace Kaenx.Classes.Controls.Paras
         public string Hash { get; set; }
         public string ParamId { get; }
         void SetVisibility(Visibility visible);
+        Visibility GetVisibility();
     }
 }

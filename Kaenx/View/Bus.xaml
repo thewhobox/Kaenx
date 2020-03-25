@@ -30,6 +30,9 @@
                     <toolkit:HeaderedContentControl Header="Masken Version" Margin="0 5">
                         <TextBlock Text="{Binding MaskVersion}" />
                     </toolkit:HeaderedContentControl>
+                    <toolkit:HeaderedContentControl Header="Zusätzliche Info" Margin="0 5">
+                        <TextBlock Text="{Binding Additional}" />
+                    </toolkit:HeaderedContentControl>
                 </StackPanel>
 
                 <ListView Grid.Column="1" ItemsSource="{Binding GroupTable}" Visibility="Collapsed" />

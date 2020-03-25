@@ -71,7 +71,7 @@ namespace Kaenx.View
             _pages.Add("groups", new Groups() { DataContext = CurrentProject });
             _pages.Add("bus", new Bus() { DataContext = Classes.Bus.BusConnection.Instance });
             _pages.Add("settings", new Settings());
-
+            App._pages = _pages;
 
             InfoBus.DataContext = Classes.Bus.BusConnection.Instance;
 

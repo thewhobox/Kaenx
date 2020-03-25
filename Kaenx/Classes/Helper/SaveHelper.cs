@@ -323,10 +323,10 @@ namespace Kaenx.Classes.Helper
                         {
                             AppComObject comObj = contextC.AppComObjects.Single(c => c.Id == com.ComId);
                             DeviceComObject dcom = new DeviceComObject(comObj);
-                            string[] ids = com.Groups.Split(",");
 
-                            if (com.Groups != "")
+                            if (!string.IsNullOrEmpty(com.Groups))
                             {
+                                string[] ids = com.Groups.Split(",");
                                 foreach (string id_str in ids)
                                 {
                                     int id = int.Parse(id_str);

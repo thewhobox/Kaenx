@@ -15,6 +15,7 @@ namespace Kaenx.Classes.Bus.Actions
         public string ApplicationName { get; set; }
         public string Manufacturer { get; set; }
         public string DeviceName { get; set; }
+        public string Additional { get; set; }
         public LineDevice Device { get; set; }
 
 

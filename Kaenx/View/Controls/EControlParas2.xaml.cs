@@ -49,6 +49,7 @@ namespace Kaenx.Views.Easy.Controls
         private Dictionary<string, AppParameter> AppParas = new Dictionary<string, AppParameter>();
         private Dictionary<string, AppParameterTypeViewModel> AppParaTypess = new Dictionary<string, AppParameterTypeViewModel>();
         Stopwatch watch = new Stopwatch();
+        private XDocument dynamic;
 
         public EControlParas2(LineDevice dev)
         {
@@ -89,7 +90,7 @@ namespace Kaenx.Views.Easy.Controls
         private async Task Load()
         {
             AppAdditional adds = _context.AppAdditionals.Single(a => a.Id == device.ApplicationId);
-            XDocument dynamic = XDocument.Parse(Encoding.UTF8.GetString(adds.Dynamic));
+            dynamic = XDocument.Parse(Encoding.UTF8.GetString(adds.Dynamic));
 
 
             PrepareComObject(dynamic.Root);
@@ -236,66 +237,7 @@ namespace Kaenx.Views.Easy.Controls
                         //TODO überprüfen
                         AppParameterTypeViewModel paraType = GetParamType(para.ParameterTypeId);
 
-
-                        string ids = para.Id;
-                        bool stopper = false;
-                        bool finished = false;
-                        XElement xtemp = xele;
-                        while (!stopper)
-                        {
-                            xtemp = xtemp.Parent;
-
-                            switch (xtemp.Name.LocalName)
-                            {
-                                case "when":
-                                    if (finished) continue;
-                                    ParamCondition cond = new ParamCondition();
-                                    int tempOut2;
-                                    if (xtemp.Attribute("default")?.Value == "true")
-                                    {
-                                        ids = "d" + ids;
-                                        List<string> values = new List<string>();
-                                        IEnumerable<XElement> whens = xtemp.Parent.Elements();
-                                        foreach (XElement w in whens)
-                                        {
-                                            if (w == xtemp)
-                                                continue;
-
-                                            try
-                                            {
-                                                values.AddRange(w.Attribute("test").Value.Split(" "));
-                                            } catch
-                                            {
-
-                                            }
-                                        }
-                                        cond.Values = string.Join(",", values);
-                                    }
-                                    else if (xtemp.Attribute("test")?.Value.Contains(" ") == true || int.TryParse(xtemp.Attribute("test")?.Value, out tempOut2))
-                                    {
-                                        cond.Values = string.Join(",", xtemp.Attribute("test").Value.Split(" "));
-                                    }
-                                    else
-                                    {
-                                        Log.Warning("Unbekanntes when! " + xele.ToString());
-                                    }
-
-                                    ids = "|" + xtemp.Parent.Attribute("ParamRefId").Value + "." + cond.Values + "|" + ids;
-                                    break;
-
-                                case "Channel":
-                                case "ParameterBlock":
-                                    ids = xtemp.Attribute("Id").Value + "|" + ids;
-                                    finished = true;
-                                    break;
-
-                                case "Dynamic":
-                                    stopper = true;
-                                    break;
-                            }
-                        }
-
-                        string hash = Convert.ToBase64String(Encoding.UTF8.GetBytes(ids));
+                        string hash = GetHash(xele, para.Id);
 
                         switch (paraType.Type)
                         {
@@ -398,7 +340,7 @@ namespace Kaenx.Views.Easy.Controls
                                 allVals.AddRange(xwhen.Attribute("test").Value.Split(" "));
                             } else if(xwhen.Attribute("default") != null)
                             {
-
+                                //TODO muss hier was getan werden??
                             }
                             else
                             {
@@ -441,6 +383,71 @@ namespace Kaenx.Views.Easy.Controls
             }
         }
         
+        private string GetHash(XElement when, string paraId)
+        {
+            string ids = paraId;
+            bool stopper = false;
+            bool finished = false;
+            XElement xtemp = when;
+            while (!stopper)
+            {
+                xtemp = xtemp.Parent;
+
+                switch (xtemp.Name.LocalName)
+                {
+                    case "when":
+                        if (finished) continue;
+                        ParamCondition cond = new ParamCondition();
+                        int tempOut2;
+                        if (xtemp.Attribute("default")?.Value == "true")
+                        {
+                            ids = "d" + ids;
+                            List<string> values = new List<string>();
+                            IEnumerable<XElement> whens = xtemp.Parent.Elements();
+                            foreach (XElement w in whens)
+                            {
+                                if (w == xtemp)
+                                    continue;
+
+                                try
+                                {
+                                    values.AddRange(w.Attribute("test").Value.Split(" "));
+                                }
+                                catch
+                                {
+
+                                }
+                            }
+                            cond.Values = string.Join(",", values);
+                        }
+                        else if (xtemp.Attribute("test")?.Value.Contains(" ") == true || int.TryParse(xtemp.Attribute("test")?.Value, out tempOut2))
+                        {
+                            cond.Values = string.Join(",", xtemp.Attribute("test").Value.Split(" "));
+                        }
+                        else
+                        {
+                            Log.Warning("Unbekanntes when! " + xtemp.ToString());
+                        }
+
+                        ids = "|" + xtemp.Parent.Attribute("ParamRefId").Value + "." + cond.Values + "|" + ids;
+                        break;
+
+                    case "Channel":
+                    case "ParameterBlock":
+                        ids = xtemp.Attribute("Id").Value + "|" + ids;
+                        finished = true;
+                        break;
+
+                    case "Dynamic":
+                        stopper = true;
+                        break;
+                }
+            }
+
+            return Convert.ToBase64String(Encoding.UTF8.GetBytes(ids));
+        }
+
+
         private async void ParamChanged(IParam param)
         {
             string source = param.ParamId;
@@ -493,6 +500,8 @@ namespace Kaenx.Views.Easy.Controls
                 }
             }
 
+
+
             IEnumerable<BlockVisHelper> helpersB = helperBlock.Where(h => h.Conditions.Any(c => c.SourceId == source));
             foreach(BlockVisHelper helper in helpersB)
             {
@@ -535,6 +544,8 @@ namespace Kaenx.Views.Easy.Controls
             ChangeHandler.Instance.ChangedParam(change);
             CheckComObjects();
         }
+
+        
 
         private AppParameterTypeViewModel GetParamType(string id)
         {
@@ -625,11 +636,18 @@ namespace Kaenx.Views.Easy.Controls
                     toDelete.Add(cobj);
             }
 
+            Dictionary<string, ComObject> coms = new Dictionary<string, ComObject>();
+            foreach (ComObject com in _contextP.ComObjects)
+                coms.Add(com.ComId, com);
+
             foreach (DeviceComObject cobj in toDelete)
             {
-
+                ComObject com = coms[cobj.Id];
+                _contextP.ComObjects.Remove(com);
                 device.ComObjects.Remove(cobj);
             }
+
+
             foreach (DeviceComObject cobj in toAdd)
             {
                 if (cobj.Name.Contains("{{"))
@@ -665,9 +683,16 @@ namespace Kaenx.Views.Easy.Controls
                     }
                 }
                 device.ComObjects.Add(cobj);
+
+
+                ComObject com = new ComObject();
+                com.ComId = cobj.Id;
+                com.DeviceId = device.UId;
+                _contextP.ComObjects.Add(com);
             }
 
             device.ComObjects.Sort(s => s.Number);
+            _contextP.SaveChanges();
         }
 
         private void PrepareComObject(XElement xele)
