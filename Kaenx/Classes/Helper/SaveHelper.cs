@@ -398,12 +398,9 @@ namespace Kaenx.Classes.Helper
         {
             List<DeviceComObject> comObjects = new List<DeviceComObject>();
             XDocument dynamic = XDocument.Parse(System.Text.Encoding.UTF8.GetString(adds.Dynamic));
-            string xmlns = dynamic.Root.Name.NamespaceName;
-
-            IEnumerable<XElement> elements = dynamic.Root.Descendants(XName.Get("ComObjectRefRef", xmlns));
+            IEnumerable<XElement> elements = dynamic.Root.Descendants(XName.Get("ComObjectRefRef", dynamic.Root.Name.NamespaceName));
             Dictionary<string, AppComObject> comobjects = new Dictionary<string, AppComObject>();
-            List<string> addedHashes = new List<string>();
-
+            
             foreach (AppComObject com in contextC.AppComObjects)
                 comobjects.Add(com.Id, com);
 
@@ -412,22 +409,9 @@ namespace Kaenx.Classes.Helper
                 AppComObject appCom = comobjects[xcom.Attribute("RefId").Value];
                 if (appCom.Text == "Dummy") continue;
 
-
-                (List<ParamCondition> list, string ids) result = GetConditions(xcom, true);
-
-                foreach (XElement xele in xcom.Parent.Elements(XName.Get("ComObjectRefRef", xcom.Name.NamespaceName)))
-                {
-                    string comId = xele.Attribute("RefId").Value;
-                    string hash = Convert.ToBase64String(Encoding.UTF8.GetBytes(result.ids + comId));
-                    if (addedHashes.Contains(hash)) continue;
-
-                    DeviceComObject comobject = new DeviceComObject(comobjects[comId]);
-                    comobject.Conditions = result.list;
-                    comObjects.Add(comobject);
-                    addedHashes.Add(hash);
-                }
-
-                    
+                DeviceComObject comobject = new DeviceComObject(appCom);
+                comobject.Conditions = GetConditions(xcom);
+                comObjects.Add(comobject);
             }
 
             adds.ComsAll = ObjectToByteArray(comObjects);
@@ -438,36 +422,46 @@ namespace Kaenx.Classes.Helper
         {
             List<ParamVisHelper> paras = new List<ParamVisHelper>();
             XDocument dynamic = XDocument.Parse(System.Text.Encoding.UTF8.GetString(adds.Dynamic));
-            string xmlns = dynamic.Root.Name.NamespaceName;
+            IEnumerable<XElement> elements = dynamic.Root.Descendants(XName.Get("ParameterRefRef", dynamic.Root.Name.NamespaceName));
 
-            IEnumerable<XElement> elements = dynamic.Root.Descendants(XName.Get("ParameterRefRef", xmlns));
-            Dictionary<string, AppParameter> parameters = new Dictionary<string, AppParameter>();
-            List<string> addedHashes = new List<string>();
+            //Dictionary<string, AppParameter> parameters = new Dictionary<string, AppParameter>();
+            //List<string> addedHashes = new List<string>();
 
-            foreach (AppParameter para in contextC.AppParameters)
-                parameters.Add(para.Id, para);
+            //foreach (AppParameter para in contextC.AppParameters)
+            //    parameters.Add(para.Id, para);
 
+
+            //foreach (XElement xpara in elements)
+            //{
+            //    AppParameter appParam = parameters[xpara.Attribute("RefId").Value];
+            //    if (appParam.Text == "Dummy") continue;
+
+            //    (List<ParamCondition> list, string ids) result = GetConditions(xpara, true);
+            //    string hash = Convert.ToBase64String(Encoding.UTF8.GetBytes(result.ids + appParam.Id));
+            //    if (addedHashes.Contains(hash)) continue;
+
+            //    foreach (XElement xele in xpara.Parent.Elements(XName.Get("ParameterRefRef", xpara.Name.NamespaceName)))
+            //    {
+            //        string paraId = xele.Attribute("RefId").Value;
+            //        string hash2 = Convert.ToBase64String(Encoding.UTF8.GetBytes(result.ids + paraId));
+            //        if (addedHashes.Contains(hash2)) continue;
+
+            //        ParamVisHelper para = new ParamVisHelper(parameters[paraId]);
+            //        para.Conditions = result.list;
+            //        para.Hash = hash2;
+            //        paras.Add(para);
+            //        addedHashes.Add(hash2);
+            //    }
+
+            //}
 
             foreach (XElement xpara in elements)
             {
-                AppParameter appParam = parameters[xpara.Attribute("RefId").Value];
-                if (appParam.Text == "Dummy") continue;
-
-                (List<ParamCondition> list, string ids) result = GetConditions(xpara, true);
-
-                foreach (XElement xele in xpara.Parent.Elements(XName.Get("ParameterRefRef", xpara.Name.NamespaceName)))
-                {
-                    string paraId = xele.Attribute("RefId").Value;
-                    string hash = Convert.ToBase64String(Encoding.UTF8.GetBytes(result.ids + paraId));
-                    if (addedHashes.Contains(hash)) continue;
-
-                    ParamVisHelper para = new ParamVisHelper(parameters[paraId]);
-                    para.Conditions = result.list;
-                    para.Hash = hash;
-                    paras.Add(para);
-                    addedHashes.Add(hash);
-                }
-
+                ParamVisHelper para = new ParamVisHelper(xpara.Attribute("RefId").Value);
+                (List<ParamCondition> conds, string hash) result = GetConditions(xpara, true);
+                para.Conditions = result.conds;
+                para.Hash = result.hash;
+                paras.Add(para);
             }
 
             adds.ParameterAll = ObjectToByteArray(paras);
@@ -485,7 +479,7 @@ namespace Kaenx.Classes.Helper
             List<ParamCondition> conds = new List<ParamCondition>();
             try
             {
-                string ids = "";
+                string ids = xele.Attribute("RefId")?.Value;
                 bool finished = false;
                 while (true)
                 {
@@ -511,6 +505,12 @@ namespace Kaenx.Classes.Helper
                                 }
                                 cond.Values = string.Join(",", values);
                                 cond.Operation = ConditionOperation.Default;
+
+                                if(cond.Values == "")
+                                {
+                                    ids = "|" + xele.Parent.Attribute("ParamRefId").Value + ".|" + ids;
+                                    continue;
+                                }
                             }
                             else if (xele.Attribute("test")?.Value.Contains(" ") == true || int.TryParse(xele.Attribute("test")?.Value, out tempOut))
                             {
@@ -540,7 +540,8 @@ namespace Kaenx.Classes.Helper
                             break;
 
                         case "Dynamic":
-                            return (conds, ids);
+                            //return (conds, ids);
+                            return (conds, Convert.ToBase64String(Encoding.UTF8.GetBytes(ids)));
                     }
                 }
             }
@@ -557,26 +558,25 @@ namespace Kaenx.Classes.Helper
             Dictionary<string, string> tempValues = new Dictionary<string, string>();
             ObservableCollection<AppParameter> defObjs = new ObservableCollection<AppParameter>();
 
+            Dictionary<string, AppParameter> parameters = new Dictionary<string, AppParameter>();
+
+            foreach (AppParameter para in contextC.AppParameters)
+                parameters.Add(para.Id, para);
+
+
+
             foreach (ParamVisHelper obj in paras)
             {
                 if (obj.Conditions.Count == 0)
                 {
-                    defObjs.Add(obj.Parameter);
+                    defObjs.Add(parameters[obj.ParameterId]);
                     continue;
                 }
 
                 bool flag = true;
                 foreach (ParamCondition cond in obj.Conditions)
                 {
-                    string val;
-                    if (tempValues.ContainsKey(cond.SourceId))
-                        val = tempValues[cond.SourceId];
-                    else
-                    {
-                        AppParameter pbPara = contextC.AppParameters.Single(p => p.Id == cond.SourceId);
-                        val = pbPara.Value;
-                        tempValues.Add(cond.SourceId, val);
-                    }
+                    string val = parameters[cond.SourceId].Value;
 
                     switch (cond.Operation)
                     {
@@ -599,7 +599,7 @@ namespace Kaenx.Classes.Helper
                 }
 
                 if (flag)
-                    defObjs.Add(obj.Parameter);
+                    defObjs.Add(parameters[obj.ParameterId]);
             }
 
             return defObjs.ToList();

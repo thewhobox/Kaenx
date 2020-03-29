@@ -59,7 +59,6 @@ namespace Kaenx
             }
             catch { }
 
-
             using (var db = new LocalContext())
             {
                 db.Database.Migrate();

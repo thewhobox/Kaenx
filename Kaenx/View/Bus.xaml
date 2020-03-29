@@ -59,24 +59,33 @@
                     <Grid.RowDefinitions>
                         <RowDefinition Height="auto" />
                         <RowDefinition Height="auto" />
+                        <RowDefinition Height="auto" />
                         <RowDefinition />
                     </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="200" />
+                        <ColumnDefinition Width="auto" />
+                    </Grid.ColumnDefinitions>
 
-                    <StackPanel DataContext="{Binding CurrentAction}" Margin="5" Padding="5" BorderBrush="LightGray" BorderThickness="1">
-                        <TextBlock Text="{Binding Path=Device.Name}" />
+                    <Border Grid.ColumnSpan="2" Grid.RowSpan="2"  BorderBrush="LightGray" BorderThickness="1" />
+
+                    <TextBlock Margin="10 0 5 0" VerticalAlignment="Center" Text="{Binding Path=CurrentAction.Device.Name}" />
+
+                    <Button Grid.Column="1" VerticalAlignment="Top" HorizontalAlignment="Right" Margin="5" Click="ClickCancel">
+                        <SymbolIcon Symbol="Cancel" />
+                    </Button>
+
+                    <StackPanel Grid.ColumnSpan="2" Grid.Row="1" DataContext="{Binding CurrentAction}" Margin="5 0 5 5" Padding="5 0 5 5">
                         <TextBlock Text="{Binding Path=Device.LineName}" Foreground="Gray" />
-                        <TextBlock Text="{Binding Path=Type}" Foreground="Gray" Margin="0 0 0 10" />
+                        <TextBlock Text="{Binding Path=Type}" Foreground="Gray" Margin="0 0 0 5" />
                         <TextBlock Text="{Binding TodoText}" />
                         <ProgressBar IsIndeterminate="{Binding ProgressIsIndeterminate}" IsEnabled="True" Value="{Binding ProgressValue}" Maximum="100" />
                     </StackPanel>
                     
-                    <Button VerticalAlignment="Top" HorizontalAlignment="Right" Margin="5" Click="ClickCancel">
-                        <SymbolIcon Symbol="DisableUpdates" />
-                    </Button>
 
-                    <TextBlock Grid.Row="1" Text="Ausstehen:" Margin="5 10 5 5" FontSize="17" />
+                    <TextBlock Grid.Row="2" Text="Warteliste:" Margin="5 10 5 5" FontSize="17" />
 
-                    <ListView Grid.Row="2" ItemsSource="{Binding actions}" IsItemClickEnabled="False" SelectionMode="None">
+                    <ListView Grid.Row="3" ItemsSource="{Binding actions}" IsItemClickEnabled="False" SelectionMode="None">
                         <ListView.ItemContainerStyle>
                             <Style TargetType="ListViewItem">
                                 <Setter Property="HorizontalContentAlignment" Value="Stretch" />
@@ -205,7 +214,7 @@
 
                     <toolkit:DataGrid x:Name="GridReads" Grid.Row="1" ItemsSource="{Binding}" IsReadOnly="True" AutoGenerateColumns="False" AreRowDetailsFrozen="True" RowDetailsVisibilityMode="VisibleWhenSelected" RowDetailsTemplate="{StaticResource RowDetailsTemplate}" >
                         <toolkit:DataGrid.Columns>
-                            <toolkit:DataGridTextColumn Header="Geräte Id" Width="SizeToCells" Binding="{Binding Device.LineName}" />
+                            <toolkit:DataGridTextColumn Header="Adresse" Width="SizeToCells" Binding="{Binding Device.LineName}" />
                             <toolkit:DataGridTextColumn Header="Hersteller" Binding="{Binding Manufacturer}" />
                             <toolkit:DataGridTextColumn Header="Seriennummer" Binding="{Binding SerialNumber}" />
                             <toolkit:DataGridTextColumn Header="Applikation" Binding="{Binding ApplicationName}" />

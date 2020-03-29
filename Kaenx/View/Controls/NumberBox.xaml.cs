@@ -98,10 +98,13 @@ namespace Kaenx.View.Controls
                 int _val = (int)GetValue(ValueProperty);
                 bool error = false;
 
+                BtnUp.IsEnabled = _val < value;
                 if (_val > value)
                     error = true;
 
-                if (_val < (int)GetValue(MinimumProperty))
+                int min = (int)GetValue(MinimumProperty);
+                BtnDown.IsEnabled = _val > min;
+                if (_val < min)
                     error = true;
 
                 if (!error)
@@ -124,9 +127,12 @@ namespace Kaenx.View.Controls
                 int _val = (int)GetValue(ValueProperty);
                 bool error = false;
 
-                if (_val > (int)GetValue(MaximumProperty))
+                int max = (int)GetValue(MaximumProperty);
+                BtnUp.IsEnabled = _val < max;
+                if (_val > max)
                     error = true;
 
+                BtnDown.IsEnabled = _val > value;
                 if (_val < value)
                     error = true;
 
@@ -163,6 +169,16 @@ namespace Kaenx.View.Controls
                 case Windows.System.VirtualKey.Number7:
                 case Windows.System.VirtualKey.Number8:
                 case Windows.System.VirtualKey.Number9:
+                case Windows.System.VirtualKey.NumberPad0:
+                case Windows.System.VirtualKey.NumberPad1:
+                case Windows.System.VirtualKey.NumberPad2:
+                case Windows.System.VirtualKey.NumberPad3:
+                case Windows.System.VirtualKey.NumberPad4:
+                case Windows.System.VirtualKey.NumberPad5:
+                case Windows.System.VirtualKey.NumberPad6:
+                case Windows.System.VirtualKey.NumberPad7:
+                case Windows.System.VirtualKey.NumberPad8:
+                case Windows.System.VirtualKey.NumberPad9:
                 case Windows.System.VirtualKey.Delete:
                 case Windows.System.VirtualKey.Clear:
                 case Windows.System.VirtualKey.Back:

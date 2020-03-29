@@ -292,7 +292,7 @@ namespace Kaenx.Classes.Bus.Actions
 
             Dictionary<string, ParamVisHelper> conditions = new Dictionary<string, ParamVisHelper>();
             foreach (ParamVisHelper helper in SaveHelper.ByteArrayToObject<List<ParamVisHelper>>(adds.ParameterAll))
-                conditions.Add(helper.Parameter.Id, helper);
+                conditions.Add(helper.ParameterId, helper);
 
             int visibleBlocks = 0;
             foreach (XElement paraBlock in dynamic.Descendants(XName.Get("ParameterBlock", dynamic.Root.Name.NamespaceName)))

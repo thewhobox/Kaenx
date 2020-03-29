@@ -7,7 +7,7 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d"
     Title="Sprache auswählen"
-    PrimaryButtonText="Immer aushwählen"
+    PrimaryButtonText="Immer auswählen"
     SecondaryButtonText="Dieses mal"
     PrimaryButtonClick="ContentDialog_PrimaryButtonClick"
     SecondaryButtonClick="ContentDialog_SecondaryButtonClick"

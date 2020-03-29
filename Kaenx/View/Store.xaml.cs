@@ -77,10 +77,10 @@ namespace Kaenx.View
         {
             if (e.Handled) return;
 
-            //if(LogoMax.Visibility == Visibility.Visible)
-            //    LogoMax.Visibility = Visibility.Collapsed;
-            //else
-            //    App.Navigate(typeof(MainPage));
+            if (SmokeGrid.Visibility == Visibility.Visible)
+                DetailClose(null, null);
+            else
+                App.Navigate(typeof(MainPage));
         }
 
         private void DetailOpen(object sender, ItemClickEventArgs e)

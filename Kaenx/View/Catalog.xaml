@@ -12,7 +12,6 @@
     xmlns:extensions="using:Microsoft.Toolkit.Uwp.UI.Extensions"
     xmlns:animations="using:Microsoft.Toolkit.Uwp.UI.Animations"
     xmlns:behaviors="using:Microsoft.Toolkit.Uwp.UI.Animations.Behaviors"
-    xmlns:controls="using:Microsoft.Toolkit.Uwp.UI.Controls"
     mc:Ignorable="d">
     <Page.Resources>
         <converter:BoolToVisibilityConverter x:Key="BoolToVisibilityConverter" />
@@ -29,24 +28,13 @@
                 <RowDefinition />
             </Grid.RowDefinitions>
             <Grid.ColumnDefinitions>
-                <ColumnDefinition MinWidth="200" MaxWidth="600" Width="220" />
-                <ColumnDefinition Width="auto" />
                 <ColumnDefinition />
                 <ColumnDefinition Width="auto" />
-                <ColumnDefinition Width="300" />
+                <ColumnDefinition Width="auto" />
             </Grid.ColumnDefinitions>
 
 
-            <TreeView x:Name="TreeV" Grid.Row="1" Grid.RowSpan="2" Margin="-25 0 0 0" ItemsSource="{Binding SectionsList}" ItemInvoked="TreeV_ItemInvoked" />
-
-            <toolkit:GridSplitter Grid.Column="1" Grid.Row="1" Grid.RowSpan="2" Width="12" Background="Gray" Foreground="White" FontSize="13">
-                <toolkit:GridSplitter.Element>
-                    <Grid>
-                        <TextBlock HorizontalAlignment="Center" IsHitTestVisible="False" VerticalAlignment="Center" Text="&#xE784;" Foreground="Black" FontFamily="Segoe MDL2 Assets">
-                        </TextBlock>
-                    </Grid>
-                </toolkit:GridSplitter.Element>
-            </toolkit:GridSplitter>
+            
 
             <CommandBar Grid.ColumnSpan="5">
                 <AppBarElementContainer>
@@ -54,13 +42,30 @@
                 </AppBarElementContainer>
                 <AppBarButton Icon="Delete" x:Uid="/Catalog/BarDelete" x:Name="BarDelete" Click="ClickDelete"  IsEnabled="False"/>
                 <AppBarSeparator />
-                <AppBarButton Icon="Download" x:Uid="/Catalog/BarImport" controls:Menu.InputGestureText="Ctrl+Shift+N" Click="ClickImport" />
+                <AppBarButton Icon="Download" x:Uid="/Catalog/BarImport" toolkit:Menu.InputGestureText="Ctrl+Shift+N" Click="ClickImport" />
                 <AppBarButton Icon="Upload" x:Uid="/Catalog/BarExport" />
             </CommandBar>
 
+            <toolkit:DataGrid x:Name="CatalogDeviceList" Grid.Row="2" Sorting="CatalogDeviceList_Sorting" AutoGenerateColumns="False" ItemsSource="{Binding CatalogDevices}" LoadingRow="RowLoading" SelectionChanged="CatalogDeviceList_SelectionChanged" IsReadOnly="True" CanUserSortColumns="True">
+                <toolkit:DataGrid.Resources>
+                    <Style TargetType="toolkit:DataGridRow">
+                        <Setter Property="CanDrag" Value="True" />
+                    </Style>
+                </toolkit:DataGrid.Resources>
+                <toolkit:DataGrid.Columns>
+                    <toolkit:DataGridTextColumn x:Uid="/Catalog/DListName" Tag="Name" Width="SizeToCells" Binding="{Binding Name}" />
+                    <toolkit:DataGridTextColumn x:Uid="/Catalog/DListDesc" Tag="Desc" Width="SizeToCells" Binding="{Binding VisibleDescription}" />
+                    <toolkit:DataGridTextColumn x:Uid="/Catalog/DListNumb" Tag="OrderNr" Width="SizeToCells" Binding="{Binding OrderNumber}" />
+                </toolkit:DataGrid.Columns>
+            </toolkit:DataGrid>
 
-            <Border Grid.Column="4" Grid.Row="1" BorderThickness="1 0 0 0" BorderBrush="LightGray">
-                <Grid DataContext="{Binding ElementName=CatalogDeviceList, Path=SelectedItem}">
+            <toolkit:Expander Grid.Row="1" Grid.Column="1" ExpandDirection="Left" VerticalContentAlignment="Stretch">
+                <toolkit:Expander.HeaderTemplate>
+                    <DataTemplate>
+                        <TextBlock x:Uid="/Catalog/SideProps"  Text="Geräteinfos" FontSize="20" />
+                    </DataTemplate>
+                </toolkit:Expander.HeaderTemplate>
+                <Grid DataContext="{Binding ElementName=CatalogDeviceList, Path=SelectedItem}" Padding="0 30 0 0" Background="White" BorderBrush="LightGray" BorderThickness="1 0 0 0">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="auto" />
                         <ColumnDefinition  />
@@ -115,21 +120,19 @@
                     <TextBlock Grid.Row="8" Grid.Column="1" Margin="10 5" x:Name="DevInfoApp" />
 
                 </Grid>
-            </Border>
+            </toolkit:Expander>
 
 
-            <controls:DataGrid x:Name="CatalogDeviceList" Grid.Column="2" Grid.Row="2" Sorting="CatalogDeviceList_Sorting" AutoGenerateColumns="False" ItemsSource="{Binding CatalogDevices}" LoadingRow="RowLoading" SelectionChanged="CatalogDeviceList_SelectionChanged" IsReadOnly="True" CanUserSortColumns="True">
-                <controls:DataGrid.Resources>
-                    <Style TargetType="controls:DataGridRow">
-                        <Setter Property="CanDrag" Value="True" />
-                    </Style>
-                </controls:DataGrid.Resources>
-                <controls:DataGrid.Columns>
-                    <controls:DataGridTextColumn x:Uid="/Catalog/DListName" Tag="Name" Width="SizeToCells" Binding="{Binding Name}" />
-                    <controls:DataGridTextColumn x:Uid="/Catalog/DListDesc" Tag="Desc" Width="SizeToCells" Binding="{Binding VisibleDescription}" />
-                    <controls:DataGridTextColumn x:Uid="/Catalog/DListNumb" Tag="OrderNr" Width="SizeToCells" Binding="{Binding OrderNumber}" />
-                </controls:DataGrid.Columns>
-            </controls:DataGrid>
+
+            <toolkit:Expander Grid.Column="2" Grid.Row="1" Grid.RowSpan="2" ExpandDirection="Left" VerticalContentAlignment="Stretch">
+                <toolkit:Expander.HeaderTemplate>
+                    <DataTemplate>
+                        <TextBlock x:Uid="/Catalog/SideFilter"  Text="Filter" FontSize="20" />
+                    </DataTemplate>
+                </toolkit:Expander.HeaderTemplate>
+                <TreeView x:Name="TreeV" ItemsSource="{Binding SectionsList}" ItemInvoked="TreeV_ItemInvoked" Background="White" />
+            </toolkit:Expander>
+            
         </Grid>
 
         <Border x:Name="GridImportDevices" Background="#99000000" Visibility="Collapsed">

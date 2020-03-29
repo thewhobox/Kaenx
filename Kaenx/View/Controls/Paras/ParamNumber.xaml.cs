@@ -31,15 +31,18 @@ namespace Kaenx.Classes.Controls.Paras
         {
             this.InitializeComponent();
 
-            ParaValue.Value = int.Parse(param.Value);
             ParamId = param.Id;
             ParaName.Text = param.Text;
+
+            ParaValue.Value = int.Parse(param.Value);
 
             //ParaValue.ValueChanged += ParaValue_ValueChanged;
             ParaValue.LostFocus += ParaValue_LostFocus;
 
             ParaValue.Minimum = int.Parse(type.Tag1);
             ParaValue.Maximum = int.Parse(type.Tag2);
+
+
 
             ToolTipService.SetToolTip(ParaValue, type.Tag1 + " - " + type.Tag2);
         }

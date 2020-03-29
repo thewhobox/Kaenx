@@ -585,7 +585,7 @@ namespace Kaenx.View
                 LineMiddle line = (LineMiddle)tbase;
                 e.AcceptedOperation = Windows.ApplicationModel.DataTransfer.DataPackageOperation.Link;
                 e.DragUIOverride.Caption = string.Format(loader.GetString("DragConnect"), line.Parent.Id, line.Id);
-                e.Handled = true;
+                //e.Handled = true;
             }
         }
     }

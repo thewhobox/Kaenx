@@ -10,14 +10,15 @@ namespace Kaenx.Classes.Helper
 {
     public class ParamVisHelper
     {
-        public AppParameter Parameter { get; set; }
+        public string ParameterId { get; set; }
         public string Hash { get; set; }
         public List<ParamCondition> Conditions { get; set; }
 
+        public ParamVisHelper() { }
 
-        public ParamVisHelper(AppParameter para)
+        public ParamVisHelper(string paraId)
         {
-            Parameter = para;
+            ParameterId = paraId;
         }
     }
 }

@@ -614,8 +614,21 @@ namespace Kaenx.Views.Easy.Controls
                 foreach (ParamCondition cond in obj.Conditions)
                 {
                     string val = AppParas[cond.SourceId].Value;
-                    if (!cond.Values.Contains(val))
-                        flag = false;
+
+                    switch (cond.Operation)
+                    {
+                        case ConditionOperation.IsInValue:
+                            if (!cond.Values.Split(",").Contains(val))
+                                flag = false;
+                            break;
+                        case ConditionOperation.Default:
+                            if (cond.Values.Split(",").Contains(val))
+                                flag = false;
+                            break;
+                        default:
+                            Log.Warning("GetDefaultParams nicht unterstützte Operation! " + cond.Operation.ToString());
+                            break;
+                    }
                 }
 
                 if (flag)
@@ -638,7 +651,8 @@ namespace Kaenx.Views.Easy.Controls
 
             Dictionary<string, ComObject> coms = new Dictionary<string, ComObject>();
             foreach (ComObject com in _contextP.ComObjects)
-                coms.Add(com.ComId, com);
+                if(!coms.ContainsKey(com.ComId))
+                    coms.Add(com.ComId, com);
 
             foreach (DeviceComObject cobj in toDelete)
             {
