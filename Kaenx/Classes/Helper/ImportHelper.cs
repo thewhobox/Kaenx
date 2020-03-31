@@ -115,6 +115,8 @@ namespace Kaenx.Classes.Helper
                 //ViewDevicesList.SelectedItem = device;
                 ProgressChanged?.Invoke(0);
 
+                device.Icon = Symbol.Sync;
+
                 OnDeviceChanged?.Invoke(resourceLoader.GetString("StateHard"));
                 Log.Information("---- Hardware wird importiert");
             

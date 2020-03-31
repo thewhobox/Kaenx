@@ -6,9 +6,7 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d"
-    Title="Sprache auswählen"
-    PrimaryButtonText="Immer auswählen"
-    SecondaryButtonText="Dieses mal"
+    x:Uid="/Dialogs/Lang"
     PrimaryButtonClick="ContentDialog_PrimaryButtonClick"
     SecondaryButtonClick="ContentDialog_SecondaryButtonClick"
     DefaultButton="Primary">
@@ -19,7 +17,7 @@
             <ColumnDefinition />
         </Grid.ColumnDefinitions>
         
-        <TextBlock Text="Sprache: " VerticalAlignment="Center" Margin="0 0 10 0" />
+        <TextBlock x:Uid="/Diaglos/LangBlock" VerticalAlignment="Center" Margin="0 0 10 0" />
         <ComboBox x:Name="InSelectLang" Grid.Column="1" DisplayMemberPath="Local" VerticalAlignment="Center" Width="200" ItemsSource="{Binding Languages}" SelectionChanged="InSelectLang_SelectionChanged" />
     </Grid>
 </ContentDialog>

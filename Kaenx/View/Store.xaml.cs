@@ -45,8 +45,6 @@ namespace Kaenx.View
 
         private async void LoadStoreProducts()
         {
-            StoreAppLicense appLicense = await c.GetAppLicenseAsync();
-
             string[] productKinds = { "Durable" };
             List<String> filterList = new List<string>(productKinds);
             StoreProductQueryResult queryResult = await c.GetAssociatedStoreProductsAsync(filterList);
@@ -81,6 +79,8 @@ namespace Kaenx.View
                 DetailClose(null, null);
             else
                 App.Navigate(typeof(MainPage));
+
+            e.Handled = true;
         }
 
         private void DetailOpen(object sender, ItemClickEventArgs e)

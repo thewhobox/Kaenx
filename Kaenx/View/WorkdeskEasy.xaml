@@ -35,6 +35,7 @@
             <NavigationView.MenuItems>
                 <NavigationViewItem x:Uid="/WorkDeskEasy/MenuHome" Tag="home" Icon="Home" IsSelected="True"/>
                 <NavigationViewItemSeparator/>
+                <NavigationViewItem x:Uid="/WorkDeskEasy/MenuCatalog"  Tag="catalog" Icon="Shop" />
                 <NavigationViewItem x:Uid="/WorkDeskEasy/MenuTopologie"  Tag="topologie" Icon="AllApps" />
                 <NavigationViewItem x:Uid="/WorkDeskEasy/MenuGroups" Tag="groups" Icon="SelectAll" />
                 <NavigationViewItem x:Uid="/WorkDeskEasy/MenuBus" Tag="bus" Icon="View" />

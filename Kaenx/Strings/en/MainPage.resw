@@ -117,7 +117,61 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <data name="AppCrashed" xml:space="preserve">
+    <value>The app crashed recently.</value>
+  </data>
+  <data name="BtnArchiv.Text" xml:space="preserve">
+    <value>Archiv</value>
+  </data>
+  <data name="BtnCatalog.Text" xml:space="preserve">
+    <value>Catalog</value>
+  </data>
   <data name="BtnNewProject.Text" xml:space="preserve">
     <value>Create</value>
+  </data>
+  <data name="BtnSettings.Text" xml:space="preserve">
+    <value>Settings</value>
+  </data>
+  <data name="BtnStore.Text" xml:space="preserve">
+    <value>Store</value>
+  </data>
+  <data name="MsgProjectDeleted" xml:space="preserve">
+    <value>Project was deleted.</value>
+  </data>
+  <data name="NewTitle.Text" xml:space="preserve">
+    <value>Create a new project</value>
+  </data>
+  <data name="NewName.Text" xml:space="preserve">
+    <value>Name:</value>
+  </data>
+  <data name="NewNameIn.Text" xml:space="preserve">
+    <value>New project</value>
+  </data>
+  <data name="NewPath.Text" xml:space="preserve">
+    <value>Savepath:</value>
+  </data>
+  <data name="NewImage.Text" xml:space="preserve">
+    <value>Image:</value>
+  </data>
+  <data name="NewImageFile.Content" xml:space="preserve">
+    <value>From File</value>
+  </data>
+  <data name="NewImageStandard.Content" xml:space="preserve">
+    <value>From Standard</value>
+  </data>
+  <data name="NewImageHouse.Content" xml:space="preserve">
+    <value>Building</value>
+  </data>
+  <data name="NewImageSkyline" xml:space="preserve">
+    <value>Skyline</value>
+  </data>
+  <data name="NewImageChruch.Content" xml:space="preserve">
+    <value>Church</value>
+  </data>
+  <data name="NewCreate.Content" xml:space="preserve">
+    <value>Create</value>
+  </data>
+  <data name="NewCancel.Content" xml:space="preserve">
+    <value>Cancel</value>
   </data>
 </root>

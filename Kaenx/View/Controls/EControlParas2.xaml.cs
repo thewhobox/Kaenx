@@ -9,6 +9,7 @@ using Serilog;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
@@ -32,8 +33,15 @@ using Windows.UI.Xaml.Navigation;
 
 namespace Kaenx.Views.Easy.Controls
 {
-    public sealed partial class EControlParas2 : UserControl
+    public sealed partial class EControlParas2 : UserControl, INotifyPropertyChanged
     {
+        private bool _isBigView = false;
+        public bool IsBigView
+        {
+            get { return _isBigView; }
+            set { _isBigView = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("IsBigView")); }
+        }
+
         public ObservableCollection<ListChannelModel> ListNavChannel { get; set; } = new ObservableCollection<ListChannelModel>();
         public ObservableCollection<ListBlockModel> ListNavBlock { get; set; } = new ObservableCollection<ListBlockModel>();
         private List<DeviceComObject> comObjects { get; set; }
@@ -51,6 +59,8 @@ namespace Kaenx.Views.Easy.Controls
         Stopwatch watch = new Stopwatch();
         private XDocument dynamic;
 
+        public event PropertyChangedEventHandler PropertyChanged;
+
         public EControlParas2(LineDevice dev)
         {
             this.InitializeComponent();
@@ -63,6 +73,13 @@ namespace Kaenx.Views.Easy.Controls
                 ViewHelper.Instance.ShowNotification("Achtung!!! Applikation konnte nicht gefunden werden. Bitte importieren Sie das Produkt erneut.", 4000, ViewHelper.MessageType.Error);
                 return;
             }
+
+            this.SizeChanged += EControlParas2_SizeChanged;
+        }
+
+        private void EControlParas2_SizeChanged(object sender, SizeChangedEventArgs e)
+        {
+            IsBigView = e.NewSize.Width > 850;
         }
 
         public void Start()
@@ -161,11 +178,15 @@ namespace Kaenx.Views.Easy.Controls
                         await ParseBlock(xele, mBlock.Panel, Visibility.Visible);
                         break;
                     case "ChannelIndependentBlock":
-                        NavChannel.IsEnabled = false;
-                        ListChannelModel mChannelIB = new ListChannelModel();
-                        mChannelIB.Name = "Allgemein";
-                        ListNavChannel.Add(mChannelIB);
-                        await ParseRoot(xele, visibility, mChannelIB);
+                        //    NavChannel.IsEnabled = false;
+                        //    ListChannelModel mChannelIB = new ListChannelModel();
+                        //    mChannelIB.Name = "Allgemein";
+                        //    ListNavChannel.Add(mChannelIB);
+                        //    await ParseRoot(xele, visibility, mChannelIB);
+                        ListChannelModel inChannel = new ListChannelModel();
+                        inChannel.Name = "Allgemein";
+                        ListNavChannel.Add(inChannel);
+                        await ParseRoot(xele, visibility, inChannel);
                         break;
                     case "choose":
                         AppParameter choosePara = AppParas[xele.Attribute("ParamRefId").Value];
@@ -754,15 +775,16 @@ namespace Kaenx.Views.Easy.Controls
         private void filterBlocks()
         {
             ListChannelModel selectedItem = (ListChannelModel)NavChannel.SelectedItem;
+            List<ListBlockModel> toRemove = new List<ListBlockModel>();
 
-
-            foreach (ListBlockModel block in selectedItem.Blocks)
+            foreach (ListBlockModel block in ListNavBlock)
             {
-                if (block.Visible == Visibility.Visible || !ListNavBlock.Any(b => ((ListBlockModel)b).Id == block.Id)) continue;
-
-                ListBlockModel helper = ListNavBlock.Single(b => b.Id == block.Id);
-                ListNavBlock.Remove(helper);
+                if (selectedItem.Blocks.Any(b => b.Id == block.Id)) continue;
+                toRemove.Add(block);
             }
+
+            foreach (ListBlockModel model in toRemove)
+                ListNavBlock.Remove(model);
 
 
 

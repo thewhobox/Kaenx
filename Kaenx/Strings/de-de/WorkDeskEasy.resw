@@ -138,6 +138,9 @@
   <data name="MenuHome.Content" xml:space="preserve">
     <value>Startseite</value>
   </data>
+  <data name="MenuCatalog.Content" xml:space="preserve">
+    <value>Katalog</value>
+  </data>
   <data name="MenuTopologie.Content" xml:space="preserve">
     <value>Topologie</value>
   </data>

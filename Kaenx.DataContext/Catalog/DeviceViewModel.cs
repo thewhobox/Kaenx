@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -20,6 +21,9 @@ namespace Kaenx.DataContext.Catalog
         public string VisibleDescription { get; set; }
         [MaxLength(100)]
         public string OrderNumber { get; set; }
+
+        [NotMapped]
+        public string ManufacturerName { get; set; }
 
         public bool HasIndividualAddress { get; set; }
         public bool HasApplicationProgram { get; set; }

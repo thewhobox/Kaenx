@@ -7,10 +7,8 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:controls="using:Microsoft.Toolkit.Uwp.UI.Controls"
     mc:Ignorable="d"
-    Title="Achtung!"
+    x:Uid="/Dialogs/ComsDelete"
     DefaultButton="Primary"
-    PrimaryButtonText="Verbindungen löschen"
-    CloseButtonText="Abbrechen"
     PrimaryButtonClick="ContentDialog_PrimaryButtonClick"
     CloseButtonClick="ContentDialog_CloseButtonClick">
 
@@ -21,14 +19,14 @@
         </Grid.RowDefinitions>
 
 
-        <TextBlock TextWrapping="WrapWholeWords" Text="Das Ändern des Parameters führt dazu, dass folgende Kommunikationsobjetkte getrennt werden müssen." />
+        <TextBlock x:Uid="/Dialogs/ComsDeleteBlock" TextWrapping="WrapWholeWords" />
 
         <controls:DataGrid x:Name="ListComs" Grid.Row="1" AutoGenerateColumns="False" ItemsSource="{Binding}" IsReadOnly="True">
             <controls:DataGrid.Columns>
-                <controls:DataGridTextColumn Header="Nr." Width="SizeToCells" Binding="{Binding Number}" />
-                <controls:DataGridTextColumn Header="Name" Width="SizeToCells" Binding="{Binding Name}" />
-                <controls:DataGridTextColumn Header="Funktion" Width="SizeToCells" Binding="{Binding Function}" />
-                <controls:DataGridTextColumn Header="Verbindungen" Binding="{Binding Connections}" />
+                <controls:DataGridTextColumn x:Uid="/Dialogs/ComsDeleteNr" Header="Nr." Width="SizeToCells" Binding="{Binding Number}" />
+                <controls:DataGridTextColumn x:Uid="/Dialogs/ComsDeleteName" Header="Name" Width="SizeToCells" Binding="{Binding Name}" />
+                <controls:DataGridTextColumn x:Uid="/Dialogs/ComsDeleteFunc" Header="Funktion" Width="SizeToCells" Binding="{Binding Function}" />
+                <controls:DataGridTextColumn x:Uid="/Dialogs/ComsDeleteConn" Header="Verbindungen" Binding="{Binding Connections}" />
             </controls:DataGrid.Columns>
         </controls:DataGrid>
     </Grid>

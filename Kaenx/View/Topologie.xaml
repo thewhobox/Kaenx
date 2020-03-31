@@ -32,6 +32,14 @@
                         <Setter Target="PanelSettings.Width" Value="300" />
                     </VisualState.Setters>
                 </VisualState>
+                <VisualState>
+                    <VisualState.StateTriggers>
+                        <AdaptiveTrigger MinWindowWidth="0" />
+                    </VisualState.StateTriggers>
+                    <VisualState.Setters>
+                        <Setter Target="SettExpander.IsExpanded" Value="True" />
+                    </VisualState.Setters>
+                </VisualState>
             </VisualStateGroup>
         </VisualStateManager.VisualStateGroups>
         
@@ -63,18 +71,24 @@
         
         <Border Grid.Row="1" BorderThickness="0 0 0 1" BorderBrush="White">
             <StackPanel Orientation="Horizontal">
-                <AppBarButton x:Uid="/Topologie/ToolAdd" Icon="Add" Click="ClickAddMain" />
-                <AppBarButton x:Uid="/Topologie/ToolOpenCat" Icon="Shop" Click="ClickOpenCatalog" />
+                <AppBarButton x:Uid="/Topologie/ToolAddLine" Icon="Add" Click="ClickAdd" />
+                <AppBarButton x:Uid="/Topologie/ToolAddDevice" Icon="Add" Click="ClickAddDevice" />
             </StackPanel>
         </Border>
 
-        <TreeView x:Name="TreeV" Grid.Row="2" ItemsSource="{Binding}" CanReorderItems="False" ItemInvoked="TreeV_ItemInvoked"  VerticalAlignment="Stretch" Background="LightGray">
+        <TreeView x:Name="TreeV" Grid.Row="2" ItemsSource="{Binding}" CanDragItems="False" CanReorderItems="False" ItemInvoked="TreeV_ItemInvoked"  VerticalAlignment="Stretch" Background="LightGray">
+            <TreeView.ItemContainerStyle>
+                <Style TargetType="TreeViewItem">
+                    <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+                </Style>
+            </TreeView.ItemContainerStyle>
             <TreeView.ItemTemplate>
                 <DataTemplate x:DataType="local:Line">
-                    <TreeViewItem Margin="-20 0 0 0" AllowDrop="True" HorizontalContentAlignment="Stretch" HorizontalAlignment="Stretch" DragEnter="TreeViewItem_DragEnter" ToolTipService.ToolTip="{Binding Name}" DoubleTapped="TreeViewItem_DoubleTapped" Background="{Binding CurrentBackBrush}" BorderThickness="0" Content="{Binding}" ItemsSource="{Binding Subs}" IsExpanded="{Binding IsExpanded, Mode=TwoWay}" Drop="TreeViewItem_Drop">
+                    <TreeViewItem Margin="-20 0 0 0" HorizontalContentAlignment="Stretch" HorizontalAlignment="Stretch" ToolTipService.ToolTip="{Binding Name}" DoubleTapped="TreeViewItem_DoubleTapped" Background="{Binding CurrentBackBrush}" BorderThickness="0" Content="{Binding}" ItemsSource="{Binding Subs}" IsExpanded="{Binding IsExpanded, Mode=TwoWay}">
                         <TreeViewItem.ContextFlyout>
                             <MenuFlyout Opening="MenuFlyout_Opening">
-                                <MenuFlyoutItem x:Name="MFI_Add" x:Uid="/Topologie/MenAdd" Icon="Add" Click="ClickAddSub" />
+                                <MenuFlyoutItem x:Name="MFI_AddLine" x:Uid="/Topologie/MenAddLine" Icon="Add" Click="ClickAdd" />
+                                <MenuFlyoutItem x:Name="MFI_AddDevice" x:Uid="/Topologie/MenAddDevice" Icon="Add" Click="ClickAddDevice" />
                                 <MenuFlyoutSubItem x:Name="MFI_Prog" x:Uid="/Topologie/MenProg" Icon="PostUpdate">
                                     <MenuFlyoutItem x:Uid="/Topologie/MenProgPh" Icon="MapPin" Click="ClickProAddr" />
                                     <MenuFlyoutSeparator />
@@ -86,6 +100,7 @@
                                     <MenuFlyoutItem x:Uid="/Topologie/MenRestart" Icon="Refresh" Click="ClickRestart" />
                                     <MenuFlyoutItem x:Uid="/Topologie/MenInfo" Icon="BrowsePhotos" Click="ClickInfo" />
                                     <MenuFlyoutItem x:Name="MFI_Toggle" x:Uid="/Topologie/MenToggle" Icon="DisconnectDrive" Click="ClickToggle" />
+                                    <MenuFlyoutItem x:Name="MFI_ReadConf" x:Uid="/Topologie/MenReadConf" Text="Konfiguration auslesen" Icon="Find" />
                                     <MenuFlyoutItem Text="Speicher auslesen" Icon="Save" Click="ClickMemory" />
                                 </MenuFlyoutSubItem>
                                 <MenuFlyoutItem x:Name="MFI_Para" x:Uid="/Topologie/MenOpenPara" Icon="Bookmarks" Click="ClickOpenParas" />
@@ -127,11 +142,26 @@
             </TextBlock>
         </StackPanel>
 
+        <Grid Grid.Column="1" Grid.Row="1" Grid.RowSpan="3">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="57" />
+                <RowDefinition />
+            </Grid.RowDefinitions>
 
-        <toolkit:TabView x:Name="tabView" Grid.Column="1" Grid.Row="1" Grid.RowSpan="3" CanCloseTabs="True" Margin="5 0 5 0" />
+            <StackPanel Orientation="Horizontal" Margin="5 0 5 0" VerticalAlignment="Center">
+                <TextBlock x:Name="ParamHeaderLine" FontSize="25" />
+                <TextBlock x:Name="ParamHeaderName" FontSize="25" Margin="10 0 0 0" />
+            </StackPanel>
 
-
+            <ContentPresenter x:Name="ParamPresenter" Grid.Row="1" Margin="5 0 5 0" />
+        </Grid>
+        
         <toolkit:Expander x:Name="SettExpander" Grid.Row="1" Grid.Column="2" Grid.RowSpan="3" HorizontalContentAlignment="Stretch" ExpandDirection="Left" VerticalContentAlignment="Stretch" IsExpanded="True">
+            <toolkit:Expander.Resources>
+                <Style TargetType="ToggleButton">
+                    <Setter Property="Visibility" Value="Collapsed" />
+                </Style>
+            </toolkit:Expander.Resources>
             <toolkit:Expander.HeaderTemplate>
                 <DataTemplate>
                     <TextBlock x:Uid="/Topologie/SideProps"  FontSize="20" />

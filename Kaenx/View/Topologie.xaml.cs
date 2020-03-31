@@ -5,6 +5,7 @@ using Kaenx.Classes.Helper;
 using Kaenx.Classes.Project;
 using Kaenx.DataContext.Catalog;
 using Kaenx.DataContext.Project;
+using Kaenx.View.Controls;
 using Kaenx.Views.Easy.Controls;
 using Microsoft.Toolkit.Uwp.UI.Controls;
 using System;
@@ -19,6 +20,8 @@ using Windows.ApplicationModel.Resources;
 using Windows.Foundation;
 using Windows.Foundation.Collections;
 using Windows.Storage;
+using Windows.System;
+using Windows.UI.Core;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Controls.Primitives;
@@ -40,17 +43,25 @@ namespace Kaenx.View
         public Project _project;
         private CatalogContext _context = new CatalogContext();
         private ResourceLoader loader = ResourceLoader.GetForCurrentView("Topologie");
+        private StoreHelper storeHelper;
 
         public Topologie()
         {
             this.InitializeComponent();
             StartCalc();
+            GetLicenses();
         }
 
         private async void StartCalc()
         {
             await Task.Delay(500);
             CalcCounts();
+        }
+
+        private async void GetLicenses()
+        {
+            storeHelper = new StoreHelper();
+            await storeHelper.Load();
         }
 
         private async void ClickRename(object sender, RoutedEventArgs e)
@@ -62,8 +73,10 @@ namespace Kaenx.View
             if (diag.NewName != null)
             {
                 item.Name = diag.NewName;
+
+                //TODO replace for only single save
+                SaveHelper.SaveProject();
             }
-            SaveHelper.SaveProject();
         }
 
         private void ClickProAddr(object sender, RoutedEventArgs e)
@@ -106,32 +119,99 @@ namespace Kaenx.View
             BusConnection.Instance.AddAction(action);
         }
 
-        private void ClickAddMain(object sender, RoutedEventArgs e)
+        private async void ClickAdd(object sender, RoutedEventArgs e)
         {
-            ObservableCollection<Line> Lines = (ObservableCollection<Line>)this.DataContext;
-            Line line = new Line(getFirstFreeIdMain(), loader.GetString("NewLineMain"));
-            Lines.Add(line);
+            DiagAddLine diag = new DiagAddLine();
 
-            SaveHelper.SaveProject();
-            CalcCounts();
-        }
+            
 
-        private void ClickAddSub(object sender, RoutedEventArgs e)
-        {
-            object data = ((MenuFlyoutItem)e.OriginalSource).DataContext;
-
-            switch (data.GetType().ToString())
+            if (sender is MenuFlyoutItem)
             {
-                case "Kaenx.Classes.Line":
-                    Line main = (Line)data;
-                    LineMiddle line = new LineMiddle(getFirstFreeIdSub(main), loader.GetString("NewLineMiddle"), main);
-                    main.Subs.Add(line);
-                    main.IsExpanded = true;
-                    break;
+                Line line = (sender as MenuFlyoutItem).DataContext as Line;
+
+                if (Window.Current.CoreWindow.GetKeyState(VirtualKey.Shift).HasFlag(CoreVirtualKeyStates.Down))
+                {
+                    LineMiddle newLine = new LineMiddle(getFirstFreeIdSub(line), loader.GetString("NewLineMiddle"), line);
+                    SaveHelper.SaveLine(newLine);
+                    line.Subs.Add(newLine);
+                    return;
+                }
+
+
+                diag.SelectedLine = line;
+            }
+            else
+            {
+                if (Window.Current.CoreWindow.GetKeyState(VirtualKey.Shift).HasFlag(CoreVirtualKeyStates.Down))
+                {
+                    Line newLine = new Line(getFirstFreeIdMain(), loader.GetString("NewLineMain"));
+                    SaveHelper.SaveLine(newLine);
+                    SaveHelper._project.Lines.Add(newLine);
+                    return;
+                }
             }
 
-            SaveHelper.SaveProject();
-            CalcCounts();
+            await diag.ShowAsync();
+
+            foreach(TopologieBase tbase in diag.AddedLines)
+            {
+                if(tbase is Line)
+                {
+                    Line line = tbase as Line;
+                    if (line.Id == 0) continue;
+
+                    SaveHelper.SaveLine(line);
+                    SaveHelper._project.Lines.Add(line);
+                } else if(tbase is LineMiddle)
+                {
+                    LineMiddle line = tbase as LineMiddle;
+                    Line parent = SaveHelper._project.Lines.Single(l => l == line.Parent);
+                    parent.Subs.Add(line);
+                    SaveHelper.SaveLine(line);
+                }
+            }
+            //SaveHelper.SaveProject();
+            //CalcCounts();
+        }
+
+        private async void ClickAddDevice(object sender, RoutedEventArgs e)
+        {
+            DiagAddDevice diag = new DiagAddDevice();
+
+            if(sender is MenuFlyoutItem)
+            {
+                TopologieBase line = (sender as MenuFlyoutItem).DataContext as TopologieBase;
+                diag.SelectedLine = line;
+            }
+
+            await diag.ShowAsync();
+
+            if (diag.SelectedDevice == null) return;
+
+            LineMiddle lineToAdd = null;
+
+            if(diag.SelectedLine is LineMiddle)
+            {
+                lineToAdd = diag.SelectedLine as LineMiddle;
+            } else if(diag.SelectedLine is Line)
+            {
+                Line line = diag.SelectedLine as Line;
+                if(line.Subs.Any(l => l.Id == 0))
+                {
+                    lineToAdd = line.Subs.Single(l => l.Id == 0);
+                }
+                else
+                {
+                    lineToAdd = new LineMiddle(0, "Backbone", line);
+                    SaveHelper.SaveLine(lineToAdd);
+                    line.Subs.Insert(0, lineToAdd);
+                }
+            }
+
+            for(int i = 0; i < diag.Count; i++)
+            {
+                await AddDeviceToLine(diag.SelectedDevice, lineToAdd);
+            }
         }
 
         private void ClickDelete(object sender, RoutedEventArgs e)
@@ -164,65 +244,56 @@ namespace Kaenx.View
             CalcCounts();
         }
 
+
+        List<(UIElement ui, int id)> ParamStack = new List<(UIElement ui, int id)>();
+
         private async void ClickOpenParas(object sender, RoutedEventArgs e)
         {
             LineDevice device = (LineDevice)((MenuFlyoutItem)e.OriginalSource).DataContext;
-            EControlParas2 paras = new EControlParas2(device);
-            //paras.DataContext = device; 
-
-            TabViewItem item = new TabViewItem();
-            item.Icon = new SymbolIcon(Symbol.AllApps);
-
-
-            StackPanel header = new StackPanel();
-            header.Orientation = Orientation.Horizontal;
-
-            TextBlock hLine = new TextBlock() { Margin = new Thickness(0, 0, 5, 0) };
-            TextBlock hName = new TextBlock();
-
-            header.Children.Add(hLine);
-            header.Children.Add(hName);
+            EControlParas2 paras;
+            bool isFromCache = false;
 
             Windows.UI.Xaml.Data.Binding bindLine = new Windows.UI.Xaml.Data.Binding();
             bindLine.Path = new PropertyPath("LineName");
             bindLine.Source = device;
-            hLine.SetBinding(TextBlock.TextProperty, bindLine);
+            ParamHeaderLine.SetBinding(TextBlock.TextProperty, bindLine);
 
             Windows.UI.Xaml.Data.Binding bindName = new Windows.UI.Xaml.Data.Binding();
             bindName.Path = new PropertyPath("Name");
             bindName.Source = device;
-            hName.SetBinding(TextBlock.TextProperty, bindName);
+            ParamHeaderName.SetBinding(TextBlock.TextProperty, bindName);
 
-            item.Header = header;
-            item.Content = paras;
-            tabView.Items.Add(item);
-            tabView.SelectedItem = item;
+            if (ParamStack.Any(p => p.id == device.UId))
+            {
+                (UIElement ui, int id) element = ParamStack.Single(i => i.id == device.UId);
+                paras = (EControlParas2) element.ui;
+                ParamStack.Remove(element);
+                isFromCache = true;
+            } else
+            {
+                paras = new EControlParas2(device);
 
-            await Task.Delay(100);
-            paras.Start();
+                if(ParamStack.Count >= 5) //TODO move to app settings
+                {
+                    ParamStack.RemoveAt(0);
+                }
+            }
+
+            ParamStack.Add((paras, device.UId));
+            ParamPresenter.Content = paras;
+
+            if (!isFromCache)
+            {
+                await Task.Delay(100);
+                paras.Start();
+            }
         }
 
-        private void ClickOpenCatalog(object sender, RoutedEventArgs e)
+
+
+
+        private async Task AddDeviceToLine(DeviceViewModel model, LineMiddle line)
         {
-            Frame frame = new Frame();
-
-            TabViewItem item = new TabViewItem();
-            item.Icon = new SymbolIcon(Symbol.Shop);
-            item.Header = loader.GetString("Catalog");
-            item.Content = frame;
-            tabView.Items.Add(item);
-            tabView.SelectedItem = item;
-
-            frame.Navigate(typeof(Catalog));
-        }
-
-        private async void TreeViewItem_Drop(object sender, DragEventArgs e)
-        {
-            CatalogContext context = new CatalogContext();
-
-            DeviceViewModel model = (DeviceViewModel)ViewHelper.Instance.DragItem;
-            LineMiddle line = (LineMiddle)((TreeViewItem)e.OriginalSource).DataContext;
-
             LineDevice device = new LineDevice(model, line, true);
             device.DeviceId = model.Id;
 
@@ -237,7 +308,7 @@ namespace Kaenx.View
             }
             else if (model.IsPowerSupply)
             {
-                if (context.Devices.Any(d => d.IsPowerSupply && line.Subs.Any(l => l.DeviceId == d.Id)))
+                if (_context.Devices.Any(d => d.IsPowerSupply && line.Subs.Any(l => l.DeviceId == d.Id)))
                 {
                     ViewHelper.Instance.ShowNotification(loader.GetString("ErrMsgPowerSupply"), 4000, ViewHelper.MessageType.Error);
                     return;
@@ -263,10 +334,10 @@ namespace Kaenx.View
 
             if (model.HasApplicationProgram)
             {
-                int apps = context.Hardware2App.Count(h => h.HardwareId == model.HardwareId);
+                int apps = _context.Hardware2App.Count(h => h.HardwareId == model.HardwareId);
                 if (apps == 1)
                 {
-                    Hardware2AppModel app = context.Hardware2App.First(h => h.HardwareId == model.HardwareId);
+                    Hardware2AppModel app = _context.Hardware2App.First(h => h.HardwareId == model.HardwareId);
                     device.ApplicationId = app.ApplicationId;
                 }
                 else
@@ -293,15 +364,14 @@ namespace Kaenx.View
             line.Subs.Add(device);
             line.Subs.Sort(l => l.Id);
             line.IsExpanded = true;
-            e.Handled = true;
 
 
-
-            if(_context.AppAdditionals.Any(a => a.Id == device.ApplicationId))
+            if (_context.AppAdditionals.Any(a => a.Id == device.ApplicationId))
             {
                 AppAdditional adds = _context.AppAdditionals.Single(a => a.Id == device.ApplicationId);
                 device.ComObjects = SaveHelper.ByteArrayToObject<ObservableCollection<DeviceComObject>>(adds.ComsDefault);
-            } else
+            }
+            else
             {
                 device.ComObjects = new ObservableCollection<DeviceComObject>();
             }
@@ -312,7 +382,6 @@ namespace Kaenx.View
             UpdateManager.Instance.CountUpdates();
             CalcCounts();
         }
-
 
         private void ClickRestart(object sender, RoutedEventArgs e)
         {
@@ -340,11 +409,22 @@ namespace Kaenx.View
 
             TopologieBase line = (TopologieBase)((TreeViewItem)menu.Target).DataContext;
 
-            MenuFlyoutItemBase mAdd = menu.Items.Single(i => i.Name == "MFI_Add");
+            MenuFlyoutItemBase mAddL = menu.Items.Single(i => i.Name == "MFI_AddLine");
+            MenuFlyoutItemBase mAddD = menu.Items.Single(i => i.Name == "MFI_AddDevice");
             MenuFlyoutItemBase mProg = menu.Items.Single(i => i.Name == "MFI_Prog");
             MenuFlyoutItemBase mPara = menu.Items.Single(i => i.Name == "MFI_Para");
             MenuFlyoutSubItem mActions = (MenuFlyoutSubItem)menu.Items.Single(i => i.Name == "MFI_Actions");
             MenuFlyoutItemBase mToggle = mActions.Items.Single(i => i.Name == "MFI_Toggle");
+            MenuFlyoutItemBase mReadConf = mActions.Items.Single(i => i.Name == "MFI_ReadConf");
+
+
+#if DEBUG
+#else
+            mToggle.IsEnabled = storeHelper.DeviceDeActivate;
+            mReadConf.IsEnabled = storeHelper.LoadDeviceConfig;
+#endif
+
+
 
             switch (line.Type)
             {
@@ -355,21 +435,24 @@ namespace Kaenx.View
                     MenuFlyoutItem itemT = (MenuFlyoutItem)mToggle;
                     itemT.Text = dev.IsDeactivated ? loader.GetString("MenToggle_Activate") : loader.GetString("MenToggle_Deactivate");
 
-                    mAdd.Visibility = Visibility.Collapsed;
+                    mAddL.Visibility = Visibility.Collapsed;
+                    mAddD.Visibility = Visibility.Collapsed;
                     mProg.Visibility = Visibility.Visible;
                     mPara.Visibility = Visibility.Visible;
                     mActions.Visibility = Visibility.Visible;
                     break;
 
                 case TopologieType.LineMiddle:
-                    mAdd.Visibility = Visibility.Collapsed;
+                    mAddL.Visibility = Visibility.Collapsed;
+                    mAddD.Visibility = Visibility.Visible;
                     mProg.Visibility = Visibility.Collapsed;
                     mPara.Visibility = Visibility.Collapsed;
                     mActions.Visibility = Visibility.Collapsed;
                     break;
 
                 case TopologieType.Line:
-                    mAdd.Visibility = Visibility.Visible;
+                    mAddL.Visibility = Visibility.Visible;
+                    mAddD.Visibility = Visibility.Visible;
                     mProg.Visibility = Visibility.Collapsed;
                     mPara.Visibility = Visibility.Collapsed;
                     mActions.Visibility = Visibility.Collapsed;
@@ -572,20 +655,6 @@ namespace Kaenx.View
                     ColsPara.Width = new GridLength(0, GridUnitType.Star);
                     ColsSett.Width = new GridLength(1, GridUnitType.Star);
                     break;
-            }
-        }
-
-        private void TreeViewItem_DragEnter(object sender, DragEventArgs e)
-        {
-            //e.AcceptedOperation = Windows.ApplicationModel.DataTransfer.DataPackageOperation.Link;
-
-            TopologieBase tbase = (TopologieBase)((TreeViewItem)e.OriginalSource).DataContext;
-            if (tbase.Type == TopologieType.LineMiddle && ViewHelper.Instance.DragItem?.GetType() == typeof(DataContext.Catalog.DeviceViewModel))
-            {
-                LineMiddle line = (LineMiddle)tbase;
-                e.AcceptedOperation = Windows.ApplicationModel.DataTransfer.DataPackageOperation.Link;
-                e.DragUIOverride.Caption = string.Format(loader.GetString("DragConnect"), line.Parent.Id, line.Id);
-                //e.Handled = true;
             }
         }
     }

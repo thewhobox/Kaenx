@@ -192,7 +192,7 @@ namespace Kaenx.View
             ProjectViewHelper proj = (ProjectViewHelper)TestGrid.SelectedItem;
             ProjectList.Remove(proj);
 
-            SaveHelper.DeleteProject(proj.Id);
+            SaveHelper.DeleteProject(proj);
             Notify.Show(loader.GetString("MsgProjectDeleted"), 3000);
 
             Serilog.Log.Debug("Projekt wurde gelöscht: " + proj.Id + " - " + proj.Name);

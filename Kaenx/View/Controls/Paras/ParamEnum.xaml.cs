@@ -55,6 +55,9 @@ namespace Kaenx.Classes.Controls.Paras
 
             ToolTipService.SetToolTip(ParaValue, toolTip);
             ParaValue.SelectionChanged += ParaValue_SelectionChanged;
+
+            if (param.Access == AccessType.Read)
+                ParaValue.IsEnabled = false;
         }
 
         private void ParaValue_SelectionChanged(object sender, SelectionChangedEventArgs e)

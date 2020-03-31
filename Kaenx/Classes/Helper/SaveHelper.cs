@@ -21,7 +21,7 @@ namespace Kaenx.Classes.Helper
 {
     public class SaveHelper
     {
-        private static Project.Project _project;
+        public static Project.Project _project;
         public static ProjectContext contextProject;
         private static CatalogContext contextC = new CatalogContext(new LocalConnectionCatalog() { DbHostname = "Catalog.db", Type = LocalConnectionCatalog.DbConnectionType.SqlLite });
 
@@ -183,6 +183,48 @@ namespace Kaenx.Classes.Helper
             contextProject.SaveChanges();
         }
 
+        public static void SaveLine(Line line)
+        {
+            LineModel linemodel;
+            if (contextProject.LinesMain.Any(l => l.UId == line.UId && l.ProjectId == _project.Id))
+            {
+                linemodel = contextProject.LinesMain.Single(l => l.UId == line.UId && l.ProjectId == _project.Id);
+            }
+            else
+            {
+                linemodel = new LineModel(_project.Id);
+                contextProject.LinesMain.Add(linemodel);
+                contextProject.SaveChanges();
+                line.UId = linemodel.UId;
+            }
+            linemodel.Id = line.Id;
+            linemodel.Name = line.Name;
+            linemodel.IsExpanded = line.IsExpanded;
+            contextProject.LinesMain.Update(linemodel);
+            contextProject.SaveChanges();
+        }
+
+        public static void SaveLine(LineMiddle line)
+        {
+            LineMiddleModel linemodel;
+            if (contextProject.LinesMiddle.Any(l => l.UId == line.UId && l.ProjectId == _project.Id))
+            {
+                linemodel = contextProject.LinesMiddle.Single(l => l.UId == line.UId && l.ProjectId == _project.Id);
+            }
+            else
+            {
+                linemodel = new LineMiddleModel(_project.Id);
+                contextProject.LinesMiddle.Add(linemodel);
+                contextProject.SaveChanges();
+                line.UId = linemodel.UId;
+            }
+            linemodel.Id = line.Id;
+            linemodel.Name = line.Name;
+            linemodel.IsExpanded = line.IsExpanded;
+            linemodel.ParentId = line.Parent.Id;
+            contextProject.LinesMiddle.Update(linemodel);
+            contextProject.SaveChanges();
+        }
 
         public static void SaveGroups()
         {
@@ -375,18 +417,35 @@ namespace Kaenx.Classes.Helper
             return project;
         }
 
-        public static void DeleteProject(int id)
+        public static void DeleteProject(ProjectViewHelper helper)
         {
-            List<ProjectModel> ps = contextProject.Projects.Where(p => p.Id == id).ToList();
+            using (LocalContext con = new LocalContext())
+            {
+                LocalConnectionProject lconn;
+                try
+                {
+                    lconn = con.ConnsProject.Single(p => p.Id == helper.Local.ConnectionId);
+                }
+                catch
+                {
+                    Serilog.Log.Error($"Project-Verbindung {helper.Local.ConnectionId} konnte nicht gefunden werden.");
+                    ViewHelper.Instance.ShowNotification("Die Verbindung wo das Projekt gespeichert sein soll konnt enicht gefunden werden.", 3000, ViewHelper.MessageType.Error);
+                    return;
+                }
+                contextProject = new ProjectContext(lconn);
+                contextProject.Database.Migrate();
+            }
+
+            List<ProjectModel> ps = contextProject.Projects.Where(p => p.Id == helper.ProjectId).ToList();
             contextProject.Projects.RemoveRange(ps);
 
-            List<LineModel> ls = contextProject.LinesMain.Where(l => l.ProjectId == id).ToList();
+            List<LineModel> ls = contextProject.LinesMain.Where(l => l.ProjectId == helper.ProjectId).ToList();
             contextProject.LinesMain.RemoveRange(ls);
 
-            List<LineMiddleModel> lms = contextProject.LinesMiddle.Where(l => l.ProjectId == id).ToList();
+            List<LineMiddleModel> lms = contextProject.LinesMiddle.Where(l => l.ProjectId == helper.ProjectId).ToList();
             contextProject.LinesMiddle.RemoveRange(lms);
 
-            List<LineDeviceModel> lds = contextProject.LineDevices.Where(l => l.ProjectId == id).ToList();
+            List<LineDeviceModel> lds = contextProject.LineDevices.Where(l => l.ProjectId == helper.ProjectId).ToList();
             contextProject.LineDevices.RemoveRange(lds);
 
             contextProject.SaveChanges();

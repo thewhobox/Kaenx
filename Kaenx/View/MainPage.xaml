@@ -63,7 +63,7 @@
                     <Viewbox x:Name="VB1" Height="70">
                         <SymbolIcon Symbol="Page2" Foreground="Gray" />
                     </Viewbox>
-                    <TextBlock x:Uid="/MainPage/BtnnewProject" HorizontalAlignment="Center" Margin="0 5 0 0" Foreground="Gray" />
+                    <TextBlock x:Uid="/MainPage/BtnNewProject" HorizontalAlignment="Center" Margin="0 5 0 0" Foreground="Gray" />
                 </StackPanel>
             </Button>
 
@@ -185,22 +185,22 @@
                     <RowDefinition Height="auto" />
                 </Grid.RowDefinitions>
 
-                <TextBlock Grid.ColumnSpan="2" Text="Neues Projekt" FontSize="24" Margin="0 0 0 30" />
+                <TextBlock x:Uid="/MainPage/NewTitle" Grid.ColumnSpan="2" FontSize="24" Margin="0 0 0 30" />
 
-                <TextBlock Grid.Row="1" Text="Name:" />
-                <TextBox Grid.Row="1" Grid.Column="1" x:Name="InName" Text="Neues Projekt" />
+                <TextBlock x:Uid="/MainPage/NewName" Grid.Row="1" />
+                <TextBox x:Uid="/MainPage/NewNameIn" Grid.Row="1" Grid.Column="1" x:Name="InName" />
 
-                <TextBlock Grid.Row="2" Text="Speicherort:" />
+                <TextBlock x:Uid="/MainPage/NewPath" Grid.Row="2" />
                 <ComboBox  Grid.Row="2" Grid.Column="1" x:Name="InConn" Margin="0 5" ItemsSource="{Binding ConnectionsList}" DisplayMemberPath="Name" /> 
 
-                <TextBlock Grid.Row="3" Text="Bild:" />
+                <TextBlock x:Uid="/MainPage/NewImage" Grid.Row="3" />
                 <StackPanel Grid.Row="3" Grid.Column="1" Orientation="Horizontal">
-                    <Button Content="Aus Datei" Click="ClickChangePicFile" Margin="0 0 10 0" />
-                    <Button Content="Aus Standard" Click="ClickChangePicStandard" Margin="0 0 10 0" />
+                    <Button x:Uid="/MainPage/NewImageFile" Click="ClickChangePicFile" Margin="0 0 10 0" />
+                    <Button x:Uid="/MainPage/NewImageStandard" Click="ClickChangePicStandard" Margin="0 0 10 0" />
                     <ComboBox x:Name="DiagStandard">
-                        <ComboBoxItem Content="Gebäude" Tag="home" IsSelected="True" />
-                        <ComboBoxItem Content="Hochhaus" Tag="skyline" />
-                        <ComboBoxItem Content="Kirche" Tag="church" />
+                        <ComboBoxItem x:Uid="/MainPage/NewImageHouse" Tag="home" IsSelected="True" />
+                        <ComboBoxItem x:Uid="/MainPage/NewImageSkyline" Tag="skyline" />
+                        <ComboBoxItem x:Uid="/MainPage/NewImageChurch" Tag="church" />
                     </ComboBox>
                 </StackPanel>
 
@@ -213,8 +213,8 @@
                         <ColumnDefinition Width="20" />
                         <ColumnDefinition />
                     </Grid.ColumnDefinitions>
-                    <Button Content="Erstellen" HorizontalAlignment="Stretch" Click="CickDiagCreate" />
-                    <Button Grid.Column="2" Content="Abbrechen" HorizontalAlignment="Stretch" Click="CickDiagCancel" />
+                    <Button x:Uid="/MainPage/NewCreate" HorizontalAlignment="Stretch" Click="CickDiagCreate" Background="{ThemeResource SystemAccentColor}" Foreground="White" />
+                    <Button x:Uid="/MainPage/NewCancel" Grid.Column="2" HorizontalAlignment="Stretch" Click="CickDiagCancel" />
                 </Grid>
             </Grid>
         </Border>

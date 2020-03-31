@@ -15,17 +15,28 @@
             <VisualStateGroup>
                 <VisualState>
                     <VisualState.StateTriggers>
-                        <AdaptiveTrigger MinWindowWidth="700" />
+                        <StateTrigger IsActive="{Binding IsBigView}" />
                     </VisualState.StateTriggers>
                     <VisualState.Setters>
                         <Setter Target="ColsPara.Width" Value="600" />
+                        <Setter Target="ColsComs.Width" Value="*" />
+                        <Setter Target="ShowComsToggler.Visibility" Value="Collapsed" />
+                    </VisualState.Setters>
+                </VisualState>
+                <VisualState>
+                    <VisualState.StateTriggers>
+                        <StateTrigger IsActive="{Binding ElementName=ShowComsToggler, Path=IsOn}" />
+                    </VisualState.StateTriggers>
+                    <VisualState.Setters>
+                        <Setter Target="ColsPara.Width" Value="0" />
                         <Setter Target="ColsComs.Width" Value="*" />
                     </VisualState.Setters>
                 </VisualState>
             </VisualStateGroup>
         </VisualStateManager.VisualStateGroups>
-        
+
         <Grid.RowDefinitions>
+            <RowDefinition Height="auto" />
             <RowDefinition Height="auto" />
             <RowDefinition />
         </Grid.RowDefinitions>
@@ -34,26 +45,26 @@
             <ColumnDefinition x:Name="ColsComs" Width="0" />
         </Grid.ColumnDefinitions>
 
+        <ToggleSwitch x:Name="ShowComsToggler" Grid.ColumnSpan="2" HorizontalAlignment="Center" OnContent="Kommunikationsobjekte anzeigen" OffContent="Kommunikationsobjekte ausblenden"  />
 
-        <Grid>
+        <Grid Grid.Row="1">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition />
                 <ColumnDefinition />
             </Grid.ColumnDefinitions>
-
             <ComboBox x:Name="NavChannel" ItemsSource="{Binding ListNavChannel}" HorizontalAlignment="Stretch" DisplayMemberPath="Name" SelectionChanged="NavChannel_SelectionChanged" Visibility="Collapsed" />
             <ComboBox x:Name="NavBlock" ItemsSource="{Binding ListNavBlock}" DisplayMemberPath="Name" Grid.ColumnSpan="2" HorizontalAlignment="Stretch" />
         </Grid>
 
-        <ScrollViewer Grid.Row="1">
+        <ScrollViewer Grid.Row="2" BorderBrush="LightGray" BorderThickness="1">
             <ContentPresenter Content="{Binding ElementName=NavBlock, Path=SelectedItem.Panel}" />
         </ScrollViewer>
 
-        <Border x:Name="LoadRing" Grid.RowSpan="2" Background="LightGray" Opacity="0.6">
+        <Border x:Name="LoadRing" Grid.RowSpan="3" Grid.ColumnSpan="2" Background="LightGray" Opacity="0.6">
             <ProgressRing HorizontalAlignment="Center" IsActive="true" Width="100" Height="100"  Visibility="Visible"/>
         </Border>
 
-        <toolkit:DataGrid x:Name="ComList" Grid.RowSpan="2" Grid.Column="1" BorderBrush="White" BorderThickness="5 0 0 0" AutoGenerateColumns="False" ItemsSource="{Binding device.ComObjects, Mode=OneWay}" IsReadOnly="True" >
+        <toolkit:DataGrid x:Name="ComList" Grid.Row="1" Grid.RowSpan="2" Grid.Column="1" BorderBrush="LightGray" BorderThickness="1" Margin="5 0 0 0" AutoGenerateColumns="False" ItemsSource="{Binding device.ComObjects, Mode=OneWay}" IsReadOnly="True" >
             <toolkit:DataGrid.Columns>
                 <toolkit:DataGridTextColumn Tag="Number" Width="SizeToCells" Header="Nummer" Binding="{Binding Number}" />
                 <toolkit:DataGridTextColumn Tag="Name" Width="SizeToCells" Header="Name" Binding="{Binding Name}" />

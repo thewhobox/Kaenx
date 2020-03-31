@@ -138,4 +138,37 @@
   <data name="MsgProjectDeleted" xml:space="preserve">
     <value>Projekt wurde gelöscht.</value>
   </data>
+  <data name="NewTitle.Text" xml:space="preserve">
+    <value>Neues Projekt</value>
+  </data>
+  <data name="NewName.Text" xml:space="preserve">
+    <value>Name:</value>
+  </data>
+  <data name="NewPath.Text" xml:space="preserve">
+    <value>Speicherort:</value>
+  </data>
+  <data name="NewImage.Text" xml:space="preserve">
+    <value>Bild:</value>
+  </data>
+  <data name="NewImageFile.Content" xml:space="preserve">
+    <value>Aus Datei</value>
+  </data>
+  <data name="NewImageStandard.Content" xml:space="preserve">
+    <value>Aus Standard</value>
+  </data>
+  <data name="NewImageHouse.Content" xml:space="preserve">
+    <value>Gebäude</value>
+  </data>
+  <data name="NewImageSkyline" xml:space="preserve">
+    <value>Hochhaus</value>
+  </data>
+  <data name="NewImageChruch.Content" xml:space="preserve">
+    <value>Kirche</value>
+  </data>
+  <data name="NewCreate.Content" xml:space="preserve">
+    <value>Erstellen</value>
+  </data>
+  <data name="NewCancel.Content" xml:space="preserve">
+    <value>Abbrechen</value>
+  </data>
 </root>

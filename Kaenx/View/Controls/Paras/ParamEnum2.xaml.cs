@@ -58,6 +58,12 @@ namespace Kaenx.Classes.Controls.Paras
                 ValuePanel.Orientation = Orientation.Horizontal;
 
             ToolTipService.SetToolTip(ValuePanel, toolTip);
+
+            if (param.Access == AccessType.Read)
+            {
+                ParaValue1.IsEnabled = false;
+                ParaValue2.IsEnabled = false;
+            }
         }
 
         public string GetValue()

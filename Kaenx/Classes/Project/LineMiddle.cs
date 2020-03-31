@@ -29,7 +29,7 @@ namespace Kaenx.Classes
         public int Id
         {
             get { return _id; }
-            set { _id = value; Changed("Id"); Changed("LineName"); SaveHelper.SaveProject(); }
+            set { _id = value; Changed("Id"); Changed("LineName"); if(Parent != null) Parent.Subs.Sort(l => l.Id); SaveHelper.SaveProject(); }
         }
         public int UId { get; set; }
         [XmlIgnore]

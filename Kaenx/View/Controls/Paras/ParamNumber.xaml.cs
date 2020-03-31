@@ -42,9 +42,10 @@ namespace Kaenx.Classes.Controls.Paras
             ParaValue.Minimum = int.Parse(type.Tag1);
             ParaValue.Maximum = int.Parse(type.Tag2);
 
-
-
             ToolTipService.SetToolTip(ParaValue, type.Tag1 + " - " + type.Tag2);
+
+            if (param.Access == AccessType.Read)
+                ParaValue.IsEnabled = false;
         }
 
         private void ParaValue_LostFocus(object sender, RoutedEventArgs e)

@@ -117,6 +117,93 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <data name="AddDevice.Title" xml:space="preserve">
+    <value>Gerät hinzufügen</value>
+  </data>
+  <data name="AddDevice.PrimaryButtonText" xml:space="preserve">
+    <value>Hinzufügen</value>
+  </data>
+  <data name="AddDevice.CloseButtonText" xml:space="preserve">
+    <value>Abbrechen</value>
+  </data>
+  <data name="AddDeviceSearch.PlaceholderText" xml:space="preserve">
+    <value>Suchen...</value>
+  </data>
+  <data name="AddDeviceRequired" xml:space="preserve">
+    <value>Bitte wählen Sie ein Gerät und eine Linie aus.</value>
+  </data>
+  <data name="AddDeviceCount.Text" xml:space="preserve">
+    <value>Anzahl:</value>
+  </data>
+  <data name="AddDeviceLine.Text" xml:space="preserve">
+    <value>Linie:</value>
+  </data>
+  <data name="AddLine.Title" xml:space="preserve">
+    <value>Linien hinzufügen</value>
+  </data>
+  <data name="AddLine.PrimaryButtonText" xml:space="preserve">
+    <value>Hinzufügen</value>
+  </data>
+  <data name="AddLine.CloseButtonText" xml:space="preserve">
+    <value>Abbrechen</value>
+  </data>
+  <data name="AddLineLine.Text" xml:space="preserve">
+    <value>Linie:</value>
+  </data>
+  <data name="AddLineAdd.Text" xml:space="preserve">
+    <value>Hinzufügen</value>
+  </data>
+  <data name="AddLineNewAreaName" xml:space="preserve">
+    <value>Neuer Bereich</value>
+  </data>
+  <data name="AddLineNewLineName" xml:space="preserve">
+    <value>Neue Linie</value>
+  </data>
+  <data name="App.CloseButtonText" xml:space="preserve">
+    <value>Abbrechen</value>
+  </data>
+  <data name="App.PrimaryButtonText" xml:space="preserve">
+    <value>Hinzufügen</value>
+  </data>
+  <data name="App.Title" xml:space="preserve">
+    <value>Applikation auswählen</value>
+  </data>
+  <data name="ComsDelete.CloseButtonText" xml:space="preserve">
+    <value>Abbrechen</value>
+  </data>
+  <data name="ComsDelete.PrimaryButtonText" xml:space="preserve">
+    <value>Verbindungen löschen</value>
+  </data>
+  <data name="ComsDelete.Text" xml:space="preserve">
+    <value>Achtung!</value>
+  </data>
+  <data name="ComsDeleteBlock.Text" xml:space="preserve">
+    <value>Das Ändern des Parameters führt dazu, dass folgende Kommunikationsobjetkte getrennt werden müssen.</value>
+  </data>
+  <data name="ComsDeleteConn.Header" xml:space="preserve">
+    <value>Verbindungen</value>
+  </data>
+  <data name="ComsDeleteName.Header" xml:space="preserve">
+    <value>Name</value>
+  </data>
+  <data name="ComsDeleteNr.Header" xml:space="preserve">
+    <value>Nr.</value>
+  </data>
+  <data name="ComsDelteFunc.Header" xml:space="preserve">
+    <value>Funktion</value>
+  </data>
+  <data name="Lang.PrimaryButtonText" xml:space="preserve">
+    <value>Immer auswählen</value>
+  </data>
+  <data name="Lang.SecondaryButtonText" xml:space="preserve">
+    <value>Dieses mal</value>
+  </data>
+  <data name="Lang.Title" xml:space="preserve">
+    <value>Sprache auswählen</value>
+  </data>
+  <data name="LangBlock.Text" xml:space="preserve">
+    <value>Sprache: </value>
+  </data>
   <data name="NewName.CloseButtonText" xml:space="preserve">
     <value>Abbrechen</value>
   </data>

@@ -12,6 +12,7 @@ namespace Kaenx.Classes
     {
         int Id { get; set; }
         string Name { get; set; }
+        string LineName { get; }
         Symbol Icon { get; set; }
         TopologieType Type { get; set; }
         SolidColorBrush CurrentBrush { get; set; }

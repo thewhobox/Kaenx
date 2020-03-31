@@ -45,6 +45,10 @@ namespace Kaenx.Classes.Controls.Paras
 
             ParaValue.KeyUp += ParaValue_KeyUp;
             ParaValue.LostFocus += ParaValue_LostFocus;
+
+
+            if (param.Access == AccessType.Read)
+                ParaValue.IsEnabled = false;
         }
 
         private void ParaValue_LostFocus(object sender, RoutedEventArgs e)

@@ -117,139 +117,109 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="Catalog" xml:space="preserve">
-    <value>Katalog</value>
+  <data name="AddDevice.Title" xml:space="preserve">
+    <value>Add device</value>
   </data>
-  <data name="DragConnect" xml:space="preserve">
-    <value>Zu Linie {0}.{1} hinzufügen.</value>
+  <data name="AddDevice.PrimaryButtonText" xml:space="preserve">
+    <value>Add</value>
   </data>
-  <data name="ErrMsgCoupler" xml:space="preserve">
-    <value>In der Linie ist bereits ein Koppler vorhanden.</value>
+  <data name="AddDevice.CloseButtonText" xml:space="preserve">
+    <value>Cancel</value>
   </data>
-  <data name="ErrMsgExistArea" xml:space="preserve">
-    <value>Es existiert bereits ein Bereich mit dieser ID.</value>
+  <data name="AddDeviceSearch.PlaceholderText" xml:space="preserve">
+    <value>Search...</value>
   </data>
-  <data name="ErrMsgExistDevice" xml:space="preserve">
-    <value>Es existiert bereits ein Gerät mit dieser ID.</value>
+  <data name="AddDeviceRequired" xml:space="preserve">
+    <value>Please select a device and a line.</value>
   </data>
-  <data name="ErrMsgExistLine" xml:space="preserve">
-    <value>Es existiert bereits eine Linie mit dieser ID.</value>
+  <data name="AddDeviceCount.Text" xml:space="preserve">
+    <value>Count:</value>
   </data>
-  <data name="ErrMsgMaxDevices" xml:space="preserve">
-    <value>Sie haben das Limit von 255 Geräten Pro Linie erreicht.</value>
+  <data name="AddDeviceLine.Text" xml:space="preserve">
+    <value>Line:</value>
   </data>
-  <data name="ErrMsgNoApp" xml:space="preserve">
-    <value>Besitzt keine Applikation</value>
+  <data name="AddLine.Title" xml:space="preserve">
+    <value>Add Lines</value>
   </data>
-  <data name="ErrMsgPowerSupply" xml:space="preserve">
-    <value>In der Linie ist bereits eine Spannungsversorgung vorhanden.</value>
+  <data name="AddLine.PrimaryButtonText" xml:space="preserve">
+    <value>Add</value>
   </data>
-  <data name="ErrorMsgExistDevice" xml:space="preserve">
-    <value>Es existiert bereits ein Gerät mit dieser ID.</value>
+  <data name="AddLine.CloseButtonText" xml:space="preserve">
+    <value>Cancel</value>
   </data>
-  <data name="InfoArea.Text" xml:space="preserve">
-    <value>Bereiche: </value>
+  <data name="AddLineLine.Text" xml:space="preserve">
+    <value>Line:</value>
   </data>
-  <data name="InfoDevice.Text" xml:space="preserve">
-    <value>Geräte: </value>
+  <data name="AddLineAdd.Text" xml:space="preserve">
+    <value>Add</value>
   </data>
-  <data name="InfoLine.Text" xml:space="preserve">
-    <value>Linien: </value>
+  <data name="AddLineNewAreaName" xml:space="preserve">
+    <value>New Area</value>
   </data>
-  <data name="MenActions.Text" xml:space="preserve">
-    <value>Aktionen</value>
+  <data name="AddLineNewLineName" xml:space="preserve">
+    <value>New Line</value>
   </data>
-  <data name="MenAddLine.Text" xml:space="preserve">
-    <value>Linie hinzufügen</value>
+  <data name="App.CloseButtonText" xml:space="preserve">
+    <value>Cancel</value>
   </data>
-  <data name="MenAddLine.ToolTipService.ToolTip" xml:space="preserve">
-    <value>+SHIFT: Neue Linie anfügen</value>
+  <data name="App.PrimaryButtonText" xml:space="preserve">
+    <value>Add</value>
   </data>
-  <data name="MenAddDevice.Text" xml:space="preserve">
-    <value>Gerät hinzufügen</value>
+  <data name="App.Title" xml:space="preserve">
+    <value>Select Application</value>
   </data>
-  <data name="MenDelete.Text" xml:space="preserve">
-    <value>Löschen</value>
+  <data name="ComsDelete.CloseButtonText" xml:space="preserve">
+    <value>Cancel</value>
   </data>
-  <data name="MenInfo.Text" xml:space="preserve">
-    <value>Info auslesen</value>
+  <data name="ComsDelete.PrimaryButtonText" xml:space="preserve">
+    <value>Delete connections</value>
   </data>
-  <data name="MenOpenPara.Text" xml:space="preserve">
-    <value>Parameter</value>
+  <data name="ComsDelete.Text" xml:space="preserve">
+    <value>Attention!</value>
   </data>
-  <data name="MenOpenPara2.Text" xml:space="preserve">
-    <value>Parameter 2</value>
+  <data name="ComsDeleteBlock.Text" xml:space="preserve">
+    <value>Changing the parameters causes that the following Communication-Objects will be deleted.</value>
   </data>
-  <data name="MenProg.Text" xml:space="preserve">
-    <value>Programmieren</value>
+  <data name="ComsDeleteConn.Header" xml:space="preserve">
+    <value>Connections</value>
   </data>
-  <data name="MenProgAppK.Text" xml:space="preserve">
-    <value>Applikation (Komplett)</value>
+  <data name="ComsDeleteName.Header" xml:space="preserve">
+    <value>Name</value>
   </data>
-  <data name="MenProgAppM.Text" xml:space="preserve">
-    <value>Applikation (Minimal, Experimentell)</value>
+  <data name="ComsDeleteNr.Header" xml:space="preserve">
+    <value>Nr.</value>
   </data>
-  <data name="MenProgAppP.Text" xml:space="preserve">
-    <value>Applikation (Partiell)</value>
+  <data name="ComsDelteFunc.Header" xml:space="preserve">
+    <value>Function</value>
   </data>
-  <data name="MenProgPh.Text" xml:space="preserve">
-    <value>Ph. Adresse</value>
+  <data name="Lang.PrimaryButtonText" xml:space="preserve">
+    <value>Select always</value>
   </data>
-  <data name="MenRename.Text" xml:space="preserve">
-    <value>Umbenennen</value>
+  <data name="Lang.SecondaryButtonText" xml:space="preserve">
+    <value>Only this time</value>
   </data>
-  <data name="MenRestart.Text" xml:space="preserve">
-    <value>Neustarten</value>
+  <data name="Lang.Title" xml:space="preserve">
+    <value>Select language</value>
   </data>
-  <data name="MenToggle_Activate" xml:space="preserve">
-    <value>Aktivieren</value>
+  <data name="LangBlock.Text" xml:space="preserve">
+    <value>Language: </value>
   </data>
-  <data name="MenToggle_Deactivate" xml:space="preserve">
-    <value>Deaktivieren</value>
+  <data name="NewName.CloseButtonText" xml:space="preserve">
+    <value>Cancel</value>
   </data>
-  <data name="NewLineMain" xml:space="preserve">
-    <value>Neuer Bereich</value>
+  <data name="NewName.PrimaryButtonText" xml:space="preserve">
+    <value>Rename</value>
   </data>
-  <data name="NewLineMiddle" xml:space="preserve">
-    <value>Neue Linie</value>
+  <data name="NewName.Title" xml:space="preserve">
+    <value>New Name</value>
   </data>
-  <data name="SideProps.Text" xml:space="preserve">
-    <value>Eigenschaften</value>
+  <data name="NewNameProjectName" xml:space="preserve">
+    <value>New Project</value>
   </data>
-  <data name="SidePropsApp.Header" xml:space="preserve">
-    <value>Applikation:</value>
+  <data name="NewNameProjectPrimary" xml:space="preserve">
+    <value>Create</value>
   </data>
-  <data name="SidePropsCheckA.Content" xml:space="preserve">
-    <value>Applikation</value>
-  </data>
-  <data name="SidePropsCheckG.Content" xml:space="preserve">
-    <value>Gruppen</value>
-  </data>
-  <data name="SidePropsCheckP.Content" xml:space="preserve">
-    <value>Ph. Adresse</value>
-  </data>
-  <data name="SidePropsCurrentA.Header" xml:space="preserve">
-    <value>Verfügbarer Busstrom:</value>
-  </data>
-  <data name="SidePropsCurrentU.Header" xml:space="preserve">
-    <value>Berechneter Busstrom:</value>
-  </data>
-  <data name="SidePropsName.Header" xml:space="preserve">
-    <value>Name:</value>
-  </data>
-  <data name="SidePropsNumb.Header" xml:space="preserve">
-    <value>Nummer:</value>
-  </data>
-  <data name="ToolAddLine.Label" xml:space="preserve">
-    <value>Bereich</value>
-  </data>
-  <data name="ToolAddLine.ToolTipService.ToolTip" xml:space="preserve">
-    <value>+SHIFT: Neuen Bereich anfügen</value>
-  </data>
-  <data name="ToolAddDevice.Label" xml:space="preserve">
-    <value>Gerät</value>
-  </data>
-  <data name="ToolOpenCat.Label" xml:space="preserve">
-    <value>Katalog</value>
+  <data name="NewNameProjectTitle" xml:space="preserve">
+    <value>New Project</value>
   </data>
 </root>

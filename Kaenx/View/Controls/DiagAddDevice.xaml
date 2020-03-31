@@ -1,0 +1,62 @@
+﻿<ContentDialog
+    x:Class="Kaenx.View.Controls.DiagAddDevice"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:Kaenx.View.Controls"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:toolkit="using:Microsoft.Toolkit.Uwp.UI.Controls"
+    xmlns:controls="using:Kaenx.View.Controls"
+    mc:Ignorable="d"
+    x:Uid="/Dialogs/AddDevice"
+    Title="Gerät hinzufügen"
+    DefaultButton="Primary"
+    PrimaryButtonText="Hinzufügen"
+    CloseButtonText="Abbrechen"
+    PrimaryButtonClick="ContentDialog_PrimaryButtonClick"
+    CloseButtonClick="ContentDialog_CancelButtonClick">
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="auto" />
+            <RowDefinition />
+            <RowDefinition Height="auto" />
+            <RowDefinition Height="auto" />
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="auto" />
+            <ColumnDefinition />
+        </Grid.ColumnDefinitions>
+
+        <TextBox x:Uid="/Dialogs/AddDeviceSearch" x:Name="SearchBox" Grid.ColumnSpan="2" TextChanged="SearchTextChanged" Margin="0 5" />
+
+        <toolkit:DataGrid x:Name="CatalogDeviceList" SelectedItem="{Binding SelectedDevice, Mode=TwoWay}" Grid.ColumnSpan="2" Grid.Row="1" SelectionMode="Single" Sorting="CatalogDeviceList_Sorting" 
+                          AutoGenerateColumns="False" ItemsSource="{Binding CatalogDevices}" IsReadOnly="True" CanUserSortColumns="True"
+                          BorderBrush="LightGray" BorderThickness="1">
+            <toolkit:DataGrid.Columns>
+                <toolkit:DataGridTextColumn x:Uid="/Catalog/DListManu" Tag="Name" Width="SizeToCells" Binding="{Binding ManufacturerName}" />
+                <toolkit:DataGridTextColumn x:Uid="/Catalog/DListName" Tag="Name" Width="SizeToCells" Binding="{Binding Name}" />
+                <toolkit:DataGridTextColumn x:Uid="/Catalog/DListDesc" Tag="Desc" Width="SizeToCells" Binding="{Binding VisibleDescription}" />
+                <toolkit:DataGridTextColumn x:Uid="/Catalog/DListNumb" Tag="OrderNr" Width="SizeToCells" Binding="{Binding OrderNumber}" />
+            </toolkit:DataGrid.Columns>
+        </toolkit:DataGrid>
+
+        <TextBlock x:Uid="/Dialogs/AddDeviceCount" Grid.Row="2" Text="Anzahl:" VerticalAlignment="Center" />
+        <controls:NumberBox Grid.Column="1" Grid.Row="2" Minimum="1" Maximum="254" Value="1" ValueOk="{Binding Count, Mode=TwoWay}" Margin="10 10 0 5" />
+
+        <TextBlock x:Uid="/Dialogs/AddDeviceLine" Grid.Row="3" Text="Linie:" VerticalAlignment="Center" />
+        <ComboBox x:Name="LineList" Grid.Row="3" Grid.Column="1" HorizontalAlignment="Stretch" ItemsSource="{Binding Lines}" SelectedItem="{Binding SelectedLine, Mode=TwoWay}" Margin="10 5 0 10">
+            <ComboBox.ItemTemplate>
+                <DataTemplate>
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="{Binding LineName}" />
+                        <TextBlock Text="{Binding Name}" Margin="5 0 0 0" />
+                    </StackPanel>
+                </DataTemplate>
+            </ComboBox.ItemTemplate>
+        </ComboBox>
+
+
+        <toolkit:InAppNotification x:Name="Notify" Grid.RowSpan="4" Grid.ColumnSpan="2" VerticalAlignment="Bottom" />
+    </Grid>
+</ContentDialog>

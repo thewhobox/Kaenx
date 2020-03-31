@@ -94,6 +94,8 @@ namespace Kaenx.View
         private void CurrentView_BackRequested(object sender, BackRequestedEventArgs e)
         {
             App.Navigate(typeof(MainPage));
+
+            e.Handled = true;
         }
 
         private async void ClickImport(object sender, RoutedEventArgs e)
@@ -318,19 +320,6 @@ namespace Kaenx.View
             SearchTextChanged(null, null);
         }
 
-        private void RowDragStarting(UIElement sender, DragStartingEventArgs args)
-        {
-            ((DataGridRow)sender).CanDrag = true;
-            args.AllowedOperations = Windows.ApplicationModel.DataTransfer.DataPackageOperation.Link;
-            args.Data.RequestedOperation = Windows.ApplicationModel.DataTransfer.DataPackageOperation.Link;
-            ViewHelper.Instance.DragItem = ((DataGridRow)sender).DataContext;
-        }
-
-        private void RowLoading(object sender, DataGridRowEventArgs e)
-        {
-            e.Row.DragStarting += RowDragStarting;
-        }
-
         private void ClickDelete(object sender, RoutedEventArgs e)
         {
             DeviceViewModel device = CatalogDeviceList.SelectedItem as DeviceViewModel;
@@ -415,6 +404,22 @@ namespace Kaenx.View
                         device.SlideSettings = swipe;
                     }
                 }
+            }
+        }
+
+        private void ImportList_ItemClick(object sender, ItemClickEventArgs e)
+        {
+            if (((FrameworkElement)e.OriginalSource).DataContext is Device)
+            {
+                Device device = (Device)((FrameworkElement)e.OriginalSource).DataContext;
+                device.SlideSettings.IsSelected = !device.SlideSettings.IsSelected;
+
+                int count = Import.DeviceList.Where<Device>(d => d.SlideSettings.IsSelected == true).Count();
+
+                if (count == 0)
+                    ButtonImportSelected.IsEnabled = false;
+                else
+                    ButtonImportSelected.IsEnabled = true;
             }
         }
     }
