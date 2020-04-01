@@ -469,6 +469,7 @@ namespace Kaenx.Classes.Bus.Actions
             addedGroups.Sort();
 
             //länge der Tabelle erstmal auf 1 setzen
+            Debug.WriteLine("Tabelle auf 1");
             await dev.MemoryWriteSync(addr, new byte[] { 0x01 });
 
             await Task.Delay(100);
@@ -476,15 +477,19 @@ namespace Kaenx.Classes.Bus.Actions
             List<byte> data = new List<byte>();
             foreach (string group in addedGroups) //Liste zum Datenpaket hinzufügen
                 if (group != "") data.AddRange(MulticastAddress.FromString(group).GetBytes());
+            Debug.WriteLine("Tabelle schreiben");
             await dev.MemoryWriteSync(addr + 3, data.ToArray());
 
-            //await Task.Delay(100);
+            await Task.Delay(100);
 
+            Debug.WriteLine("Tabelle länge setzen");
             await dev.MemoryWriteSync(addr, new byte[] { BitConverter.GetBytes(addedGroups.Count)[0] });
+
 
             _ = App._dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Low, () =>
             {
                 Device.LoadedGroup = true;
+                Device.LoadedApplication = true;
                 Device.LoadedPA = true;
             });
         }

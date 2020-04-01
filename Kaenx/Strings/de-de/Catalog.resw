@@ -195,4 +195,10 @@
   <data name="WindowTitle" xml:space="preserve">
     <value>Katalog</value>
   </data>
+  <data name="SideProps.Text" xml:space="preserve">
+    <value>Geräteinfos</value>
+  </data>
+  <data name="SideFilter.Text" xml:space="preserve">
+    <value>Filter</value>
+  </data>
 </root>

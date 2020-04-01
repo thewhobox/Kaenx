@@ -117,18 +117,6 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="BusConnFalse" xml:space="preserve">
-    <value>Getrennt</value>
-  </data>
-  <data name="BusConnTrue" xml:space="preserve">
-    <value>Verbunden</value>
-  </data>
-  <data name="InfoBus.Text" xml:space="preserve">
-    <value>Bus</value>
-  </data>
-  <data name="InfoBusState.Text" xml:space="preserve">
-    <value>Getrennt</value>
-  </data>
   <data name="MenuBus.Content" xml:space="preserve">
     <value>Bus</value>
   </data>
@@ -149,5 +137,11 @@
   </data>
   <data name="TooltipInfoUpdate.ToolTipService.ToolTip" xml:space="preserve">
     <value>Updates</value>
+  </data>
+  <data name="TooltipInfoBus.ToolTipService.ToolTip" xml:space="preserve">
+    <value>Bus</value>
+  </data>
+  <data name="TooltipInfoBusCancel.Text" xml:space="preserve">
+    <value>Aktion abbrechen</value>
   </data>
 </root>

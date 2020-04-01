@@ -117,70 +117,31 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="CListConn.Header" xml:space="preserve">
-    <value>Verbindungen</value>
+  <data name="MenuBus.Content" xml:space="preserve">
+    <value>Bus</value>
   </data>
-  <data name="CListContextLink.Text" xml:space="preserve">
-    <value>Verbinden</value>
+  <data name="MenuGroups.Content" xml:space="preserve">
+    <value>Groupaddresses</value>
   </data>
-  <data name="CListContextUnlink.Text" xml:space="preserve">
-    <value>Trennen</value>
+  <data name="MenuHome.Content" xml:space="preserve">
+    <value>Startpage</value>
   </data>
-  <data name="CListContextUnlinkAll.Text" xml:space="preserve">
-    <value>Alle trennen</value>
+  <data name="MenuCatalog.Content" xml:space="preserve">
+    <value>Catalog</value>
   </data>
-  <data name="CListDPT.Header" xml:space="preserve">
-    <value>Datentyp</value>
+  <data name="MenuTopologie.Content" xml:space="preserve">
+    <value>Topologie</value>
   </data>
-  <data name="CListFunc.Header" xml:space="preserve">
-    <value>Funktion</value>
+  <data name="TooltipInfoChange.ToolTipService.ToolTip" xml:space="preserve">
+    <value>Changes</value>
   </data>
-  <data name="CListName.Header" xml:space="preserve">
-    <value>Name</value>
+  <data name="TooltipInfoUpdate.ToolTipService.ToolTip" xml:space="preserve">
+    <value>Updates</value>
   </data>
-  <data name="CListNumb.Header" xml:space="preserve">
-    <value>Nr.</value>
+  <data name="TooltipInfoBus.ToolTipService.ToolTip" xml:space="preserve">
+    <value>Bus</value>
   </data>
-  <data name="DragConnectKO" xml:space="preserve">
-    <value>KO mit "{0} {1}" verknüpfen.</value>
-  </data>
-  <data name="GListContextAdd.Text" xml:space="preserve">
-    <value>Hinzufügen</value>
-  </data>
-  <data name="GListContextDelete.Text" xml:space="preserve">
-    <value>Löschen</value>
-  </data>
-  <data name="GListContextRename.Text" xml:space="preserve">
-    <value>Umbenennen</value>
-  </data>
-  <data name="ListHeaderLink.Text" xml:space="preserve">
-    <value>Verbinde KO mit der Gruppe:</value>
-  </data>
-  <data name="LComsConn.Header" xml:space="preserve">
-    <value>Verbindungen</value>
-  </data>
-  <data name="LComsFunc.Header" xml:space="preserve">
-    <value>Funktion</value>
-  </data>
-  <data name="LComsName.Header" xml:space="preserve">
-    <value>Name</value>
-  </data>
-  <data name="LComsNumb.Header" xml:space="preserve">
-    <value>Nr.</value>
-  </data>
-  <data name="NewGroupAddr" xml:space="preserve">
-    <value>Neue Gruppenadresse</value>
-  </data>
-  <data name="NewGroupMain" xml:space="preserve">
-    <value>Neue Hauptgruppe</value>
-  </data>
-  <data name="NewGroupMiddle" xml:space="preserve">
-    <value>Neue Mittelgruppe</value>
-  </data>
-  <data name="ToolAddMain.Label" xml:space="preserve">
-    <value>Haupt</value>
-  </data>
-  <data name="ToolFilter.Label" xml:space="preserve">
-    <value>Filter</value>
+  <data name="TooltipInfoBusCancel.Text" xml:space="preserve">
+    <value>Cancel action</value>
   </data>
 </root>

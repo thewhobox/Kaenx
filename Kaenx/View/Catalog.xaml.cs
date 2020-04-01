@@ -151,8 +151,12 @@ namespace Kaenx.View
         {
             Import.Archive.Dispose();
             GridImportDevices.Visibility = Visibility.Collapsed;
-            StorageFile file = await ApplicationData.Current.TemporaryFolder.GetFileAsync("temp.knxprod");
-            await file.DeleteAsync();
+            try
+            {
+                StorageFile file = await ApplicationData.Current.TemporaryFolder.GetFileAsync("temp.knxprod");
+                await file.DeleteAsync();
+            }
+            catch { }
         }
 
         private void ListView_Tapped(object sender, TappedRoutedEventArgs e)
@@ -391,7 +395,7 @@ namespace Kaenx.View
                     DiagLanguage diaglang = new DiagLanguage(tempLangs);
                     await diaglang.ShowAsync();
                     Import.SelectedLanguage = diaglang.SelectedLanguage;
-                    await ImportHelper.TranslateXml(catXML.Root, diaglang.SelectedLanguage);
+                    ImportHelper.TranslateXml(catXML.Root, diaglang.SelectedLanguage);
                     OutSelectedLang.Text = new System.Globalization.CultureInfo(Import.SelectedLanguage).DisplayName;
                     XElement catalogXML = catXML.Descendants(XName.Get("Catalog", ns)).ElementAt<XElement>(0);
                     Import.DeviceList = CatalogHelper.GetDevicesFromCatalog(catalogXML);

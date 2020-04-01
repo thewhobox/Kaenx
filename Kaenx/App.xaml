@@ -2,7 +2,7 @@
     x:Class="Kaenx.App"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:local="using:Kaenx"
+    xmlns:local="using:Kaenx" xmlns:controls="using:Microsoft.UI.Xaml.Controls"
     RequestedTheme="Light">
     <Application.Resources>
         

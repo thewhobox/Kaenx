@@ -2,7 +2,6 @@
     x:Class="Kaenx.View.WorkdeskEasy"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:local="using:Kaenx.View.Easy"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:toolkit="using:Microsoft.Toolkit.Uwp.UI.Controls"
@@ -59,10 +58,10 @@
 
 
 
-                    <Button x:Name="InfoBus" x:Uid="/WorkDeskEasy/TooltipInfoBus" ToolTipService.ToolTip="Bus" Grid.Column="1" Style="{StaticResource InfobarButton}" Click="InfoBus_Click">
+                    <Button x:Name="InfoBus" x:Uid="/WorkDeskEasy/TooltipInfoBus" Grid.Column="1" Style="{StaticResource InfobarButton}" Click="InfoBus_Click">
                         <Button.ContextFlyout>
                             <MenuFlyout>
-                                <MenuFlyoutItem Icon="Cancel" Text="Aktion abbrechen" />
+                                <MenuFlyoutItem x:Uid="/WordDeskEasy/TooltipInfoBusCancel" Icon="Cancel" />
                             </MenuFlyout>
                         </Button.ContextFlyout>
                         <StackPanel Orientation="Horizontal">

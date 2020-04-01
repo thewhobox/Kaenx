@@ -37,7 +37,7 @@
 
                 <ListView Grid.Column="1" ItemsSource="{Binding GroupTable}" Visibility="Collapsed" />
 
-                <toolkit:DataGrid Grid.Column="2" ItemsSource="{Binding AssociationTable}" AutoGenerateColumns="False" IsReadOnly="False">
+                <toolkit:DataGrid Grid.Column="2" ItemsSource="{Binding AssociationTable}" AutoGenerateColumns="False" IsReadOnly="True">
                     <toolkit:DataGrid.Columns>
                         <toolkit:DataGridTextColumn Header="Gruppenadresse" Binding="{Binding GroupIndex}" />
                         <toolkit:DataGridTextColumn Header="KO Nr." Binding="{Binding ObjectIndex}" />

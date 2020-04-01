@@ -57,7 +57,7 @@
             <toolkit:Expander Grid.Row="1" Grid.Column="1" ExpandDirection="Left" VerticalContentAlignment="Stretch">
                 <toolkit:Expander.HeaderTemplate>
                     <DataTemplate>
-                        <TextBlock x:Uid="/Catalog/SideProps"  Text="Geräteinfos" FontSize="20" />
+                        <TextBlock x:Uid="/Catalog/SideProps" FontSize="20" />
                     </DataTemplate>
                 </toolkit:Expander.HeaderTemplate>
                 <Grid DataContext="{Binding ElementName=CatalogDeviceList, Path=SelectedItem}" Padding="0 30 0 0" Background="White" BorderBrush="LightGray" BorderThickness="1 0 0 0">
@@ -122,7 +122,7 @@
             <toolkit:Expander Grid.Column="2" Grid.Row="1" Grid.RowSpan="2" ExpandDirection="Left" VerticalContentAlignment="Stretch">
                 <toolkit:Expander.HeaderTemplate>
                     <DataTemplate>
-                        <TextBlock x:Uid="/Catalog/SideFilter"  Text="Filter" FontSize="20" />
+                        <TextBlock x:Uid="/Catalog/SideFilter" FontSize="20" />
                     </DataTemplate>
                 </toolkit:Expander.HeaderTemplate>
                 <TreeView x:Name="TreeV" ItemsSource="{Binding SectionsList}" ItemInvoked="TreeV_ItemInvoked" Background="White" CanDragItems="False" CanReorderItems="False" />

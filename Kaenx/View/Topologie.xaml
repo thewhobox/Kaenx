@@ -84,7 +84,7 @@
             </TreeView.ItemContainerStyle>
             <TreeView.ItemTemplate>
                 <DataTemplate x:DataType="local:Line">
-                    <TreeViewItem Margin="-20 0 0 0" HorizontalContentAlignment="Stretch" HorizontalAlignment="Stretch" ToolTipService.ToolTip="{Binding Name}" DoubleTapped="TreeViewItem_DoubleTapped" Background="{Binding CurrentBackBrush}" BorderThickness="0" Content="{Binding}" ItemsSource="{Binding Subs}" IsExpanded="{Binding IsExpanded, Mode=TwoWay}">
+                    <TreeViewItem Margin="-20 0 0 0" HorizontalContentAlignment="Stretch" Padding="0 0 5 0" HorizontalAlignment="Stretch" ToolTipService.ToolTip="{Binding Name}" DoubleTapped="TreeViewItem_DoubleTapped" Background="{Binding CurrentBackBrush}" BorderThickness="0" Content="{Binding}" ItemsSource="{Binding Subs}" IsExpanded="{Binding IsExpanded, Mode=TwoWay}">
                         <TreeViewItem.ContextFlyout>
                             <MenuFlyout Opening="MenuFlyout_Opening">
                                 <MenuFlyoutItem x:Name="MFI_AddLine" x:Uid="/Topologie/MenAddLine" Icon="Add" Click="ClickAdd" />

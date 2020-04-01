@@ -45,7 +45,7 @@ namespace Kaenx.Classes.Helper
 
 
 
-        public static async Task TranslateXml(XElement xml, string selectedLang)
+        public static void TranslateXml(XElement xml, string selectedLang)
         {
             if (selectedLang == null) return;
 
@@ -132,7 +132,7 @@ namespace Kaenx.Classes.Helper
                     {
                         ZipArchiveEntry entry = Imports.Archive.GetEntry(manu + "/Hardware.xml");
                         xml = XDocument.Load(entry.Open()).Root;
-                        await ImportHelper.TranslateXml(xml, Imports.SelectedLanguage);
+                        ImportHelper.TranslateXml(xml, Imports.SelectedLanguage);
                         hards.Add(manu, xml);
                     }
                     catch (Exception e)
@@ -175,7 +175,7 @@ namespace Kaenx.Classes.Helper
                         OnDeviceChanged?.Invoke(resourceLoader.GetString("StateTranslate"));
                         Stopwatch sw = new Stopwatch();
                         sw.Start();
-                        await TranslateXml(doc, Imports.SelectedLanguage);
+                        TranslateXml(doc, Imports.SelectedLanguage);
                         sw.Stop();
                         Debug.WriteLine("Translate: " + sw.Elapsed.TotalSeconds);
                         ProgressChanged?.Invoke(2);
@@ -328,19 +328,19 @@ namespace Kaenx.Classes.Helper
                         DiagLanguage diaglang = new DiagLanguage(tempLangs);
                         await diaglang.ShowAsync();
                         Import.SelectedLanguage = diaglang.SelectedLanguage;
-                        await ImportHelper.TranslateXml(catXML.Root, diaglang.SelectedLanguage);
+                        ImportHelper.TranslateXml(catXML.Root, diaglang.SelectedLanguage);
                     }
                 }
                 else
                 {
                     Import.SelectedLanguage = defaultLang;
-                    await ImportHelper.TranslateXml(catXML.Root, defaultLang);
+                    ImportHelper.TranslateXml(catXML.Root, defaultLang);
                 }
             }
             else if (tempLangs.Count == 1)
             {
                 Import.SelectedLanguage = tempLangs[0];
-                await ImportHelper.TranslateXml(catXML.Root, tempLangs[0]);
+                ImportHelper.TranslateXml(catXML.Root, tempLangs[0]);
             }
 
             XElement catalogXML = catXML.Descendants(XName.Get("Catalog", ns)).ElementAt<XElement>(0);
@@ -389,6 +389,7 @@ namespace Kaenx.Classes.Helper
                 }
 
                 XElement catalog = XDocument.Load(entry.Open()).Root;
+                TranslateXml(catalog, Imports.SelectedLanguage);
                 currentNamespace = catalog.Name.NamespaceName;
                 catalog = catalog.Element(GetXName("ManufacturerData")).Element(GetXName("Manufacturer")).Element(GetXName("Catalog"));
 
@@ -1490,15 +1491,22 @@ namespace Kaenx.Classes.Helper
                         if (plugrequ != null && (plugrequ == "1" || plugrequ == "true") && !errs.Contains("RequiresExternalSoftware")) errs.Add("RequiresExternalSoftware");
                         break;
                     case "ParameterCalculations":
-                        Log.Warning("Applikation enthält Berechnungen: " + reader.Name, reader.ReadOuterXml());
+                        Log.Warning("Applikation enthält Berechnungen: " + reader.Name);
                         if (!errs.Contains("ParameterCalculations")) errs.Add("ParameterCalculations");
                         reader.ReadOuterXml();
                         break;
-                    //case "Property":
-                    //    Log.Warning("Unbekannte Property! ", reader.ReadOuterXml());
-                    //    //if (!errs.Contains("Property")) errs.Add("Property");
-                    //    // ToDo: Check what it means
-                    //    break;
+                    case "when":
+                        if (reader.GetAttribute("test")?.StartsWith(">") == true || reader.GetAttribute("test")?.StartsWith("<") == true)
+                        {
+                            Log.Warning("Unbekanntes when " + reader.GetAttribute("test"));
+                            if (!errs.Contains("Unknown when")) errs.Add("Unknown when");
+                        }
+                        break;
+                        //case "Property":
+                        //    Log.Warning("Unbekannte Property! ", reader.ReadOuterXml());
+                        //    //if (!errs.Contains("Property")) errs.Add("Property");
+                        //    // ToDo: Check what it means
+                        //    break;
                 }
             }
 

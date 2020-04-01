@@ -198,14 +198,6 @@ namespace Kaenx.Views.Easy.Controls
                             {
                                 allVals.AddRange(xwhen.Attribute("test").Value.Split(" "));
                             }
-                            else if (xwhen.Attribute("default") != null)
-                            {
-
-                            }
-                            else
-                            {
-
-                            }
                         }
 
                         foreach (XElement xwhen in xele.Elements())
@@ -214,7 +206,7 @@ namespace Kaenx.Views.Easy.Controls
 
                             if (visibility == Visibility.Visible)
                             {
-                                if (xwhen.Attribute("default") != null && !allVals.Contains(choosePara.Value))
+                                if (xwhen.Attribute("default")?.Value == "true" && !allVals.Contains(choosePara.Value))
                                 {
                                     visible = Visibility.Visible;
                                 }
@@ -359,13 +351,6 @@ namespace Kaenx.Views.Easy.Controls
                             if(xwhen.Attribute("test")?.Value.Contains(" ") == true || int.TryParse(xwhen.Attribute("test")?.Value, out tempOut))
                             {
                                 allVals.AddRange(xwhen.Attribute("test").Value.Split(" "));
-                            } else if(xwhen.Attribute("default") != null)
-                            {
-                                //TODO muss hier was getan werden??
-                            }
-                            else
-                            {
-
                             }
                         }
 
@@ -375,9 +360,9 @@ namespace Kaenx.Views.Easy.Controls
 
                             if (visibility == Visibility.Visible)
                             {
-                                if (xwhen.Attribute("default") != null && !allVals.Contains(choosePara.Value))
+                                if (xwhen.Attribute("default")?.Value == "true" && allVals.Contains(choosePara.Value))
                                 {
-                                    visible = Visibility.Visible;
+                                    visible = Visibility.Collapsed;
                                 }
                                 else if (xwhen.Attribute("test")?.Value.Contains(" ") == true || int.TryParse(xwhen.Attribute("test")?.Value, out tempOut))
                                 {

@@ -539,6 +539,7 @@ namespace Kaenx.Classes.Helper
             try
             {
                 string ids = xele.Attribute("RefId")?.Value;
+                if (ids == null) ids = xele.Attribute("Id").Value;
                 bool finished = false;
                 while (true)
                 {

@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <root>
   <!-- 
     Microsoft ResX Schema 
@@ -117,70 +117,88 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="CListConn.Header" xml:space="preserve">
-    <value>Verbindungen</value>
+  <data name="BarDelete.Label" xml:space="preserve">
+    <value>Delete</value>
   </data>
-  <data name="CListContextLink.Text" xml:space="preserve">
-    <value>Verbinden</value>
+  <data name="BarExport.Label" xml:space="preserve">
+    <value>Export</value>
   </data>
-  <data name="CListContextUnlink.Text" xml:space="preserve">
-    <value>Trennen</value>
+  <data name="BarImport.Label" xml:space="preserve">
+    <value>Import</value>
   </data>
-  <data name="CListContextUnlinkAll.Text" xml:space="preserve">
-    <value>Alle trennen</value>
+  <data name="BarSearch.PlaceholderText" xml:space="preserve">
+    <value>Search...</value>
   </data>
-  <data name="CListDPT.Header" xml:space="preserve">
-    <value>Datentyp</value>
+  <data name="BarSort.Text" xml:space="preserve">
+    <value>Sort:</value>
   </data>
-  <data name="CListFunc.Header" xml:space="preserve">
-    <value>Funktion</value>
+  <data name="DeviceInfoAddress.Text" xml:space="preserve">
+    <value>Ph. Address:</value>
   </data>
-  <data name="CListName.Header" xml:space="preserve">
+  <data name="DeviceInfoApp.Text" xml:space="preserve">
+    <value>Latest Application:</value>
+  </data>
+  <data name="DeviceInfoCoupler.Text" xml:space="preserve">
+    <value>Coupler:</value>
+  </data>
+  <data name="DeviceInfoCurrent.Text" xml:space="preserve">
+    <value>Buscurrent:</value>
+  </data>
+  <data name="DeviceInfoHasApp.Text" xml:space="preserve">
+    <value>Application:</value>
+  </data>
+  <data name="DeviceInfoHeader2.Text" xml:space="preserve">
+    <value>Device information</value>
+  </data>
+  <data name="DeviceInfoName.Text" xml:space="preserve">
+    <value>Name:</value>
+  </data>
+  <data name="DeviceInfoOrder.Text" xml:space="preserve">
+    <value>Ordernumber:</value>
+  </data>
+  <data name="DeviceInfoSupply.Text" xml:space="preserve">
+    <value>Power Supply:</value>
+  </data>
+  <data name="DListDesc.Header" xml:space="preserve">
+    <value>Description</value>
+  </data>
+  <data name="DListName.Header" xml:space="preserve">
     <value>Name</value>
   </data>
-  <data name="CListNumb.Header" xml:space="preserve">
-    <value>Nr.</value>
+  <data name="DListNumb.Header" xml:space="preserve">
+    <value>Ordernumber</value>
   </data>
-  <data name="DragConnectKO" xml:space="preserve">
-    <value>KO mit "{0} {1}" verknüpfen.</value>
+  <data name="ImportAll.Content" xml:space="preserve">
+    <value>All</value>
   </data>
-  <data name="GListContextAdd.Text" xml:space="preserve">
-    <value>Hinzufügen</value>
+  <data name="ImportCancel.Content" xml:space="preserve">
+    <value>Cancel</value>
   </data>
-  <data name="GListContextDelete.Text" xml:space="preserve">
-    <value>Löschen</value>
+  <data name="ImportChangeLange.Text" xml:space="preserve">
+    <value>Change</value>
   </data>
-  <data name="GListContextRename.Text" xml:space="preserve">
-    <value>Umbenennen</value>
+  <data name="ImportHeader.Text" xml:space="preserve">
+    <value>Which devices should be imported?</value>
   </data>
-  <data name="ListHeaderLink.Text" xml:space="preserve">
-    <value>Verbinde KO mit der Gruppe:</value>
+  <data name="ImportSelected.Content" xml:space="preserve">
+    <value>Selected</value>
   </data>
-  <data name="LComsConn.Header" xml:space="preserve">
-    <value>Verbindungen</value>
+  <data name="ImportSelectedLang.Text" xml:space="preserve">
+    <value>Language: </value>
   </data>
-  <data name="LComsFunc.Header" xml:space="preserve">
-    <value>Funktion</value>
+  <data name="MansListAll" xml:space="preserve">
+    <value>All manufacturers</value>
   </data>
-  <data name="LComsName.Header" xml:space="preserve">
-    <value>Name</value>
+  <data name="MsgNotCopied" xml:space="preserve">
+    <value>The file could not be copied.</value>
   </data>
-  <data name="LComsNumb.Header" xml:space="preserve">
-    <value>Nr.</value>
+  <data name="WindowTitle" xml:space="preserve">
+    <value>Catalog</value>
   </data>
-  <data name="NewGroupAddr" xml:space="preserve">
-    <value>Neue Gruppenadresse</value>
+  <data name="SideProps.Text" xml:space="preserve">
+    <value>Device information</value>
   </data>
-  <data name="NewGroupMain" xml:space="preserve">
-    <value>Neue Hauptgruppe</value>
-  </data>
-  <data name="NewGroupMiddle" xml:space="preserve">
-    <value>Neue Mittelgruppe</value>
-  </data>
-  <data name="ToolAddMain.Label" xml:space="preserve">
-    <value>Haupt</value>
-  </data>
-  <data name="ToolFilter.Label" xml:space="preserve">
+  <data name="SideFilter.Text" xml:space="preserve">
     <value>Filter</value>
   </data>
 </root>

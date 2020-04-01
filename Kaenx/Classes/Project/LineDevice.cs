@@ -27,7 +27,7 @@ namespace Kaenx.Classes
         private bool _loadedApplication = false;
         private bool _loadedPA = false;
         private bool _isDeactivated = false;
-        public bool LoadedGroup { get { return _loadedGroups; } set { _loadedGroups = value; Changed("LoadedGroups"); if(!IsInit) SaveHelper.UpdateDevice(this); } }
+        public bool LoadedGroup { get { return _loadedGroups; } set { _loadedGroups = value; Changed("LoadedGroup"); if(!IsInit) SaveHelper.UpdateDevice(this); } }
         public bool LoadedApplication { get { return _loadedApplication; } set { _loadedApplication = value; Changed("LoadedApplication"); if (!IsInit) SaveHelper.UpdateDevice(this); } }
         public bool LoadedPA { get { return _loadedPA; } set { _loadedPA = value; Changed("LoadedPA"); if (!IsInit) SaveHelper.UpdateDevice(this); } }
         public bool IsDeactivated { get { return _isDeactivated; } set { _isDeactivated = value; Changed("CurrentBackBrush"); if (!IsInit) SaveHelper.UpdateDevice(this); } }

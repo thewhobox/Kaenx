@@ -62,7 +62,6 @@ namespace Kaenx.View
             this.InitializeComponent();
             ListComs.DataContext = this;
             ListGroupComs.DataContext = this;
-            OutDeviceName.DataContext = this;
             OutGroupName.DataContext = this;
             GroupsInfo.DataContext = this;
 
@@ -256,97 +255,6 @@ namespace Kaenx.View
             SelectedDevice = (LineDevice)args.InvokedItem;
         }
 
-        private void ListGroupComs_DragEnter(object sender, DragEventArgs e)
-        {
-            if(SelectedGroup.Id != -1)
-            {
-                e.DragUIOverride.Caption = string.Format(loader.GetString("DragConnectKO"), SelectedGroup.GroupName, SelectedGroup.Name);
-                e.AcceptedOperation = Windows.ApplicationModel.DataTransfer.DataPackageOperation.Link;
-            } else
-            {
-                e.DragUIOverride.Caption = SelectedGroup.Name;
-            }
-        }
-
-        private void ListComs_LoadingRow(object sender, DataGridRowEventArgs e)
-        {
-            e.Row.DragStarting += Row_DragStarting;
-        }
-
-        private void Row_DragStarting(UIElement sender, DragStartingEventArgs args)
-        {
-            _dragItem = ((DataGridRow)sender).DataContext as DeviceComObject;
-            args.AllowedOperations = Windows.ApplicationModel.DataTransfer.DataPackageOperation.Link;
-            //TODO drag von mehreren Zeilen unterstützen. Idee: Prüfen ob aktuelle Zeile in ListComs.SelectedItems vorhanden ist.
-        }
-
-        private void General_DragLeave(object sender, DragEventArgs e)
-        {
-            e.DragUIOverride.Caption = "";
-            e.AcceptedOperation = Windows.ApplicationModel.DataTransfer.DataPackageOperation.None;
-        }
-
-        private void ListGroupComs_Drop(object sender, DragEventArgs e)
-        {
-            if(!_dragItem.Groups.Contains(SelectedGroup))
-                _dragItem.Groups.Add(SelectedGroup);
-            if(!_selectedGroup.ComObjects.Contains(_dragItem))
-                _selectedGroup.ComObjects.Add(_dragItem);
-
-            SaveHelper.SaveAssociations(SelectedDevice);
-        }
-
-        private void TreeViewItem_DragEnter(object sender, DragEventArgs e)
-        {
-            TreeViewItem tvi = sender as TreeViewItem;
-            e.AcceptedOperation = Windows.ApplicationModel.DataTransfer.DataPackageOperation.Link;
-
-            if (_dragItem == null)
-                return;
-
-            if (tvi.DataContext is GroupAddress)
-            {
-                GroupAddress ga = tvi.DataContext as GroupAddress;
-                e.DragUIOverride.Caption = string.Format(loader.GetString("DragConnectKO"), ga.GroupName, ga.Name);
-            } else
-            {
-                e.DragUIOverride.Caption = "";
-            }
-            e.Handled = true;
-        }
-
-        private void TreeViewItem_Drop(object sender, DragEventArgs e)
-        {
-            TreeViewItem tvi = sender as TreeViewItem;
-            if(tvi.DataContext is GroupAddress)
-            {
-                GroupAddress ga = tvi.DataContext as GroupAddress;
-                if (!ga.ComObjects.Contains(_dragItem))
-                    ga.ComObjects.Add(_dragItem);
-                if (!_dragItem.Groups.Contains(ga))
-                    _dragItem.Groups.Add(ga);
-
-                SaveHelper.SaveAssociations(SelectedDevice);
-            }
-        }
-
-        private void ClickUnlink(object sender, RoutedEventArgs e)
-        {
-            MenuFlyoutItem tvi = sender as MenuFlyoutItem;
-            DeviceComObject com = tvi.DataContext as DeviceComObject;
-            GroupAddress ga = null;
-
-            try
-            {
-                ga = com.Groups.Single(g => g == SelectedGroup);
-            } catch { }
-
-            if (ga == null) return;
-
-            com.Groups.Remove(SelectedGroup);
-            SelectedGroup.ComObjects.Remove(com);
-            SaveHelper.SaveAssociations(SelectedDevice);
-        }
 
         private void ClickUnlink2(object sender, RoutedEventArgs e)
         {
@@ -363,12 +271,92 @@ namespace Kaenx.View
 
         private void ToggleExpert(object sender, RoutedEventArgs e)
         {
-            CheckBox box = sender as CheckBox;
+            AppBarToggleButton box = sender as AppBarToggleButton;
 
             if (box.IsChecked == true)
                 ListComs.RowDetailsVisibilityMode = DataGridRowDetailsVisibilityMode.VisibleWhenSelected;
             else
                 ListComs.RowDetailsVisibilityMode = DataGridRowDetailsVisibilityMode.Collapsed;
+        }
+
+        private void MenuFlyout_Opening(object sender, object e)
+        {
+            MenuFlyout mf = sender as MenuFlyout;
+            DeviceComObject com = (mf.Target as DataGridRow).DataContext as DeviceComObject;
+
+
+            if(SelectedGroup.Id == -1)
+            {
+                mf.Items[0].Visibility = Visibility.Collapsed;
+                mf.Items[1].Visibility = Visibility.Collapsed;
+            } else
+            {
+                bool isExisting = com.Groups.Contains(SelectedGroup);
+
+                mf.Items[0].Visibility = isExisting ? Visibility.Collapsed : Visibility.Visible;
+                mf.Items[1].Visibility = isExisting ? Visibility.Visible : Visibility.Collapsed;
+            }
+
+            mf.Items[0].IsEnabled = SelectedGroup.Id != -1;
+            mf.Items[1].IsEnabled = SelectedGroup.Id != -1;
+
+            mf.Items[2].IsEnabled = com.Groups.Count > 0;
+        }
+
+        private void ListComs_LoadingRow(object sender, DataGridRowEventArgs e)
+        {
+            e.Row.DoubleTapped += Groups_DoubleTapped;
+        }
+
+        private void Groups_DoubleTapped(object sender, DoubleTappedRoutedEventArgs e)
+        {
+            DataGridRow row = sender as DataGridRow;
+            DeviceComObject com = row.DataContext as DeviceComObject;
+            LinkComObject(com);
+        }
+
+        private void ClickLink(object sender, RoutedEventArgs e)
+        {
+            MenuFlyoutItem tvi = sender as MenuFlyoutItem;
+            DeviceComObject com = tvi.DataContext as DeviceComObject;
+            LinkComObject(com);
+        }
+
+        private void ClickLinkAll(object sender, RoutedEventArgs e)
+        {
+            MenuFlyoutItem tvi = sender as MenuFlyoutItem;
+            DeviceComObject com = tvi.DataContext as DeviceComObject;
+           
+            foreach(GroupAddress addr in com.Groups)
+                addr.ComObjects.Remove(com);
+
+            com.Groups.Clear();
+
+            SaveHelper.SaveAssociations(SelectedDevice);
+        }
+
+        private void LinkComObject(DeviceComObject com)
+        {
+            if(SelectedGroup.Id == -1)
+            {
+                ViewHelper.Instance.ShowNotification("Bitte wählen Sie erst eine Gruppe aus.", 3000, ViewHelper.MessageType.Error);
+                return;
+            }
+
+            if (com.Groups.Contains(SelectedGroup))
+            {
+                com.Groups.Remove(SelectedGroup);
+                SelectedGroup.ComObjects.Remove(com);
+            }
+            else
+            {
+                if (!com.Groups.Contains(SelectedGroup))
+                    com.Groups.Add(SelectedGroup);
+                if (!_selectedGroup.ComObjects.Contains(com))
+                    _selectedGroup.ComObjects.Add(com);
+            }
+
+            SaveHelper.SaveAssociations(SelectedDevice);
         }
     }
 }
