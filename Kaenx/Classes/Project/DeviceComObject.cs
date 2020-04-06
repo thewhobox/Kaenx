@@ -46,6 +46,7 @@ namespace Kaenx.Classes.Project
         }
 
         private string _name;
+        private string _dname;
 
         public string Id { get; set; }
         public int Datapoint { get; set; }
@@ -53,6 +54,7 @@ namespace Kaenx.Classes.Project
         public string DP_Full { get { if (Datapoint == -1) return "-"; else { if (DatapointSub == -1) return Datapoint + ".0"; else return Datapoint + "." + DatapointSub; } } }
         public int Number { get; set; }
         public string Name { get { return _name; } set { _name = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Name")); } }
+        public string DisplayName { get { return _dname; } set { _dname = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("DisplayName")); } }
         public string Function { get; set; }
         public List<ParamCondition> Conditions { get; set; }
         [JsonIgnore]
@@ -65,7 +67,8 @@ namespace Kaenx.Classes.Project
                 string groups = "";
                 foreach(GroupAddress group in Groups)
                 {
-                    groups += ", " + group.GroupName;
+                    if(group != null)
+                        groups += ", " + group.GroupName;
                 }
                 return groups == "" ? "" : groups.Substring(2);
             }

@@ -11,6 +11,7 @@ using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices.WindowsRuntime;
+using System.Threading.Tasks;
 using Windows.ApplicationModel.Resources;
 using Windows.Foundation;
 using Windows.Foundation.Collections;
@@ -253,20 +254,7 @@ namespace Kaenx.View
             }
 
             SelectedDevice = (LineDevice)args.InvokedItem;
-        }
-
-
-        private void ClickUnlink2(object sender, RoutedEventArgs e)
-        {
-            MenuFlyoutItem tvi = sender as MenuFlyoutItem;
-            DeviceComObject com = tvi.DataContext as DeviceComObject;
-
-            foreach(GroupAddress ga in com.Groups)
-            {
-                ga.ComObjects.Remove(com);
-            }
-            com.Groups.Clear();
-            SaveHelper.SaveAssociations(SelectedDevice);
+            ShowAssociatedGroups(null);
         }
 
         private void ToggleExpert(object sender, RoutedEventArgs e)
@@ -305,14 +293,31 @@ namespace Kaenx.View
 
         private void ListComs_LoadingRow(object sender, DataGridRowEventArgs e)
         {
-            e.Row.DoubleTapped += Groups_DoubleTapped;
+            e.Row.PointerPressed += Row_PointerPressed;
+            e.Row.DoubleTapped += Row_DoubleTapped;
         }
 
-        private void Groups_DoubleTapped(object sender, DoubleTappedRoutedEventArgs e)
+        private void Row_DoubleTapped(object sender, DoubleTappedRoutedEventArgs e)
         {
             DataGridRow row = sender as DataGridRow;
             DeviceComObject com = row.DataContext as DeviceComObject;
             LinkComObject(com);
+        }
+
+        private async void Row_PointerPressed(object sender, PointerRoutedEventArgs e)
+        {
+            await Task.Delay(400);
+            ShowAssociatedGroups(ListComs.SelectedItem as DeviceComObject);
+        }
+
+        private void Groups_DoubleTapped(object sender, DoubleTappedRoutedEventArgs e)
+        {
+            TreeViewItem tvi = sender as TreeViewItem;
+            if(tvi.DataContext is GroupAddress)
+            {
+                GroupAddress addr = tvi.DataContext as GroupAddress;
+                LinkGroupAddress(addr);
+            }
         }
 
         private void ClickLink(object sender, RoutedEventArgs e)
@@ -357,6 +362,69 @@ namespace Kaenx.View
             }
 
             SaveHelper.SaveAssociations(SelectedDevice);
+        }
+
+        private void LinkGroupAddress(GroupAddress addr)
+        {
+            if(BtnToggleView.IsChecked == true)
+            {
+                ViewHelper.Instance.ShowNotification("Das Verbinden ist in dieser Ansicht nicht verfügbar.", 3000, ViewHelper.MessageType.Warning);
+                return;
+            }
+
+            DeviceComObject com = ListComs.SelectedItem as DeviceComObject;
+
+            if (com.Groups.Contains(addr))
+            {
+                com.Groups.Remove(addr);
+                addr.ComObjects.Remove(com);
+            } else
+            {
+                com.Groups.Add(addr);
+                addr.ComObjects.Add(com);
+            }
+
+            SaveHelper.SaveAssociations(SelectedDevice);
+            ShowAssociatedGroups(com);
+        }
+
+        private void ShowAssociatedGroups(DeviceComObject com)
+        {
+            foreach(Group g in SaveHelper._project.Groups)
+            {
+                bool flagG = false;
+
+                foreach(GroupMiddle gm in g.Subs)
+                {
+                    bool flagGM = false;
+
+                    foreach(GroupAddress ga in gm.Subs)
+                    {
+                        if (ga.ComObjects.Contains(com))
+                        {
+                            ga.CurrentBrush = new SolidColorBrush(Windows.UI.Colors.Green) { Opacity = 0.5 };
+                            flagGM = true;
+                        }
+                        else
+                            ga.CurrentBrush = new SolidColorBrush(Windows.UI.Colors.Transparent);
+                    }
+
+                    if (flagGM)
+                    {
+                        gm.CurrentBrush = new SolidColorBrush(Windows.UI.Colors.Green) { Opacity = 0.4 };
+                        flagG = true;
+                    }
+                    else
+                        gm.CurrentBrush = new SolidColorBrush(Windows.UI.Colors.Transparent);
+                }
+
+                if (flagG)
+                {
+                    g.CurrentBrush = new SolidColorBrush(Windows.UI.Colors.Green) { Opacity = 0.3 };
+                }
+                else
+                    g.CurrentBrush = new SolidColorBrush(Windows.UI.Colors.Transparent);
+            }
         }
     }
 }

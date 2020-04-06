@@ -47,7 +47,7 @@
         </DataTemplate>
     </Page.Resources>
 
-    <Grid>
+    <Grid Margin="10">
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="auto" />
             <ColumnDefinition />
@@ -137,7 +137,7 @@
                 </ListView>
             </toolkit:TabViewItem>
 
-            <toolkit:TabViewItem Header="Schnittstelle">
+            <toolkit:TabViewItem Header="Schnittstelle" IsSelected="True">
                 <Grid Margin="10 20">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="auto" />
@@ -145,28 +145,20 @@
                         <RowDefinition Height="auto" />
                         <RowDefinition Height="auto" />
                         <RowDefinition Height="auto" />
+                        <RowDefinition Height="auto" />
                         <RowDefinition />
                     </Grid.RowDefinitions>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="auto" />
-                        <ColumnDefinition />
-                    </Grid.ColumnDefinitions>
+                    
+                    <TextBlock Text="Ausgewählte Schnittstellen:" Margin="10 20 0 0" />
 
-                    <TextBlock Grid.ColumnSpan="2" Text="Verbindung" FontSize="20" HorizontalAlignment="Center" Margin="0 0 0 20" />
+                    <TextBlock Grid.Row="2" Text="Gefundene Schnittstellen:" Margin="10 20 0 0" />
 
-                    <TextBlock Grid.Row="1" Text="IP-Adresse:" VerticalAlignment="Center" HorizontalAlignment="Right" Margin="0 0 20 0" />
-                    <TextBox x:Name="InIp" Grid.Row="1" Grid.Column="1" Margin="2" Text="192.168.0.118" />
-
-                    <TextBlock Grid.Row="2" Text="Port:" VerticalAlignment="Center" HorizontalAlignment="Right" Margin="0 0 20 0" />
-                    <TextBox x:Name="InPort" Grid.Row="2" Grid.Column="1" Margin="2" Text="3671" />
-
-                    <TextBlock Grid.Row="3" Text="Ph. Adresse:" VerticalAlignment="Center" HorizontalAlignment="Right" Margin="0 0 20 0" />
-                    <TextBox x:Name="InAddress" Grid.Row="3" Grid.Column="1" Margin="2" Text="1.1.99" />
+                    <ListView Grid.Row="3">
+                        
+                    </ListView>
 
 
-                    <Button x:Name="BtnSave" Grid.Row="4" Grid.Column="1" HorizontalAlignment="Left" Margin="2" Content="Speichern" />
-                    <Button x:Name="BtnTest" Grid.Row="4" HorizontalAlignment="Right" Margin="2" Content="Testen" />
-
+                    <TextBlock Grid.Row="4" Text="Gespeicherte Schnittstellen:" Margin="10 20 0 0" />
 
                 </Grid>
             </toolkit:TabViewItem>

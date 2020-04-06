@@ -136,7 +136,7 @@
     <value>Anzahl:</value>
   </data>
   <data name="AddDeviceLine.Text" xml:space="preserve">
-    <value>Linie:</value>
+    <value>Übergeordnete Linie:</value>
   </data>
   <data name="AddLine.Title" xml:space="preserve">
     <value>Linien hinzufügen</value>
@@ -148,7 +148,7 @@
     <value>Abbrechen</value>
   </data>
   <data name="AddLineLine.Text" xml:space="preserve">
-    <value>Linie:</value>
+    <value>Übergeordnete Linie:</value>
   </data>
   <data name="AddLineAdd.Text" xml:space="preserve">
     <value>Hinzufügen</value>

@@ -40,6 +40,7 @@ namespace Kaenx.View
             this.InitializeComponent();
             GridReads.DataContext = ReadList;
             GridBusMonitor.DataContext = TelegramList;
+
         }
 
         private void ReadInfo(object sender, RoutedEventArgs e)

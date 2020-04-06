@@ -26,78 +26,104 @@
         <Style x:Key="NotifyStyleInfo" TargetType="toolkit:InAppNotification">
             <Setter Property="BorderBrush" Value="DarkCyan" />
         </Style>
+        <SolidColorBrush  x:Key="NavigationViewTopPaneBackground" Color="{Binding Source={ThemeResource BrushAccentColor1}, Path=Color}" />
     </Page.Resources>
 
     <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="auto" />
+            <RowDefinition />
+            <RowDefinition Height="auto" />
+        </Grid.RowDefinitions>
+        
         <NavigationView x:Name="NavView" PaneDisplayMode="Top" SelectionChanged="ItemChanged" IsBackButtonVisible="Collapsed">
-
+            <NavigationView.Resources>
+                <Style TargetType="SymbolIcon">
+                    <Setter Property="Foreground" Value="{ThemeResource BrushAccentColorLight1}" />
+                </Style>
+                <Style TargetType="TextBlock">
+                    <Setter Property="Foreground" Value="{ThemeResource BrushAccentColorLight1}" />
+                </Style>
+            </NavigationView.Resources>
             <NavigationView.MenuItems>
-                <NavigationViewItem x:Uid="/WorkDeskEasy/MenuHome" Tag="home" Icon="Home" IsSelected="True"/>
-                <NavigationViewItemSeparator/>
-                <NavigationViewItem x:Uid="/WorkDeskEasy/MenuCatalog"  Tag="catalog" Icon="Shop" />
-                <NavigationViewItem x:Uid="/WorkDeskEasy/MenuTopologie"  Tag="topologie" Icon="AllApps" />
-                <NavigationViewItem x:Uid="/WorkDeskEasy/MenuGroups" Tag="groups" Icon="SelectAll" />
-                <NavigationViewItem x:Uid="/WorkDeskEasy/MenuBus" Tag="bus" Icon="View" />
+                <NavigationViewItem Tag="home" Icon="Home" IsSelected="True">
+                    <TextBlock  x:Uid="/WorkDeskEasy/MenuHome" Text="Test" />
+                </NavigationViewItem>
+                <NavigationViewItemSeparator Foreground="{ThemeResource BrushAccentColorLight1}"/>
+                <NavigationViewItem Tag="catalog" Icon="Shop">
+                    <TextBlock x:Uid="/WorkDeskEasy/MenuCatalog" />
+                </NavigationViewItem>
+                <NavigationViewItem Tag="topologie" Icon="AllApps">
+                    <TextBlock x:Uid="/WorkDeskEasy/MenuTopologie" />
+                </NavigationViewItem>
+                <NavigationViewItem Tag="groups" Icon="SelectAll">
+                    <TextBlock x:Uid="/WorkDeskEasy/MenuGroups" />
+                </NavigationViewItem>
+                <NavigationViewItem Tag="bus" Icon="View">
+                    <TextBlock x:Uid="/WorkDeskEasy/MenuBus" />
+                </NavigationViewItem>
             </NavigationView.MenuItems>
-
-            <Grid>
-                <Grid.RowDefinitions>
-                    <RowDefinition />
-                    <RowDefinition Height="auto" />
-                </Grid.RowDefinitions>
-
-                <Frame x:Name="ContentFrame" Padding="5" IsTabStop="True"  />
-
-                <Grid Grid.Row="1" Background="Green">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition />
-                        <ColumnDefinition Width="Auto" />
-                        <ColumnDefinition Width="Auto" />
-                        <ColumnDefinition Width="Auto" />
-                    </Grid.ColumnDefinitions>
-
-
-
-                    <Button x:Name="InfoBus" x:Uid="/WorkDeskEasy/TooltipInfoBus" Grid.Column="1" Style="{StaticResource InfobarButton}" Click="InfoBus_Click">
-                        <Button.ContextFlyout>
-                            <MenuFlyout>
-                                <MenuFlyoutItem x:Uid="/WordDeskEasy/TooltipInfoBusCancel" Icon="Cancel" />
-                            </MenuFlyout>
-                        </Button.ContextFlyout>
-                        <StackPanel Orientation="Horizontal">
-                            <TextBlock Margin="0 0 5 0">
-                                <Run Text="{Binding CurrentAction.Device.LineName}" />
-                                <Run Text="{Binding CurrentAction.TodoText}" />
-                            </TextBlock>
-                            <Viewbox Height="12" Margin="0 0 5 0">
-                                <SymbolIcon Symbol="Bullets" />
-                            </Viewbox>
-                            <TextBlock Text="{Binding busActions.Count}" />
-                        </StackPanel>
-                    </Button>
-
-
-                    <Button x:Uid="/WorkDeskEasy/TooltipInfoUpdate" x:Name="InfoUpdate" Grid.Column="2" Style="{StaticResource InfobarButton}" >
-                        <StackPanel Orientation="Horizontal" Margin="3 0">
-                            <Viewbox Height="12" Margin="0 0 5 0">
-                                <SymbolIcon Symbol="Upload" />
-                            </Viewbox>
-                            <TextBlock Text="{Binding Count}" />
-                        </StackPanel>
-                    </Button>
-
-                    <Button x:Uid="/WorkDeskEasy/TooltipInfoChange" x:Name="InfoChange" Grid.Column="3" Style="{StaticResource InfobarButton}">
-                        <StackPanel Orientation="Horizontal" Margin="3 0">
-                            <Viewbox Height="12" Margin="0 0 5 0">
-                                <SymbolIcon Symbol="Edit" />
-                            </Viewbox>
-                            <TextBlock Text="{Binding Count}" />
-                        </StackPanel>
-                    </Button>
-                </Grid>
-            </Grid>
         </NavigationView>
 
-        <toolkit:InAppNotification x:Name="Notify" />
+
+        <Frame Grid.Row="1" x:Name="ContentFrame" IsTabStop="True"  />
+
+        <Grid Grid.Row="2" Background="Green">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition />
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+
+            <TextBlock Text="Schnitstelle:" Foreground="White" Margin="10 0" VerticalAlignment="Center"/>
+
+            <ComboBox Grid.Column="1" Height="29" Width="200">
+                <ComboBoxItem Content="Schnittstelle 1" />
+                <ComboBoxItem Content="Schnittstelle 2" />
+            </ComboBox>
+
+
+            <Button x:Name="InfoBus" x:Uid="/WorkDeskEasy/TooltipInfoBus" Grid.Column="3" Style="{StaticResource InfobarButton}" Click="InfoBus_Click">
+                <Button.ContextFlyout>
+                    <MenuFlyout>
+                        <MenuFlyoutItem x:Uid="/WordDeskEasy/TooltipInfoBusCancel" Icon="Cancel" />
+                    </MenuFlyout>
+                </Button.ContextFlyout>
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock Margin="0 0 5 0">
+                                <Run Text="{Binding CurrentAction.Device.LineName}" />
+                                <Run Text="{Binding CurrentAction.TodoText}" />
+                    </TextBlock>
+                    <Viewbox Height="12" Margin="0 0 5 0">
+                        <SymbolIcon Symbol="Bullets" />
+                    </Viewbox>
+                    <TextBlock Text="{Binding busActions.Count}" />
+                </StackPanel>
+            </Button>
+
+
+            <Button x:Uid="/WorkDeskEasy/TooltipInfoUpdate" x:Name="InfoUpdate" Grid.Column="4" Style="{StaticResource InfobarButton}" >
+                <StackPanel Orientation="Horizontal" Margin="3 0">
+                    <Viewbox Height="12" Margin="0 0 5 0">
+                        <SymbolIcon Symbol="Upload" />
+                    </Viewbox>
+                    <TextBlock Text="{Binding Count}" />
+                </StackPanel>
+            </Button>
+
+            <Button x:Uid="/WorkDeskEasy/TooltipInfoChange" x:Name="InfoChange" Grid.Column="5" Style="{StaticResource InfobarButton}">
+                <StackPanel Orientation="Horizontal" Margin="3 0">
+                    <Viewbox Height="12" Margin="0 0 5 0">
+                        <SymbolIcon Symbol="Edit" />
+                    </Viewbox>
+                    <TextBlock Text="{Binding Count}" />
+                </StackPanel>
+            </Button>
+        </Grid>
+
+        <toolkit:InAppNotification Grid.RowSpan="3" x:Name="Notify" />
     </Grid>
 </Page>

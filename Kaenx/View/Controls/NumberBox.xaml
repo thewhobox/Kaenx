@@ -39,11 +39,11 @@
             </VisualStateGroup>
         </VisualStateManager.VisualStateGroups>
 
-        <TextBox x:Name="InputBox" VerticalAlignment="Center" Background="{ThemeResource TextBoxBackgroundThemeBrush}" Text="{Binding Value, Converter={StaticResource NumberConverter}}" TextChanged="InputBox_TextChanged" AcceptsReturn="False" VerticalContentAlignment="Center" BorderThickness="2,2,0.5,2" PreviewKeyDown="InputBox_PreviewKeyDown" BorderBrush="{ThemeResource TextControlBorderBrush}" />
+        <TextBox x:Name="InputBox" CornerRadius="2 0 0 2" Height="34" VerticalAlignment="Center" Background="{ThemeResource TextBoxBackgroundThemeBrush}" Text="{Binding Value, Converter={StaticResource NumberConverter}}" TextChanged="InputBox_TextChanged" AcceptsReturn="False" VerticalContentAlignment="Center" BorderThickness="2,2,0.5,2" PreviewKeyDown="InputBox_PreviewKeyDown" BorderBrush="{ThemeResource TextControlBorderBrush}" />
         <TextBlock x:Name="Message" Grid.Row="1" FontSize="12" TextWrapping="WrapWholeWords" Foreground="Red" Margin="5 0 0 0" Grid.ColumnSpan="3" VerticalAlignment="Center" Text="{Binding ErrMessage}" Visibility="Collapsed" />
 
-        <Button x:Name="BtnUp" Grid.Column="1" Height="32" MinHeight="32" Background="{ThemeResource TextBoxBackgroundThemeBrush}" Click="GoUp" Content="&#xE70E;" Width="40" BorderThickness="1,2,0.5,2" BorderBrush="{ThemeResource TextControlBorderBrush}" VerticalAlignment="Stretch" FontFamily="{ThemeResource SymbolThemeFontFamily}" />
-        <Button x:Name="BtnDown" Grid.Column="2" Height="32" MinHeight="32" Background="{ThemeResource TextBoxBackgroundThemeBrush}" Click="GoDown" Content="&#xE70D;" Width="40" BorderThickness="0.5,2,2,2" BorderBrush="{ThemeResource TextControlBorderBrush}" VerticalAlignment="Stretch" FontFamily="{ThemeResource SymbolThemeFontFamily}" />
+        <Button x:Name="BtnUp" CornerRadius="0" Grid.Column="1" Height="34" MinHeight="34" Background="{ThemeResource TextBoxBackgroundThemeBrush}" Click="GoUp" Content="&#xE70E;" Width="40" BorderThickness="1,2,0.5,2" BorderBrush="{ThemeResource TextControlBorderBrush}" VerticalAlignment="Stretch" FontFamily="{ThemeResource SymbolThemeFontFamily}" />
+        <Button x:Name="BtnDown" CornerRadius="0 2 2 0" Grid.Column="2" Height="34" MinHeight="34" Background="{ThemeResource TextBoxBackgroundThemeBrush}" Click="GoDown" Content="&#xE70D;" Width="40" BorderThickness="0.5,2,2,2" BorderBrush="{ThemeResource TextControlBorderBrush}" VerticalAlignment="Stretch" FontFamily="{ThemeResource SymbolThemeFontFamily}" />
     </Grid>
 
 

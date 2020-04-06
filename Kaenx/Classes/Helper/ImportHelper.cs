@@ -1495,13 +1495,6 @@ namespace Kaenx.Classes.Helper
                         if (!errs.Contains("ParameterCalculations")) errs.Add("ParameterCalculations");
                         reader.ReadOuterXml();
                         break;
-                    case "when":
-                        if (reader.GetAttribute("test")?.StartsWith(">") == true || reader.GetAttribute("test")?.StartsWith("<") == true)
-                        {
-                            Log.Warning("Unbekanntes when " + reader.GetAttribute("test"));
-                            if (!errs.Contains("Unknown when")) errs.Add("Unknown when");
-                        }
-                        break;
                         //case "Property":
                         //    Log.Warning("Unbekannte Property! ", reader.ReadOuterXml());
                         //    //if (!errs.Contains("Property")) errs.Add("Property");

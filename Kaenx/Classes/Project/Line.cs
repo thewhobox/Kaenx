@@ -21,6 +21,8 @@ namespace Kaenx.Classes
 
         [XmlIgnore]
         public SolidColorBrush CurrentBrush { get; set; } = new SolidColorBrush(Windows.UI.Colors.Black);
+        [XmlIgnore]
+        public SolidColorBrush CurrentBackBrush { get; set; } = new SolidColorBrush(Windows.UI.Colors.Transparent);
         public int Id
         {
             get { return _id; }

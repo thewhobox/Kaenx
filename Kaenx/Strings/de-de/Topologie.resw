@@ -241,7 +241,7 @@
     <value>Nummer:</value>
   </data>
   <data name="ToolAddLine.Label" xml:space="preserve">
-    <value>Bereich</value>
+    <value>Linie</value>
   </data>
   <data name="ToolAddLine.ToolTipService.ToolTip" xml:space="preserve">
     <value>+SHIFT: Neuen Bereich anfügen</value>

@@ -25,7 +25,9 @@ namespace Kaenx.Classes
         {
             get { return _currentBrush; }
             set { _currentBrush = value; Changed("CurrentBrush"); }
-    }
+        }
+        [XmlIgnore]
+        public SolidColorBrush CurrentBackBrush { get; set; } = new SolidColorBrush(Windows.UI.Colors.Transparent);
         public int Id
         {
             get { return _id; }

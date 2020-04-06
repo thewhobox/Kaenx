@@ -180,7 +180,10 @@
   <data name="ToolAddMain.Label" xml:space="preserve">
     <value>Haupt</value>
   </data>
-  <data name="ToolFilter.Label" xml:space="preserve">
-    <value>Filter</value>
+  <data name="ToolView.Label" xml:space="preserve">
+    <value>Ansicht</value>
+  </data>
+  <data name="ToolExpert.Label" xml:space="preserve">
+    <value>Expert</value>
   </data>
 </root>

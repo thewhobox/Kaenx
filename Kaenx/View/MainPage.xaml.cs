@@ -55,6 +55,7 @@ namespace Kaenx.View
 
         private bool _projectSelected = false;
         private LocalContext _contextL = new LocalContext();
+        private FlyoutBase _currentFlyout = null;
 
         public event PropertyChangedEventHandler PropertyChanged;
 
@@ -134,19 +135,21 @@ namespace Kaenx.View
             ConnectionsList.Clear();
             foreach (LocalConnectionProject conn in _contextL.ConnsProject)
                 ConnectionsList.Add(conn);
+
             InConn.SelectedIndex = 0;
             DiagNew.Visibility = Visibility;
-            InName.Focus(FocusState.Pointer);
             InName.SelectAll();
+            InName.Focus(FocusState.Programmatic);
         }
 
 
         private async void OpenProject(object sender, RoutedEventArgs e)
         {
+            _currentFlyout.Hide();
             LoadScreen.IsLoading = true;
             await Task.Delay(200);
 
-            ProjectViewHelper helper = (ProjectViewHelper)TestGrid.SelectedItem;
+            ProjectViewHelper helper = (ProjectViewHelper)ProjectsGrid.SelectedItem;
 
             Project project = SaveHelper.LoadProject(helper);
             if(project == null)
@@ -189,8 +192,10 @@ namespace Kaenx.View
 
         private void DeleteProject(object sender, RoutedEventArgs e)
         {
-            ProjectViewHelper proj = (ProjectViewHelper)TestGrid.SelectedItem;
+            ProjectViewHelper proj = (ProjectViewHelper)ProjectsGrid.SelectedItem;
             ProjectList.Remove(proj);
+            _contextL.Projects.Remove(proj.Local);
+            _contextL.SaveChanges();
 
             SaveHelper.DeleteProject(proj);
             Notify.Show(loader.GetString("MsgProjectDeleted"), 3000);
@@ -198,34 +203,10 @@ namespace Kaenx.View
             Serilog.Log.Debug("Projekt wurde gelöscht: " + proj.Id + " - " + proj.Name);
         }
 
-        //private async void ClickOpen(object sender, RoutedEventArgs e)
-        //{
-        //    if (LBProjects.SelectedIndex < 0)
-        //    {
-        //        Notify.Show(loader.GetString("MsgSelectProject"), 3000);
-        //        return;
-        //    }
-
-        //    LoadScreen.IsLoading = true;
-
-        //    await Task.Delay(200);
-
-        //    Project project = SaveHelper.LoadProject(((ProjectModel)LBProjects.SelectedItem).Id);
-        //    ChangeHandler.Instance = new ChangeHandler(project.Id);
-
-        //    Serilog.Log.Debug("Neues Projekt erstellt: " + project.Id + " - " + project.Name);
-
-        //    App.AppFrame.Navigate(typeof(WorkdeskEasy), project);
-        //}
-
-        private void wizardP_Click(object sender, RoutedEventArgs e)
-        {
-            Crashes.GenerateTestCrash();
-        }
-
         private void GridItemTapped(object sender, TappedRoutedEventArgs e)
         {
-            FlyoutBase.ShowAttachedFlyout((FrameworkElement)sender);
+            _currentFlyout = FlyoutBase.GetAttachedFlyout((FrameworkElement)sender);
+            _currentFlyout.ShowAt((FrameworkElement)sender);
         }
 
         private async void ClickChangePicFile(object sender, RoutedEventArgs e)
@@ -285,24 +266,20 @@ namespace Kaenx.View
                     fileStream.Seek(0);
                     var decoder = await BitmapDecoder.CreateAsync(fileStream);
 
-                    // Scale image to appropriate size 
                     var transform = new BitmapTransform()
                     {
                         ScaledWidth = Convert.ToUInt32(newImage.PixelWidth),
                         ScaledHeight = Convert.ToUInt32(newImage.PixelHeight)
                     };
                     var pixelData = await decoder.GetPixelDataAsync(
-                        BitmapPixelFormat.Bgra8, // WriteableBitmap uses BGRA format 
+                        BitmapPixelFormat.Bgra8,
                         BitmapAlphaMode.Straight,
                         transform,
-                        ExifOrientationMode.IgnoreExifOrientation, // This sample ignores Exif orientation 
+                        ExifOrientationMode.IgnoreExifOrientation,
                         ColorManagementMode.DoNotColorManage
                     );
-
-                    // An array containing the decoded image data, which could be modified before being displayed 
                     var sourcePixels = pixelData.DetachPixelData();
 
-                    // Open a stream to copy the image contents to the WriteableBitmap's pixel buffer 
                     using (var stream = newImage.PixelBuffer.AsStream())
                     {
                         await stream.WriteAsync(sourcePixels, 0, sourcePixels.Length);
@@ -310,23 +287,6 @@ namespace Kaenx.View
                 }
 
                 image = newImage;
-
-
-                //StorageFolder pictureFolder = ApplicationData.Current.LocalFolder;
-                //var file2 = await pictureFolder.CreateFileAsync("test.jpg", CreationCollisionOption.ReplaceExisting);
-
-                //using (var stream = await file2.OpenStreamForWriteAsync())
-                //{
-                //    BitmapEncoder encoder = await BitmapEncoder.CreateAsync(BitmapEncoder.JpegEncoderId, stream.AsRandomAccessStream());
-                //    var pixelStream = image.PixelBuffer.AsStream();
-                //    byte[] pixels2 = new byte[image.PixelBuffer.Length];
-
-                //    await pixelStream.ReadAsync(pixels2, 0, pixels2.Length);
-
-                //    encoder.SetPixelData(BitmapPixelFormat.Bgra8, BitmapAlphaMode.Ignore, (uint)image.PixelWidth, (uint)image.PixelHeight, 96, 96, pixels2);
-
-                //    await encoder.FlushAsync();
-                //}
 
                 await file.DeleteAsync();
             }
@@ -371,11 +331,6 @@ namespace Kaenx.View
             Serilog.Log.Debug("Projekt wird geöffnet: " + proj.Id + " - " + proj.Name);
 
             App.AppFrame.Navigate(typeof(WorkdeskEasy), proj);
-        }
-
-        private void OpenStore(object sender, RoutedEventArgs e)
-        {
-            App.AppFrame.Navigate(typeof(Store), "main");
         }
     }
 }

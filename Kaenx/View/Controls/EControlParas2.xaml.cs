@@ -52,6 +52,7 @@ namespace Kaenx.Views.Easy.Controls
 
         private List<BlockVisHelper> helperBlock = new List<BlockVisHelper>();
         private List<Binding> bindings = new List<Binding>();
+        private List<Binding> bindingBlocks = new List<Binding>();
         private Dictionary<string, IParam> Params = new Dictionary<string, IParam>();
         private List<ParamVisHelper> conditions;
         private Dictionary<string, AppParameter> AppParas = new Dictionary<string, AppParameter>();
@@ -109,10 +110,9 @@ namespace Kaenx.Views.Easy.Controls
             AppAdditional adds = _context.AppAdditionals.Single(a => a.Id == device.ApplicationId);
             dynamic = XDocument.Parse(Encoding.UTF8.GetString(adds.Dynamic));
 
-
-            PrepareComObject(dynamic.Root);
-
+            comObjects = SaveHelper.ByteArrayToObject<List<DeviceComObject>>(adds.ComsAll);
             conditions = SaveHelper.ByteArrayToObject<List<ParamVisHelper>>(adds.ParameterAll);
+
             try
             {
                 await ParseRoot(dynamic.Root, Visibility.Visible);
@@ -132,7 +132,11 @@ namespace Kaenx.Views.Easy.Controls
                 NavChannel.Visibility = Visibility.Visible;
                 Grid.SetColumn(NavBlock, 1);
                 Grid.SetColumnSpan(NavBlock, 1);
+                NavChannel.CornerRadius = new CornerRadius(2, 0, 0, 0);
+                NavBlock.CornerRadius = new CornerRadius(0, 2, 0, 0);
             }
+
+            PrepareBindings();
 
             LoadRing.Visibility = Visibility.Collapsed;
 
@@ -369,6 +373,34 @@ namespace Kaenx.Views.Easy.Controls
                                     if (!xwhen.Attribute("test").Value.Split(" ").Contains(choosePara.Value))
                                         visible = Visibility.Collapsed;
                                 }
+                                else if (xwhen.Attribute("test")?.Value.StartsWith("<") == true)
+                                {
+                                    int val = int.Parse(choosePara.Value);
+                                    if (xwhen.Attribute("test").Value.Contains("="))
+                                    {
+                                        if (val <= int.Parse(xwhen.Attribute("test").Value.Substring(2)) == false)
+                                            visible = Visibility.Collapsed;
+                                    }
+                                    else
+                                    {
+                                        if (val < int.Parse(xwhen.Attribute("test").Value.Substring(1)) == false)
+                                            visible = Visibility.Collapsed;
+                                    }
+                                }
+                                else if (xwhen.Attribute("test")?.Value.StartsWith(">") == true)
+                                {
+                                    int val = int.Parse(choosePara.Value);
+                                    if (xwhen.Attribute("test").Value.Contains("="))
+                                    {
+                                        if (val >= int.Parse(xwhen.Attribute("test").Value.Substring(2)) == false)
+                                            visible = Visibility.Collapsed;
+                                    }
+                                    else
+                                    {
+                                        if (val > int.Parse(xwhen.Attribute("test").Value.Substring(1)) == false)
+                                            visible = Visibility.Collapsed;
+                                    }
+                                }
                                 else
                                 {
 
@@ -430,6 +462,20 @@ namespace Kaenx.Views.Easy.Controls
                         {
                             cond.Values = string.Join(",", xtemp.Attribute("test").Value.Split(" "));
                         }
+                        else if (xtemp.Attribute("test")?.Value.StartsWith("<") == true)
+                        {
+                            if (xtemp.Attribute("test").Value.Contains("="))
+                                cond.Values = xtemp.Attribute("test").Value.Substring(2);
+                            else
+                                cond.Values = xtemp.Attribute("test").Value.Substring(1);
+                        }
+                        else if (xtemp.Attribute("test")?.Value.StartsWith(">") == true)
+                        {
+                            if (xtemp.Attribute("test").Value.Contains("="))
+                                cond.Values = xtemp.Attribute("test").Value.Substring(2);
+                            else
+                                cond.Values = xtemp.Attribute("test").Value.Substring(1);
+                        }
                         else
                         {
                             Log.Warning("Unbekanntes when! " + xtemp.ToString());
@@ -453,6 +499,61 @@ namespace Kaenx.Views.Easy.Controls
             return Convert.ToBase64String(Encoding.UTF8.GetBytes(ids));
         }
 
+        private bool CheckConditions(List<ParamCondition> conds)
+        {
+            bool flag = true;
+
+            foreach (ParamCondition cond in conds)
+            {
+                if (flag == false) break;
+                AppParameter paraCond = AppParas[cond.SourceId];
+
+                switch (cond.Operation)
+                {
+                    case ConditionOperation.IsInValue:
+                        if (!cond.Values.Split(",").Contains(paraCond.Value))
+                            flag = false;
+                        break;
+
+                    case ConditionOperation.Default:
+                        //if(!checkDefault)
+                        //{
+                            
+                        //}
+                        break;
+
+                    case ConditionOperation.LowerThan:
+                        int valLT = int.Parse(paraCond.Value);
+                        int valLTo = int.Parse(cond.Values);
+                        if ((valLT < valLTo) == false)
+                            flag = false;
+                        break;
+
+                    case ConditionOperation.LowerEqualThan:
+                        int valLET = int.Parse(paraCond.Value);
+                        int valLETo = int.Parse(cond.Values);
+                        if ((valLET <= valLETo) == false)
+                            flag = false;
+                        break;
+
+                    case ConditionOperation.GreatherThan:
+                        int valGT = int.Parse(paraCond.Value);
+                        int valGTo = int.Parse(cond.Values);
+                        if ((valGT > valGTo) == false)
+                            flag = false;
+                        break;
+
+                    case ConditionOperation.GreatherEqualThan:
+                        int valGET = int.Parse(paraCond.Value);
+                        int valGETo = int.Parse(cond.Values);
+                        if ((valGET >= valGETo) == false)
+                            flag = false;
+                        break;
+                }
+            }
+
+            return flag;
+        }
 
         private async void ParamChanged(IParam param)
         {
@@ -478,32 +579,10 @@ namespace Kaenx.Views.Easy.Controls
 
             foreach(ParamVisHelper helper in helpers)
             {
-                bool flag = true;
+                if (!Params.ContainsKey(helper.Hash)) continue;
 
-                foreach(ParamCondition cond in helper.Conditions)
-                {
-                    if (flag == false) break;
-                    AppParameter paraCond = AppParas[cond.SourceId];
-                    switch (cond.Operation)
-                    {
-                        case ConditionOperation.IsInValue:
-                            if (!cond.Values.Split(",").Contains(paraCond.Value))
-                                flag = false;
-                            break;
-
-                        case ConditionOperation.Default:
-                            if (cond.Values.Split(",").Contains(paraCond.Value))
-                                flag = false;
-                            break;
-                        default:
-                            break;
-                    }
-                }
-
-                if(Params.ContainsKey(helper.Hash))
-                {
-                    Params[helper.Hash].SetVisibility(flag ? Visibility.Visible : Visibility.Collapsed);
-                }
+                bool flag = CheckConditions(helper.Conditions);
+                Params[helper.Hash].SetVisibility(flag ? Visibility.Visible : Visibility.Collapsed);
             }
 
 
@@ -511,33 +590,30 @@ namespace Kaenx.Views.Easy.Controls
             IEnumerable<BlockVisHelper> helpersB = helperBlock.Where(h => h.Conditions.Any(c => c.SourceId == source));
             foreach(BlockVisHelper helper in helpersB)
             {
-                bool flag = true;
-
-                foreach (ParamCondition cond in helper.Conditions)
-                {
-                    if (flag == false) break;
-                    AppParameter paraCond = AppParas[cond.SourceId];
-                    switch (cond.Operation)
-                    {
-                        case ConditionOperation.IsInValue:
-                            if (!cond.Values.Split(",").Contains(paraCond.Value))
-                                flag = false;
-                            break;
-
-                        case ConditionOperation.Default:
-                            if (cond.Values.Split(",").Contains(paraCond.Value))
-                                flag = false;
-                            break;
-                        default:
-                            break;
-                    }
-                }
-
+                bool flag = CheckConditions(helper.Conditions);
                 helper.Block.Visible = flag ? Visibility.Visible : Visibility.Collapsed;
             }
 
             if (helpersB.Count() > 0)
                 filterBlocks();
+
+
+            foreach(Binding bind in bindings.Where(b => b.Id == source))
+            {
+                string newText = bind.TextPlaceholder.Replace("{{dyn}}", para.Value);
+
+                if (bind.Item is ListChannelModel)
+                {
+                    (bind.Item as ListChannelModel).Name = newText;
+                } else if(bind.Item is ListBlockModel)
+                {
+                    (bind.Item as ListBlockModel).Name = newText;
+                } else if(bind.Item is DeviceComObject)
+                {
+                    (bind.Item as DeviceComObject).DisplayName = newText;
+                }
+            }
+
 
             ChangeParamModel change = new ChangeParamModel
             {
@@ -585,13 +661,7 @@ namespace Kaenx.Views.Easy.Controls
                     continue;
                 }
 
-                bool flag = true;
-                foreach (ParamCondition cond in obj.Conditions)
-                {
-                    string val = cond.SourceId == paraId ? paraValue : AppParas[cond.SourceId].Value;
-                    if (!cond.Values.Contains(val))
-                        flag = false;
-                }
+                bool flag = CheckConditions(obj.Conditions);
                 if (flag)
                     newObjs.Add(obj);
             }
@@ -616,26 +686,7 @@ namespace Kaenx.Views.Easy.Controls
                     continue;
                 }
 
-                bool flag = true;
-                foreach (ParamCondition cond in obj.Conditions)
-                {
-                    string val = AppParas[cond.SourceId].Value;
-
-                    switch (cond.Operation)
-                    {
-                        case ConditionOperation.IsInValue:
-                            if (!cond.Values.Split(",").Contains(val))
-                                flag = false;
-                            break;
-                        case ConditionOperation.Default:
-                            if (cond.Values.Split(",").Contains(val))
-                                flag = false;
-                            break;
-                        default:
-                            Log.Warning("GetDefaultParams nicht unterstützte Operation! " + cond.Operation.ToString());
-                            break;
-                    }
-                }
+                bool flag = CheckConditions(obj.Conditions);
 
                 if (flag)
                     newObjs.Add(obj);
@@ -678,28 +729,20 @@ namespace Kaenx.Views.Easy.Controls
                     {
                         Binding bind = new Binding()
                         {
-                            Id = m.Groups[2].Value,
                             DefaultText = m.Groups[3].Value,
                             TextPlaceholder = reg.Replace(cobj.Name, "{{dyn}}")
                         };
+                        string rId = m.Groups[2].Value;
+                        bind.Id = AppParas.Keys.Single(k => k.Contains("P-") && k.EndsWith("R-" + rId));
                         bind.Item = cobj;
                         bindings.Add(bind);
 
-                        string value = "";
-                        try
-                        {
-                            ChangeParamModel changeB = _contextP.ChangesParam.Where(c => c.DeviceId == device.UId && c.ParamId.EndsWith("R-" + bind.Id)).OrderByDescending(c => c.StateId).First();
-                            value = changeB.Value;
-                        }
-                        catch { }
+                        string value = AppParas[bind.Id].Value;
 
-                        if (bind.Item == null) continue;
-                        DeviceComObject dco = (DeviceComObject)bind.Item;
-
-                        if (value == "")
-                            dco.Name = reg.Replace(cobj.Name, bind.DefaultText);
+                        if (string.IsNullOrEmpty(value))
+                            cobj.DisplayName = reg.Replace(cobj.Name, bind.DefaultText);
                         else
-                            dco.Name = reg.Replace(cobj.Name, value);
+                            cobj.DisplayName = reg.Replace(cobj.Name, value);
                     }
                 }
                 device.ComObjects.Add(cobj);
@@ -715,38 +758,92 @@ namespace Kaenx.Views.Easy.Controls
             _contextP.SaveChanges();
         }
 
-        private void PrepareComObject(XElement xele)
+        private void PrepareBindings()
         {
-            try
+            foreach (DeviceComObject com in device.ComObjects)
             {
-                AppAdditional adds = _context.AppAdditionals.Single(a => a.Id == device.ApplicationId);
-
-                comObjects = SaveHelper.ByteArrayToObject<List<DeviceComObject>>(adds.ComsAll);
-
-
-                foreach (DeviceComObject com in comObjects)
+                if (com.Name.Contains("{{"))
                 {
-                    if (com.Name.Contains("{{"))
+                    Regex reg = new Regex("{{((.+):(.+))}}");
+                    Match m = reg.Match(com.Name);
+                    if (m.Success)
+                    {
+                        Binding bind = new Binding()
+                        {
+                            DefaultText = m.Groups[3].Value,
+                            TextPlaceholder = reg.Replace(com.Name, "{{dyn}}")
+                        };
+                        string rId = m.Groups[2].Value;
+                        bind.Id = AppParas.Keys.Single(k => k.Contains("P-") && k.EndsWith("R-" + rId));
+                        bind.Item = com;
+
+                        string value = AppParas[bind.Id].Value;
+
+                        if (!string.IsNullOrEmpty(value))
+                            com.DisplayName = bind.TextPlaceholder.Replace("{{dyn}}", value);
+                        else
+                            com.DisplayName = bind.TextPlaceholder.Replace("{{dyn}}", bind.DefaultText);
+
+                        bindings.Add(bind);
+                    }
+                }
+            }
+            
+
+            foreach(ListChannelModel ch in ListNavChannel)
+            {
+                if (ch.Name.Contains("{{"))
+                {
+                    Regex reg = new Regex("{{((.+):(.+))}}");
+                    Match m = reg.Match(ch.Name);
+                    if (m.Success)
+                    {
+                        Binding bind = new Binding()
+                        {
+                            DefaultText = m.Groups[3].Value,
+                            TextPlaceholder = reg.Replace(ch.Name, "{{dyn}}")
+                        };
+                        string rId = m.Groups[2].Value;
+                        bind.Id = AppParas.Keys.Single(k => k.Contains("P-") && k.EndsWith("R-" + rId));
+                        bind.Item = ch;
+
+                        string value = AppParas[bind.Id].Value;
+                        if (!string.IsNullOrEmpty(value))
+                            ch.Name = bind.TextPlaceholder.Replace("{{dyn}}", value);
+                        else
+                            ch.Name = bind.TextPlaceholder.Replace("{{dyn}}", bind.DefaultText);
+
+                        bindings.Add(bind);
+                    }
+                }
+
+                foreach(ListBlockModel bl in ch.Blocks)
+                {
+                    if (bl.Name.Contains("{{"))
                     {
                         Regex reg = new Regex("{{((.+):(.+))}}");
-                        Match m = reg.Match(com.Name);
+                        Match m = reg.Match(bl.Name);
                         if (m.Success)
                         {
                             Binding bind = new Binding()
                             {
-                                Id = m.Groups[2].Value,
                                 DefaultText = m.Groups[3].Value,
-                                TextPlaceholder = reg.Replace(com.Name, "{{dyn}}")
+                                TextPlaceholder = reg.Replace(bl.Name, "{{dyn}}")
                             };
-                            if (device.ComObjects.Any(c => c.Id == com.Id))
-                                bind.Item = device.ComObjects.Single(c => c.Id == com.Id);
+                            string rId = m.Groups[2].Value;
+                            bind.Id = AppParas.Keys.Single(k => k.Contains("P-") && k.EndsWith("R-" + rId));
+                            bind.Item = bl;
+
+                            string value = AppParas[bind.Id].Value;
+                            if (!string.IsNullOrEmpty(value))
+                                bl.Name = bind.TextPlaceholder.Replace("{{dyn}}", value);
+                            else
+                                bl.Name = bind.TextPlaceholder.Replace("{{dyn}}", bind.DefaultText);
+
                             bindings.Add(bind);
                         }
                     }
                 }
-            }catch(Exception e)
-            {
-                Log.Error(e, "PrepareComObject Fehler!");
             }
         }
 
@@ -764,7 +861,7 @@ namespace Kaenx.Views.Easy.Controls
 
             foreach (ListBlockModel block in ListNavBlock)
             {
-                if (selectedItem.Blocks.Any(b => b.Id == block.Id)) continue;
+                if (selectedItem.Blocks.Any(b => b.Id == block.Id && b.Visible == Visibility.Visible)) continue;
                 toRemove.Add(block);
             }
 

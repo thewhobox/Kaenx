@@ -142,19 +142,19 @@
     <value>Coupler:</value>
   </data>
   <data name="DeviceInfoCurrent.Text" xml:space="preserve">
-    <value>Buscurrent:</value>
+    <value>Bus Current:</value>
   </data>
   <data name="DeviceInfoHasApp.Text" xml:space="preserve">
     <value>Application:</value>
   </data>
   <data name="DeviceInfoHeader2.Text" xml:space="preserve">
-    <value>Device information</value>
+    <value>Device Information</value>
   </data>
   <data name="DeviceInfoName.Text" xml:space="preserve">
     <value>Name:</value>
   </data>
   <data name="DeviceInfoOrder.Text" xml:space="preserve">
-    <value>Ordernumber:</value>
+    <value>Order Number:</value>
   </data>
   <data name="DeviceInfoSupply.Text" xml:space="preserve">
     <value>Power Supply:</value>
@@ -166,7 +166,7 @@
     <value>Name</value>
   </data>
   <data name="DListNumb.Header" xml:space="preserve">
-    <value>Ordernumber</value>
+    <value>Order Number</value>
   </data>
   <data name="ImportAll.Content" xml:space="preserve">
     <value>All</value>
@@ -196,7 +196,7 @@
     <value>Catalog</value>
   </data>
   <data name="SideProps.Text" xml:space="preserve">
-    <value>Device information</value>
+    <value>Device Information</value>
   </data>
   <data name="SideFilter.Text" xml:space="preserve">
     <value>Filter</value>

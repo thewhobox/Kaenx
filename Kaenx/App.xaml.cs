@@ -106,6 +106,8 @@ namespace Kaenx
             AppCenter.Start("15f6e92f-3928-4b75-a73d-6e95dc2a0ee4",
                    typeof(Analytics), typeof(Crashes), typeof(Push));
 #endif
+
+
         }
 
 
@@ -225,6 +227,10 @@ namespace Kaenx
                 // Ensure the current window is active
                 Window.Current.Activate();
             }
+
+
+            //TODO implement change theme
+            //(Application.Current.Resources["BrushAccentColor2"] as SolidColorBrush).Color = Windows.UI.Colors.Red;
 
         }
 

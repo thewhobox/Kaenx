@@ -28,8 +28,6 @@
             <ColumnDefinition Width="auto" />
             <ColumnDefinition />
             <ColumnDefinition Width="auto" />
-            <ColumnDefinition Width="auto" />
-            <ColumnDefinition Width="auto" />
         </Grid.ColumnDefinitions>
         <Grid.RowDefinitions>
             <RowDefinition Height="auto" />
@@ -37,6 +35,20 @@
             <RowDefinition Height="auto" />
         </Grid.RowDefinitions>
 
+        <VisualStateManager.VisualStateGroups>
+            <VisualStateGroup>
+                <VisualState>
+                    <VisualState.StateTriggers>
+                        <StateTrigger IsActive="{Binding ElementName=BtnToggleView, Path=IsChecked}" />
+                    </VisualState.StateTriggers>
+                    <VisualState.Setters>
+                        <Setter Target="ListComs.Visibility" Value="Collapsed" />
+                        <Setter Target="OutGroupName.Visibility" Value="Collapsed" />
+                        <Setter Target="ListGroupComs.Visibility" Value="Visible" />
+                    </VisualState.Setters>
+                </VisualState>
+            </VisualStateGroup>
+        </VisualStateManager.VisualStateGroups>
 
         <Border Background="LightGray" Grid.Row="1">
             <TreeView x:Name="TreeTopologie" MinWidth="100" MaxWidth="350" CanReorderItems="False" ItemsSource="{Binding Lines}" CanDragItems="False" ItemInvoked="TreeTopologie_ItemInvoked" VerticalAlignment="Stretch" Background="LightGray">
@@ -81,7 +93,7 @@
             </toolkit:DataGrid.Background>
             <toolkit:DataGrid.Columns>
                 <toolkit:DataGridTextColumn x:Uid="/Groups/LComsNumb" Tag="number" Width="SizeToCells" Binding="{Binding Number}" />
-                <toolkit:DataGridTextColumn x:Uid="/Groups/LComsName" MinWidth="160" Tag="name" Width="SizeToCells" Binding="{Binding Name}" />
+                <toolkit:DataGridTextColumn x:Uid="/Groups/LComsName" MinWidth="160" Tag="name" Width="SizeToCells" Binding="{Binding DisplayName}" />
                 <toolkit:DataGridTextColumn x:Uid="/Groups/LComsFunc" MinWidth="160" Tag="func" Width="SizeToCells" Binding="{Binding Function}" />
                 <toolkit:DataGridTextColumn x:Uid="/Groups/LComsConn" MinWidth="100" Tag="connections" Width="SizeToCells" Binding="{Binding Connections}" />
                 <toolkit:DataGridTextColumn x:Uid="/Groups/ClistDPT" Tag="dpt" Width="SizeToCells" Binding="{Binding DP_Full}" />
@@ -96,8 +108,8 @@
             <Run Text="{Binding SelectedGroup.Name}" />
         </TextBlock>
         
-        <toolkit:DataGrid x:Name="ListGroupComs" Visibility="Collapsed" Width="300"
-                          Grid.Column="3" Grid.Row="1" Margin="5 0" AutoGenerateColumns="False" ItemsSource="{Binding SelectedGroup.ComObjects}" BorderThickness="1 1 1 0" BorderBrush="LightGray" IsReadOnly="True">
+        <toolkit:DataGrid x:Name="ListGroupComs" Visibility="Collapsed" Grid.Column="1" Grid.Row="1" Margin="5 0" AutoGenerateColumns="False" 
+                          ItemsSource="{Binding SelectedGroup.ComObjects}" BorderThickness="1 1 1 0" BorderBrush="LightGray" IsReadOnly="True">
             <toolkit:DataGrid.Background>
                 <SolidColorBrush Color="#FFE0E0E0" />
             </toolkit:DataGrid.Background>
@@ -106,7 +118,6 @@
                     <Setter Property="toolkit:DataGridRow.ContextFlyout">
                         <Setter.Value>
                             <MenuFlyout>
-                                <MenuFlyoutItem x:Uid="/Groups/CListContextLink" Click="ClickLink" Icon="Link" />
                                 <MenuFlyoutItem x:Uid="/Groups/CListContextUnlink" Click="ClickLink" Icon="Delete" />
                             </MenuFlyout>
                         </Setter.Value>
@@ -115,7 +126,7 @@
             </toolkit:DataGrid.RowStyle>
             <toolkit:DataGrid.Columns>
                 <toolkit:DataGridTextColumn x:Uid="/Groups/CListNumb" Tag="number" Width="SizeToCells" Binding="{Binding Number}" />
-                <toolkit:DataGridTextColumn x:Uid="/Groups/CListName" MinWidth="160" Tag="name" Width="SizeToCells" Binding="{Binding Name}" />
+                <toolkit:DataGridTextColumn x:Uid="/Groups/CListName" MinWidth="160" Tag="name" Width="SizeToCells" Binding="{Binding DisplayName}" />
                 <toolkit:DataGridTextColumn x:Uid="/Groups/CListFunc" MinWidth="160" Tag="func" Width="SizeToCells" Binding="{Binding Function}" />
                 <toolkit:DataGridTextColumn x:Uid="/Groups/ClistConn" MinWidth="100" Tag="connections" Width="SizeToCells" Binding="{Binding Connections}" />
             </toolkit:DataGrid.Columns>
@@ -130,29 +141,19 @@
             </TextBlock>
         </StackPanel>
 
-        <toolkit:GridSplitter Grid.Column="2" Grid.RowSpan="2" Width="11" ResizeBehavior="BasedOnAlignment" ResizeDirection="Auto" Background="Gray" Foreground="White" FontSize="13" Visibility="Collapsed">
-            <toolkit:GridSplitter.Element>
-                <Grid>
-                    <TextBlock HorizontalAlignment="Center"  IsHitTestVisible="False"
-                    VerticalAlignment="Center" Text="&#xE784;"
-                    Foreground="Black" FontFamily="Segoe MDL2 Assets"/>
-                </Grid>
-            </toolkit:GridSplitter.Element>
-        </toolkit:GridSplitter>
-
-        <Border Grid.Column="4" Background="LightGray" BorderThickness="0 0 0 1" BorderBrush="White">
+        <Border Grid.Column="2" Background="LightGray" BorderThickness="0 0 0 1" BorderBrush="White">
             <StackPanel Orientation="Horizontal">
                 <AppBarButton x:Uid="/Groups/ToolAddMain" Icon="Add" Click="ClickAddMain" />
-                <AppBarToggleButton x:Uid="/Groups/ToolFilter" x:Name="BtnToggleProps" Icon="Filter" IsChecked="True" />
+                <AppBarToggleButton x:Uid="/Groups/ToolView" x:Name="BtnToggleView" Icon="View" />
                 <AppBarToggleButton x:Uid="/Groups/ToolExpert" Icon="OutlineStar" Checked="ToggleExpert" Unchecked="ToggleExpert" />
             </StackPanel>
         </Border>
 
-        <Border Background="LightGray" Grid.Row="1" Grid.Column="4">
+        <Border Background="LightGray" Grid.Row="1" Grid.Column="2">
             <TreeView x:Name="TreeGroups" ItemsSource="{Binding Groups}" CanReorderItems="False" ItemInvoked="TreeGroups_ItemInvoked" MinWidth="250" Margin="0 0 5 0">
                 <TreeView.ItemTemplate>
                     <DataTemplate x:DataType="local:Line">
-                        <TreeViewItem Content="{Binding}" CanDrag="False" Margin="-20 0 0 0" ItemsSource="{Binding Subs}" IsExpanded="{Binding IsExpanded, Mode=TwoWay}">
+                        <TreeViewItem Content="{Binding}" Background="{Binding CurrentBrush}" DoubleTapped="Groups_DoubleTapped" CanDrag="False" Margin="-20 0 0 0" ItemsSource="{Binding Subs}" IsExpanded="{Binding IsExpanded, Mode=TwoWay}">
                             <TreeViewItem.ContextFlyout>
                                 <MenuFlyout>
                                     <MenuFlyoutItem x:Uid="/Groups/GListContextAdd" Icon="Add" Click="ClickAddSub" />

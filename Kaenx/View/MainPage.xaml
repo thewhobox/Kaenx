@@ -13,155 +13,182 @@
     extensions:ApplicationViewExtensions.Title="Startseite"
     extensions:ApplicationViewExtensions.BackButtonVisibility="Collapsed"
     mc:Ignorable="d">
-    
+
     <Grid>
-        <Grid.RowDefinitions>
-            <RowDefinition Height="auto" />
-            <RowDefinition Height="auto" />
-            <RowDefinition />
-        </Grid.RowDefinitions>
+        <Grid>
+            <VisualStateManager.VisualStateGroups>
+                <VisualStateGroup>
+                    <VisualState>
+                        <VisualState.StateTriggers>
+                            <AdaptiveTrigger MinWindowWidth="800" />
+                        </VisualState.StateTriggers>
+                        <VisualState.Setters>
+                            <Setter Target="LogoImage.Height" Value="270" />
+                            <Setter Target="VB1.Height" Value="100" />
+                            <Setter Target="VB2.Height" Value="100" />
+                            <Setter Target="VB3.Height" Value="100" />
+                            <Setter Target="VB4.Height" Value="100" />
+                            <Setter Target="VB5.Height" Value="100" />
+                            <Setter Target="WrapGrid.Orientation" Value="Vertical" />
+                            <Setter Target="WrapGrid.MaximumRowsOrColumns" Value="1" />
+                            <Setter Target="DiagGrid.Height" Value="600" />
+                            <Setter Target="DiagGrid.Width" Value="700" />
+                            <Setter Target="FillRow.Height" Value="*" />
+                            <Setter Target="FillRow2.Height" Value="auto" />
 
-        <VisualStateManager.VisualStateGroups>
-            <VisualStateGroup>
-                <VisualState>
-                    <VisualState.StateTriggers>
-                        <AdaptiveTrigger MinWindowWidth="800" />
-                    </VisualState.StateTriggers>
-                    <VisualState.Setters>
-                        <Setter Target="LogoImage.Height" Value="270" />
-                        <Setter Target="VB1.Height" Value="100" />
-                        <Setter Target="VB2.Height" Value="100" />
-                        <Setter Target="VB3.Height" Value="100" />
-                        <Setter Target="VB4.Height" Value="100" />
-                        <Setter Target="VB5.Height" Value="100" />
-                        <Setter Target="TestGrid.VerticalAlignment" Value="Bottom" />
-                        <Setter Target="WrapGrid.Orientation" Value="Vertical" />
-                        <Setter Target="WrapGrid.MaximumRowsOrColumns" Value="1" />
-                        <Setter Target="DiagGrid.Height" Value="600" />
-                        <Setter Target="DiagGrid.Width" Value="700" />
-                    </VisualState.Setters>
-                </VisualState>
-            </VisualStateGroup>
-        </VisualStateManager.VisualStateGroups>
+                            <Setter Target="ProjectsGrid.ScrollViewer.HorizontalScrollMode" Value="Disabled" />
+                            <Setter Target="ProjectsGrid.ScrollViewer.VerticalScrollMode" Value="Enabled" />
+                        </VisualState.Setters>
+                    </VisualState>
+                </VisualStateGroup>
+            </VisualStateManager.VisualStateGroups>
 
-
-        <Image x:Name="LogoImage" Source="ms-appx:///Assets/SplashScreen.png"  Height="150" />
-
-        <Grid Grid.Row="1"  Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition />
-                <ColumnDefinition Width="auto" />
-                <ColumnDefinition Width="auto" />
-                <ColumnDefinition Width="auto" />
-                <ColumnDefinition Width="auto" />
-                <ColumnDefinition Width="auto" />
-                <ColumnDefinition />
-            </Grid.ColumnDefinitions>
-
-            <Button Grid.Column="1" Click="OpenNewProjekt" BorderBrush="White" Background="Transparent" Padding="20" >
-                <StackPanel>
-                    <Viewbox x:Name="VB1" Height="70">
-                        <SymbolIcon Symbol="Page2" Foreground="Gray" />
-                    </Viewbox>
-                    <TextBlock x:Uid="/MainPage/BtnNewProject" HorizontalAlignment="Center" Margin="0 5 0 0" Foreground="Gray" />
-                </StackPanel>
-            </Button>
-
-            <Button Grid.Column="2" Click="OpenCatalog" BorderBrush="White" Background="Transparent" Padding="20" >
-                <StackPanel>
-                    <Viewbox x:Name="VB2" Height="70">
-                        <SymbolIcon Symbol="Shop" Foreground="Gray" />
-                    </Viewbox>
-                    <TextBlock x:Uid="/MainPage/BtnCatalog" HorizontalAlignment="Center" Margin="0 5 0 0" Foreground="Gray" />
-                </StackPanel>
-            </Button>
-
-            <Button Grid.Column="3" BorderBrush="White" Background="Transparent" Padding="20" >
-                <StackPanel>
-                    <Viewbox x:Name="VB3" Height="70">
-                        <SymbolIcon Symbol="Library" Foreground="Gray" />
-                    </Viewbox>
-                    <TextBlock x:Uid="/MainPage/BtnArchiv" HorizontalAlignment="Center" Margin="0 5 0 0" Foreground="Gray" />
-                </StackPanel>
-            </Button>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="auto" />
+                <RowDefinition Height="auto" />
+                <RowDefinition x:Name="FillRow" Height="0" />
+                <RowDefinition Height="auto" />
+                <RowDefinition x:Name="FillRow2" Height="*" />
+            </Grid.RowDefinitions>
 
 
-            <Button Grid.Column="4" Click="OpenStore" BorderBrush="White" Background="Transparent" Padding="20" >
-                <StackPanel>
-                    <Viewbox x:Name="VB4" Height="70">
-                        <SymbolIcon Symbol="World" Foreground="Gray" />
-                    </Viewbox>
-                    <TextBlock x:Uid="/MainPage/BtnStore" HorizontalAlignment="Center" Margin="0 5 0 0" Foreground="Gray" />
-                </StackPanel>
-            </Button>
-            
-            <Button Grid.Column="5" Click="OpenSettings" BorderBrush="White" Background="Transparent" Padding="20" >
-                <StackPanel>
-                    <Viewbox x:Name="VB5" Height="70">
-                        <SymbolIcon Symbol="Setting" Foreground="Gray" />
-                    </Viewbox>
-                    <TextBlock x:Uid="/MainPage/BtnSettings" HorizontalAlignment="Center" Margin="0 5 0 0" Foreground="Gray" />
-                </StackPanel>
-            </Button>
+            <Image x:Name="LogoImage" Source="ms-appx:///Assets/SplashScreen.png"  Height="150" />
+
+            <Grid Grid.Row="1" Background="{ThemeResource BrushAccentColor1}">
+                <Grid.Resources>
+                    <Style TargetType="Button">
+                        <Setter Property="BorderThickness" Value="0" />
+                        <Setter Property="Background" Value="Transparent" />
+                        <Setter Property="Padding" Value="20" />
+                    </Style>
+                    <Style TargetType="SymbolIcon">
+                        <Setter Property="Foreground" Value="{ThemeResource BrushAccentColorLight1}" />
+                    </Style>
+                    <Style TargetType="TextBlock">
+                        <Setter Property="Foreground" Value="{ThemeResource BrushAccentColorLight1}" />
+                        <Setter Property="Margin" Value="0 5 0 0" />
+                        <Setter Property="HorizontalAlignment" Value="Center" />
+                    </Style>
+                </Grid.Resources>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition />
+                    <ColumnDefinition Width="auto" />
+                    <ColumnDefinition Width="auto" />
+                    <ColumnDefinition Width="auto" />
+                    <ColumnDefinition Width="auto" />
+                    <ColumnDefinition Width="auto" />
+                    <ColumnDefinition />
+                </Grid.ColumnDefinitions>
+
+                <Button Grid.Column="1" Click="OpenNewProjekt">
+                    <StackPanel>
+                        <Viewbox x:Name="VB1" Height="70">
+                            <SymbolIcon Symbol="Page2" />
+                        </Viewbox>
+                        <TextBlock x:Uid="/MainPage/BtnNewProject" />
+                    </StackPanel>
+                </Button>
+
+                <Button Grid.Column="2" Click="OpenCatalog">
+                    <StackPanel>
+                        <Viewbox x:Name="VB2" Height="70">
+                            <SymbolIcon Symbol="Shop" />
+                        </Viewbox>
+                        <TextBlock x:Uid="/MainPage/BtnCatalog" />
+                    </StackPanel>
+                </Button>
+
+                <Button Grid.Column="3" BorderBrush="White">
+                    <StackPanel>
+                        <Viewbox x:Name="VB3" Height="70">
+                            <SymbolIcon Symbol="Library" />
+                        </Viewbox>
+                        <TextBlock x:Uid="/MainPage/BtnArchiv" />
+                    </StackPanel>
+                </Button>
+
+                <Button Grid.Column="5" Click="OpenSettings">
+                    <StackPanel>
+                        <Viewbox x:Name="VB5" Height="70">
+                            <SymbolIcon Symbol="Setting" />
+                        </Viewbox>
+                        <TextBlock x:Uid="/MainPage/BtnSettings" />
+                    </StackPanel>
+                </Button>
+            </Grid>
+
+            <Border Grid.Row="3" Background="{ThemeResource BrushAccentColor2}">
+                <TextBlock x:Uid="/MainPage/OpenedRecently" Foreground="{ThemeResource BrushAccentColorLight1}" Margin="20 10" />
+            </Border>
+
+
+            <GridView Grid.Row="4" x:Name="ProjectsGrid"  ItemsSource="{Binding ProjectList}">
+                <GridView.ItemContainerStyle>
+                    <Style TargetType="GridViewItem">
+                        <Setter Property="Margin" Value="5" />
+                    </Style>
+                </GridView.ItemContainerStyle>
+                <GridView.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <ItemsWrapGrid x:Name="WrapGrid" Orientation="Horizontal" />
+                    </ItemsPanelTemplate>
+                </GridView.ItemsPanel>
+                <GridView.ItemTemplate>
+                    <DataTemplate>
+                        <Grid x:Name="GridTemplate" Tapped="GridItemTapped" IsTapEnabled="True" Height="240" Width="240" BorderBrush="LightGray" BorderThickness="1">
+                            <Grid.RowDefinitions>
+                                <RowDefinition />
+                                <RowDefinition Height="auto" />
+                            </Grid.RowDefinitions>
+
+                            <FlyoutBase.AttachedFlyout>
+                                <Flyout>
+                                    <StackPanel Orientation="Horizontal" Margin="-9">
+                                        <Button Background="Transparent" BorderThickness="0" Click="OpenProject">
+                                            <SymbolIcon Symbol="OpenFile" Margin="5" />
+                                        </Button>
+                                        <Button Background="Transparent" BorderThickness="0">
+                                            <SymbolIcon Symbol="Setting" Margin="5" />
+                                        </Button>
+                                        <Button Background="Transparent" BorderThickness="0">
+                                            <SymbolIcon Symbol="Library" Margin="5" />
+                                        </Button>
+                                        <Button Background="Transparent" BorderThickness="0" Click="DeleteProject">
+                                            <SymbolIcon Symbol="Delete" Margin="5" />
+                                        </Button>
+                                    </StackPanel>
+                                </Flyout>
+                            </FlyoutBase.AttachedFlyout>
+
+                            <Image Grid.RowSpan="2" Source="{Binding Image}" />
+                            <Border Grid.Row="2" Padding=" 5 2">
+                                <Border.Background>
+                                    <SolidColorBrush Color="LightGray" Opacity="0.9" />
+                                </Border.Background>
+                                <TextBlock x:Name="Rofl" Text="{Binding Name}" TextWrapping="WrapWholeWords" />
+                            </Border>
+                        </Grid>
+                    </DataTemplate>
+                </GridView.ItemTemplate>
+            </GridView>
+
+
+
+            <TextBlock x:Name="AppVersion" VerticalAlignment="Top" HorizontalAlignment="Right" Margin="20"/>
+
+            <toolkit:Loading Grid.RowSpan="6" x:Name="LoadScreen">
+                <toolkit:Loading.Background>
+                    <SolidColorBrush Color="Gray" Opacity="0.6" />
+                </toolkit:Loading.Background>
+                <ProgressRing IsActive="True" Foreground="Black" Height="100" Width="100" />
+            </toolkit:Loading>
+
+            <toolkit:InAppNotification Grid.Row="2"  x:Name="Notify" />
         </Grid>
 
 
-        <GridView Grid.Row="3" x:Name="TestGrid"  ItemsSource="{Binding ProjectList}" ScrollViewer.HorizontalScrollBarVisibility="Auto" ScrollViewer.HorizontalScrollMode="Enabled">
-            <GridView.ItemContainerStyle>
-                <Style TargetType="GridViewItem">
-                    <Setter Property="Margin" Value="5" />
-                </Style>
-            </GridView.ItemContainerStyle>
-            <GridView.ItemsPanel>
-                <ItemsPanelTemplate>
-                    <ItemsWrapGrid x:Name="WrapGrid" Orientation="Horizontal" />
-                </ItemsPanelTemplate>
-            </GridView.ItemsPanel>
-            <GridView.ItemTemplate>
-                <DataTemplate>
-                    <Grid x:Name="GridTemplate" Tapped="GridItemTapped" IsTapEnabled="True" Height="240" Width="240" BorderBrush="LightGray" BorderThickness="1">
-                        <Grid.RowDefinitions>
-                            <RowDefinition />
-                            <RowDefinition Height="auto" />
-                        </Grid.RowDefinitions>
 
-                        <FlyoutBase.AttachedFlyout>
-                            <Flyout>
-                                <StackPanel Orientation="Horizontal" Margin="-9">
-                                    <Button Background="Transparent" BorderThickness="0" Click="OpenProject">
-                                        <SymbolIcon Symbol="OpenFile" Margin="5" />
-                                    </Button>
-                                    <Button Background="Transparent" BorderThickness="0">
-                                        <SymbolIcon Symbol="Setting" Margin="5" />
-                                    </Button>
-                                    <Button Background="Transparent" BorderThickness="0">
-                                        <SymbolIcon Symbol="Library" Margin="5" />
-                                    </Button>
-                                    <Button Background="Transparent" BorderThickness="0" Click="DeleteProject">
-                                        <SymbolIcon Symbol="Delete" Margin="5" />
-                                    </Button>
-                                </StackPanel>
-                            </Flyout>
-                        </FlyoutBase.AttachedFlyout>
-
-                        <Image Grid.RowSpan="2" Source="{Binding Image}" />
-                        <Border Grid.Row="2" Padding=" 5 2">
-                            <Border.Background>
-                                <SolidColorBrush Color="LightGray" Opacity="0.9" />
-                            </Border.Background>
-                            <TextBlock x:Name="Rofl" Text="{Binding Name}" TextWrapping="WrapWholeWords" />
-                        </Border>
-                    </Grid>
-                </DataTemplate>
-            </GridView.ItemTemplate>
-        </GridView>
-
-
-
-        <TextBlock x:Name="AppVersion" VerticalAlignment="Top" HorizontalAlignment="Right" Margin="20"/>
-
-        
-        <Border x:Name="DiagNew" Grid.RowSpan="4" Visibility="Collapsed">
+        <Border x:Name="DiagNew" Visibility="Collapsed">
             <Border.Background>
                 <SolidColorBrush Color="Gray" Opacity="0.7" />
             </Border.Background>
@@ -191,7 +218,7 @@
                 <TextBox x:Uid="/MainPage/NewNameIn" Grid.Row="1" Grid.Column="1" x:Name="InName" />
 
                 <TextBlock x:Uid="/MainPage/NewPath" Grid.Row="2" />
-                <ComboBox  Grid.Row="2" Grid.Column="1" x:Name="InConn" Margin="0 5" ItemsSource="{Binding ConnectionsList}" DisplayMemberPath="Name" /> 
+                <ComboBox  Grid.Row="2" Grid.Column="1" x:Name="InConn" Margin="0 5" ItemsSource="{Binding ConnectionsList}" DisplayMemberPath="Name" />
 
                 <TextBlock x:Uid="/MainPage/NewImage" Grid.Row="3" />
                 <StackPanel Grid.Row="3" Grid.Column="1" Orientation="Horizontal">
@@ -218,17 +245,5 @@
                 </Grid>
             </Grid>
         </Border>
-        
-        
-        <toolkit:Loading Grid.RowSpan="4" x:Name="LoadScreen">
-            <toolkit:Loading.Background>
-                <SolidColorBrush Color="Gray" Opacity="0.6" />
-            </toolkit:Loading.Background>
-            <ProgressRing IsActive="True" Foreground="Black" Height="100" Width="100" />
-        </toolkit:Loading>
-
-        <toolkit:InAppNotification Grid.Row="2"  x:Name="Notify" />
     </Grid>
-
-    
 </Page>

@@ -8,14 +8,22 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Xml.Serialization;
 using Windows.UI.Xaml.Controls;
+using Windows.UI.Xaml.Media;
 
 namespace Kaenx.Classes.Project
 {
     public class Group : INotifyPropertyChanged
     {
+        private SolidColorBrush _currentBrush = new SolidColorBrush(Windows.UI.Colors.Transparent);
         private bool _isExpanded;
         private int _id;
         private string _name;
+
+        public SolidColorBrush CurrentBrush
+        {
+            get { return _isExpanded ? new SolidColorBrush(Windows.UI.Colors.Transparent) : _currentBrush; }
+            set { _currentBrush = value; Changed("CurrentBrush"); }
+        }
 
         public int UId { get; set; }
 
@@ -34,7 +42,7 @@ namespace Kaenx.Classes.Project
         public bool IsExpanded
         {
             get { return _isExpanded; }
-            set { _isExpanded = value; Changed("IsExpanded"); }
+            set { _isExpanded = value; Changed("IsExpanded"); Changed("CurrentBrush"); }
         }
         public string GroupName
         {

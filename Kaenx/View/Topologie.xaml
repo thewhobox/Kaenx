@@ -63,67 +63,62 @@
             </NavigationView.MenuItems>
         </NavigationView>
 
-        <Border Grid.Row="1" Grid.RowSpan="2">
-            <Border.Background>
-                <SolidColorBrush Color="#FFE0E0E0" />
-            </Border.Background>
+        <StackPanel Grid.Row="1" Background="{ThemeResource BrushAccentColor2}" BorderBrush="{ThemeResource BrushAccentColorLight1}" BorderThickness="0 0 0 1" Orientation="Horizontal">
+            <SymbolIcon Symbol="Add" Margin="10 0" />
+            <AppBarButton x:Uid="/Topologie/ToolAddLine" Icon="AllApps" Click="ClickAdd" Width="55" />
+            <AppBarButton x:Uid="/Topologie/ToolAddDevice" Icon="MapDrive" Click="ClickAddDevice" Width="55" />
+        </StackPanel>
+
+        <Border Grid.Row="2" Background="{ThemeResource BrushAccentColor2}">
+            <TreeView x:Name="TreeV" ItemsSource="{Binding}" CanDragItems="False" CanReorderItems="False" ItemInvoked="TreeV_ItemInvoked"  VerticalAlignment="Stretch" Background="LightGray">
+                <TreeView.ItemContainerStyle>
+                    <Style TargetType="TreeViewItem">
+                        <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+                    </Style>
+                </TreeView.ItemContainerStyle>
+                <TreeView.ItemTemplate>
+                    <DataTemplate x:DataType="local:Line">
+                        <TreeViewItem Margin="-20 0 0 0" Padding="0 0 5 0" VerticalAlignment="Stretch" ToolTipService.ToolTip="{Binding Name}" DoubleTapped="TreeViewItem_DoubleTapped" Background="{Binding CurrentBackBrush}" BorderThickness="0" Content="{Binding}" ItemsSource="{Binding Subs}" IsExpanded="{Binding IsExpanded, Mode=TwoWay}">
+                            <TreeViewItem.ContextFlyout>
+                                <MenuFlyout Opening="MenuFlyout_Opening">
+                                    <MenuFlyoutItem x:Name="MFI_AddLine" x:Uid="/Topologie/MenAddLine" Icon="Add" Click="ClickAdd" />
+                                    <MenuFlyoutItem x:Name="MFI_AddDevice" x:Uid="/Topologie/MenAddDevice" Icon="Add" Click="ClickAddDevice" />
+                                    <MenuFlyoutSubItem x:Name="MFI_Prog" x:Uid="/Topologie/MenProg" Icon="PostUpdate">
+                                        <MenuFlyoutItem x:Uid="/Topologie/MenProgPh" Icon="MapPin" Click="ClickProAddr" />
+                                        <MenuFlyoutSeparator />
+                                        <MenuFlyoutItem x:Uid="/Topologie/MenProgAppK" Icon="FourBars" Tag="0" Click="ClickProApp" />
+                                        <MenuFlyoutItem x:Uid="/Topologie/MenProgAppP" Icon="ThreeBars" Tag="1" Click="ClickProApp" />
+                                        <MenuFlyoutItem x:Uid="/Topologie/MenProgAppM" Icon="Onebar" Tag="2" Click="ClickProApp" />
+                                    </MenuFlyoutSubItem>
+                                    <MenuFlyoutSubItem x:Name="MFI_Actions" x:Uid="/Topologie/MenActions" Icon="Share">
+                                        <MenuFlyoutItem x:Uid="/Topologie/MenRestart" Icon="Refresh" Click="ClickRestart" />
+                                        <MenuFlyoutItem x:Uid="/Topologie/MenInfo" Icon="BrowsePhotos" Click="ClickInfo" />
+                                        <MenuFlyoutItem x:Name="MFI_Toggle" x:Uid="/Topologie/MenToggle" Icon="DisconnectDrive" Click="ClickToggle" />
+                                        <MenuFlyoutItem x:Name="MFI_ReadConf" x:Uid="/Topologie/MenReadConf" Text="Konfiguration auslesen" Icon="Find" />
+                                        <MenuFlyoutItem Text="Speicher auslesen" Icon="Save" Click="ClickMemory" />
+                                    </MenuFlyoutSubItem>
+                                    <MenuFlyoutItem x:Name="MFI_Para" x:Uid="/Topologie/MenOpenPara" Icon="Bookmarks" Click="ClickOpenParas" />
+                                    <MenuFlyoutItem x:Name="MFI_Rename" x:Uid="/Topologie/MenRename" Icon="Rename" Click="ClickRename" />
+                                    <MenuFlyoutItem x:Name="MFI_Delete" x:Uid="/Topologie/MenDelete" Icon="Delete" Click="ClickDelete" />
+                                </MenuFlyout>
+                            </TreeViewItem.ContextFlyout>
+                            <TreeViewItem.ContentTemplate>
+                                <DataTemplate x:DataType="local:TopologieBase">
+                                    <StackPanel Orientation="Horizontal">
+                                        <Viewbox Height="15">
+                                            <SymbolIcon Symbol="{Binding Icon}" Foreground="{Binding CurrentBrush}" />
+                                        </Viewbox>
+                                        <TextBlock Text="{Binding LineName}" Margin="5 0 0 0" FontSize="14" VerticalAlignment="Center" />
+                                        <TextBlock Text="{Binding Name}" Margin="5 0 10 0" FontSize="14" VerticalAlignment="Center" />
+                                    </StackPanel>
+                                </DataTemplate>
+                            </TreeViewItem.ContentTemplate>
+                        </TreeViewItem>
+                    </DataTemplate>
+                </TreeView.ItemTemplate>
+            </TreeView>
         </Border>
         
-        <Border Grid.Row="1" BorderThickness="0 0 0 1" BorderBrush="White">
-            <StackPanel Orientation="Horizontal">
-                <AppBarButton x:Uid="/Topologie/ToolAddLine" Icon="Add" Click="ClickAdd" />
-                <AppBarButton x:Uid="/Topologie/ToolAddDevice" Icon="Add" Click="ClickAddDevice" />
-            </StackPanel>
-        </Border>
-
-        <TreeView x:Name="TreeV" Grid.Row="2" ItemsSource="{Binding}" CanDragItems="False" CanReorderItems="False" ItemInvoked="TreeV_ItemInvoked"  VerticalAlignment="Stretch" Background="LightGray">
-            <TreeView.ItemContainerStyle>
-                <Style TargetType="TreeViewItem">
-                    <Setter Property="HorizontalContentAlignment" Value="Stretch" />
-                </Style>
-            </TreeView.ItemContainerStyle>
-            <TreeView.ItemTemplate>
-                <DataTemplate x:DataType="local:Line">
-                    <TreeViewItem Margin="-20 0 0 0" HorizontalContentAlignment="Stretch" Padding="0 0 5 0" HorizontalAlignment="Stretch" ToolTipService.ToolTip="{Binding Name}" DoubleTapped="TreeViewItem_DoubleTapped" Background="{Binding CurrentBackBrush}" BorderThickness="0" Content="{Binding}" ItemsSource="{Binding Subs}" IsExpanded="{Binding IsExpanded, Mode=TwoWay}">
-                        <TreeViewItem.ContextFlyout>
-                            <MenuFlyout Opening="MenuFlyout_Opening">
-                                <MenuFlyoutItem x:Name="MFI_AddLine" x:Uid="/Topologie/MenAddLine" Icon="Add" Click="ClickAdd" />
-                                <MenuFlyoutItem x:Name="MFI_AddDevice" x:Uid="/Topologie/MenAddDevice" Icon="Add" Click="ClickAddDevice" />
-                                <MenuFlyoutSubItem x:Name="MFI_Prog" x:Uid="/Topologie/MenProg" Icon="PostUpdate">
-                                    <MenuFlyoutItem x:Uid="/Topologie/MenProgPh" Icon="MapPin" Click="ClickProAddr" />
-                                    <MenuFlyoutSeparator />
-                                    <MenuFlyoutItem x:Uid="/Topologie/MenProgAppK" Icon="FourBars" Tag="0" Click="ClickProApp" />
-                                    <MenuFlyoutItem x:Uid="/Topologie/MenProgAppP" Icon="ThreeBars" Tag="1" Click="ClickProApp" />
-                                    <MenuFlyoutItem x:Uid="/Topologie/MenProgAppM" Icon="Onebar" Tag="2" Click="ClickProApp" />
-                                </MenuFlyoutSubItem>
-                                <MenuFlyoutSubItem x:Name="MFI_Actions" x:Uid="/Topologie/MenActions" Icon="Share">
-                                    <MenuFlyoutItem x:Uid="/Topologie/MenRestart" Icon="Refresh" Click="ClickRestart" />
-                                    <MenuFlyoutItem x:Uid="/Topologie/MenInfo" Icon="BrowsePhotos" Click="ClickInfo" />
-                                    <MenuFlyoutItem x:Name="MFI_Toggle" x:Uid="/Topologie/MenToggle" Icon="DisconnectDrive" Click="ClickToggle" />
-                                    <MenuFlyoutItem x:Name="MFI_ReadConf" x:Uid="/Topologie/MenReadConf" Text="Konfiguration auslesen" Icon="Find" />
-                                    <MenuFlyoutItem Text="Speicher auslesen" Icon="Save" Click="ClickMemory" />
-                                </MenuFlyoutSubItem>
-                                <MenuFlyoutItem x:Name="MFI_Para" x:Uid="/Topologie/MenOpenPara" Icon="Bookmarks" Click="ClickOpenParas" />
-                                <MenuFlyoutItem x:Name="MFI_Rename" x:Uid="/Topologie/MenRename" Icon="Rename" Click="ClickRename" />
-                                <MenuFlyoutItem x:Name="MFI_Delete" x:Uid="/Topologie/MenDelete" Icon="Delete" Click="ClickDelete" />
-                            </MenuFlyout>
-                        </TreeViewItem.ContextFlyout>
-                        <TreeViewItem.ContentTemplate>
-                            <DataTemplate x:DataType="local:TopologieBase">
-                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Stretch">
-                                    <Viewbox Height="15">
-                                        <SymbolIcon Symbol="{Binding Icon}" Foreground="{Binding CurrentBrush}" />
-                                    </Viewbox>
-                                    <TextBlock Text="{Binding LineName}" Margin="5 0 0 0" FontSize="14" VerticalAlignment="Center" />
-                                    <TextBlock Text="{Binding Name}" Margin="5 0 10 0" FontSize="14" VerticalAlignment="Center" />
-                                </StackPanel>
-                            </DataTemplate>
-                        </TreeViewItem.ContentTemplate>
-                    </TreeViewItem>
-                </DataTemplate>
-            </TreeView.ItemTemplate>
-        </TreeView>
-
         <StackPanel Orientation="Horizontal" Grid.Row="3" Margin="0 5 0 0" Padding="3">
             <StackPanel.Background>
                 <SolidColorBrush Color="#FFE0E0E0" />

@@ -21,7 +21,9 @@ namespace Kaenx.Classes.Controls.Paras
         IsInValue,
         Default,
         GreatherThan,
+        GreatherEqualThan,
         LowerThan,
+        LowerEqualThan,
         NotEqual
     }
 

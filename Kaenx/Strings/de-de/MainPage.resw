@@ -171,4 +171,7 @@
   <data name="NewCancel.Content" xml:space="preserve">
     <value>Abbrechen</value>
   </data>
+  <data name="OpenedRecently.Text" xml:space="preserve">
+    <value>Zuletzt geöffnet:</value>
+  </data>
 </root>

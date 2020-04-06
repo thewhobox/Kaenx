@@ -53,10 +53,10 @@
                 <ColumnDefinition />
             </Grid.ColumnDefinitions>
             <ComboBox x:Name="NavChannel" ItemsSource="{Binding ListNavChannel}" HorizontalAlignment="Stretch" DisplayMemberPath="Name" SelectionChanged="NavChannel_SelectionChanged" Visibility="Collapsed" />
-            <ComboBox x:Name="NavBlock" ItemsSource="{Binding ListNavBlock}" DisplayMemberPath="Name" Grid.ColumnSpan="2" HorizontalAlignment="Stretch" />
+            <ComboBox x:Name="NavBlock" ItemsSource="{Binding ListNavBlock}" CornerRadius="2 2 0 0" DisplayMemberPath="Name" Grid.ColumnSpan="2" HorizontalAlignment="Stretch" />
         </Grid>
 
-        <ScrollViewer Grid.Row="2" BorderBrush="LightGray" BorderThickness="1">
+        <ScrollViewer Grid.Row="2" BorderBrush="LightGray" BorderThickness="1 0">
             <ContentPresenter Content="{Binding ElementName=NavBlock, Path=SelectedItem.Panel}" />
         </ScrollViewer>
 
@@ -67,7 +67,7 @@
         <toolkit:DataGrid x:Name="ComList" Grid.Row="1" Grid.RowSpan="2" Grid.Column="1" BorderBrush="LightGray" BorderThickness="1" Margin="5 0 0 0" AutoGenerateColumns="False" ItemsSource="{Binding device.ComObjects, Mode=OneWay}" IsReadOnly="True" >
             <toolkit:DataGrid.Columns>
                 <toolkit:DataGridTextColumn Tag="Number" Width="SizeToCells" Header="Nummer" Binding="{Binding Number}" />
-                <toolkit:DataGridTextColumn Tag="Name" Width="SizeToCells" Header="Name" Binding="{Binding Name}" />
+                <toolkit:DataGridTextColumn Tag="Name" Width="SizeToCells" Header="Name" Binding="{Binding DisplayName}" />
                 <toolkit:DataGridTextColumn Tag="Function" Width="SizeToCells" Header="Funktion" Binding="{Binding Function}" />
                 <toolkit:DataGridTextColumn Tag="Connections" Width="SizeToCells" Header="Verbindungen" Binding="{Binding Connections}" />
             </toolkit:DataGrid.Columns>

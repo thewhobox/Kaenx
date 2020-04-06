@@ -117,19 +117,19 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="MenuBus.Content" xml:space="preserve">
+  <data name="MenuBus.Text" xml:space="preserve">
     <value>Bus</value>
   </data>
-  <data name="MenuGroups.Content" xml:space="preserve">
-    <value>Groupaddresses</value>
+  <data name="MenuGroups.Text" xml:space="preserve">
+    <value>Group Addresses</value>
   </data>
-  <data name="MenuHome.Content" xml:space="preserve">
+  <data name="MenuHome.Text" xml:space="preserve">
     <value>Startpage</value>
   </data>
-  <data name="MenuCatalog.Content" xml:space="preserve">
+  <data name="MenuCatalog.Text" xml:space="preserve">
     <value>Catalog</value>
   </data>
-  <data name="MenuTopologie.Content" xml:space="preserve">
+  <data name="MenuTopologie.Text" xml:space="preserve">
     <value>Topologie</value>
   </data>
   <data name="TooltipInfoChange.ToolTipService.ToolTip" xml:space="preserve">

@@ -290,6 +290,25 @@ namespace Kaenx.Classes.Helper
             contextProject.SaveChanges();
         }
 
+        //public static void SaveComObject(DeviceComObject com)
+        //{
+        //    ComObject com;
+        //    if (contextProject.ComObjects.Any(co => co.ComId == comObj.Id && co.DeviceId == linedev.UId))
+        //    {
+        //        com = contextProject.ComObjects.Single(co => co.ComId == comObj.Id && co.DeviceId == linedev.UId);
+        //        com.Groups = string.Join(",", groupIds);
+        //        contextProject.ComObjects.Update(com);
+        //    }
+        //    else
+        //    {
+        //        com = new ComObject();
+        //        com.ComId = comObj.Id;
+        //        com.DeviceId = linedev.UId;
+        //        com.Groups = string.Join(",", groupIds);
+        //        contextProject.ComObjects.Add(com);
+        //    }
+        //}
+
         public static Project.Project LoadProject(ProjectViewHelper helper)
         {
             Project.Project project = new Project.Project();
@@ -393,10 +412,13 @@ namespace Kaenx.Classes.Helper
                                     catch { }
 
                                     if (value == "")
-                                        dcom.Name = reg.Replace(dcom.Name, m.Groups[3].Value);
+                                        dcom.DisplayName = reg.Replace(dcom.Name, m.Groups[3].Value);
                                     else
-                                        dcom.Name = reg.Replace(dcom.Name, value);
+                                        dcom.DisplayName = reg.Replace(dcom.Name, value);
                                 }
+                            } else
+                            {
+                                dcom.DisplayName = dcom.Name;
                             }
 
 
@@ -483,37 +505,6 @@ namespace Kaenx.Classes.Helper
             XDocument dynamic = XDocument.Parse(System.Text.Encoding.UTF8.GetString(adds.Dynamic));
             IEnumerable<XElement> elements = dynamic.Root.Descendants(XName.Get("ParameterRefRef", dynamic.Root.Name.NamespaceName));
 
-            //Dictionary<string, AppParameter> parameters = new Dictionary<string, AppParameter>();
-            //List<string> addedHashes = new List<string>();
-
-            //foreach (AppParameter para in contextC.AppParameters)
-            //    parameters.Add(para.Id, para);
-
-
-            //foreach (XElement xpara in elements)
-            //{
-            //    AppParameter appParam = parameters[xpara.Attribute("RefId").Value];
-            //    if (appParam.Text == "Dummy") continue;
-
-            //    (List<ParamCondition> list, string ids) result = GetConditions(xpara, true);
-            //    string hash = Convert.ToBase64String(Encoding.UTF8.GetBytes(result.ids + appParam.Id));
-            //    if (addedHashes.Contains(hash)) continue;
-
-            //    foreach (XElement xele in xpara.Parent.Elements(XName.Get("ParameterRefRef", xpara.Name.NamespaceName)))
-            //    {
-            //        string paraId = xele.Attribute("RefId").Value;
-            //        string hash2 = Convert.ToBase64String(Encoding.UTF8.GetBytes(result.ids + paraId));
-            //        if (addedHashes.Contains(hash2)) continue;
-
-            //        ParamVisHelper para = new ParamVisHelper(parameters[paraId]);
-            //        para.Conditions = result.list;
-            //        para.Hash = hash2;
-            //        paras.Add(para);
-            //        addedHashes.Add(hash2);
-            //    }
-
-            //}
-
             foreach (XElement xpara in elements)
             {
                 ParamVisHelper para = new ParamVisHelper(xpara.Attribute("RefId").Value);
@@ -566,7 +557,7 @@ namespace Kaenx.Classes.Helper
                                 cond.Values = string.Join(",", values);
                                 cond.Operation = ConditionOperation.Default;
 
-                                if(cond.Values == "")
+                                if (cond.Values == "")
                                 {
                                     ids = "|" + xele.Parent.Attribute("ParamRefId").Value + ".|" + ids;
                                     continue;
@@ -582,9 +573,39 @@ namespace Kaenx.Classes.Helper
                                 cond.Values = xele.Attribute("test").Value.Substring(2);
                                 cond.Operation = ConditionOperation.NotEqual;
                             }
-                            else
+                            else if (xele.Attribute("test")?.Value.StartsWith("<") == true)
                             {
-                                Log.Warning("Unbekanntes when! " + xele.Attribute("test").Value);
+                                if (xele.Attribute("test").Value.Contains("="))
+                                {
+                                    cond.Operation = ConditionOperation.LowerEqualThan;
+                                    cond.Values = xele.Attribute("test").Value.Substring(2);
+                                }
+                                else
+                                {
+                                    cond.Operation = ConditionOperation.LowerThan;
+                                    cond.Values = xele.Attribute("test").Value.Substring(1);
+                                }
+                            }
+                            else if (xele.Attribute("test")?.Value.StartsWith(">") == true)
+                            {
+                                if (xele.Attribute("test").Value.Contains("="))
+                                {
+                                    cond.Operation = ConditionOperation.GreatherEqualThan;
+                                    cond.Values = xele.Attribute("test").Value.Substring(2);
+                                }
+                                else
+                                {
+                                    cond.Operation = ConditionOperation.GreatherThan;
+                                    cond.Values = xele.Attribute("test").Value.Substring(1);
+                                }
+                            } 
+                            else {
+                                string attrs = "";
+                                foreach(XAttribute attr in xele.Attributes())
+                                {
+                                    attrs += attr.Name.LocalName + "=" + attr.Value + "  ";
+                                }
+                                Log.Warning("Unbekanntes when! " + attrs);
                             }
 
                             cond.SourceId = xele.Parent.Attribute("ParamRefId").Value;

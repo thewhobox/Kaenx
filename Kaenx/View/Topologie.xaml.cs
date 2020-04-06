@@ -263,7 +263,7 @@ namespace Kaenx.View
             bindName.Source = device;
             ParamHeaderName.SetBinding(TextBlock.TextProperty, bindName);
 
-            if (ParamStack.Any(p => p.id == device.UId))
+            if (!Window.Current.CoreWindow.GetKeyState(VirtualKey.Shift).HasFlag(CoreVirtualKeyStates.Down) && ParamStack.Any(p => p.id == device.UId))
             {
                 (UIElement ui, int id) element = ParamStack.Single(i => i.id == device.UId);
                 paras = (EControlParas2) element.ui;
