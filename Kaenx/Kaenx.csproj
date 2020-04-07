@@ -27,10 +27,10 @@
     <AppInstallerCheckForUpdateFrequency>OnApplicationRun</AppInstallerCheckForUpdateFrequency>
     <PackageCertificateThumbprint>C554126408FAF38E210787F6EC62EC5E77D59B00</PackageCertificateThumbprint>
     <AppxPackageSigningTimestampDigestAlgorithm>SHA256</AppxPackageSigningTimestampDigestAlgorithm>
-    <GenerateTestArtifacts>False</GenerateTestArtifacts>
+    <GenerateTestArtifacts>True</GenerateTestArtifacts>
     <HoursBetweenUpdateChecks>0</HoursBetweenUpdateChecks>
     <AppxPackageSigningEnabled>True</AppxPackageSigningEnabled>
-    <AppxSymbolPackageEnabled>True</AppxSymbolPackageEnabled>
+    <AppxSymbolPackageEnabled>False</AppxSymbolPackageEnabled>
     <AppInstallerUri>https://kaenx.000webhostapp.com/</AppInstallerUri>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x86'">
@@ -254,6 +254,10 @@
     </AppxManifest>
     <None Include="Data\Logos\kænx.odg" />
     <None Include="METS_TemporaryKey.pfx" />
+    <PRIResource Include="Strings\en\Topologie.resw" />
+    <PRIResource Include="Strings\en\Import.resw" />
+    <PRIResource Include="Strings\en\Groups.resw" />
+    <PRIResource Include="Strings\en\Global.resw" />
     <PRIResource Include="Strings\de-de\Bus.resw" />
     <PRIResource Include="Strings\en\WorkDeskEasy.resw" />
     <PRIResource Include="Strings\en\Catalog.resw" />
@@ -266,7 +270,6 @@
     <PRIResource Include="Strings\de-de\Global.resw" />
     <PRIResource Include="Strings\de-de\Catalog.resw" />
     <PRIResource Include="Strings\de-de\Import.resw" />
-    <PRIResource Include="Strings\de-de\Resources.resw" />
     <PRIResource Include="Strings\de-de\MainPage.resw" />
     <PRIResource Include="Strings\en\MainPage.resw" />
   </ItemGroup>

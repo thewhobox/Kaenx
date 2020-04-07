@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <root>
   <!-- 
     Microsoft ResX Schema 
@@ -117,88 +117,142 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="BarDelete.Label" xml:space="preserve">
-    <value>Delete</value>
-  </data>
-  <data name="BarExport.Label" xml:space="preserve">
-    <value>Export</value>
-  </data>
-  <data name="BarImport.Label" xml:space="preserve">
-    <value>Import</value>
-  </data>
-  <data name="BarSearch.PlaceholderText" xml:space="preserve">
-    <value>Search...</value>
-  </data>
-  <data name="BarSort.Text" xml:space="preserve">
-    <value>Sort:</value>
-  </data>
-  <data name="DeviceInfoAddress.Text" xml:space="preserve">
-    <value>Ph. Address:</value>
-  </data>
-  <data name="DeviceInfoApp.Text" xml:space="preserve">
-    <value>Latest Version:</value>
-  </data>
-  <data name="DeviceInfoCoupler.Text" xml:space="preserve">
-    <value>Coupler:</value>
-  </data>
-  <data name="DeviceInfoCurrent.Text" xml:space="preserve">
-    <value>Bus Current:</value>
-  </data>
-  <data name="DeviceInfoHasApp.Text" xml:space="preserve">
-    <value>Application:</value>
-  </data>
-  <data name="DeviceInfoHeader2.Text" xml:space="preserve">
-    <value>Device Information</value>
-  </data>
-  <data name="DeviceInfoName.Text" xml:space="preserve">
-    <value>Name:</value>
-  </data>
-  <data name="DeviceInfoOrder.Text" xml:space="preserve">
-    <value>Order Number:</value>
-  </data>
-  <data name="DeviceInfoSupply.Text" xml:space="preserve">
-    <value>Power Supply:</value>
-  </data>
-  <data name="DListDesc.Header" xml:space="preserve">
-    <value>Description</value>
-  </data>
-  <data name="DListName.Header" xml:space="preserve">
-    <value>Name</value>
-  </data>
-  <data name="DListNumb.Header" xml:space="preserve">
-    <value>Order Number</value>
-  </data>
-  <data name="ImportAll.Content" xml:space="preserve">
-    <value>All</value>
-  </data>
-  <data name="ImportCancel.Content" xml:space="preserve">
-    <value>Cancel</value>
-  </data>
-  <data name="ImportChangeLange.Text" xml:space="preserve">
-    <value>Change</value>
-  </data>
-  <data name="ImportHeader.Text" xml:space="preserve">
-    <value>Select devices to import:</value>
-  </data>
-  <data name="ImportSelected.Content" xml:space="preserve">
-    <value>Selected</value>
-  </data>
-  <data name="ImportSelectedLang.Text" xml:space="preserve">
-    <value>Language: </value>
-  </data>
-  <data name="MansListAll" xml:space="preserve">
-    <value>All manufacturers</value>
-  </data>
-  <data name="MsgNotCopied" xml:space="preserve">
-    <value>The file could not be copied.</value>
-  </data>
-  <data name="WindowTitle" xml:space="preserve">
+  <data name="Catalog" xml:space="preserve">
     <value>Catalog</value>
   </data>
-  <data name="SideProps.Text" xml:space="preserve">
-    <value>Device Information</value>
+  <data name="DragConnect" xml:space="preserve">
+    <value>Add to Line {0}.{1}</value>
   </data>
-  <data name="SideFilter.Text" xml:space="preserve">
-    <value>Filter</value>
+  <data name="ErrMsgCoupler" xml:space="preserve">
+    <value>This Line already contains a coupler.</value>
+  </data>
+  <data name="ErrMsgExistArea" xml:space="preserve">
+    <value>There is already an Area with this ID.</value>
+  </data>
+  <data name="ErrMsgExistDevice" xml:space="preserve">
+    <value>There is already a Device with this ID.</value>
+  </data>
+  <data name="ErrMsgExistLine" xml:space="preserve">
+    <value>There is already a Line with this ID.</value>
+  </data>
+  <data name="ErrMsgMaxDevices" xml:space="preserve">
+    <value>You have reached the limit of 255 Devices per Line.</value>
+  </data>
+  <data name="ErrMsgNoApp" xml:space="preserve">
+    <value>No Application</value>
+  </data>
+  <data name="ErrMsgPowerSupply" xml:space="preserve">
+    <value>This Line already contains a Power Supply.</value>
+  </data>
+  <data name="InfoArea.Text" xml:space="preserve">
+    <value>Areas:</value>
+  </data>
+  <data name="InfoDevice.Text" xml:space="preserve">
+    <value>Devices: </value>
+  </data>
+  <data name="InfoLine.Text" xml:space="preserve">
+    <value>Lines: </value>
+  </data>
+  <data name="MenActions.Text" xml:space="preserve">
+    <value>Actions</value>
+  </data>
+  <data name="MenAddLine.Text" xml:space="preserve">
+    <value>Add Line</value>
+  </data>
+  <data name="MenAddLine.ToolTipService.ToolTip" xml:space="preserve">
+    <value>+SHIFT: Add Line</value>
+  </data>
+  <data name="MenAddDevice.Text" xml:space="preserve">
+    <value>Add Device</value>
+  </data>
+  <data name="MenDelete.Text" xml:space="preserve">
+    <value>Delete</value>
+  </data>
+  <data name="MenInfo.Text" xml:space="preserve">
+    <value>Read Device Information</value>
+  </data>
+  <data name="MenOpenPara.Text" xml:space="preserve">
+    <value>Parameter</value>
+  </data>
+  <data name="MenProg.Text" xml:space="preserve">
+    <value>Program</value>
+  </data>
+  <data name="MenProgAppK.Text" xml:space="preserve">
+    <value>Application (Complete)</value>
+  </data>
+  <data name="MenProgAppM.Text" xml:space="preserve">
+    <value>Application (Minimal, Experimental)</value>
+  </data>
+  <data name="MenProgAppP.Text" xml:space="preserve">
+    <value>Application (Partial)</value>
+  </data>
+  <data name="MenProgPh.Text" xml:space="preserve">
+    <value>Ph. Address</value>
+  </data>
+  <data name="MenRename.Text" xml:space="preserve">
+    <value>Rename</value>
+  </data>
+  <data name="MenRestart.Text" xml:space="preserve">
+    <value>Restart</value>
+  </data>
+  <data name="MenToggle_Activate" xml:space="preserve">
+    <value>Activate</value>
+  </data>
+  <data name="MenToggle_Deactivate" xml:space="preserve">
+    <value>Deactivate</value>
+  </data>
+  <data name="NewLineMain" xml:space="preserve">
+    <value>New Area</value>
+  </data>
+  <data name="NewLineMiddle" xml:space="preserve">
+    <value>New Line</value>
+  </data>
+  <data name="SideProps.Text" xml:space="preserve">
+    <value>Properties</value>
+  </data>
+  <data name="SidePropsApp.Header" xml:space="preserve">
+    <value>Application:</value>
+  </data>
+  <data name="SidePropsCheckA.Content" xml:space="preserve">
+    <value>Application</value>
+  </data>
+  <data name="SidePropsCheckG.Content" xml:space="preserve">
+    <value>Groups</value>
+  </data>
+  <data name="SidePropsCheckP.Content" xml:space="preserve">
+    <value>Ph. Address</value>
+  </data>
+  <data name="SidePropsCurrentA.Header" xml:space="preserve">
+    <value>Availible Bus Current:</value>
+  </data>
+  <data name="SidePropsCurrentU.Header" xml:space="preserve">
+    <value>Calculated Bus Current:</value>
+  </data>
+  <data name="SidePropsName.Header" xml:space="preserve">
+    <value>Name:</value>
+  </data>
+  <data name="SidePropsNumb.Header" xml:space="preserve">
+    <value>Number:</value>
+  </data>
+  <data name="ToolAddLine.Label" xml:space="preserve">
+    <value>Line</value>
+  </data>
+  <data name="ToolAddLine.ToolTipService.ToolTip" xml:space="preserve">
+    <value>+SHIFT: Add Area</value>
+  </data>
+  <data name="ToolAddDevice.Label" xml:space="preserve">
+    <value>Device</value>
+  </data>
+  <data name="ToolOpenCat.Label" xml:space="preserve">
+    <value>Catalog</value>
+  </data>
+  <data name="MenuDevices.Text" xml:space="preserve">
+    <value>Device</value>
+  </data>
+  <data name="MenuParas.Text" xml:space="preserve">
+    <value>Parameter</value>
+  </data>
+  <data name="MenuSettings.Text" xml:space="preserve">
+    <value>Settings</value>
   </data>
 </root>

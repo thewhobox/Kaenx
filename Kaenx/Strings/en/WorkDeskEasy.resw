@@ -124,13 +124,13 @@
     <value>Group Addresses</value>
   </data>
   <data name="MenuHome.Text" xml:space="preserve">
-    <value>Startpage</value>
+    <value>Main Page</value>
   </data>
   <data name="MenuCatalog.Text" xml:space="preserve">
     <value>Catalog</value>
   </data>
   <data name="MenuTopologie.Text" xml:space="preserve">
-    <value>Topologie</value>
+    <value>Topology</value>
   </data>
   <data name="TooltipInfoChange.ToolTipService.ToolTip" xml:space="preserve">
     <value>Changes</value>
@@ -142,7 +142,7 @@
     <value>Bus</value>
   </data>
   <data name="TooltipInfoBusCancel.Text" xml:space="preserve">
-    <value>Cancel action</value>
+    <value>Cancel Action</value>
   </data>
   <data name="InfoInterface.Text" xml:space="preserve">
     <value>Interface:</value>

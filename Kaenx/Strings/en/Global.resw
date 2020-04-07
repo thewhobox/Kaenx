@@ -117,16 +117,10 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="MainPage_LoadProject.Text" xml:space="preserve">
-    <value>Projekt laden</value>
+  <data name="Area" xml:space="preserve">
+    <value>Area</value>
   </data>
-  <data name="MainPage_NewProject.Content" xml:space="preserve">
-    <value>Neues Fortgeschrittenes Projekt</value>
-  </data>
-  <data name="MainPage_WizProject.Content" xml:space="preserve">
-    <value>Projekt Wizard benutzen</value>
-  </data>
-  <data name="MainPage_Catalog.Content" xml:space="preserve">
-    <value>Katalog öffnen</value>
+  <data name="Line" xml:space="preserve">
+    <value>Line</value>
   </data>
 </root>

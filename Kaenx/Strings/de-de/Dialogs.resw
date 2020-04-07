@@ -178,7 +178,7 @@
     <value>Achtung!</value>
   </data>
   <data name="ComsDeleteBlock.Text" xml:space="preserve">
-    <value>Das Ändern des Parameters führt dazu, dass folgende Kommunikationsobjetkte getrennt werden müssen.</value>
+    <value>Das Ändern des Parameters führt dazu, dass folgende Kommunikationsobjekte gelöscht werden müssen.</value>
   </data>
   <data name="ComsDeleteConn.Header" xml:space="preserve">
     <value>Verbindungen</value>
@@ -202,7 +202,7 @@
     <value>Sprache auswählen</value>
   </data>
   <data name="LangBlock.Text" xml:space="preserve">
-    <value>Sprache: </value>
+    <value>Sprache:</value>
   </data>
   <data name="NewName.CloseButtonText" xml:space="preserve">
     <value>Abbrechen</value>

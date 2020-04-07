@@ -132,9 +132,6 @@
   <data name="BtnSettings.Text" xml:space="preserve">
     <value>Einstellungen</value>
   </data>
-  <data name="BtnStore.Text" xml:space="preserve">
-    <value>Store</value>
-  </data>
   <data name="MsgProjectDeleted" xml:space="preserve">
     <value>Projekt wurde gelöscht.</value>
   </data>
@@ -143,6 +140,9 @@
   </data>
   <data name="NewName.Text" xml:space="preserve">
     <value>Name:</value>
+  </data>
+  <data name="NewNameIn.Text" xml:space="preserve">
+    <value>Neues Projekt</value>
   </data>
   <data name="NewPath.Text" xml:space="preserve">
     <value>Speicherort:</value>

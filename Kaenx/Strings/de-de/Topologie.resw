@@ -148,13 +148,13 @@
     <value>Es existiert bereits ein Gerät mit dieser ID.</value>
   </data>
   <data name="InfoArea.Text" xml:space="preserve">
-    <value>Bereiche: </value>
+    <value>Bereiche:</value>
   </data>
   <data name="InfoDevice.Text" xml:space="preserve">
-    <value>Geräte: </value>
+    <value>Geräte:</value>
   </data>
   <data name="InfoLine.Text" xml:space="preserve">
-    <value>Linien: </value>
+    <value>Linien:</value>
   </data>
   <data name="MenActions.Text" xml:space="preserve">
     <value>Aktionen</value>
@@ -176,9 +176,6 @@
   </data>
   <data name="MenOpenPara.Text" xml:space="preserve">
     <value>Parameter</value>
-  </data>
-  <data name="MenOpenPara2.Text" xml:space="preserve">
-    <value>Parameter 2</value>
   </data>
   <data name="MenProg.Text" xml:space="preserve">
     <value>Programmieren</value>

@@ -220,7 +220,7 @@ namespace Kaenx.Classes.Bus
 
             if (!_cancelTokenSource.IsCancellationRequested)
             {
-                CurrentAction.TodoText = loader.GetString("Action_TimoutProc");
+                CurrentAction.TodoText = loader.GetString("Action_TimeoutProc");
                 CurrentAction_Finished(null, null);
             } else
             {

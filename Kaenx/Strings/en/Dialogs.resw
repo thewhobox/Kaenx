@@ -118,7 +118,7 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="AddDevice.Title" xml:space="preserve">
-    <value>Add device</value>
+    <value>Add Device</value>
   </data>
   <data name="AddDevice.PrimaryButtonText" xml:space="preserve">
     <value>Add</value>
@@ -130,7 +130,7 @@
     <value>Search...</value>
   </data>
   <data name="AddDeviceRequired" xml:space="preserve">
-    <value>Please select a device and a line.</value>
+    <value>Please select device and line.</value>
   </data>
   <data name="AddDeviceCount.Text" xml:space="preserve">
     <value>Count:</value>
@@ -172,13 +172,13 @@
     <value>Cancel</value>
   </data>
   <data name="ComsDelete.PrimaryButtonText" xml:space="preserve">
-    <value>Delete connections</value>
+    <value>Delete Connections</value>
   </data>
   <data name="ComsDelete.Text" xml:space="preserve">
-    <value>Attention!</value>
+    <value>Warning!</value>
   </data>
   <data name="ComsDeleteBlock.Text" xml:space="preserve">
-    <value>Changing the parameters causes that the following Communication-Objects will be deleted.</value>
+    <value>Changing parameters causes the listed Communication objects to be deleted.</value>
   </data>
   <data name="ComsDeleteConn.Header" xml:space="preserve">
     <value>Connections</value>
@@ -187,10 +187,10 @@
     <value>Name</value>
   </data>
   <data name="ComsDeleteNr.Header" xml:space="preserve">
-    <value>Nr.</value>
+    <value>No.</value>
   </data>
   <data name="ComsDelteFunc.Header" xml:space="preserve">
-    <value>Function</value>
+    <value>Functionality</value>
   </data>
   <data name="Lang.PrimaryButtonText" xml:space="preserve">
     <value>Select always</value>
@@ -199,10 +199,10 @@
     <value>Only this time</value>
   </data>
   <data name="Lang.Title" xml:space="preserve">
-    <value>Select language</value>
+    <value>Select Language</value>
   </data>
   <data name="LangBlock.Text" xml:space="preserve">
-    <value>Language: </value>
+    <value>Language:</value>
   </data>
   <data name="NewName.CloseButtonText" xml:space="preserve">
     <value>Cancel</value>

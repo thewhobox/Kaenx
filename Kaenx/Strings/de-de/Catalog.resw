@@ -136,7 +136,7 @@
     <value>Ph. Adresse:</value>
   </data>
   <data name="DeviceInfoApp.Text" xml:space="preserve">
-    <value>Aktuellste Applikation:</value>
+    <value>Aktuellste Version:</value>
   </data>
   <data name="DeviceInfoCoupler.Text" xml:space="preserve">
     <value>Koppler:</value>
@@ -178,7 +178,7 @@
     <value>Ändern</value>
   </data>
   <data name="ImportHeader.Text" xml:space="preserve">
-    <value>Welche Geräte sollen importiert werden?</value>
+    <value>Geräte zum Importieren auswählen:</value>
   </data>
   <data name="ImportSelected.Content" xml:space="preserve">
     <value>Ausgewählte</value>

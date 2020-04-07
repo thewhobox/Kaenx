@@ -121,7 +121,7 @@
     <value>The app crashed recently.</value>
   </data>
   <data name="BtnArchiv.Text" xml:space="preserve">
-    <value>Archiv</value>
+    <value>Archive</value>
   </data>
   <data name="BtnCatalog.Text" xml:space="preserve">
     <value>Catalog</value>
@@ -132,14 +132,11 @@
   <data name="BtnSettings.Text" xml:space="preserve">
     <value>Settings</value>
   </data>
-  <data name="BtnStore.Text" xml:space="preserve">
-    <value>Store</value>
-  </data>
   <data name="MsgProjectDeleted" xml:space="preserve">
     <value>Project was deleted.</value>
   </data>
   <data name="NewTitle.Text" xml:space="preserve">
-    <value>Create a new project</value>
+    <value>New Project</value>
   </data>
   <data name="NewName.Text" xml:space="preserve">
     <value>Name:</value>
@@ -148,7 +145,7 @@
     <value>New project</value>
   </data>
   <data name="NewPath.Text" xml:space="preserve">
-    <value>Savepath:</value>
+    <value>Location:</value>
   </data>
   <data name="NewImage.Text" xml:space="preserve">
     <value>Image:</value>
