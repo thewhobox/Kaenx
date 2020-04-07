@@ -117,148 +117,88 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="Catalog" xml:space="preserve">
-    <value>Katalog</value>
+  <data name="NoInterfaceSelected" xml:space="preserve">
+    <value>Bitte wählen Sie eine Schnittstelle aus!</value>
   </data>
-  <data name="DragConnect" xml:space="preserve">
-    <value>Zu Linie {0}.{1} hinzufügen.</value>
+  <data name="Action_Connecting" xml:space="preserve">
+    <value>Verbindung wird hergestellt...</value>
   </data>
-  <data name="ErrMsgCoupler" xml:space="preserve">
-    <value>In der Linie ist bereits ein Koppler vorhanden.</value>
+  <data name="Action_Canceled" xml:space="preserve">
+    <value>Wurde abgebrochen</value>
   </data>
-  <data name="ErrMsgExistArea" xml:space="preserve">
-    <value>Es existiert bereits ein Bereich mit dieser ID.</value>
+  <data name="Action_Timeout" xml:space="preserve">
+    <value>Zeitüberschreitung (10s)</value>
   </data>
-  <data name="ErrMsgExistDevice" xml:space="preserve">
-    <value>Es existiert bereits ein Gerät mit dieser ID.</value>
+  <data name="Action_TimeoutProc" xml:space="preserve">
+    <value>Zeitüberschreitung Proess (30s)</value>
   </data>
-  <data name="ErrMsgExistLine" xml:space="preserve">
-    <value>Es existiert bereits eine Linie mit dieser ID.</value>
+  <data name="DeviceInfoAddress.Text" xml:space="preserve">
+    <value>Ph. Adresse:</value>
   </data>
-  <data name="ErrMsgMaxDevices" xml:space="preserve">
-    <value>Sie haben das Limit von 255 Geräten Pro Linie erreicht.</value>
+  <data name="DeviceInfoApp.Text" xml:space="preserve">
+    <value>Aktuellste Applikation:</value>
   </data>
-  <data name="ErrMsgNoApp" xml:space="preserve">
-    <value>Besitzt keine Applikation</value>
+  <data name="DeviceInfoCoupler.Text" xml:space="preserve">
+    <value>Koppler:</value>
   </data>
-  <data name="ErrMsgPowerSupply" xml:space="preserve">
-    <value>In der Linie ist bereits eine Spannungsversorgung vorhanden.</value>
+  <data name="DeviceInfoCurrent.Text" xml:space="preserve">
+    <value>Busstrom:</value>
   </data>
-  <data name="ErrorMsgExistDevice" xml:space="preserve">
-    <value>Es existiert bereits ein Gerät mit dieser ID.</value>
-  </data>
-  <data name="InfoArea.Text" xml:space="preserve">
-    <value>Bereiche: </value>
-  </data>
-  <data name="InfoDevice.Text" xml:space="preserve">
-    <value>Geräte: </value>
-  </data>
-  <data name="InfoLine.Text" xml:space="preserve">
-    <value>Linien: </value>
-  </data>
-  <data name="MenActions.Text" xml:space="preserve">
-    <value>Aktionen</value>
-  </data>
-  <data name="MenAddLine.Text" xml:space="preserve">
-    <value>Linie hinzufügen</value>
-  </data>
-  <data name="MenAddLine.ToolTipService.ToolTip" xml:space="preserve">
-    <value>+SHIFT: Neue Linie anfügen</value>
-  </data>
-  <data name="MenAddDevice.Text" xml:space="preserve">
-    <value>Gerät hinzufügen</value>
-  </data>
-  <data name="MenDelete.Text" xml:space="preserve">
-    <value>Löschen</value>
-  </data>
-  <data name="MenInfo.Text" xml:space="preserve">
-    <value>Info auslesen</value>
-  </data>
-  <data name="MenOpenPara.Text" xml:space="preserve">
-    <value>Parameter</value>
-  </data>
-  <data name="MenOpenPara2.Text" xml:space="preserve">
-    <value>Parameter 2</value>
-  </data>
-  <data name="MenProg.Text" xml:space="preserve">
-    <value>Programmieren</value>
-  </data>
-  <data name="MenProgAppK.Text" xml:space="preserve">
-    <value>Applikation (Komplett)</value>
-  </data>
-  <data name="MenProgAppM.Text" xml:space="preserve">
-    <value>Applikation (Minimal, Experimentell)</value>
-  </data>
-  <data name="MenProgAppP.Text" xml:space="preserve">
-    <value>Applikation (Partiell)</value>
-  </data>
-  <data name="MenProgPh.Text" xml:space="preserve">
-    <value>Ph. Adresse</value>
-  </data>
-  <data name="MenRename.Text" xml:space="preserve">
-    <value>Umbenennen</value>
-  </data>
-  <data name="MenRestart.Text" xml:space="preserve">
-    <value>Neustarten</value>
-  </data>
-  <data name="MenToggle_Activate" xml:space="preserve">
-    <value>Aktivieren</value>
-  </data>
-  <data name="MenToggle_Deactivate" xml:space="preserve">
-    <value>Deaktivieren</value>
-  </data>
-  <data name="NewLineMain" xml:space="preserve">
-    <value>Neuer Bereich</value>
-  </data>
-  <data name="NewLineMiddle" xml:space="preserve">
-    <value>Neue Linie</value>
-  </data>
-  <data name="SideProps.Text" xml:space="preserve">
-    <value>Eigenschaften</value>
-  </data>
-  <data name="SidePropsApp.Header" xml:space="preserve">
+  <data name="DeviceInfoHasApp.Text" xml:space="preserve">
     <value>Applikation:</value>
   </data>
-  <data name="SidePropsCheckA.Content" xml:space="preserve">
-    <value>Applikation</value>
+  <data name="DeviceInfoHeader2.Text" xml:space="preserve">
+    <value>Geräte Informationen</value>
   </data>
-  <data name="SidePropsCheckG.Content" xml:space="preserve">
-    <value>Gruppen</value>
-  </data>
-  <data name="SidePropsCheckP.Content" xml:space="preserve">
-    <value>Ph. Adresse</value>
-  </data>
-  <data name="SidePropsCurrentA.Header" xml:space="preserve">
-    <value>Verfügbarer Busstrom:</value>
-  </data>
-  <data name="SidePropsCurrentU.Header" xml:space="preserve">
-    <value>Berechneter Busstrom:</value>
-  </data>
-  <data name="SidePropsName.Header" xml:space="preserve">
+  <data name="DeviceInfoName.Text" xml:space="preserve">
     <value>Name:</value>
   </data>
-  <data name="SidePropsNumb.Header" xml:space="preserve">
-    <value>Nummer:</value>
+  <data name="DeviceInfoOrder.Text" xml:space="preserve">
+    <value>Bestellnummer:</value>
   </data>
-  <data name="ToolAddLine.Label" xml:space="preserve">
-    <value>Linie</value>
+  <data name="DeviceInfoSupply.Text" xml:space="preserve">
+    <value>Netzteil:</value>
   </data>
-  <data name="ToolAddLine.ToolTipService.ToolTip" xml:space="preserve">
-    <value>+SHIFT: Neuen Bereich anfügen</value>
+  <data name="DListDesc.Header" xml:space="preserve">
+    <value>Beschreibung</value>
   </data>
-  <data name="ToolAddDevice.Label" xml:space="preserve">
-    <value>Gerät</value>
+  <data name="DListName.Header" xml:space="preserve">
+    <value>Name</value>
   </data>
-  <data name="ToolOpenCat.Label" xml:space="preserve">
+  <data name="DListNumb.Header" xml:space="preserve">
+    <value>Bestellnummer</value>
+  </data>
+  <data name="ImportAll.Content" xml:space="preserve">
+    <value>Alle</value>
+  </data>
+  <data name="ImportCancel.Content" xml:space="preserve">
+    <value>Abbrechen</value>
+  </data>
+  <data name="ImportChangeLange.Text" xml:space="preserve">
+    <value>Ändern</value>
+  </data>
+  <data name="ImportHeader.Text" xml:space="preserve">
+    <value>Welche Geräte sollen importiert werden?</value>
+  </data>
+  <data name="ImportSelected.Content" xml:space="preserve">
+    <value>Ausgewählte</value>
+  </data>
+  <data name="ImportSelectedLang.Text" xml:space="preserve">
+    <value>Sprache: </value>
+  </data>
+  <data name="MansListAll" xml:space="preserve">
+    <value>Alle Hersteller</value>
+  </data>
+  <data name="MsgNotCopied" xml:space="preserve">
+    <value>Die Datei konnte nicht kopiert werden.</value>
+  </data>
+  <data name="WindowTitle" xml:space="preserve">
     <value>Katalog</value>
   </data>
-  <data name="MenuDevices.Text" xml:space="preserve">
-    <value>Geräte</value>
+  <data name="SideProps.Text" xml:space="preserve">
+    <value>Geräteinfos</value>
   </data>
-  <data name="MenuParas.Text" xml:space="preserve">
-    <value>Parameter</value>
-  </data>
-  <data name="MenuSettings.Text" xml:space="preserve">
-    <value>Einstellungen</value>
+  <data name="SideFilter.Text" xml:space="preserve">
+    <value>Filter</value>
   </data>
 </root>

@@ -27,10 +27,10 @@
     <AppInstallerCheckForUpdateFrequency>OnApplicationRun</AppInstallerCheckForUpdateFrequency>
     <PackageCertificateThumbprint>C554126408FAF38E210787F6EC62EC5E77D59B00</PackageCertificateThumbprint>
     <AppxPackageSigningTimestampDigestAlgorithm>SHA256</AppxPackageSigningTimestampDigestAlgorithm>
-    <GenerateTestArtifacts>True</GenerateTestArtifacts>
+    <GenerateTestArtifacts>False</GenerateTestArtifacts>
     <HoursBetweenUpdateChecks>0</HoursBetweenUpdateChecks>
     <AppxPackageSigningEnabled>True</AppxPackageSigningEnabled>
-    <AppxSymbolPackageEnabled>False</AppxSymbolPackageEnabled>
+    <AppxSymbolPackageEnabled>True</AppxSymbolPackageEnabled>
     <AppInstallerUri>https://kaenx.000webhostapp.com/</AppInstallerUri>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x86'">
@@ -128,6 +128,7 @@
     <Compile Include="Classes\Bus\Actions\ProgApplication.cs" />
     <Compile Include="Classes\Bus\Actions\ProgPhysicalAddress.cs" />
     <Compile Include="Classes\Bus\BusConnection.cs" />
+    <Compile Include="Classes\Bus\BusInterface.cs" />
     <Compile Include="Classes\Bus\BusSettings.cs" />
     <Compile Include="Classes\Device.cs" />
     <Compile Include="Classes\ComboItemSimple.cs" />
@@ -253,6 +254,7 @@
     </AppxManifest>
     <None Include="Data\Logos\kænx.odg" />
     <None Include="METS_TemporaryKey.pfx" />
+    <PRIResource Include="Strings\de-de\Bus.resw" />
     <PRIResource Include="Strings\en\WorkDeskEasy.resw" />
     <PRIResource Include="Strings\en\Catalog.resw" />
     <PRIResource Include="Strings\en\Dialogs.resw" />

@@ -3,6 +3,7 @@ using Kaenx.Classes.Bus;
 using Kaenx.Classes.Bus.Actions;
 using Kaenx.Classes.Helper;
 using Kaenx.Konnect;
+using Kaenx.Konnect.Builders;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -19,6 +20,7 @@ using Windows.UI.Xaml.Data;
 using Windows.UI.Xaml.Input;
 using Windows.UI.Xaml.Media;
 using Windows.UI.Xaml.Navigation;
+using Windows.Web.Http;
 
 // Die Elementvorlage "Leere Seite" wird unter https://go.microsoft.com/fwlink/?LinkId=234238 dokumentiert.
 
@@ -32,7 +34,6 @@ namespace Kaenx.View
         public ObservableCollection<DeviceInfoData> ReadList { get; } = new ObservableCollection<DeviceInfoData>();
         public ObservableCollection<MonitorTelegram> TelegramList { get; } = new ObservableCollection<MonitorTelegram>();
 
-
         private Connection _conn = null;
 
         public Bus()
@@ -40,8 +41,8 @@ namespace Kaenx.View
             this.InitializeComponent();
             GridReads.DataContext = ReadList;
             GridBusMonitor.DataContext = TelegramList;
-
         }
+
 
         private void ReadInfo(object sender, RoutedEventArgs e)
         {

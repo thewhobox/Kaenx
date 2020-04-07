@@ -74,9 +74,10 @@ namespace Kaenx.View
             _pages.Add("settings", new Settings());
             App._pages = _pages;
 
+            InfoInterfaces.DataContext = Classes.Bus.BusConnection.Instance;
             InfoBus.DataContext = Classes.Bus.BusConnection.Instance;
 
-            ContentFrame.Content = _pages["home"];
+            NavView.SelectedItem = NavView.MenuItems[0];
         }
 
         private void Instance_OnShowNotification(string text, int duration, ViewHelper.MessageType type)
@@ -109,7 +110,7 @@ namespace Kaenx.View
 
         private void InfoBus_Click(object sender, RoutedEventArgs e)
         {
-            NavView.SelectedItem = NavView.MenuItems[4];
+            NavView.SelectedItem = NavView.MenuItems[5];
         }
     }
 }

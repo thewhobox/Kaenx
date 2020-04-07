@@ -78,11 +78,17 @@
                 <ColumnDefinition Width="Auto" />
             </Grid.ColumnDefinitions>
 
-            <TextBlock Text="Schnitstelle:" Foreground="White" Margin="10 0" VerticalAlignment="Center"/>
+            <TextBlock x:Uid="/WorkDesKEasy/InfoInterface" Foreground="White" Margin="10 0" VerticalAlignment="Center"/>
 
-            <ComboBox Grid.Column="1" Height="29" Width="200">
-                <ComboBoxItem Content="Schnittstelle 1" />
-                <ComboBoxItem Content="Schnittstelle 2" />
+            <ComboBox x:Name="InfoInterfaces" ItemsSource="{Binding InterfaceList}" SelectedItem="{Binding SelectedInterface, Mode=TwoWay}" Grid.Column="1" Height="29" MinWidth="200">
+                <ComboBox.ItemTemplate>
+                    <DataTemplate>
+                        <StackPanel Orientation="Vertical">
+                            <TextBlock Text="{Binding Name}" />
+                            <TextBlock Text="{Binding Endpoint}" FontSize="12" Foreground="Gray" />
+                        </StackPanel>
+                    </DataTemplate>
+                </ComboBox.ItemTemplate>
             </ComboBox>
 
 

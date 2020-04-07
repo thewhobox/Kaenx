@@ -27,10 +27,42 @@ namespace Kaenx.Classes
         private bool _loadedApplication = false;
         private bool _loadedPA = false;
         private bool _isDeactivated = false;
-        public bool LoadedGroup { get { return _loadedGroups; } set { _loadedGroups = value; Changed("LoadedGroup"); if(!IsInit) SaveHelper.UpdateDevice(this); } }
-        public bool LoadedApplication { get { return _loadedApplication; } set { _loadedApplication = value; Changed("LoadedApplication"); if (!IsInit) SaveHelper.UpdateDevice(this); } }
-        public bool LoadedPA { get { return _loadedPA; } set { _loadedPA = value; Changed("LoadedPA"); if (!IsInit) SaveHelper.UpdateDevice(this); } }
-        public bool IsDeactivated { get { return _isDeactivated; } set { _isDeactivated = value; Changed("CurrentBackBrush"); if (!IsInit) SaveHelper.UpdateDevice(this); } }
+        public bool LoadedGroup { 
+            get { return _loadedGroups; } 
+            set {
+                if (_loadedGroups == value) return;
+                _loadedGroups = value; 
+                Changed("LoadedGroup"); 
+                if(!IsInit) SaveHelper.UpdateDevice(this); 
+            } 
+        }
+        public bool LoadedApplication { 
+            get { return _loadedApplication; } 
+            set { 
+                if (_loadedApplication == value) return; 
+                _loadedApplication = value; 
+                Changed("LoadedApplication"); 
+                if (!IsInit) SaveHelper.UpdateDevice(this); 
+            } 
+        }
+        public bool LoadedPA { 
+            get { return _loadedPA; } 
+            set {
+                if (_loadedPA == value) return;
+                _loadedPA = value; 
+                Changed("LoadedPA"); 
+                if (!IsInit) SaveHelper.UpdateDevice(this); 
+            } 
+        }
+        public bool IsDeactivated { 
+            get { return _isDeactivated; } 
+            set {
+                if (_isDeactivated == value) return;
+                _isDeactivated = value; 
+                Changed("CurrentBackBrush"); 
+                if (!IsInit) SaveHelper.UpdateDevice(this); 
+            } 
+        }
         public bool IsExpanded { get { return false; } }
         public List<string> Subs { get; }
 
@@ -43,12 +75,20 @@ namespace Kaenx.Classes
         public int Id
         {
             get { return _id; }
-            set { _id = value; Changed("Id"); Changed("LineName"); LoadedPA = false; Parent?.Subs.Sort(x => x.Id); if (!IsInit) SaveHelper.UpdateDevice(this); }
+            set {
+                if (_id == value) return;
+                _id = value; 
+                Changed("Id"); 
+                Changed("LineName"); 
+                LoadedPA = false; 
+                Parent?.Subs.Sort(x => x.Id); 
+                if (!IsInit) SaveHelper.UpdateDevice(this); 
+            }
         }
         public ObservableCollection<DeviceComObject> ComObjects
         {
             get { return _comObjects; }
-            set { _comObjects = value; Changed("ComObjects"); SaveHelper.SaveProject(); }
+            set { _comObjects = value; Changed("ComObjects"); SaveHelper.SaveAssociations(this); }
         }
         public int UId { get; set; }
         [XmlIgnore]
@@ -56,7 +96,12 @@ namespace Kaenx.Classes
         public string Name
         {
             get { return _name; }
-            set { _name = value; Changed("Name"); if (!IsInit) SaveHelper.UpdateDevice(this); }
+            set {
+                if (_name == value) return;
+                _name = value; 
+                Changed("Name"); 
+                if (!IsInit) SaveHelper.UpdateDevice(this); 
+            }
         }
         [XmlIgnore]
         public LineMiddle Parent { get; set; }

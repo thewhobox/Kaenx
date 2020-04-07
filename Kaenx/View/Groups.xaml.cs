@@ -42,9 +42,6 @@ namespace Kaenx.View
         private LineDevice _selectedDevice;
         private Project _project;
 
-        private DeviceComObject _dragItem;
-
-
         public LineDevice SelectedDevice
         {
             get { return _selectedDevice == null ? defaultDevice : _selectedDevice; }
@@ -75,15 +72,12 @@ namespace Kaenx.View
             _project = (Project)this.DataContext;
         }
 
-        private int count = 1;
-
         public event PropertyChangedEventHandler PropertyChanged;
 
         private void ClickAddMain(object sender, RoutedEventArgs e)
         {
             Group group = new Group(getFirstFreeIdMain(), loader.GetString("NewGroupMain"));
             _project.Groups.Add(group);
-            count++;
 
             GroupMainModel model = new GroupMainModel();
             model.Name = group.Name;
@@ -104,8 +98,7 @@ namespace Kaenx.View
             {
                 Group item = dc as Group;
                 GroupMiddle Group = new GroupMiddle(getFirstFreeIdSub(item), loader.GetString("NewGroupMiddle"), item);
-                count++;
-
+                
                 GroupMiddleModel model = new GroupMiddleModel();
                 model.Name = Group.Name;
                 model.Id = Group.Id;
@@ -123,8 +116,7 @@ namespace Kaenx.View
             {
                 GroupMiddle item = dc as GroupMiddle;
                 GroupAddress Group = new GroupAddress(getFirstFreeIdSub(item), loader.GetString("NewGroupAddr"), item);
-                count++;
-
+                
                 GroupAddressModel model = new GroupAddressModel();
                 model.Name = Group.Name;
                 model.Id = Group.Id;

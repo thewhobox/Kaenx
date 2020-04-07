@@ -13,6 +13,7 @@
     <Page.Resources>
         <converter:Checked2VisibilityConverter x:Key="CheckedConverter" />
         <converter:NumberConverter x:Key="NumberConverter" />
+        <SolidColorBrush  x:Key="NavigationViewTopPaneBackground" Color="{Binding Source={ThemeResource BrushAccentColor1}, Path=Color}" />
     </Page.Resources>
 
     <Grid x:Name="GridDevices">
@@ -55,11 +56,17 @@
             <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
 
-        <NavigationView x:Name="SubNavPanel" Grid.ColumnSpan="3" Margin="0 0 0 5" SelectionChanged="SubNavPanel_SelectionChanged" PaneDisplayMode="Top" IsSettingsVisible="False" IsBackButtonVisible="Collapsed">
+        <NavigationView x:Name="SubNavPanel" Grid.ColumnSpan="3" Margin="0 1" SelectionChanged="SubNavPanel_SelectionChanged" PaneDisplayMode="Top" IsSettingsVisible="False" IsBackButtonVisible="Collapsed">
             <NavigationView.MenuItems>
-                <NavigationViewItem Content="Geräte"  Tag="topo" IsSelected="true" />
-                <NavigationViewItem Content="Parameter" Tag="para" />
-                <NavigationViewItem Content="Einstellungen" Tag="sett" />
+                <NavigationViewItem Tag="topo" IsSelected="true">
+                    <TextBlock x:Uid="/Topologie/MenuDevices" Foreground="White" />
+                </NavigationViewItem>
+                <NavigationViewItem Tag="para">
+                    <TextBlock x:Uid="/Topologie/MenuParas" Foreground="White" />
+                </NavigationViewItem>
+                <NavigationViewItem Tag="sett">
+                    <TextBlock x:Uid="/Topologie/MenuSettings" Foreground="White" />
+                </NavigationViewItem>
             </NavigationView.MenuItems>
         </NavigationView>
 

@@ -43,25 +43,18 @@ namespace Kaenx.View
         public Project _project;
         private CatalogContext _context = new CatalogContext();
         private ResourceLoader loader = ResourceLoader.GetForCurrentView("Topologie");
-        private StoreHelper storeHelper;
 
         public Topologie()
         {
             this.InitializeComponent();
             StartCalc();
-            GetLicenses();
+            SubNavPanel.SelectedItem = SubNavPanel.MenuItems[0];
         }
 
         private async void StartCalc()
         {
             await Task.Delay(500);
             CalcCounts();
-        }
-
-        private async void GetLicenses()
-        {
-            storeHelper = new StoreHelper();
-            await storeHelper.Load();
         }
 
         private async void ClickRename(object sender, RoutedEventArgs e)
@@ -282,9 +275,12 @@ namespace Kaenx.View
             ParamStack.Add((paras, device.UId));
             ParamPresenter.Content = paras;
 
+            if(ColsPara.Width.Value == 0)
+                SubNavPanel.SelectedItem = SubNavPanel.MenuItems[1];
+
             if (!isFromCache)
             {
-                await Task.Delay(100);
+                await Task.Delay(500);
                 paras.Start();
             }
         }
@@ -357,6 +353,7 @@ namespace Kaenx.View
             linedevmodel.Name = device.Name;
             linedevmodel.ApplicationId = device.ApplicationId;
             linedevmodel.DeviceId = device.DeviceId;
+            linedevmodel.ProjectId = SaveHelper._project.Id;
             _contextP.LineDevices.Add(linedevmodel);
             _contextP.SaveChanges();
             device.UId = linedevmodel.UId;
@@ -415,16 +412,6 @@ namespace Kaenx.View
             MenuFlyoutItemBase mPara = menu.Items.Single(i => i.Name == "MFI_Para");
             MenuFlyoutSubItem mActions = (MenuFlyoutSubItem)menu.Items.Single(i => i.Name == "MFI_Actions");
             MenuFlyoutItemBase mToggle = mActions.Items.Single(i => i.Name == "MFI_Toggle");
-            MenuFlyoutItemBase mReadConf = mActions.Items.Single(i => i.Name == "MFI_ReadConf");
-
-
-#if DEBUG
-#else
-            mToggle.IsEnabled = storeHelper.DeviceDeActivate;
-            mReadConf.IsEnabled = storeHelper.LoadDeviceConfig;
-#endif
-
-
 
             switch (line.Type)
             {
@@ -432,8 +419,7 @@ namespace Kaenx.View
 
                     LineDevice dev = (LineDevice)line;
 
-                    MenuFlyoutItem itemT = (MenuFlyoutItem)mToggle;
-                    itemT.Text = dev.IsDeactivated ? loader.GetString("MenToggle_Activate") : loader.GetString("MenToggle_Deactivate");
+                    (mToggle as MenuFlyoutItem).Text = dev.IsDeactivated ? loader.GetString("MenToggle_Activate") : loader.GetString("MenToggle_Deactivate");
 
                     mAddL.Visibility = Visibility.Collapsed;
                     mAddD.Visibility = Visibility.Collapsed;

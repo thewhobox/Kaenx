@@ -8,12 +8,17 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Kaenx.Classes.Bus.Actions;
+using Kaenx.Classes.Helper;
+using Kaenx.Konnect;
 using Kaenx.Konnect.Builders;
+using Windows.ApplicationModel.Resources;
+using Windows.UI.Xaml;
 
 namespace Kaenx.Classes.Bus
 {
     public class BusConnection :INotifyPropertyChanged
     {
+        private ResourceLoader loader = ResourceLoader.GetForCurrentView("Bus");
         private bool _isConnected = false;
         private bool _cancelIsUser = false;
 
@@ -26,15 +31,22 @@ namespace Kaenx.Classes.Bus
         public event ConnectionChangedHandler ConnectionChanged;
         public event PropertyChangedEventHandler PropertyChanged;
 
+        public ObservableCollection<BusInterface> InterfaceList { get; } = new ObservableCollection<BusInterface>();
         public Queue<IBusAction> busActions { get; set; } = new Queue<IBusAction>();
         public ObservableCollection<IBusAction> History { get; set; } = new ObservableCollection<IBusAction>();
 
         public List<IBusAction> actions { get { return busActions.ToList(); } }
 
 
-        public delegate void TunnelResponseHandler(TunnelResponse response);
-        public event TunnelResponseHandler OnTunnelResponse;
 
+        private BusInterface _selectedInterface;
+        public BusInterface SelectedInterface
+        {
+            get { return _selectedInterface; }
+            set { _selectedInterface = value; Changed("SelectedInterface"); }
+        }
+        private Connection searchConn = new Connection(new IPEndPoint(IPAddress.Parse("224.0.23.12"), 3671));
+        private DispatcherTimer searchTimer = new DispatcherTimer() { Interval = TimeSpan.FromSeconds(30) };
 
 
 
@@ -55,45 +67,75 @@ namespace Kaenx.Classes.Bus
             }
         }
 
-        private string _currentProgressText = "Getrennt";
-        public string CurrentProgressText
-        {
-            get { return _currentProgressText; }
-            set { _currentProgressText = value; Changed("CurrentProgressText"); }
-        }
-
 
         public BusConnection()
         {
             Run();
+
+            searchConn.OnSearchResponse += SearchConn_OnSearchResponse;
+            searchTimer.Tick += (a, b) => SearchForDevices();
+            SearchForDevices();
         }
 
-        private void Connection_OnTunnelRequest(TunnelResponse response)
+        private void SearchConn_OnSearchResponse(Konnect.Responses.SearchResponse response)
         {
-            OnTunnelResponse?.Invoke(response);
+            if(InterfaceList.Any(i => i.Hash == response.endpoint.ToString() + response.FriendlyName)) {
+                BusInterface inter = InterfaceList.Single(i => i.Hash == response.endpoint.ToString() + response.FriendlyName);
+                inter.LastFound = DateTime.Now;
+            }
+            else
+            {
+                BusInterface inter = new BusInterface();
+                inter.Endpoint = response.endpoint;
+                inter.Name = response.FriendlyName;
+                inter.Hash = inter.Endpoint.ToString() + inter.Name;
+                inter.LastFound = DateTime.Now;
+                _ = App._dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Normal, () =>
+                {
+                    InterfaceList.Add(inter);
+                });
+            }
         }
+
+        private void SearchForDevices()
+        {
+            List<BusInterface> toDelete = new List<BusInterface>();
+            foreach(BusInterface inter in InterfaceList)
+            {
+                if ((DateTime.Now - TimeSpan.FromMinutes(2)) > inter.LastFound)
+                    toDelete.Add(inter);
+            }
+            _ = App._dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Normal, () =>
+            {
+                foreach (BusInterface inter in toDelete)
+                    InterfaceList.Remove(inter);
+            });
+
+            SearchRequest req = new SearchRequest();
+            IPAddress a = GetIpAddress();
+            req.Build(new IPEndPoint(GetIpAddress(), searchConn.Port));
+            searchConn.SendWithoutConnected(req);
+        }
+
+
+
+        public IPAddress GetIpAddress()
+        {
+            string hostName = Dns.GetHostName();
+            foreach(IPAddress addr in Dns.GetHostAddresses(hostName))
+            {
+                if (addr.AddressFamily == System.Net.Sockets.AddressFamily.InterNetwork)
+                    return addr;
+            }
+            return null;
+        }
+
 
         public void CancelCurrent()
         {
             _cancelIsUser = true;
             _cancelTokenSource?.Cancel();
         }
-
-        //public void SendAsync(IRequestBuilder builder)
-        //{
-        //    if (!IsConnected)
-        //        throw new Exception("Not connected");
-
-        //    _ = connection.SendAsync(builder);
-        //}
-
-        //public void SendAsync(byte[] bytes)
-        //{
-        //    if (!IsConnected)
-        //        throw new Exception("Not connected");
-
-        //    _ = connection.SendAsync(bytes);
-        //}
 
         private void Connection_ConnectionChanged(bool isConnected)
         {
@@ -103,17 +145,34 @@ namespace Kaenx.Classes.Bus
 
         private async void Run()
         {
+            bool alreadyShowedWarning = false;
+
             while (true)
             {
                 await Task.Delay(2000);
 
                 if (CurrentAction != null) continue;
 
+
                 if(busActions.Count == 0)
                 {
                     //if (IsConnected) connection.Disconnect();
                     continue;
                 }
+
+
+                if (SelectedInterface == null)
+                {
+                    if (!alreadyShowedWarning)
+                    {
+                        ViewHelper.Instance.ShowNotification(loader.GetString("NoInterfaceSelected"), 3000, ViewHelper.MessageType.Error);
+                        alreadyShowedWarning = true;
+                    }
+                    continue;
+                }
+
+                alreadyShowedWarning = false;
+
 
                 IBusAction action = busActions.Dequeue();
                 if (action == null) continue;
@@ -128,12 +187,11 @@ namespace Kaenx.Classes.Bus
 
         private async void ExecuteAction()
         {
-            CurrentAction.Connection = new Kaenx.Konnect.Connection(new IPEndPoint(IPAddress.Parse("192.168.0.108"), Convert.ToInt32(3671)));
+            CurrentAction.Connection = new Kaenx.Konnect.Connection(SelectedInterface.Endpoint);
             CurrentAction.Connection.ConnectionChanged += Connection_ConnectionChanged;
             
             CurrentAction.ProgressIsIndeterminate = true;
-            CurrentProgressText = "Verbindung wird hergestellt...";
-            CurrentAction.TodoText = "Verbindung wird hergestellt...";
+            CurrentAction.TodoText = loader.GetString("Action_Connecting");
             _cancelTokenSource = new CancellationTokenSource();
 
             int c = 0;
@@ -144,12 +202,11 @@ namespace Kaenx.Classes.Bus
                 await Task.Delay(500);
                 if (c == 20)
                 {
-                    CurrentAction.TodoText = _cancelIsUser ? "Wurde abgebrochen" : "Connect Timeout (10s)";
+                    CurrentAction.TodoText = _cancelIsUser ? loader.GetString("Action_Canceled") : loader.GetString("Action_Timeout");
                     CurrentAction_Finished(null, null);
                     return;
                 }
             }
-            CurrentProgressText = "Verbunden";
 
             CurrentAction.ProgressIsIndeterminate = false;
             CurrentAction.Finished += CurrentAction_Finished;
@@ -163,13 +220,13 @@ namespace Kaenx.Classes.Bus
 
             if (!_cancelTokenSource.IsCancellationRequested)
             {
-                CurrentAction.TodoText = "Process Timeout (30s)";
+                CurrentAction.TodoText = loader.GetString("Action_TimoutProc");
                 CurrentAction_Finished(null, null);
             } else
             {
                 if (_cancelIsUser)
                 {
-                    CurrentAction.TodoText = "Wurde abgebrochen";
+                    CurrentAction.TodoText = loader.GetString("Action_Canceled");
                     CurrentAction_Finished(null, null);
                 }
             }
@@ -179,7 +236,6 @@ namespace Kaenx.Classes.Bus
         {
             _cancelTokenSource?.Cancel();
             CurrentAction.Connection.Disconnect();
-            CurrentProgressText = "Getrennt";
             await Task.Delay(500);
             _ = App._dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Low, () =>
             {

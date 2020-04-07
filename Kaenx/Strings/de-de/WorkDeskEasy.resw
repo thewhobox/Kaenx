@@ -144,4 +144,7 @@
   <data name="TooltipInfoBusCancel.Text" xml:space="preserve">
     <value>Aktion abbrechen</value>
   </data>
+  <data name="InfoInterface.Text" xml:space="preserve">
+    <value>Schnittstelle:</value>
+  </data>
 </root>

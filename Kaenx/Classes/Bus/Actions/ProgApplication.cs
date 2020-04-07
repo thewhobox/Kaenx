@@ -176,7 +176,14 @@ namespace Kaenx.Classes.Bus.Actions
                     break;
 
                 case "3":
-                    await WriteApplication(adds);
+                    try
+                    {
+                        await WriteApplication(adds);
+                    }
+                    catch
+                    {
+
+                    }
                     break;
 
                 case "4":
@@ -241,6 +248,9 @@ namespace Kaenx.Classes.Bus.Actions
                 }
             }
 
+
+            TodoText = "Schreibe Speicher...";
+
             switch (_type)
             {
                 case ProgAppType.Komplett:
@@ -256,12 +266,6 @@ namespace Kaenx.Classes.Bus.Actions
                 case ProgAppType.Partiell:
                     break;
             }
-
-            
-
-
-            
-
         }
 
 
