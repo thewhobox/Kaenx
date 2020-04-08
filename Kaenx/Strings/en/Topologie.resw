@@ -187,7 +187,7 @@
     <value>Application (Partial)</value>
   </data>
   <data name="MenProgPh.Text" xml:space="preserve">
-    <value>Ph. Address</value>
+    <value>Physical Address</value>
   </data>
   <data name="MenRename.Text" xml:space="preserve">
     <value>Rename</value>
@@ -254,5 +254,11 @@
   </data>
   <data name="MenuSettings.Text" xml:space="preserve">
     <value>Settings</value>
+  </data>
+  <data name="MenReadConf.Text" xml:space="preserve">
+    <value>Read Configuration</value>
+  </data>
+  <data name="MenReadMem.Text" xml:space="preserve">
+    <value>Read Memory</value>
   </data>
 </root>

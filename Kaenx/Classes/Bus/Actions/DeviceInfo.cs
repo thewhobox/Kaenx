@@ -1,4 +1,5 @@
-﻿using Kaenx.DataContext.Catalog;
+﻿using Kaenx.Classes.Bus.Data;
+using Kaenx.DataContext.Catalog;
 using Kaenx.Konnect;
 using Kaenx.Konnect.Addresses;
 using Kaenx.Konnect.Builders;

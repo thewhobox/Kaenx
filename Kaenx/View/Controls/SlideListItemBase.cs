@@ -14,7 +14,7 @@ namespace Kaenx.Classes.Controls
     {
         private bool isSelected = false;
         public bool IsSelected
-        {
+        { 
             get { return isSelected; }
             set
             {

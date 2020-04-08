@@ -222,4 +222,7 @@
   <data name="NewNameProjectTitle" xml:space="preserve">
     <value>New Project</value>
   </data>
+  <data name="AddLineErrMsg" xml:space="preserve">
+    <value>Bitte wählen Sie erst eine Linie aus.</value>
+  </data>
 </root>

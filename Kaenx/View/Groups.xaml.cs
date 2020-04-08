@@ -34,13 +34,13 @@ namespace Kaenx.View
     {
         private ProjectContext context = SaveHelper.contextProject;
 
-        private LineDevice defaultDevice = new LineDevice(true) { Name = "Bitte Gerät auswählen" };
-        private GroupAddress defaultGroup = new GroupAddress() { Name = "Bitte Gruppe auswählen", Id = -1 };
-
         private ResourceLoader loader = ResourceLoader.GetForCurrentView("Groups");
         private GroupAddress _selectedGroup;
         private LineDevice _selectedDevice;
         private Project _project;
+
+        private LineDevice defaultDevice = new LineDevice(true);
+        private GroupAddress defaultGroup = new GroupAddress() { Id = -1 };
 
         public LineDevice SelectedDevice
         {
@@ -62,6 +62,9 @@ namespace Kaenx.View
             ListGroupComs.DataContext = this;
             OutGroupName.DataContext = this;
             GroupsInfo.DataContext = this;
+
+            defaultDevice.Name = loader.GetString("MsgSelectDevice");
+            defaultGroup.Name = loader.GetString("MsgSelectGroup");
 
             LoadContext();
         }

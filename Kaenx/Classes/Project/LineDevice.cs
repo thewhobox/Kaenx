@@ -69,7 +69,7 @@ namespace Kaenx.Classes
         //TODO speichern ändern! Nicht immer das ganze Projekt!
 
         [XmlIgnore]
-        public SolidColorBrush CurrentBrush { get; set; } = new SolidColorBrush(Windows.UI.Colors.Black);
+        public SolidColorBrush CurrentBrush { get; set; } = new SolidColorBrush(Windows.UI.Colors.White);
         [XmlIgnore]
         public SolidColorBrush CurrentBackBrush { get { if (_isDeactivated) return new SolidColorBrush(Windows.UI.Colors.LightYellow); else return new SolidColorBrush(Windows.UI.Colors.Transparent); } }
         public int Id

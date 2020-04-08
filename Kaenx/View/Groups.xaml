@@ -50,7 +50,9 @@
             </VisualStateGroup>
         </VisualStateManager.VisualStateGroups>
 
-        <Border Background="LightGray" Grid.Row="1">
+        <Border Background="{ThemeResource BrushAccentColor2}" BorderBrush="{ThemeResource BrushAccentColorLight1}" BorderThickness="0 0 0 1" />
+
+        <Border Background="{ThemeResource BrushAccentColor2}" Grid.Row="1">
             <TreeView x:Name="TreeTopologie" MinWidth="100" MaxWidth="350" CanReorderItems="False" ItemsSource="{Binding Lines}" CanDragItems="False" ItemInvoked="TreeTopologie_ItemInvoked" VerticalAlignment="Stretch" Background="LightGray">
                 <TreeView.ItemTemplate>
                     <DataTemplate x:DataType="local:Line">
@@ -61,8 +63,8 @@
                                         <Viewbox Height="15">
                                             <SymbolIcon Symbol="{Binding Icon}" Foreground="{Binding CurrentBrush}" />
                                         </Viewbox>
-                                        <TextBlock Text="{Binding LineName}" Margin="5 0 0 0" FontSize="14" VerticalAlignment="Center" />
-                                        <TextBlock Text="{Binding Name}" Margin="5 0 10 0" FontSize="14" VerticalAlignment="Center" />
+                                        <TextBlock Text="{Binding LineName}" Margin="5 0 0 0" FontSize="14" VerticalAlignment="Center" Foreground="White" />
+                                        <TextBlock Text="{Binding Name}" Margin="5 0 10 0" FontSize="14" VerticalAlignment="Center" Foreground="White" />
                                     </StackPanel>
                                 </DataTemplate>
                             </TreeViewItem.ContentTemplate>
@@ -74,7 +76,9 @@
 
 
 
-        <toolkit:DataGrid x:Name="ListComs" AreRowDetailsFrozen="True" LoadingRow="ListComs_LoadingRow" RowDetailsVisibilityMode="Collapsed" RowDetailsTemplate="{StaticResource RowDetailsTemplate}" Grid.Column="1" Grid.Row="1" Margin="5 0" AutoGenerateColumns="False" ItemsSource="{Binding SelectedDevice.ComObjects}" IsReadOnly="True" BorderThickness="1 1 1 0" BorderBrush="LightGray" >
+        <toolkit:DataGrid x:Name="ListComs" AreRowDetailsFrozen="True" LoadingRow="ListComs_LoadingRow" RowDetailsVisibilityMode="Collapsed" RowDetailsTemplate="{StaticResource RowDetailsTemplate}"
+                          Grid.Column="1" Grid.Row="1" Margin="5 0" AutoGenerateColumns="False" ItemsSource="{Binding SelectedDevice.ComObjects}" IsReadOnly="True" BorderThickness="1 1 1 0" 
+                          BorderBrush="LightGray" Background="{ThemeResource BrushAccentControlBackground}" >
             <toolkit:DataGrid.RowStyle>
                 <Style TargetType="toolkit:DataGridRow">
                     <Setter Property="toolkit:DataGridRow.ContextFlyout">
@@ -88,9 +92,6 @@
                     </Setter>
                 </Style>
             </toolkit:DataGrid.RowStyle>
-            <toolkit:DataGrid.Background>
-                <SolidColorBrush Color="#FFE0E0E0" />
-            </toolkit:DataGrid.Background>
             <toolkit:DataGrid.Columns>
                 <toolkit:DataGridTextColumn x:Uid="/Groups/LComsNumb" Tag="number" Width="SizeToCells" Binding="{Binding Number}" />
                 <toolkit:DataGridTextColumn x:Uid="/Groups/LComsName" MinWidth="160" Tag="name" Width="SizeToCells" Binding="{Binding DisplayName}" />
@@ -107,12 +108,9 @@
             <Run Text="{Binding SelectedGroup.GroupName}" />
             <Run Text="{Binding SelectedGroup.Name}" />
         </TextBlock>
-        
-        <toolkit:DataGrid x:Name="ListGroupComs" Visibility="Collapsed" Grid.Column="1" Grid.Row="1" Margin="5 0" AutoGenerateColumns="False" 
+
+        <toolkit:DataGrid x:Name="ListGroupComs" Visibility="Collapsed" Grid.Column="1" Grid.Row="1" Margin="5 0" AutoGenerateColumns="False" Background="{ThemeResource BrushAccentControlBackground}" 
                           ItemsSource="{Binding SelectedGroup.ComObjects}" BorderThickness="1 1 1 0" BorderBrush="LightGray" IsReadOnly="True">
-            <toolkit:DataGrid.Background>
-                <SolidColorBrush Color="#FFE0E0E0" />
-            </toolkit:DataGrid.Background>
             <toolkit:DataGrid.RowStyle>
                 <Style TargetType="toolkit:DataGridRow">
                     <Setter Property="toolkit:DataGridRow.ContextFlyout">
@@ -141,7 +139,7 @@
             </TextBlock>
         </StackPanel>
 
-        <Border Grid.Column="2" Background="LightGray" BorderThickness="0 0 0 1" BorderBrush="White">
+        <Border Grid.Column="2" Background="{ThemeResource BrushAccentColor2}" BorderThickness="0 0 0 1" BorderBrush="White">
             <StackPanel Orientation="Horizontal">
                 <AppBarButton x:Uid="/Groups/ToolAddMain" Icon="Add" Click="ClickAddMain" />
                 <AppBarToggleButton x:Uid="/Groups/ToolView" x:Name="BtnToggleView" Icon="View" />
@@ -149,7 +147,7 @@
             </StackPanel>
         </Border>
 
-        <Border Background="LightGray" Grid.Row="1" Grid.Column="2">
+        <Border Background="{ThemeResource BrushAccentColor2}" Grid.Row="1" Grid.Column="2">
             <TreeView x:Name="TreeGroups" ItemsSource="{Binding Groups}" CanReorderItems="False" ItemInvoked="TreeGroups_ItemInvoked" MinWidth="250" Margin="0 0 5 0">
                 <TreeView.ItemTemplate>
                     <DataTemplate x:DataType="local:Line">
@@ -165,10 +163,10 @@
                                 <DataTemplate x:DataType="local:Line">
                                     <StackPanel Orientation="Horizontal">
                                         <Viewbox Height="15">
-                                            <SymbolIcon Symbol="{Binding Icon}" />
+                                            <SymbolIcon Symbol="{Binding Icon}" Foreground="White" />
                                         </Viewbox>
-                                        <TextBlock Text="{Binding GroupName}" Margin="10 0 0 0" />
-                                        <TextBlock Text="{Binding Name}" Margin="10 0 5 0" />
+                                        <TextBlock Text="{Binding GroupName}" Margin="10 0 0 0" Foreground="White" />
+                                        <TextBlock Text="{Binding Name}" Margin="10 0 5 0" Foreground="White" />
                                     </StackPanel>
                                 </DataTemplate>
                             </TreeViewItem.ContentTemplate>

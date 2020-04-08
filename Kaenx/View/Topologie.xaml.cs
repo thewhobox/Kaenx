@@ -84,19 +84,19 @@ namespace Kaenx.View
             Classes.Bus.Actions.DeviceInfo action = new Classes.Bus.Actions.DeviceInfo();
             action.Device = (LineDevice)((MenuFlyoutItem)e.OriginalSource).DataContext;
             action.Finished += (action, obj) => { 
-                ((Classes.Bus.Actions.DeviceInfoData)obj).Device = action.Device; 
-                ((Bus)App._pages["bus"]).AddReadData((Classes.Bus.Actions.DeviceInfoData)obj); 
+                ((Classes.Bus.Data.DeviceInfoData)obj).Device = action.Device; 
+                ((Bus)App._pages["bus"]).AddReadData((Classes.Bus.Data.DeviceInfoData)obj); 
             };
             BusConnection.Instance.AddAction(action);
         }
 
-        private void ClickMemory(object sender, RoutedEventArgs e)
+        private void ClickReadConfig(object sender, RoutedEventArgs e)
         {
-            Classes.Bus.Actions.DeviceMemory action = new Classes.Bus.Actions.DeviceMemory();
+            Classes.Bus.Actions.DeviceConfig action = new Classes.Bus.Actions.DeviceConfig();
             action.Device = (LineDevice)((MenuFlyoutItem)e.OriginalSource).DataContext;
             action.Finished += (action, obj) => {
-                ((Classes.Bus.Actions.DeviceInfoData)obj).Device = action.Device;
-                ((Bus)App._pages["bus"]).AddReadData((Classes.Bus.Actions.DeviceInfoData)obj);
+                ((Classes.Bus.Data.DeviceConfigData)obj).Device = action.Device;
+                ((Bus)App._pages["bus"]).AddReadData((Classes.Bus.Data.DeviceConfigData)obj);
             };
             BusConnection.Instance.AddAction(action);
         }
@@ -163,8 +163,8 @@ namespace Kaenx.View
                     SaveHelper.SaveLine(line);
                 }
             }
-            //SaveHelper.SaveProject();
-            //CalcCounts();
+            
+            CalcCounts();
         }
 
         private async void ClickAddDevice(object sender, RoutedEventArgs e)
@@ -367,6 +367,8 @@ namespace Kaenx.View
             {
                 AppAdditional adds = _context.AppAdditionals.Single(a => a.Id == device.ApplicationId);
                 device.ComObjects = SaveHelper.ByteArrayToObject<ObservableCollection<DeviceComObject>>(adds.ComsDefault);
+                foreach (DeviceComObject com in device.ComObjects)
+                    com.DisplayName = com.Name;
             }
             else
             {
@@ -574,7 +576,7 @@ namespace Kaenx.View
             SaveHelper.SaveProject();
         }
 
-        private string InNumber_PreviewChanged(int Value)
+        private string InNumber_PreviewChanged(NumberBox sender, int Value)
         {
             ObservableCollection<Line> Lines = (ObservableCollection<Line>)this.DataContext;
             TopologieBase tbase = PanelSettings.DataContext as TopologieBase;

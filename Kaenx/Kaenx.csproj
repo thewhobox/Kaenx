@@ -27,7 +27,7 @@
     <AppInstallerCheckForUpdateFrequency>OnApplicationRun</AppInstallerCheckForUpdateFrequency>
     <PackageCertificateThumbprint>C554126408FAF38E210787F6EC62EC5E77D59B00</PackageCertificateThumbprint>
     <AppxPackageSigningTimestampDigestAlgorithm>SHA256</AppxPackageSigningTimestampDigestAlgorithm>
-    <GenerateTestArtifacts>True</GenerateTestArtifacts>
+    <GenerateTestArtifacts>False</GenerateTestArtifacts>
     <HoursBetweenUpdateChecks>0</HoursBetweenUpdateChecks>
     <AppxPackageSigningEnabled>True</AppxPackageSigningEnabled>
     <AppxSymbolPackageEnabled>False</AppxSymbolPackageEnabled>
@@ -120,16 +120,18 @@
       <DependentUpon>App.xaml</DependentUpon>
     </Compile>
     <Compile Include="Classes\Bus\Actions\DeviceDeActivate.cs" />
-    <Compile Include="Classes\Bus\Actions\DeviceMemory.cs" />
+    <Compile Include="Classes\Bus\Actions\DeviceConfig.cs" />
     <Compile Include="Classes\Bus\Actions\DeviceRestart.cs" />
     <Compile Include="Classes\Bus\Actions\IBusAction.cs" />
     <Compile Include="Classes\Bus\Actions\DeviceInfo.cs" />
-    <Compile Include="Classes\Bus\Actions\DeviceInfoData.cs" />
+    <Compile Include="Classes\Bus\Data\DeviceConfigData.cs" />
+    <Compile Include="Classes\Bus\Data\DeviceInfoData.cs" />
     <Compile Include="Classes\Bus\Actions\ProgApplication.cs" />
     <Compile Include="Classes\Bus\Actions\ProgPhysicalAddress.cs" />
     <Compile Include="Classes\Bus\BusConnection.cs" />
     <Compile Include="Classes\Bus\BusInterface.cs" />
     <Compile Include="Classes\Bus\BusSettings.cs" />
+    <Compile Include="Classes\Bus\Data\IBusData.cs" />
     <Compile Include="Classes\Device.cs" />
     <Compile Include="Classes\ComboItemSimple.cs" />
     <Compile Include="Classes\Controls\ControlUpdate.xaml.cs">
@@ -504,6 +506,9 @@
       <Project>{b5a8a078-65e2-4621-9d3c-1c7ce248926d}</Project>
       <Name>Kaenx.DataContext</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Classes\TemplateSelectors\" />
   </ItemGroup>
   <PropertyGroup Condition=" '$(VisualStudioVersion)' == '' or '$(VisualStudioVersion)' &lt; '14.0' ">
     <VisualStudioVersion>14.0</VisualStudioVersion>

@@ -18,7 +18,7 @@ namespace Kaenx.Classes
         private bool _isExpanded;
         private int _id;
         private string _name;
-        private SolidColorBrush _currentBrush = new SolidColorBrush(Windows.UI.Colors.Black);
+        private SolidColorBrush _currentBrush = new SolidColorBrush(Windows.UI.Colors.White);
 
         [XmlIgnore]
         public SolidColorBrush CurrentBrush

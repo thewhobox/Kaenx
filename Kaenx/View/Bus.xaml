@@ -9,7 +9,7 @@
     mc:Ignorable="d"
     Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
     <Page.Resources>
-        <DataTemplate x:Key="RowDetailsTemplate">
+        <DataTemplate x:Key="RowDetailsInfoTemplate">
             <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition  />
@@ -30,9 +30,6 @@
                     <toolkit:HeaderedContentControl Header="Masken Version" Margin="0 5">
                         <TextBlock Text="{Binding MaskVersion}" />
                     </toolkit:HeaderedContentControl>
-                    <toolkit:HeaderedContentControl Header="Zusätzliche Info" Margin="0 5">
-                        <TextBlock Text="{Binding Additional}" />
-                    </toolkit:HeaderedContentControl>
                 </StackPanel>
 
                 <ListView Grid.Column="1" ItemsSource="{Binding GroupTable}" Visibility="Collapsed" />
@@ -44,6 +41,9 @@
                     </toolkit:DataGrid.Columns>
                 </toolkit:DataGrid>
             </Grid>
+        </DataTemplate>
+        <DataTemplate x:Key="RowDetailsConfigTemplate">
+            <Button Content="Config ansehen" Margin="30 10" HorizontalAlignment="Stretch" />
         </DataTemplate>
     </Page.Resources>
 
@@ -217,9 +217,15 @@
                         <Button x:Name="BtnGetInfo" Content="Auslesen" Click="ReadInfo" />
                     </StackPanel>
 
-                    <toolkit:DataGrid x:Name="GridReads" Grid.Row="1" ItemsSource="{Binding}" IsReadOnly="True" AutoGenerateColumns="False" AreRowDetailsFrozen="True" RowDetailsVisibilityMode="VisibleWhenSelected" RowDetailsTemplate="{StaticResource RowDetailsTemplate}" >
+                    <toolkit:DataGrid x:Name="GridReads" Grid.Row="1" ItemsSource="{Binding}" IsReadOnly="True" AutoGenerateColumns="False" AreRowDetailsFrozen="True" LoadingRowDetails="GridReads_LoadingRowDetails" RowDetailsVisibilityMode="VisibleWhenSelected">
+                        <toolkit:DataGrid.RowDetailsTemplate>
+                            <DataTemplate>
+                                <ContentPresenter Content="{Binding}" />
+                            </DataTemplate>
+                        </toolkit:DataGrid.RowDetailsTemplate>
                         <toolkit:DataGrid.Columns>
                             <toolkit:DataGridTextColumn Header="Adresse" Width="SizeToCells" Binding="{Binding Device.LineName}" />
+                            <toolkit:DataGridTextColumn Header="Typ" Binding="{Binding Type}" />
                             <toolkit:DataGridTextColumn Header="Hersteller" Binding="{Binding Manufacturer}" />
                             <toolkit:DataGridTextColumn Header="Seriennummer" Binding="{Binding SerialNumber}" />
                             <toolkit:DataGridTextColumn Header="Applikation" Binding="{Binding ApplicationName}" />

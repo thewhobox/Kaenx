@@ -186,4 +186,10 @@
   <data name="ToolExpert.Label" xml:space="preserve">
     <value>Expert</value>
   </data>
+  <data name="MsgSelectDevice" xml:space="preserve">
+    <value>Please select Device</value>
+  </data>
+  <data name="MsgSelectGroup" xml:space="preserve">
+    <value>Please select Group</value>
+  </data>
 </root>

@@ -1,6 +1,7 @@
 ﻿using Kaenx.Classes;
 using Kaenx.Classes.Bus;
 using Kaenx.Classes.Bus.Actions;
+using Kaenx.Classes.Bus.Data;
 using Kaenx.Classes.Helper;
 using Kaenx.Konnect;
 using Kaenx.Konnect.Builders;
@@ -31,7 +32,7 @@ namespace Kaenx.View
     /// </summary>
     public sealed partial class Bus : Page
     {
-        public ObservableCollection<DeviceInfoData> ReadList { get; } = new ObservableCollection<DeviceInfoData>();
+        public ObservableCollection<IBusData> ReadList { get; } = new ObservableCollection<IBusData>();
         public ObservableCollection<MonitorTelegram> TelegramList { get; } = new ObservableCollection<MonitorTelegram>();
 
         private Connection _conn = null;
@@ -63,7 +64,7 @@ namespace Kaenx.View
         
         }
 
-        public void AddReadData(DeviceInfoData info)
+        public void AddReadData(IBusData info)
         {
             _ = this.Dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Normal, () =>
             {
@@ -125,6 +126,20 @@ namespace Kaenx.View
             {
                 TelegramList.Add(tel);
             });
+        }
+
+        private void GridReads_LoadingRowDetails(object sender, Microsoft.Toolkit.Uwp.UI.Controls.DataGridRowDetailsEventArgs e)
+        {
+            switch (e.Row.DataContext)
+            {
+                case DeviceInfoData info:
+                    e.Row.DetailsTemplate = Resources["RowDetailsInfoTemplate"] as DataTemplate;
+                    break;
+
+                case DeviceConfigData conf:
+                    e.Row.DetailsTemplate = Resources["RowDetailsConfigTemplate"] as DataTemplate;
+                    break;
+            }
         }
     }
 }

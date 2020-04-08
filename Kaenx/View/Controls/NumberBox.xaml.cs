@@ -26,7 +26,7 @@ namespace Kaenx.View.Controls
         public static readonly DependencyProperty MinimumProperty = DependencyProperty.Register("Minimum", typeof(int), typeof(NumberBox), new PropertyMetadata(null));
 
 
-        public delegate string PreviewChangedHandler(int Value);
+        public delegate string PreviewChangedHandler(NumberBox sender, int Value);
         public event PreviewChangedHandler PreviewChanged;
         public event PropertyChangedEventHandler PropertyChanged;
 
@@ -48,8 +48,8 @@ namespace Kaenx.View.Controls
             set
             {
                 bool error = false;
-                string handled = PreviewChanged?.Invoke(value);
-                if (handled != null)
+                string handled = PreviewChanged?.Invoke(this, value);
+                if (!string.IsNullOrEmpty(handled))
                 {
                     error = true;
                     ErrMessage = handled;

@@ -70,13 +70,13 @@ namespace Kaenx.View.Controls
         {
             if (SelectedLine == null)
             {
-                Notify.Show("Bitte wählen Sie erst eine Linie aus.", 3000);
+                Notify.Show(loader.GetString("AddLineErrMsg"), 3000);
                 return;
             }
 
             if (SelectedLine.Id == 0)
             {
-                Line area = new Line(getFirstFreeIdSub(), loader.GetString("AddLineNewLineName"));
+                Line area = new Line(getFirstFreeIdSub(), loader.GetString("AddLineNewAreaName"));
                 AddedLines.Add(area);
                 Lines.Add(area);
             }
@@ -98,7 +98,7 @@ namespace Kaenx.View.Controls
             else
             {
                 for (int i = 1; i < 256; i++)
-                    if (!SelectedLine.Subs.Any(l => l.Id == i) && !AddedLines.Any(l => l.Id == i))
+                    if (!SelectedLine.Subs.Any(l => l.Id == i) && !AddedLines.Any(l => l is LineMiddle && (l as LineMiddle).Parent == SelectedLine && l.Id == i))
                         return i;
             }
 
@@ -109,21 +109,44 @@ namespace Kaenx.View.Controls
         private void Remove(object sender, RoutedEventArgs e)
         {
             object data = (sender as Button).DataContext;
-            if(data is Line)
+
+            switch((sender as Button).DataContext)
             {
-                Line line = data as Line;
-                foreach(LineMiddle lm in line.Subs)
-                {
-                    AddedLines.Remove(lm);
-                }
-                AddedLines.Remove(line);
-                Lines.Remove(line);
-            } else if(data is LineMiddle)
-            {
-                LineMiddle line = data as LineMiddle;
-                AddedLines.Remove(line);
-                line.Parent.Subs.Remove(line);
+                case Line line:
+                    List<TopologieBase> toDelete = new List<TopologieBase>() { line };
+
+                    foreach (TopologieBase topo in AddedLines)
+                        if (topo is LineMiddle && (topo as LineMiddle).Parent == line)
+                            toDelete.Add(topo);
+
+                    foreach (TopologieBase lm in toDelete)
+                        AddedLines.Remove(lm);
+
+                    Lines.Remove(line);
+                    break;
+
+                case LineMiddle linem:
+                    AddedLines.Remove(linem);
+                    linem.Parent.Subs.Remove(linem);
+                    break;
             }
+        }
+
+        private string NumberBox_PreviewChanged(NumberBox sender, int Value)
+        {
+            switch (sender.DataContext)
+            {
+                case Line line:
+                    if (Lines.Any(l => l is Line && l != line && l.Id == Value))
+                        return "schon vorhanden";
+                    break;
+
+                case LineMiddle linem:
+                    if (linem.Parent.Subs.Any(l => l != linem && l.Id == Value) || AddedLines.Any(l => l != linem && l is LineMiddle && (l as LineMiddle).Parent == linem.Parent && l.Id == Value))
+                        return "schon vorhanden 2";
+                    break;
+            }
+            return null;
         }
     }
 }

@@ -39,10 +39,10 @@
         <NavigationView x:Name="NavView" PaneDisplayMode="Top" SelectionChanged="ItemChanged" IsBackButtonVisible="Collapsed">
             <NavigationView.Resources>
                 <Style TargetType="SymbolIcon">
-                    <Setter Property="Foreground" Value="{ThemeResource BrushAccentColorLight1}" />
+                    <Setter Property="Foreground" Value="White" />
                 </Style>
                 <Style TargetType="TextBlock">
-                    <Setter Property="Foreground" Value="{ThemeResource BrushAccentColorLight1}" />
+                    <Setter Property="Foreground" Value="White" />
                 </Style>
             </NavigationView.Resources>
             <NavigationView.MenuItems>
@@ -95,7 +95,7 @@
             <Button x:Name="InfoBus" x:Uid="/WorkDeskEasy/TooltipInfoBus" Grid.Column="3" Style="{StaticResource InfobarButton}" Click="InfoBus_Click">
                 <Button.ContextFlyout>
                     <MenuFlyout>
-                        <MenuFlyoutItem x:Uid="/WordDeskEasy/TooltipInfoBusCancel" Icon="Cancel" />
+                        <MenuFlyoutItem x:Uid="/WorkDeskEasy/TooltipInfoBusCancel" Icon="Cancel" Click="ClickCancelAction" />
                     </MenuFlyout>
                 </Button.ContextFlyout>
                 <StackPanel Orientation="Horizontal">

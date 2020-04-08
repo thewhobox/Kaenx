@@ -5,10 +5,11 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Kaenx.Classes.Bus.Actions
+namespace Kaenx.Classes.Bus.Data
 {
-    public class DeviceInfoData
+    public class DeviceInfoData : IBusData
     {
+        public string Type { get; set; } = "Info";
         public string MaskVersion { get; set; }
         public string SerialNumber { get; set; }
         public string ApplicationId { get; set; }

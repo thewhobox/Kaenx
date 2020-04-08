@@ -112,5 +112,10 @@ namespace Kaenx.View
         {
             NavView.SelectedItem = NavView.MenuItems[5];
         }
+
+        private void ClickCancelAction(object sender, RoutedEventArgs e)
+        {
+            Classes.Bus.BusConnection.Instance.CancelCurrent();
+        }
     }
 }

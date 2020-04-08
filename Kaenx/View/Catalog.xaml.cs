@@ -159,26 +159,6 @@ namespace Kaenx.View
             catch { }
         }
 
-        private void ListView_Tapped(object sender, TappedRoutedEventArgs e)
-        {
-            if (((FrameworkElement)e.OriginalSource).DataContext is Device)
-            {
-                if (e.PointerDeviceType == Windows.Devices.Input.PointerDeviceType.Mouse ||
-                    e.PointerDeviceType == Windows.Devices.Input.PointerDeviceType.Pen)
-                {
-                    Device device = (Device)((FrameworkElement)e.OriginalSource).DataContext;
-                    device.SlideSettings.IsSelected = !device.SlideSettings.IsSelected;
-
-                    int count = Import.DeviceList.Where<Device>(d => d.SlideSettings.IsSelected == true).Count();
-
-                    if (count == 0)
-                        ButtonImportSelected.IsEnabled = false;
-                    else
-                        ButtonImportSelected.IsEnabled = true;
-                }
-            }
-        }
-
         private void ClickSelectAll(object sender, RoutedEventArgs e)
         {
             foreach(Device device in Import.DeviceList)
@@ -319,10 +299,6 @@ namespace Kaenx.View
                 return input.Contains(query);
             }
         }
-        private void RegChanged(object sender, RoutedEventArgs e)
-        {
-            SearchTextChanged(null, null);
-        }
 
         private void ClickDelete(object sender, RoutedEventArgs e)
         {
@@ -413,9 +389,9 @@ namespace Kaenx.View
 
         private void ImportList_ItemClick(object sender, ItemClickEventArgs e)
         {
-            if (((FrameworkElement)e.OriginalSource).DataContext is Device)
+            if (e.ClickedItem is Device)
             {
-                Device device = (Device)((FrameworkElement)e.OriginalSource).DataContext;
+                Device device = (Device)e.ClickedItem;
                 device.SlideSettings.IsSelected = !device.SlideSettings.IsSelected;
 
                 int count = Import.DeviceList.Where<Device>(d => d.SlideSettings.IsSelected == true).Count();
