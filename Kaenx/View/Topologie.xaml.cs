@@ -349,7 +349,7 @@ namespace Kaenx.View
 
             LineDeviceModel linedevmodel = new LineDeviceModel();
             linedevmodel.Id = device.Id;
-            linedevmodel.ParentId = device.Id;
+            linedevmodel.ParentId = line.UId;
             linedevmodel.Name = device.Name;
             linedevmodel.ApplicationId = device.ApplicationId;
             linedevmodel.DeviceId = device.DeviceId;
