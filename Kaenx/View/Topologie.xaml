@@ -85,7 +85,7 @@
                 </TreeView.ItemContainerStyle>
                 <TreeView.ItemTemplate>
                     <DataTemplate x:DataType="local:Line">
-                        <TreeViewItem Margin="-20 0 0 0" Padding="0 0 5 0" VerticalAlignment="Stretch" ToolTipService.ToolTip="{Binding Name}" DoubleTapped="TreeViewItem_DoubleTapped" Background="{Binding CurrentBackBrush}" BorderThickness="0" Content="{Binding}" ItemsSource="{Binding Subs}" IsExpanded="{Binding IsExpanded, Mode=TwoWay}">
+                        <TreeViewItem Margin="-20 0 0 0" Padding="0 0 5 0" VerticalAlignment="Stretch" GlyphBrush="White" ToolTipService.ToolTip="{Binding Name}" DoubleTapped="TreeViewItem_DoubleTapped" Background="{Binding CurrentBackBrush}" BorderThickness="0" Content="{Binding}" ItemsSource="{Binding Subs}" IsExpanded="{Binding IsExpanded, Mode=TwoWay}">
                             <TreeViewItem.ContextFlyout>
                                 <MenuFlyout Opening="MenuFlyout_Opening">
                                     <MenuFlyoutItem x:Name="MFI_AddLine" x:Uid="/Topologie/MenAddLine" Icon="Add" Click="ClickAdd" />
@@ -99,8 +99,8 @@
                                     </MenuFlyoutSubItem>
                                     <MenuFlyoutSubItem x:Name="MFI_Actions" x:Uid="/Topologie/MenActions" Icon="Share">
                                         <MenuFlyoutItem x:Uid="/Topologie/MenRestart" Icon="Refresh" Click="ClickRestart" />
-                                        <MenuFlyoutItem x:Uid="/Topologie/MenInfo" Icon="BrowsePhotos" Click="ClickInfo" />
                                         <MenuFlyoutItem x:Name="MFI_Toggle" x:Uid="/Topologie/MenToggle" Icon="DisconnectDrive" Click="ClickToggle" />
+                                        <MenuFlyoutItem x:Uid="/Topologie/MenInfo" Icon="BrowsePhotos" Click="ClickInfo" />
                                         <MenuFlyoutItem x:Uid="/Topologie/MenReadConf" Icon="Find" Click="ClickReadConfig" />
                                     </MenuFlyoutSubItem>
                                     <MenuFlyoutItem x:Name="MFI_Para" x:Uid="/Topologie/MenOpenPara" Icon="Bookmarks" Click="ClickOpenParas" />
@@ -157,7 +157,8 @@
             <ContentPresenter x:Name="ParamPresenter" Grid.Row="1" Margin="5 0 5 0" />
         </Grid>
         
-        <toolkit:Expander x:Name="SettExpander" Grid.Row="1" Grid.Column="2" Grid.RowSpan="3" HorizontalContentAlignment="Stretch" ExpandDirection="Left" VerticalContentAlignment="Stretch" IsExpanded="True">
+        <toolkit:Expander x:Name="SettExpander" Grid.Row="1" Grid.Column="2" Grid.RowSpan="3" HorizontalContentAlignment="Stretch" ExpandDirection="Left" VerticalContentAlignment="Stretch" 
+                          IsExpanded="True" BorderBrush="Gray" BorderThickness="1 0 0 0">
             <toolkit:Expander.Resources>
                 <Style TargetType="ToggleButton">
                     <Setter Property="Visibility" Value="Collapsed" />
@@ -168,15 +169,12 @@
                     <TextBlock x:Uid="/Topologie/SideProps"  FontSize="20" />
                 </DataTemplate>
             </toolkit:Expander.HeaderTemplate>
-            <Grid x:Name="PanelSettings" Grid.Column="2" Grid.RowSpan="2" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+            <Grid x:Name="PanelSettings" Grid.Column="2" Grid.RowSpan="2" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Background="{ThemeResource BrushAccentControlBackground}">
                 <Grid.Resources>
                     <Style TargetType="toolkit:HeaderedContentControl">
                         <Setter Property="Margin" Value="0 5" />
                     </Style>
                 </Grid.Resources>
-                <Grid.Background>
-                    <SolidColorBrush Color="#FFE0E0E0" />
-                </Grid.Background>
                 <Grid.RowDefinitions>
                     <RowDefinition Height="auto" />
                     <RowDefinition Height="auto" />

@@ -367,6 +367,12 @@ namespace Kaenx.View
                 return;
             }
 
+            if(ListComs.SelectedItem == null)
+            {
+                ViewHelper.Instance.ShowNotification("Bitte wähle erst ein KO aus.", 3000, ViewHelper.MessageType.Error);
+                return;
+            }
+
             DeviceComObject com = ListComs.SelectedItem as DeviceComObject;
 
             if (com.Groups.Contains(addr))

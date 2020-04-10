@@ -141,9 +141,6 @@
   <data name="CListNumb.Header" xml:space="preserve">
     <value>Nr.</value>
   </data>
-  <data name="DragConnectKO" xml:space="preserve">
-    <value>KO mit "{0} {1}" verknüpfen.</value>
-  </data>
   <data name="GListContextAdd.Text" xml:space="preserve">
     <value>Hinzufügen</value>
   </data>
@@ -178,7 +175,7 @@
     <value>Neue Mittelgruppe</value>
   </data>
   <data name="ToolAddMain.Label" xml:space="preserve">
-    <value>Haupt</value>
+    <value>GA</value>
   </data>
   <data name="ToolView.Label" xml:space="preserve">
     <value>Ansicht</value>
@@ -191,5 +188,8 @@
   </data>
   <data name="MsgSelectGroup" xml:space="preserve">
     <value>Bitte Gruppe auswählen</value>
+  </data>
+  <data name="ListHeaderComs.Text" xml:space="preserve">
+    <value>Alle KOs in der Gruppe:</value>
   </data>
 </root>

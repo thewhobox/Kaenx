@@ -41,22 +41,35 @@
                     <VisualState.StateTriggers>
                         <StateTrigger IsActive="{Binding ElementName=BtnToggleView, Path=IsChecked}" />
                     </VisualState.StateTriggers>
-                    <VisualState.Setters>
+                    <VisualState.Storyboard>
+                        <Storyboard>
+                            <FadeOutThemeAnimation Duration="0:0:0.5" Storyboard.TargetName="ListComs" />
+                            <FadeInThemeAnimation Duration="0:0:0.5" Storyboard.TargetName="ListGroupComs" />
+                        </Storyboard>
+                    </VisualState.Storyboard>
+                    <!--<VisualState.Setters>
                         <Setter Target="ListComs.Visibility" Value="Collapsed" />
                         <Setter Target="OutGroupName.Visibility" Value="Collapsed" />
+                        <Setter Target="OutGroupName2.Visibility" Value="Visible" />
                         <Setter Target="ListGroupComs.Visibility" Value="Visible" />
-                    </VisualState.Setters>
+                    </VisualState.Setters>-->
                 </VisualState>
             </VisualStateGroup>
         </VisualStateManager.VisualStateGroups>
 
-        <Border Background="{ThemeResource BrushAccentColor2}" BorderBrush="{ThemeResource BrushAccentColorLight1}" BorderThickness="0 0 0 1" />
+        <Border Background="{ThemeResource BrushAccentColor2}" BorderBrush="{ThemeResource BrushAccentColorLight1}" BorderThickness="0 0 0 1">
+            <StackPanel Orientation="Horizontal">
+                <SymbolIcon Symbol="Edit" Margin="10 0" Foreground="White" />
+                <AppBarToggleButton x:Uid="/Groups/ToolView" x:Name="BtnToggleView" Icon="View" Foreground="White" />
+                <AppBarToggleButton x:Uid="/Groups/ToolExpert" Icon="OutlineStar" Checked="ToggleExpert" Unchecked="ToggleExpert" Foreground="White" />
+            </StackPanel>
+        </Border>
 
-        <Border Background="{ThemeResource BrushAccentColor2}" Grid.Row="1">
+        <Border Grid.RowSpan="2" Background="{ThemeResource BrushAccentColor2}" Grid.Row="1">
             <TreeView x:Name="TreeTopologie" MinWidth="100" MaxWidth="350" CanReorderItems="False" ItemsSource="{Binding Lines}" CanDragItems="False" ItemInvoked="TreeTopologie_ItemInvoked" VerticalAlignment="Stretch" Background="LightGray">
                 <TreeView.ItemTemplate>
                     <DataTemplate x:DataType="local:Line">
-                        <TreeViewItem Margin="-20 0 0 0" Background="Transparent" ToolTipService.ToolTip="{Binding Name}" BorderThickness="0" Content="{Binding}" ItemsSource="{Binding Subs}" IsExpanded="{Binding IsExpanded, Mode=TwoWay}">
+                        <TreeViewItem Margin="-20 0 0 0" Background="Transparent" GlyphBrush="White" ToolTipService.ToolTip="{Binding Name}" BorderThickness="0" Content="{Binding}" ItemsSource="{Binding Subs}" IsExpanded="{Binding IsExpanded, Mode=TwoWay}">
                             <TreeViewItem.ContentTemplate>
                                 <DataTemplate x:DataType="local:TopologieBase">
                                     <StackPanel Orientation="Horizontal">
@@ -77,7 +90,7 @@
 
 
         <toolkit:DataGrid x:Name="ListComs" AreRowDetailsFrozen="True" LoadingRow="ListComs_LoadingRow" RowDetailsVisibilityMode="Collapsed" RowDetailsTemplate="{StaticResource RowDetailsTemplate}"
-                          Grid.Column="1" Grid.Row="1" Margin="5 0" AutoGenerateColumns="False" ItemsSource="{Binding SelectedDevice.ComObjects}" IsReadOnly="True" BorderThickness="1 1 1 0" 
+                          Grid.Column="1" Grid.Row="1" Margin="5 0" AutoGenerateColumns="False" ItemsSource="{Binding SelectedDevice.ComObjects}" IsReadOnly="True" BorderThickness="1" 
                           BorderBrush="LightGray" Background="{ThemeResource BrushAccentControlBackground}" >
             <toolkit:DataGrid.RowStyle>
                 <Style TargetType="toolkit:DataGridRow">
@@ -109,8 +122,14 @@
             <Run Text="{Binding SelectedGroup.Name}" />
         </TextBlock>
 
+        <TextBlock x:Name="OutGroupName2" Grid.Column="1" VerticalAlignment="Center" Margin="10 0 0 0" FontSize="20" Visibility="Collapsed">
+            <Run x:Uid="/Groups/ListHeaderComs" />
+            <Run Text="{Binding SelectedGroup.GroupName}" />
+            <Run Text="{Binding SelectedGroup.Name}" />
+        </TextBlock>
+
         <toolkit:DataGrid x:Name="ListGroupComs" Visibility="Collapsed" Grid.Column="1" Grid.Row="1" Margin="5 0" AutoGenerateColumns="False" Background="{ThemeResource BrushAccentControlBackground}" 
-                          ItemsSource="{Binding SelectedGroup.ComObjects}" BorderThickness="1 1 1 0" BorderBrush="LightGray" IsReadOnly="True">
+                          ItemsSource="{Binding SelectedGroup.ComObjects}" BorderThickness="1" BorderBrush="LightGray" IsReadOnly="True">
             <toolkit:DataGrid.RowStyle>
                 <Style TargetType="toolkit:DataGridRow">
                     <Setter Property="toolkit:DataGridRow.ContextFlyout">
@@ -131,7 +150,7 @@
         </toolkit:DataGrid>
 
         <StackPanel x:Name="GroupsInfo" Grid.Column="1" Grid.Row="2">
-            <TextBlock>
+            <TextBlock Margin="5 2">
                 <Run Text="Datentyp: " />
                 <Run Text="{Binding SelectedGroup.DPT}" />
                 <Run Text="." />
@@ -139,19 +158,18 @@
             </TextBlock>
         </StackPanel>
 
-        <Border Grid.Column="2" Background="{ThemeResource BrushAccentColor2}" BorderThickness="0 0 0 1" BorderBrush="White">
+        <Border Grid.Column="2" Background="{ThemeResource BrushAccentControlBackground}" BorderThickness="1 0 0 1" BorderBrush="Gray">
             <StackPanel Orientation="Horizontal">
+                <SymbolIcon Symbol="SelectAll" Margin="10 0"  />
                 <AppBarButton x:Uid="/Groups/ToolAddMain" Icon="Add" Click="ClickAddMain" />
-                <AppBarToggleButton x:Uid="/Groups/ToolView" x:Name="BtnToggleView" Icon="View" />
-                <AppBarToggleButton x:Uid="/Groups/ToolExpert" Icon="OutlineStar" Checked="ToggleExpert" Unchecked="ToggleExpert" />
             </StackPanel>
         </Border>
 
-        <Border Background="{ThemeResource BrushAccentColor2}" Grid.Row="1" Grid.Column="2">
+        <Border Grid.RowSpan="2" Background="{ThemeResource BrushAccentControlBackground}" Grid.Row="1" Grid.Column="2" BorderBrush="Gray" BorderThickness="1 0 0 0">
             <TreeView x:Name="TreeGroups" ItemsSource="{Binding Groups}" CanReorderItems="False" ItemInvoked="TreeGroups_ItemInvoked" MinWidth="250" Margin="0 0 5 0">
                 <TreeView.ItemTemplate>
                     <DataTemplate x:DataType="local:Line">
-                        <TreeViewItem Content="{Binding}" Background="{Binding CurrentBrush}" DoubleTapped="Groups_DoubleTapped" CanDrag="False" Margin="-20 0 0 0" ItemsSource="{Binding Subs}" IsExpanded="{Binding IsExpanded, Mode=TwoWay}">
+                        <TreeViewItem Background="{Binding CurrentBrush}" DoubleTapped="Groups_DoubleTapped" CanDrag="False" Margin="-20 0 0 0" ItemsSource="{Binding Subs}" IsExpanded="{Binding IsExpanded, Mode=TwoWay}">
                             <TreeViewItem.ContextFlyout>
                                 <MenuFlyout>
                                     <MenuFlyoutItem x:Uid="/Groups/GListContextAdd" Icon="Add" Click="ClickAddSub" />
@@ -163,10 +181,10 @@
                                 <DataTemplate x:DataType="local:Line">
                                     <StackPanel Orientation="Horizontal">
                                         <Viewbox Height="15">
-                                            <SymbolIcon Symbol="{Binding Icon}" Foreground="White" />
+                                            <SymbolIcon Symbol="{Binding Icon}" />
                                         </Viewbox>
-                                        <TextBlock Text="{Binding GroupName}" Margin="10 0 0 0" Foreground="White" />
-                                        <TextBlock Text="{Binding Name}" Margin="10 0 5 0" Foreground="White" />
+                                        <TextBlock Text="{Binding GroupName}" Margin="10 0 0 0" />
+                                        <TextBlock Text="{Binding Name}" Margin="10 0 5 0" />
                                     </StackPanel>
                                 </DataTemplate>
                             </TreeViewItem.ContentTemplate>

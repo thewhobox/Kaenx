@@ -48,7 +48,7 @@ namespace Kaenx.Classes.Project
         {
             get
             {
-                return Id.ToString();
+                return Id.ToString(); 
             }
         }
         public ObservableCollection<GroupMiddle> Subs { get; set; } = new ObservableCollection<GroupMiddle>();

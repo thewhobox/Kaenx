@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Windows.UI.Xaml;
 
 namespace Kaenx.Classes.Bus.Data
 {
@@ -19,6 +20,8 @@ namespace Kaenx.Classes.Bus.Data
         public string Additional { get; set; }
         public LineDevice Device { get; set; }
 
+        public Visibility ShowAdditional { get { return string.IsNullOrEmpty(Additional) ? Visibility.Collapsed : Visibility.Visible; } }
+
 
         public List<MulticastAddress> GroupTable { get; set; }
 
@@ -30,5 +33,7 @@ namespace Kaenx.Classes.Bus.Data
     {
         public string GroupIndex { get; set; }
         public int ObjectIndex { get; set; }
+        public string ObjectInfo { get; set; }
+        public string ObjectFunc { get; set; }
     }
 }

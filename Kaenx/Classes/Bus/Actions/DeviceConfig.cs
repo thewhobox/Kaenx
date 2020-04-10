@@ -1,4 +1,5 @@
 ﻿using Kaenx.Classes.Bus.Data;
+using Kaenx.Classes.Helper;
 using Kaenx.DataContext.Catalog;
 using Kaenx.Konnect;
 using Kaenx.Konnect.Addresses;
@@ -89,30 +90,60 @@ namespace Kaenx.Classes.Bus.Actions
             XElement master = (await GetKnxMaster()).Root;
             XElement manu = master.Descendants(XName.Get("Manufacturer", master.Name.NamespaceName)).Single(m => m.Attribute("Id").Value == appId.Substring(0, 6));
             _data.Manufacturer = manu.Attribute("Name").Value;
+            Hardware2AppModel h2a = null;
 
             try
             {
-                Hardware2AppModel h2a = context.Hardware2App.First(h => h.ApplicationId.StartsWith(appId));
+                h2a = context.Hardware2App.First(h => h.ApplicationId.StartsWith(appId));
                 DeviceViewModel dvm = context.Devices.First(d => d.HardwareId == h2a.HardwareId);
                 _data.ApplicationName = h2a.Name + " " + h2a.VersionString;
             }
             catch { }
 
+            if(h2a == null)
+            {
+                Finish(false);
+                return;
+            }
+
             #endregion
 
-            
-            byte[] mem = await dev.MemoryRead(17408, 304);
 
+            ProgressValue = 30;
+            TodoText = "Lese Speicher...";
+
+            byte[] mem = await dev.MemoryRead(17408, 304);
             _data.Memory = mem;
+
+
+            ProgressValue = 40;
+            TodoText = "Berechne Kofiguration...";
+
+            GetConfig(h2a);
+        }
+
+
+
+
+        private void GetConfig(Hardware2AppModel h2a)
+        {
+            CatalogContext _context = new CatalogContext();
+            Dictionary<string, AppParameter> paras = new Dictionary<string, AppParameter>();
+
+            foreach (AppParameter param in _context.AppParameters.Where(p => p.ApplicationId == h2a.ApplicationId))
+                paras.Add(param.Id, param);
+
+
+
 
             Finish();
         }
 
 
-        private void Finish()
+        private void Finish(bool success = true)
         {
             ProgressValue = 100;
-            TodoText = "Erfolgreich";
+            TodoText = success ? "Erfolgreich" : "Fehlgeschlagen";
             Finished?.Invoke(this, _data);
         }
 

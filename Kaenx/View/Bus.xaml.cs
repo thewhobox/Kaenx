@@ -56,12 +56,69 @@ namespace Kaenx.View
             }
 
             DeviceInfo action = new DeviceInfo();
-            Line dM = new Line { Id = int.Parse(address[0]) };
-            LineMiddle dL = new LineMiddle { Id = int.Parse(address[1]), Parent = dM };
-            action.Device = new LineDevice(true) { Name = "Unbekannt", Id = int.Parse(address[2]), Parent = dL };
+
+            if (InAddr2Device.IsChecked == true)
+            {
+                try
+                {
+                    Line l = SaveHelper._project.Lines.Single(l => l.Id.ToString() == address[0]);
+                    LineMiddle lm = l.Subs.Single(l => l.Id.ToString() == address[1]);
+                    LineDevice ld = lm.Subs.Single(l => l.Id.ToString() == address[2]);
+                    action.Device = ld;
+                }
+                catch
+                {
+                    ViewHelper.Instance.ShowNotification("Adresse konnte keinem Gerät zugewiesen werden.", 3000, ViewHelper.MessageType.Warning);
+                }
+            }
+
+            if (action.Device == null)
+            {
+                Line dM = new Line { Id = int.Parse(address[0]) };
+                LineMiddle dL = new LineMiddle { Id = int.Parse(address[1]), Parent = dM };
+                action.Device = new LineDevice(true) { Name = "Unbekannt", Id = int.Parse(address[2]), Parent = dL };
+            }
+
             action.Finished += Action_Finished;
             BusConnection.Instance.AddAction(action);
-        
+        }
+
+        private void ReadConf(object sender, RoutedEventArgs e)
+        {
+            string[] address = InAddress2.Text.Split(".");
+
+            if (address.Length != 3)
+            {
+                ViewHelper.Instance.ShowNotification("Ungültige Adresse!", 3000, ViewHelper.MessageType.Error);
+                return;
+            }
+
+            DeviceConfig action = new DeviceConfig();
+
+            if (InAddr2Device.IsChecked == true)
+            {
+                try
+                {
+                    Line l = SaveHelper._project.Lines.Single(l => l.Id.ToString() == address[0]);
+                    LineMiddle lm = l.Subs.Single(l => l.Id.ToString() == address[1]);
+                    LineDevice ld = lm.Subs.Single(l => l.Id.ToString() == address[2]);
+                    action.Device = ld;
+                }
+                catch
+                {
+                    ViewHelper.Instance.ShowNotification("Adresse konnte keinem Gerät zugewiesen werden.", 3000, ViewHelper.MessageType.Warning);
+                }
+            }
+            
+            if(action.Device == null)
+            {
+                Line dM = new Line { Id = int.Parse(address[0]) };
+                LineMiddle dL = new LineMiddle { Id = int.Parse(address[1]), Parent = dM };
+                action.Device = new LineDevice(true) { Name = "Unbekannt", Id = int.Parse(address[2]), Parent = dL };
+            }
+
+            action.Finished += Action_Finished;
+            BusConnection.Instance.AddAction(action);
         }
 
         public void AddReadData(IBusData info)
@@ -76,7 +133,7 @@ namespace Kaenx.View
         {
             _ = this.Dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Normal, () =>
             {
-                DeviceInfoData d = (DeviceInfoData)data;
+                IBusData d = (IBusData)data;
                 d.Device = action.Device;
                 ReadList.Add(d);
             });

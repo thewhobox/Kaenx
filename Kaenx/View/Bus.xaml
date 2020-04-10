@@ -11,9 +11,14 @@
     <Page.Resources>
         <DataTemplate x:Key="RowDetailsInfoTemplate">
             <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition />
+                    <RowDefinition Height="auto" />
+                </Grid.RowDefinitions>
                 <Grid.ColumnDefinitions>
-                    <ColumnDefinition  />
-                    <ColumnDefinition Width="150" />
+                    <ColumnDefinition Width="auto" />
+                    <ColumnDefinition Width="auto" />
+                    <ColumnDefinition />
                     <ColumnDefinition Width="auto" />
                 </Grid.ColumnDefinitions>
 
@@ -21,33 +26,41 @@
                     <toolkit:HeaderedContentControl Header="Applikations Id" Margin="0 5">
                         <TextBlock Text="{Binding ApplicationId}" />
                     </toolkit:HeaderedContentControl>
+                    <toolkit:HeaderedContentControl Header="Masken Version" Margin="0 5">
+                        <TextBlock Text="{Binding MaskVersion}" />
+                    </toolkit:HeaderedContentControl>
+                </StackPanel>
+
+                <StackPanel Grid.Column="1" Orientation="Vertical" Padding="10" ScrollViewer.HorizontalScrollMode="Auto">
                     <toolkit:HeaderedContentControl Header="Applikations Name" Margin="0 5">
                         <TextBlock Text="{Binding ApplicationName}" />
                     </toolkit:HeaderedContentControl>
                     <toolkit:HeaderedContentControl Header="Geräte Name" Margin="0 5">
                         <TextBlock Text="{Binding DeviceName}" />
                     </toolkit:HeaderedContentControl>
-                    <toolkit:HeaderedContentControl Header="Masken Version" Margin="0 5">
-                        <TextBlock Text="{Binding MaskVersion}" />
-                    </toolkit:HeaderedContentControl>
                 </StackPanel>
 
-                <ListView Grid.Column="1" ItemsSource="{Binding GroupTable}" Visibility="Collapsed" />
+                <TextBlock Grid.Row="1" Grid.ColumnSpan="3" Padding="10 0 10 10" Text="{Binding Additional}" Visibility="{Binding ShowAdditional}" />
 
-                <toolkit:DataGrid Grid.Column="2" ItemsSource="{Binding AssociationTable}" AutoGenerateColumns="False" IsReadOnly="True">
+
+                <toolkit:DataGrid Grid.Column="3" Grid.RowSpan="2" MaxWidth="450" ItemsSource="{Binding AssociationTable}" AutoGenerateColumns="False" IsReadOnly="True">
                     <toolkit:DataGrid.Columns>
                         <toolkit:DataGridTextColumn Header="Gruppenadresse" Binding="{Binding GroupIndex}" />
                         <toolkit:DataGridTextColumn Header="KO Nr." Binding="{Binding ObjectIndex}" />
+                        <toolkit:DataGridTextColumn Header="KO Desc." Binding="{Binding ObjectInfo}" />
+                        <toolkit:DataGridTextColumn Header="KO Func." Binding="{Binding ObjectFunc}" />
                     </toolkit:DataGrid.Columns>
                 </toolkit:DataGrid>
             </Grid>
         </DataTemplate>
         <DataTemplate x:Key="RowDetailsConfigTemplate">
-            <Button Content="Config ansehen" Margin="30 10" HorizontalAlignment="Stretch" />
+            <Grid Padding="30 10">
+                <Button Content="Config ansehen" HorizontalAlignment="Stretch" />
+            </Grid>
         </DataTemplate>
     </Page.Resources>
 
-    <Grid Margin="10">
+    <Grid Margin="0 10 0 0">
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="auto" />
             <ColumnDefinition />
@@ -85,7 +98,7 @@
 
                     <TextBlock Grid.Row="2" Text="Warteliste:" Margin="5 10 5 5" FontSize="17" />
 
-                    <ListView Grid.Row="3" ItemsSource="{Binding actions}" IsItemClickEnabled="False" SelectionMode="None">
+                    <ListView Grid.Row="3" Grid.ColumnSpan="2" ItemsSource="{Binding actions}" IsItemClickEnabled="False" SelectionMode="None">
                         <ListView.ItemContainerStyle>
                             <Style TargetType="ListViewItem">
                                 <Setter Property="HorizontalContentAlignment" Value="Stretch" />
@@ -123,8 +136,8 @@
                             <StackPanel Padding="0 10" BorderThickness="0 0 0 0.5" BorderBrush="Gray">
                                 <StackPanel.ContextFlyout>
                                     <MenuFlyout>
-                                        <MenuFlyoutItem Text="Vorziehen" Icon="Upload" />
-                                        <MenuFlyoutItem Text="Abbrechen" Icon="Cancel" />
+                                        <MenuFlyoutItem Text="Vorziehen" Icon="Upload" IsEnabled="False" />
+                                        <MenuFlyoutItem Text="Abbrechen" Icon="Cancel" IsEnabled="False" />
                                     </MenuFlyout>
                                 </StackPanel.ContextFlyout>
                                 <TextBlock Text="{Binding Path=Device.Name}" />
@@ -213,8 +226,16 @@
 
                     <StackPanel Orientation="Horizontal" Margin="10">
                         <TextBlock Text="Adresse:" Margin="10 0 10 0" VerticalAlignment="Center" />
-                        <TextBox x:Name="InAddress2" Text="1.1.1" Width="200" />
-                        <Button x:Name="BtnGetInfo" Content="Auslesen" Click="ReadInfo" />
+                        <TextBox x:Name="InAddress2" Text="1.1.1" Width="200" CornerRadius="2 0 0 2" />
+                        <DropDownButton Content="Auslesen">
+                            <DropDownButton.Flyout>
+                                <MenuFlyout Placement="BottomEdgeAlignedRight">
+                                    <MenuFlyoutItem Icon="BrowsePhotos" Text="Information" Click="ReadInfo" />
+                                    <MenuFlyoutItem Icon="Find" Text="Konfiguration" Click="ReadConf" />
+                                </MenuFlyout>
+                            </DropDownButton.Flyout>
+                        </DropDownButton>
+                        <CheckBox x:Name="InAddr2Device" Content="Adresse dem Gerät im Projekt zuordnen" Margin="20 0 0 0" VerticalContentAlignment="Center" />
                     </StackPanel>
 
                     <toolkit:DataGrid x:Name="GridReads" Grid.Row="1" ItemsSource="{Binding}" IsReadOnly="True" AutoGenerateColumns="False" AreRowDetailsFrozen="True" LoadingRowDetails="GridReads_LoadingRowDetails" RowDetailsVisibilityMode="VisibleWhenSelected">

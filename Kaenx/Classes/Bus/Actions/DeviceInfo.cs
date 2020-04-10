@@ -91,7 +91,15 @@ namespace Kaenx.Classes.Bus.Actions
                 _data.DeviceName = dvm.Name;
                 _data.ApplicationName = h2a.Name + " " + h2a.VersionString;
             }
-            catch { }
+            catch {
+                _data.DeviceName = "Unbekannt";
+                _data.ApplicationName = "Applikation nicht im Katalog";
+            }
+
+            if(Device != null && !Device.ApplicationId.StartsWith(appId))
+            {
+                _data.Additional = "Warnung! Applikations Id im Gerät stimmt nicht mit dem im Projekt überein!";
+            }
 
             _data.ApplicationId = appId + "XXXX";
 
@@ -177,6 +185,14 @@ namespace Kaenx.Classes.Bus.Actions
                                 helper.GroupIndex = _data.GroupTable[datax[offset] - 1].ToString();
                             else
                                 helper.GroupIndex = datax[offset].ToString();
+
+                            if(Device.ComObjects.Any(c => c.Number == helper.ObjectIndex))
+                            {
+                                Project.DeviceComObject com = Device.ComObjects.Single(c => c.Number == helper.ObjectIndex);
+                                helper.ObjectInfo = com.DisplayName;
+                                helper.ObjectFunc = com.Function;
+                            }
+
 
                             table.Add(helper);
                         }

@@ -35,15 +35,28 @@
             </Grid.ColumnDefinitions>
 
 
-            <CommandBar Grid.ColumnSpan="5" Background="{ThemeResource BrushAccentColor2}" Foreground="White">
-                <AppBarElementContainer>
-                    <TextBox Width="200" x:Uid="/Catalog/BarSearch" x:Name="BarSearchIn" Margin="0 4 0 0" TextChanged="SearchTextChanged" />
-                </AppBarElementContainer>
-                <AppBarButton Icon="Delete" x:Uid="/Catalog/BarDelete" x:Name="BarDelete" Click="ClickDelete"  IsEnabled="False"/>
-                <AppBarSeparator />
-                <AppBarButton Icon="Download" x:Uid="/Catalog/BarImport" toolkit:Menu.InputGestureText="Ctrl+Shift+N" Click="ClickImport" />
-                <AppBarButton Icon="Upload" x:Uid="/Catalog/BarExport" />
-            </CommandBar>
+            <Border Grid.ColumnSpan="5" Background="{ThemeResource BrushAccentColor2}">
+                <StackPanel  Orientation="Horizontal" HorizontalAlignment="Right">
+                    <TextBox Width="200" x:Uid="/Catalog/BarSearch" x:Name="BarSearchIn" VerticalAlignment="Center" BorderBrush="White" Foreground="White" TextChanged="SearchTextChanged" />
+                    <AppBarSeparator Foreground="White" Margin="10 0" />
+                    <Button x:Uid="/Catalog/BarDelete" x:Name="BarDelete" Click="ClickDelete" IsEnabled="False" Background="Transparent" Padding="25 11" CornerRadius="0">
+                        <SymbolIcon Symbol="Delete" Foreground="White" />
+                    </Button>
+                    <Button x:Uid="/Catalog/BarExport" Background="Transparent" Padding="25 11" CornerRadius="0" IsEnabled="False">
+                        <Button.KeyboardAccelerators>
+                            <KeyboardAccelerator Modifiers="Control" Key="E" />
+                        </Button.KeyboardAccelerators>
+                        <SymbolIcon Symbol="Upload" Foreground="White" />
+                    </Button>
+                    <Button x:Uid="/Catalog/BarImport" Click="ClickImport" Background="Transparent" Padding="25 11" CornerRadius="0">
+                        <Button.KeyboardAccelerators>
+                            <KeyboardAccelerator Modifiers="Control" Key="I" />
+                        </Button.KeyboardAccelerators>
+                        <SymbolIcon Symbol="Download" Foreground="White" />
+                    </Button>
+                </StackPanel>
+            </Border>
+            
 
             <toolkit:DataGrid x:Name="CatalogDeviceList" Grid.Row="2" Sorting="CatalogDeviceList_Sorting" AutoGenerateColumns="False" ItemsSource="{Binding CatalogDevices}" 
                               SelectionChanged="CatalogDeviceList_SelectionChanged" IsReadOnly="True" CanUserSortColumns="True" Background="{ThemeResource BrushAccentControlBackground}">
@@ -54,13 +67,13 @@
                 </toolkit:DataGrid.Columns>
             </toolkit:DataGrid>
 
-            <toolkit:Expander Grid.Row="1" Grid.Column="1" ExpandDirection="Left" VerticalContentAlignment="Stretch">
+            <toolkit:Expander Grid.Row="1" Grid.Column="1" ExpandDirection="Left" VerticalContentAlignment="Stretch" BorderBrush="Gray" BorderThickness="1 0 1 0">
                 <toolkit:Expander.HeaderTemplate>
                     <DataTemplate>
                         <TextBlock x:Uid="/Catalog/SideProps" FontSize="20" />
                     </DataTemplate>
                 </toolkit:Expander.HeaderTemplate>
-                <Grid DataContext="{Binding ElementName=CatalogDeviceList, Path=SelectedItem}" Padding="0 30 0 0" Background="{ThemeResource BrushAccentColor2}" BorderBrush="LightGray" BorderThickness="1 0 0 0">
+                <Grid DataContext="{Binding ElementName=CatalogDeviceList, Path=SelectedItem}" Padding="0 30 0 0" Background="{ThemeResource BrushAccentControlBackground}">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="auto" />
                         <ColumnDefinition  />

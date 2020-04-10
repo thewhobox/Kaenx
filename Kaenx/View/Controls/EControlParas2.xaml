@@ -57,14 +57,11 @@
         </Grid>
 
         <ScrollViewer Grid.Row="2" BorderBrush="LightGray" BorderThickness="1 0">
-            <ContentPresenter Content="{Binding ElementName=NavBlock, Path=SelectedItem.Panel}" />
+            <ContentPresenter Content="{Binding ElementName=NavBlock, Path=SelectedItem.Panel}" Background="{ThemeResource BrushAccentControlBackground}" />
         </ScrollViewer>
 
-        <Border x:Name="LoadRing" Grid.RowSpan="3" Grid.ColumnSpan="2" Background="LightGray" Opacity="0.6">
-            <ProgressRing HorizontalAlignment="Center" IsActive="true" Width="100" Height="100"  Visibility="Visible"/>
-        </Border>
-
-        <toolkit:DataGrid x:Name="ComList" Grid.Row="1" Grid.RowSpan="2" Grid.Column="1" BorderBrush="LightGray" BorderThickness="1" Margin="5 0 0 0" AutoGenerateColumns="False" ItemsSource="{Binding device.ComObjects, Mode=OneWay}" IsReadOnly="True" >
+        <toolkit:DataGrid x:Name="ComList" Grid.Row="1" Grid.RowSpan="2" Grid.Column="1" BorderBrush="LightGray" BorderThickness="1 1 1 0" Margin="5 0 0 0" AutoGenerateColumns="False"
+                          ItemsSource="{Binding device.ComObjects, Mode=OneWay}" IsReadOnly="True" Background="{ThemeResource BrushAccentControlBackground}" CornerRadius="2 2 0 0">
             <toolkit:DataGrid.Columns>
                 <toolkit:DataGridTextColumn x:Uid="/Groups/LComsNumb" Tag="Number" Width="SizeToCells" Binding="{Binding Number}" />
                 <toolkit:DataGridTextColumn x:Uid="/Groups/LComsName" Tag="Name" Width="SizeToCells" Binding="{Binding DisplayName}" />
@@ -72,5 +69,11 @@
                 <toolkit:DataGridTextColumn x:Uid="/Groups/LComsConn" Tag="Connections" Width="SizeToCells" Binding="{Binding Connections}" />
             </toolkit:DataGrid.Columns>
         </toolkit:DataGrid>
+
+
+        <Border x:Name="LoadRing" Grid.RowSpan="3" Grid.ColumnSpan="2" Background="LightGray" Opacity="0.6">
+            <ProgressRing HorizontalAlignment="Center" IsActive="true" Width="100" Height="100"  Visibility="Visible"/>
+        </Border>
+
     </Grid>
 </UserControl>

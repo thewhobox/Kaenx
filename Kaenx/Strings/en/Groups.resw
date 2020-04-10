@@ -141,9 +141,6 @@
   <data name="CListNumb.Header" xml:space="preserve">
     <value>No.</value>
   </data>
-  <data name="DragConnectKO" xml:space="preserve">
-    <value>Connect Co with "{0} {1}".</value>
-  </data>
   <data name="GListContextAdd.Text" xml:space="preserve">
     <value>Add</value>
   </data>
@@ -178,7 +175,7 @@
     <value>New Middle Group</value>
   </data>
   <data name="ToolAddMain.Label" xml:space="preserve">
-    <value>Main</value>
+    <value>GA</value>
   </data>
   <data name="ToolView.Label" xml:space="preserve">
     <value>View</value>
@@ -191,5 +188,8 @@
   </data>
   <data name="MsgSelectGroup" xml:space="preserve">
     <value>Please select Group</value>
+  </data>
+  <data name="ListHeaderComs.Text" xml:space="preserve">
+    <value>All CO's in Group:</value>
   </data>
 </root>
