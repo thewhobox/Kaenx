@@ -1,6 +1,6 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="UTF-8"?>
 <KNX xmlns="http://knx.org/xml/project/11">
-  <MasterData Version="258" Signature="F5Ay7Uxgf6W3QrCRZnqANLHEtZTZ2GfpkzbjyY3t1vxDuuPc80N6jpLu1IdEVnP6MN0fZJzAs4TwRrBfB28fweaHE0NJnYftrq+E75+yWWx4rnz/Zd4evgbii6Oropvv78aQ5htZkhuMy/NHEQL11xMx0S/IdL2/exDUOjS3elI=">
+  <MasterData Version="395" Signature="Q+pd6lMLllbgA3hgIJR5P0CpEbjwI13xRNfXHDcKkLXKwzje3UjGJFrAMtnlSL+DfeBVIcWXI/Jqt7sfsxaduSM3kOWJTtIC4Wk0mYshg1Piv7U5S4qW8GKdm1UfA5f3mdtqqgqpQ0PuU9h0Bjr4KWt08ubuJ31zw9M0VBvp3i8=">
     <DatapointTypes>
       <DatapointType Id="DPT-1" Number="1" Name="1.xxx" Text="1-bit" SizeInBit="1">
         <DatapointSubtypes>
@@ -6011,7 +6011,7 @@
         </PublicKeys>
       </Manufacturer>
       <Manufacturer Id="M-000B" KnxManufacturerId="11" Name="LEGRAND Appareillage électrique" ImportRestriction="Group" ImportGroup="Group-Legrand" />
-      <Manufacturer Id="M-000C" KnxManufacturerId="12" Name="Merten" DefaultLanguage="en" ImportRestriction="Group" ImportGroup="Group-Schneider" />
+      <Manufacturer Id="M-000C" KnxManufacturerId="12" Name="Merten" CompatibilityGroup="100" DefaultLanguage="en" ImportRestriction="Group" ImportGroup="Group-Schneider" />
       <Manufacturer Id="M-000E" KnxManufacturerId="14" Name="ABB SpA-SACE Division" CompatibilityGroup="2" ImportRestriction="Group" ImportGroup="Group-ABB" />
       <Manufacturer Id="M-0016" KnxManufacturerId="22" Name="Siedle &amp; Söhne" ImportRestriction="Own" />
       <Manufacturer Id="M-0018" KnxManufacturerId="24" Name="Eberle" ImportRestriction="Own" />
@@ -6020,17 +6020,25 @@
       <Manufacturer Id="M-001C" KnxManufacturerId="28" Name="Schupa GmbH" ImportRestriction="Own" />
       <Manufacturer Id="M-001D" KnxManufacturerId="29" Name="ABB SCHWEIZ" CompatibilityGroup="2" ImportRestriction="Group" ImportGroup="Group-ABB" />
       <Manufacturer Id="M-001E" KnxManufacturerId="30" Name="Feller" ImportRestriction="Group" ImportGroup="Group-Schneider" />
+      <Manufacturer Id="M-001F" KnxManufacturerId="31" Name="Glamox AS" ImportRestriction="Own" />
       <Manufacturer Id="M-0020" KnxManufacturerId="32" Name="DEHN &amp; SÖHNE" ImportRestriction="Own" />
       <Manufacturer Id="M-0021" KnxManufacturerId="33" Name="CRABTREE" ImportRestriction="Group" ImportGroup="Group-SAG" />
+      <Manufacturer Id="M-0022" KnxManufacturerId="34" Name="eVoKNX" ImportRestriction="Own" />
       <Manufacturer Id="M-0024" KnxManufacturerId="36" Name="Paul Hochköpper" ImportRestriction="Own" />
       <Manufacturer Id="M-0025" KnxManufacturerId="37" Name="Altenburger Electronic" ImportRestriction="Own" />
       <Manufacturer Id="M-0029" KnxManufacturerId="41" Name="Grässlin" ImportRestriction="Own" />
       <Manufacturer Id="M-002A" KnxManufacturerId="42" Name="Simon" ImportRestriction="Own" />
       <Manufacturer Id="M-002C" KnxManufacturerId="44" Name="VIMAR" CompatibilityGroup="2" DefaultLanguage="en" ImportRestriction="Own">
         <PublicKeys>
-          <PublicKey Id="M-002C_K-1" Number="1">
+          <PublicKey Id="M-002C_K-1" Number="1" Revoked="true">
             <RSAKeyValue>
               <Modulus>05IX5u+tbSVPYkPZEgldgP/mGsFIvzWjJ1vlwdA3jQpLldwYM4SpV0L0FTl2gQRGro3bHiqqc/acuiwC+j1B22y2FLX8unNHWHGnzZD5EorBiCujAKeU7WNnHr+YMUPH6xYV+rzVUMLgUj3yivmx51aiYnZwzHai12HXxd9MTwk=</Modulus>
+              <Exponent>AQAB</Exponent>
+            </RSAKeyValue>
+          </PublicKey>
+          <PublicKey Id="M-002C_K-2" Number="2">
+            <RSAKeyValue>
+              <Modulus>yw1Srt4xJud0pstgqZZRUpgbJ+VX4BlDEBEvh5g/lG96datjKs3to1RzlSF/bwvS22QQQ3prbQxYhuvv+srSp2SpmYnrmryj4NooO5fer90dtMIYl3vX0sDwhcpZ6xp13PGJMzIyNTpgsByCupvd76PCSqrgzWb73eTXphlFn6M=</Modulus>
               <Exponent>AQAB</Exponent>
             </RSAKeyValue>
           </PublicKey>
@@ -6044,11 +6052,12 @@
       <Manufacturer Id="M-0037" KnxManufacturerId="55" Name="ZUMTOBEL" ImportRestriction="Group" ImportGroup="Group-Zumtobel" />
       <Manufacturer Id="M-0039" KnxManufacturerId="57" Name="Phoenix Contact" ImportRestriction="Own" />
       <Manufacturer Id="M-003D" KnxManufacturerId="61" Name="WAGO Kontakttechnik" ImportRestriction="Own" />
+      <Manufacturer Id="M-003E" KnxManufacturerId="62" Name="knXpresso" ImportRestriction="Own" />
       <Manufacturer Id="M-0042" KnxManufacturerId="66" Name="Wieland Electric" ImportRestriction="Own" />
       <Manufacturer Id="M-0043" KnxManufacturerId="67" Name="Hermann Kleinhuis" ImportRestriction="Own" />
       <Manufacturer Id="M-0045" KnxManufacturerId="69" Name="Stiebel Eltron" ImportRestriction="Own" />
       <Manufacturer Id="M-0047" KnxManufacturerId="71" Name="Tehalit" ImportRestriction="Own" />
-      <Manufacturer Id="M-0048" KnxManufacturerId="72" Name="Theben AG" DefaultLanguage="en" ImportRestriction="Group" ImportGroup="Group-Theben">
+      <Manufacturer Id="M-0048" KnxManufacturerId="72" Name="Theben AG" CompatibilityGroup="48" DefaultLanguage="en" ImportRestriction="Group" ImportGroup="Group-Theben">
         <PublicKeys>
           <PublicKey Id="M-0048_K-1" Number="1">
             <RSAKeyValue>
@@ -6070,13 +6079,37 @@
       <Manufacturer Id="M-0059" KnxManufacturerId="89" Name="Bosch Thermotechnik GmbH" ImportRestriction="Own" />
       <Manufacturer Id="M-005A" KnxManufacturerId="90" Name="SEF - ECOTEC" ImportRestriction="Own" />
       <Manufacturer Id="M-005C" KnxManufacturerId="92" Name="DORMA GmbH + Co. KG" ImportRestriction="Own" />
-      <Manufacturer Id="M-005D" KnxManufacturerId="93" Name="WindowMaster A/S" ImportRestriction="Own" />
+      <Manufacturer Id="M-005D" KnxManufacturerId="93" Name="WindowMaster A/S" ImportRestriction="Own">
+        <PublicKeys>
+          <PublicKey Id="M-005D_K-1" Number="1">
+            <RSAKeyValue>
+              <Modulus>6V4FYefIW8Hu4IMdMQfn9OtiiJb9Fq12ywoebF2dk6yUL7hCh1tCla9Iza4cLELH3O68GXiUByxhO5zXP6C+EuAyFjb3XDRDJK94dXzrD8PNFzLmN4nfWh2xexTM7kwD3eL7XNGAbcZrhcCcjVRDO/Pkdn0/Vk90RX7a78FBJY0=</Modulus>
+              <Exponent>AQAB</Exponent>
+            </RSAKeyValue>
+          </PublicKey>
+        </PublicKeys>
+      </Manufacturer>
       <Manufacturer Id="M-005E" KnxManufacturerId="94" Name="Walther Werke" ImportRestriction="Own" />
       <Manufacturer Id="M-005F" KnxManufacturerId="95" Name="ORAS" ImportRestriction="Own" />
       <Manufacturer Id="M-0061" KnxManufacturerId="97" Name="Dätwyler" ImportRestriction="Own" />
       <Manufacturer Id="M-0062" KnxManufacturerId="98" Name="Electrak" ImportRestriction="Group" ImportGroup="Group-Legrand" />
       <Manufacturer Id="M-0063" KnxManufacturerId="99" Name="Techem" ImportRestriction="Own" />
-      <Manufacturer Id="M-0064" KnxManufacturerId="100" Name="Schneider Electric Industries SAS" DefaultLanguage="en" ImportRestriction="Group" ImportGroup="Group-Schneider" />
+      <Manufacturer Id="M-0064" KnxManufacturerId="100" Name="Schneider Electric Industries SAS" CompatibilityGroup="100" DefaultLanguage="en" ImportRestriction="Group" ImportGroup="Group-Schneider">
+        <PublicKeys>
+          <PublicKey Id="M-0064_K-1" Number="1" Revoked="true">
+            <RSAKeyValue>
+              <Modulus>ZSO0bcZyFAxTiQbYUKQaugiUTXgK9URS45A9dxjpXG2bBhCKjpvl5hak9EC8Qgr/XO8mfVSocGVxLfLBBB8E1BGOyoZzabkN4Io9rEz/+gdME5dmgytRK70a3XKdhW7B6l3NeXFXq61jeAOQ06nDLzEjpZDNgZbz9ZEzTiVQeuk=</Modulus>
+              <Exponent>AQAB</Exponent>
+            </RSAKeyValue>
+          </PublicKey>
+          <PublicKey Id="M-0064_K-2" Number="2">
+            <RSAKeyValue>
+              <Modulus>zso0bcZyFAxTiQbYUKQaugiUTXgK9URS45A9dxjpXG2bBhCKjpvl5hak9EC8Qgr/XO8mfVSocGVxLfLBBB8E1BGOyoZzabkN4Io9rEz/+gdME5dmgytRK70a3XKdhW7B6l3NeXFXq61jeAOQ06nDLzEjpZDNgZbz9ZEzTiVQeuk=</Modulus>
+              <Exponent>AQAB</Exponent>
+            </RSAKeyValue>
+          </PublicKey>
+        </PublicKeys>
+      </Manufacturer>
       <Manufacturer Id="M-0065" KnxManufacturerId="101" Name="WHD Wilhelm Huber + Söhne" ImportRestriction="Own" />
       <Manufacturer Id="M-0066" KnxManufacturerId="102" Name="Bischoff Elektronik" ImportRestriction="Own" />
       <Manufacturer Id="M-0068" KnxManufacturerId="104" Name="JEPAZ" ImportRestriction="Own" />
@@ -6174,7 +6207,16 @@
       <Manufacturer Id="M-0088" KnxManufacturerId="136" Name="function Technology" ImportRestriction="Own" />
       <Manufacturer Id="M-0089" KnxManufacturerId="137" Name="AMX" ImportRestriction="Own" />
       <Manufacturer Id="M-008A" KnxManufacturerId="138" Name="ELDAT" ImportRestriction="Own" />
-      <Manufacturer Id="M-008B" KnxManufacturerId="139" Name="Panasonic" ImportRestriction="Own" />
+      <Manufacturer Id="M-008B" KnxManufacturerId="139" Name="Panasonic" ImportRestriction="Own">
+        <PublicKeys>
+          <PublicKey Id="M-008B_K-1" Number="1">
+            <RSAKeyValue>
+              <Modulus>naHuMEqWTwwyD3jUQN1dYmQ09CNn4b89XZk+3Z6eiL87JmmuIgyTfnun7O77LSg6i3b3AJ6fpK9LS3h7JJqOT4jnXpfyUoHQmEaE+Wedmo40JcbpjzEa4/o5ky4TmLqwKHlDViWaU9JhQ6Z/rOd8IVmXfmxKvlWzXuRqENIwqjk=</Modulus>
+              <Exponent>AQAB</Exponent>
+            </RSAKeyValue>
+          </PublicKey>
+        </PublicKeys>
+      </Manufacturer>
       <Manufacturer Id="M-008C" KnxManufacturerId="140" Name="Pulse Technologies" ImportRestriction="Own" />
       <Manufacturer Id="M-008D" KnxManufacturerId="141" Name="Crestron" ImportRestriction="Own" />
       <Manufacturer Id="M-008E" KnxManufacturerId="142" Name="STEINEL professional" ImportRestriction="Own" />
@@ -6201,7 +6243,16 @@
       <Manufacturer Id="M-00A3" KnxManufacturerId="163" Name="TIANSU Automation" ImportRestriction="Own" />
       <Manufacturer Id="M-00A4" KnxManufacturerId="164" Name="Bubendorff" ImportRestriction="Own" />
       <Manufacturer Id="M-00A5" KnxManufacturerId="165" Name="MBS GmbH" ImportRestriction="Own" />
-      <Manufacturer Id="M-00A6" KnxManufacturerId="166" Name="Enertex Bayern GmbH" ImportRestriction="Own" />
+      <Manufacturer Id="M-00A6" KnxManufacturerId="166" Name="Enertex Bayern GmbH" ImportRestriction="Own">
+        <PublicKeys>
+          <PublicKey Id="M-00A6_K-1" Number="1">
+            <RSAKeyValue>
+              <Modulus>qpGTSSra7Dy91ra1c2V/jRnglrsbYRfQJvyHD0GShGoln/rCBcXc8bZqaVRg8zkBo5OaTPpZpI6JB3alfVVzfd/OEUkFhVRjiMBr8oY1SQPc5qDYW62U6Bg78F5rT/34EfYofHUF3RPqX1/5BhO51il7zwvqGm0QhQHCGELtXv8=</Modulus>
+              <Exponent>AQAB</Exponent>
+            </RSAKeyValue>
+          </PublicKey>
+        </PublicKeys>
+      </Manufacturer>
       <Manufacturer Id="M-00A7" KnxManufacturerId="167" Name="BMS" ImportRestriction="Own" />
       <Manufacturer Id="M-00A8" KnxManufacturerId="168" Name="Sinapsi" ImportRestriction="Own" />
       <Manufacturer Id="M-00A9" KnxManufacturerId="169" Name="Embedded Systems SIA" ImportRestriction="Own" />
@@ -6217,9 +6268,18 @@
       <Manufacturer Id="M-00B3" KnxManufacturerId="179" Name="Philips Controls" ImportRestriction="Own" />
       <Manufacturer Id="M-00B4" KnxManufacturerId="180" Name="VELUX A/S" ImportRestriction="Own" />
       <Manufacturer Id="M-00B5" KnxManufacturerId="181" Name="LOYTEC" ImportRestriction="Own" />
-      <Manufacturer Id="M-00B6" KnxManufacturerId="182" Name="SBS S.p.A." ImportRestriction="Own" />
+      <Manufacturer Id="M-00B6" KnxManufacturerId="182" Name="Ekinex S.p.A." ImportRestriction="Own">
+        <PublicKeys>
+          <PublicKey Id="M-00B6_K-1" Number="1">
+            <RSAKeyValue>
+              <Modulus>wm54W7OIiwUBNMINfbNObRmhqm1rmmShAnril03XLcNjTcWpD1D/eGrGZ/KJszXUKpmjflimDYfHUrBXQ+jTij/O6OeGAUC1IB+0eEFxZhcD+IqW+E70+DWHw3V79JqtKTB2mLSwloHRHUj21J2yXv54ZlPzldG+6sCr6/3odA0=</Modulus>
+              <Exponent>AQAB</Exponent>
+            </RSAKeyValue>
+          </PublicKey>
+        </PublicKeys>
+      </Manufacturer>
       <Manufacturer Id="M-00B7" KnxManufacturerId="183" Name="SIRLAN Technologies" ImportRestriction="Own" />
-      <Manufacturer Id="M-00B8" KnxManufacturerId="184" Name="Bleu Comm' Azur" ImportRestriction="Own" />
+      <Manufacturer Id="M-00B8" KnxManufacturerId="184" Name="ProKNX SAS" ImportRestriction="Own" />
       <Manufacturer Id="M-00B9" KnxManufacturerId="185" Name="IT GmbH" ImportRestriction="Own">
         <PublicKeys>
           <PublicKey Id="M-00B9_K-1" Number="1">
@@ -6236,7 +6296,7 @@
       <Manufacturer Id="M-00BD" KnxManufacturerId="189" Name="GFS GmbH" ImportRestriction="Own" />
       <Manufacturer Id="M-00BE" KnxManufacturerId="190" Name="Schenker Storen AG" ImportRestriction="Own" />
       <Manufacturer Id="M-00BF" KnxManufacturerId="191" Name="Algodue Elettronica S.r.L." ImportRestriction="Own" />
-      <Manufacturer Id="M-00C0" KnxManufacturerId="192" Name="Newron System" ImportRestriction="Own" />
+      <Manufacturer Id="M-00C0" KnxManufacturerId="192" Name="ABB France" CompatibilityGroup="2" ImportRestriction="Group" ImportGroup="Group-ABB" />
       <Manufacturer Id="M-00C1" KnxManufacturerId="193" Name="maintronic" ImportRestriction="Own" />
       <Manufacturer Id="M-00C2" KnxManufacturerId="194" Name="Vantage" ImportRestriction="Own" />
       <Manufacturer Id="M-00C3" KnxManufacturerId="195" Name="Foresis" ImportRestriction="Own" />
@@ -6275,12 +6335,21 @@
       <Manufacturer Id="M-00E1" KnxManufacturerId="225" Name="Lingg &amp; Janke" ImportRestriction="Own" />
       <Manufacturer Id="M-00E3" KnxManufacturerId="227" Name="Sauter" ImportRestriction="Own" />
       <Manufacturer Id="M-00E4" KnxManufacturerId="228" Name="SIMU" ImportRestriction="Own" />
-      <Manufacturer Id="M-00E8" KnxManufacturerId="232" Name="Theben HTS AG" DefaultLanguage="en" ImportRestriction="Group" ImportGroup="Group-Theben" />
+      <Manufacturer Id="M-00E8" KnxManufacturerId="232" Name="Theben HTS AG" CompatibilityGroup="48" DefaultLanguage="en" ImportRestriction="Group" ImportGroup="Group-Theben" />
       <Manufacturer Id="M-00E9" KnxManufacturerId="233" Name="Amann GmbH" ImportRestriction="Own" />
       <Manufacturer Id="M-00EA" KnxManufacturerId="234" Name="BERG Energiekontrollsysteme GmbH" ImportRestriction="Own" />
       <Manufacturer Id="M-00EB" KnxManufacturerId="235" Name="Hüppe Form Sonnenschutzsysteme GmbH" ImportRestriction="Own" />
       <Manufacturer Id="M-00ED" KnxManufacturerId="237" Name="Oventrop KG" ImportRestriction="Own" />
-      <Manufacturer Id="M-00EE" KnxManufacturerId="238" Name="Griesser AG" ImportRestriction="Own" />
+      <Manufacturer Id="M-00EE" KnxManufacturerId="238" Name="Griesser AG" ImportRestriction="Own">
+        <PublicKeys>
+          <PublicKey Id="M-00EE_K-1" Number="1">
+            <RSAKeyValue>
+              <Modulus>wtlDFNzJYpkZLnw8MpmBStxlwfK1r4aa/2P6A+LxdPMZzEqRjUoBIBw2EavopwE2pxvZESrcUcN1CoXX0fwwVWq6KYsTmOP1iS2hnXv7zlxpUGVRvcCpoyAvyOSYgk9mswdsGkcbSIxhBQzsAOEoJKwth4r+ZEyZi7OUF6u7xqM=</Modulus>
+              <Exponent>AQAB</Exponent>
+            </RSAKeyValue>
+          </PublicKey>
+        </PublicKeys>
+      </Manufacturer>
       <Manufacturer Id="M-00EF" KnxManufacturerId="239" Name="IPAS GmbH" ImportRestriction="Own" />
       <Manufacturer Id="M-00F0" KnxManufacturerId="240" Name="elero GmbH" ImportRestriction="Own" />
       <Manufacturer Id="M-00F1" KnxManufacturerId="241" Name="Ardan Production and Industrial Controls Ltd." ImportRestriction="Own" />
@@ -6332,7 +6401,16 @@
       <Manufacturer Id="M-0104" KnxManufacturerId="260" Name="ABUS Security-Center" ImportRestriction="Own" />
       <Manufacturer Id="M-0105" KnxManufacturerId="261" Name="Lite-Puter" ImportRestriction="Own" />
       <Manufacturer Id="M-0106" KnxManufacturerId="262" Name="Tantron Electronic" ImportRestriction="Own" />
-      <Manufacturer Id="M-0107" KnxManufacturerId="263" Name="Yönnet" ImportRestriction="Own" />
+      <Manufacturer Id="M-0107" KnxManufacturerId="263" Name="Interra" ImportRestriction="Own">
+        <PublicKeys>
+          <PublicKey Id="M-0107_K-1" Number="1">
+            <RSAKeyValue>
+              <Modulus>wG7Me4mYptj8Xai9g4ELPBAFNCU/1EYWKHU/dyWkmYkwGk72vhWRcRye4/PXrAPlJjqXNSNBtaEJ6Dsv3TFrItTgQcURv9pcofiZBXPPIfxe9x9W91vae9HJe4Luk4XSNNYSdP36lEbhGecblkmoALFIL22HiAeA6vlAUKfSQDk=</Modulus>
+              <Exponent>AQAB</Exponent>
+            </RSAKeyValue>
+          </PublicKey>
+        </PublicKeys>
+      </Manufacturer>
       <Manufacturer Id="M-0108" KnxManufacturerId="264" Name="DKX Tech" ImportRestriction="Own" />
       <Manufacturer Id="M-0109" KnxManufacturerId="265" Name="Viatron" ImportRestriction="Own" />
       <Manufacturer Id="M-010A" KnxManufacturerId="266" Name="Nautibus" ImportRestriction="Own" />
@@ -6397,7 +6475,7 @@
       <Manufacturer Id="M-013C" KnxManufacturerId="316" Name="Jiuzhou Greeble" ImportRestriction="Own" />
       <Manufacturer Id="M-013D" KnxManufacturerId="317" Name="Aumüller Aumatic GmbH" ImportRestriction="Own" />
       <Manufacturer Id="M-013E" KnxManufacturerId="318" Name="Etman Electric" ImportRestriction="Own" />
-      <Manufacturer Id="M-013F" KnxManufacturerId="319" Name="EMT Controls" ImportRestriction="Own" />
+      <Manufacturer Id="M-013F" KnxManufacturerId="319" Name="Black Nova" ImportRestriction="Own" />
       <Manufacturer Id="M-0140" KnxManufacturerId="320" Name="ZidaTech AG" ImportRestriction="Own" />
       <Manufacturer Id="M-0141" KnxManufacturerId="321" Name="IDGS bvba" ImportRestriction="Own" />
       <Manufacturer Id="M-0142" KnxManufacturerId="322" Name="dakanimo" ImportRestriction="Own" />
@@ -6490,7 +6568,7 @@
       <Manufacturer Id="M-0190" KnxManufacturerId="400" Name="ACEMATIC" ImportRestriction="Own" />
       <Manufacturer Id="M-0191" KnxManufacturerId="401" Name="ELAUSYS" ImportRestriction="Own" />
       <Manufacturer Id="M-0192" KnxManufacturerId="402" Name="ITK Engineering AG" ImportRestriction="Own" />
-      <Manufacturer Id="M-0193" KnxManufacturerId="403" Name="Aquametro AG" ImportRestriction="Own" />
+      <Manufacturer Id="M-0193" KnxManufacturerId="403" Name="INTEGRA METERING AG" ImportRestriction="Own" />
       <Manufacturer Id="M-0194" KnxManufacturerId="404" Name="FMS Hospitality Pte Ltd" ImportRestriction="Own" />
       <Manufacturer Id="M-0195" KnxManufacturerId="405" Name="Nuvo" ImportRestriction="Own" />
       <Manufacturer Id="M-0196" KnxManufacturerId="406" Name="u::Lux GmbH" ImportRestriction="Own" />
@@ -6514,10 +6592,19 @@
       <Manufacturer Id="M-01A8" KnxManufacturerId="424" Name="Zhuhai Ltech Technology Co., Ltd. " ImportRestriction="Own" />
       <Manufacturer Id="M-01A9" KnxManufacturerId="425" Name="ARCOM" ImportRestriction="Own" />
       <Manufacturer Id="M-01AA" KnxManufacturerId="426" Name="VIA Technologies, Inc." ImportRestriction="Own" />
-      <Manufacturer Id="M-01AB" KnxManufacturerId="427" Name="FEELSMART." ImportRestriction="Own" />
+      <Manufacturer Id="M-01AB" KnxManufacturerId="427" Name="FEELSMART." ImportRestriction="Own">
+        <PublicKeys>
+          <PublicKey Id="M-01AB_K-1" Number="1">
+            <RSAKeyValue>
+              <Modulus>zynMoxMi79++Aic+i4S/uh7OlJT6PEYM8CjeBS2PFyTlVyolza3RZD/inPK7gIqvoZbjXpyI7cvjEYVExLdvJsI8wuZ1VSDPKCr0wigWHtY9uHRlypwUK44wJHAk4ZNCnG7L8xNAcMj4Lb5gcRYKWtBUpYZ+sqjHl332YmW/g10=</Modulus>
+              <Exponent>AQAB</Exponent>
+            </RSAKeyValue>
+          </PublicKey>
+        </PublicKeys>
+      </Manufacturer>
       <Manufacturer Id="M-01AC" KnxManufacturerId="428" Name="SUPCON" ImportRestriction="Own" />
       <Manufacturer Id="M-01AD" KnxManufacturerId="429" Name="MANIC" ImportRestriction="Own" />
-      <Manufacturer Id="M-01AE" KnxManufacturerId="430" Name="Träum deutsche Elektronik GmbH" ImportRestriction="Own" />
+      <Manufacturer Id="M-01AE" KnxManufacturerId="430" Name="TDE GmbH" ImportRestriction="Own" />
       <Manufacturer Id="M-01AF" KnxManufacturerId="431" Name="Nanjing Shufan Information technology Co.,Ltd." ImportRestriction="Own" />
       <Manufacturer Id="M-01B0" KnxManufacturerId="432" Name="EWTech" DefaultLanguage="en" ImportRestriction="Own" />
       <Manufacturer Id="M-01B1" KnxManufacturerId="433" Name="Kluger Automation GmbH" ImportRestriction="Own" />
@@ -6525,13 +6612,167 @@
       <Manufacturer Id="M-01B3" KnxManufacturerId="435" Name="GreenControls Technology Sdn. Bhd." ImportRestriction="Own" />
       <Manufacturer Id="M-01B4" KnxManufacturerId="436" Name="IME S.p.a." ImportRestriction="Own" />
       <Manufacturer Id="M-01B5" KnxManufacturerId="437" Name="SiChuan HaoDing" ImportRestriction="Own" />
-      <Manufacturer Id="M-01B6" KnxManufacturerId="438" Name="Mindjaga Ltd." ImportRestriction="Own" />
+      <Manufacturer Id="M-01B6" KnxManufacturerId="438" Name="Mindjaga Ltd." ImportRestriction="Own">
+        <PublicKeys>
+          <PublicKey Id="M-01B6_K-1" Number="1">
+            <RSAKeyValue>
+              <Modulus>tuBm7XKDZ3CZfC+BFb5ZKyNxPZvt7JdlWguJws6zXsaLc+FNfNuLCp2cfVGFGNqtK5AOn2tb9Na1VRHY/joha0Evm6FjPYLsu6pSyP4xq7ypFocZxslm2ONbFTeQEJ32SCEXKgOSlMH1teUE0w91HtQ22bKRm6Vwan0GSPPAMf0=</Modulus>
+              <Exponent>AQAB</Exponent>
+            </RSAKeyValue>
+          </PublicKey>
+        </PublicKeys>
+      </Manufacturer>
       <Manufacturer Id="M-01B7" KnxManufacturerId="439" Name="RuiLi Smart Control" ImportRestriction="Own" />
       <Manufacturer Id="M-01B8" KnxManufacturerId="440" Name="3S-Smart Software Solutions GmbH" ImportRestriction="Own" />
       <Manufacturer Id="M-01B9" KnxManufacturerId="441" Name="Moorgen Deutschland GmbH" ImportRestriction="Own" />
       <Manufacturer Id="M-01BA" KnxManufacturerId="442" Name="CULLMANN TECH" ImportRestriction="Own" />
       <Manufacturer Id="M-01BB" KnxManufacturerId="443" Name="Merck Window Technologies B.V. " ImportRestriction="Own" />
       <Manufacturer Id="M-01BC" KnxManufacturerId="444" Name="ABEGO" ImportRestriction="Own" />
+      <Manufacturer Id="M-01BD" KnxManufacturerId="445" Name="myGEKKO" ImportRestriction="Own" />
+      <Manufacturer Id="M-01BE" KnxManufacturerId="446" Name="Ergo3 Sarl" ImportRestriction="Own" />
+      <Manufacturer Id="M-01BF" KnxManufacturerId="447" Name="STmicroelectronics International N.V." ImportRestriction="Own" />
+      <Manufacturer Id="M-01C0" KnxManufacturerId="448" Name="cjc systems" ImportRestriction="Own" />
+      <Manufacturer Id="M-01C1" KnxManufacturerId="449" Name="Sudoku" ImportRestriction="Own" />
+      <Manufacturer Id="M-01C3" KnxManufacturerId="451" Name="AZ e-lite Pte Ltd" ImportRestriction="Own" />
+      <Manufacturer Id="M-01C4" KnxManufacturerId="452" Name="Arlight" ImportRestriction="Own" />
+      <Manufacturer Id="M-01C5" KnxManufacturerId="453" Name="Grünbeck Wasseraufbereitung GmbH" ImportRestriction="Own" />
+      <Manufacturer Id="M-01C6" KnxManufacturerId="454" Name="Module Electronic" ImportRestriction="Own" />
+      <Manufacturer Id="M-01C7" KnxManufacturerId="455" Name="KOPLAT" ImportRestriction="Own" />
+      <Manufacturer Id="M-01C8" KnxManufacturerId="456" Name="Guangzhou Letour Life Technology Co., Ltd" ImportRestriction="Own" />
+      <Manufacturer Id="M-01C9" KnxManufacturerId="457" Name="ILEVIA" ImportRestriction="Own">
+        <PublicKeys>
+          <PublicKey Id="M-01C9_K-1" Number="1">
+            <RSAKeyValue>
+              <Modulus>4EzGXnhNtYV0ce8LuUy8RtuQ0NvD0z1DLJ/g1BwT42vxh6g5hCnMjRnQBi3szNRiKZj+v+fCp5AEHmlVL39ZsQaLMHiKXHI0kQfl51amEScr5gNXwn+IdLMcQ2xPo3Kd7escheZfgjDhAUxkhx9NVajo5YY/BsD8TKK8DT/Ddwk=</Modulus>
+              <Exponent>AQAB</Exponent>
+            </RSAKeyValue>
+          </PublicKey>
+        </PublicKeys>
+      </Manufacturer>
+      <Manufacturer Id="M-01CA" KnxManufacturerId="458" Name="LN SYSTEMTEQ" ImportRestriction="Own" />
+      <Manufacturer Id="M-01CB" KnxManufacturerId="459" Name="Hisense SmartHome" ImportRestriction="Own" />
+      <Manufacturer Id="M-01CC" KnxManufacturerId="460" Name="Flink Automation System" ImportRestriction="Own" />
+      <Manufacturer Id="M-01CD" KnxManufacturerId="461" Name="xxter bv" ImportRestriction="Own" />
+      <Manufacturer Id="M-01CE" KnxManufacturerId="462" Name="lynxus technology" ImportRestriction="Own" />
+      <Manufacturer Id="M-01CF" KnxManufacturerId="463" Name="ROBOT S.A." ImportRestriction="Own" />
+      <Manufacturer Id="M-01D0" KnxManufacturerId="464" Name="Shenzhen Atte Smart Life Co.,Ltd." ImportRestriction="Own" />
+      <Manufacturer Id="M-01D1" KnxManufacturerId="465" Name="Noblesse" ImportRestriction="Own" />
+      <Manufacturer Id="M-01D2" KnxManufacturerId="466" Name="Advanced Devices" ImportRestriction="Own" />
+      <Manufacturer Id="M-01D3" KnxManufacturerId="467" Name="Atrina Building Automation Co. Ltd" ImportRestriction="Own" />
+      <Manufacturer Id="M-01D4" KnxManufacturerId="468" Name="Guangdong Daming Laffey electric Co., Ltd." ImportRestriction="Own" />
+      <Manufacturer Id="M-01D5" KnxManufacturerId="469" Name="Westerstrand Urfabrik AB" ImportRestriction="Own" />
+      <Manufacturer Id="M-01D6" KnxManufacturerId="470" Name="Control4 Corporate" ImportRestriction="Own" />
+      <Manufacturer Id="M-01D7" KnxManufacturerId="471" Name="Ontrol" ImportRestriction="Own" />
+      <Manufacturer Id="M-01D8" KnxManufacturerId="472" Name="Starnet" ImportRestriction="Own" />
+      <Manufacturer Id="M-01D9" KnxManufacturerId="473" Name="BETA CAVI" ImportRestriction="Own" />
+      <Manufacturer Id="M-01DA" KnxManufacturerId="474" Name="EaseMore" ImportRestriction="Own" />
+      <Manufacturer Id="M-01DB" KnxManufacturerId="475" Name="Vivaldi srl" ImportRestriction="Own" />
+      <Manufacturer Id="M-01DC" KnxManufacturerId="476" Name="Gree Electric Appliances,Inc. of Zhuhai" ImportRestriction="Own" />
+      <Manufacturer Id="M-01DD" KnxManufacturerId="477" Name="HWISCON" ImportRestriction="Own" />
+      <Manufacturer Id="M-01DE" KnxManufacturerId="478" Name="Shanghai ELECON Intelligent Technology Co., Ltd." ImportRestriction="Own" />
+      <Manufacturer Id="M-01DF" KnxManufacturerId="479" Name="Kampmann" ImportRestriction="Own" />
+      <Manufacturer Id="M-01E0" KnxManufacturerId="480" Name="Impolux GmbH / LEDIMAX" ImportRestriction="Own" />
+      <Manufacturer Id="M-01E1" KnxManufacturerId="481" Name="Evaux" ImportRestriction="Own" />
+      <Manufacturer Id="M-01E2" KnxManufacturerId="482" Name="Webro Cables &amp; Connectors Limited" ImportRestriction="Own" />
+      <Manufacturer Id="M-01E3" KnxManufacturerId="483" Name="Shanghai E-tech Solution" ImportRestriction="Own" />
+      <Manufacturer Id="M-01E4" KnxManufacturerId="484" Name="Guangzhou HOKO Electric Co.,Ltd." ImportRestriction="Own" />
+      <Manufacturer Id="M-01E5" KnxManufacturerId="485" Name="LAMMIN HIGH TECH CO.,LTD" ImportRestriction="Own" />
+      <Manufacturer Id="M-01E6" KnxManufacturerId="486" Name="Shenzhen Merrytek Technology Co., Ltd" ImportRestriction="Own" />
+      <Manufacturer Id="M-01E7" KnxManufacturerId="487" Name="I-Luxus" ImportRestriction="Own">
+        <PublicKeys>
+          <PublicKey Id="M-01E7_K-1" Number="1">
+            <RSAKeyValue>
+              <Modulus>omsfVEEG7eoVwOkenp3m5Zhab05xVnPvobyafFSV738ayyVXUS8bpQJgCIWRxXnCFYfo5b8VnWcDPeV/sy+xKxKVTd9oHHD680ux8N6TAbyCHihFi/HUZy480Ej5nYNGNA6VQL1DSzvxKh1SMwxtSjgS4J402M1VjPl024HWx6E=</Modulus>
+              <Exponent>AQAB</Exponent>
+            </RSAKeyValue>
+          </PublicKey>
+        </PublicKeys>
+      </Manufacturer>
+      <Manufacturer Id="M-01E8" KnxManufacturerId="488" Name="Elmos Semiconductor AG" ImportRestriction="Own" />
+      <Manufacturer Id="M-01E9" KnxManufacturerId="489" Name="EmCom Technology Inc" ImportRestriction="Own" />
+      <Manufacturer Id="M-01EA" KnxManufacturerId="490" Name="project innovations GmbH" ImportRestriction="Own" />
+      <Manufacturer Id="M-01EB" KnxManufacturerId="491" Name="Itc" ImportRestriction="Own" />
+      <Manufacturer Id="M-01EC" KnxManufacturerId="492" Name="ABB LV Installation Materials Company Ltd, Beijing" CompatibilityGroup="2" ImportRestriction="Group" ImportGroup="Group-ABB" />
+      <Manufacturer Id="M-01ED" KnxManufacturerId="493" Name="Maico " ImportRestriction="Own" />
+      <Manufacturer Id="M-01EE" KnxManufacturerId="494" Name="Total Solution GmbH" ImportRestriction="Own" />
+      <Manufacturer Id="M-01EF" KnxManufacturerId="495" Name="ELAN SRL" ImportRestriction="Own" />
+      <Manufacturer Id="M-01F0" KnxManufacturerId="496" Name="MinhHa Technology co.,Ltd" ImportRestriction="Own" />
+      <Manufacturer Id="M-01F1" KnxManufacturerId="497" Name="Zhejiang Tianjie Industrial CORP." ImportRestriction="Own" />
+      <Manufacturer Id="M-01F2" KnxManufacturerId="498" Name="iAutomation Pty Limited" ImportRestriction="Own" />
+      <Manufacturer Id="M-01F3" KnxManufacturerId="499" Name="Extron" ImportRestriction="Own" />
+      <Manufacturer Id="M-01F4" KnxManufacturerId="500" Name="Freedompro" ImportRestriction="Own" />
+      <Manufacturer Id="M-01F5" KnxManufacturerId="501" Name="Voxior Inc." ImportRestriction="Own" />
+      <Manufacturer Id="M-01F6" KnxManufacturerId="502" Name="EOS Saunatechnik GmbH" ImportRestriction="Own" />
+      <Manufacturer Id="M-01F7" KnxManufacturerId="503" Name="KUSATEK GmbH" ImportRestriction="Own" />
+      <Manufacturer Id="M-01F8" KnxManufacturerId="504" Name="EisBär Scada" ImportRestriction="Own">
+        <PublicKeys>
+          <PublicKey Id="M-01F8_K-1" Number="1">
+            <RSAKeyValue>
+              <Modulus>8GwQ4UMcLwsS3FwdJWPnl9ieXOqsVD/4XXBOTOolvf1EEPzJKAnyvZohOVpwrCoHWLxLX8CZyORkjmSu3Z17TWB0+YV0yytoDR7ZaCJ0wW1TEfQMW56Kx8PPdpNcA1VJMCpNliKAm5KFfJ0Ig56GuT8oeLAOoNvGR6nNoCxO/J0=</Modulus>
+              <Exponent>AQAB</Exponent>
+            </RSAKeyValue>
+          </PublicKey>
+        </PublicKeys>
+      </Manufacturer>
+      <Manufacturer Id="M-01F9" KnxManufacturerId="505" Name="AUTOMATISMI BENINCA S.P.A." ImportRestriction="Own" />
+      <Manufacturer Id="M-01FA" KnxManufacturerId="506" Name="Blendom" ImportRestriction="Own" />
+      <Manufacturer Id="M-01FB" KnxManufacturerId="507" Name="Madel Air Technical diffusion" ImportRestriction="Own" />
+      <Manufacturer Id="M-01FC" KnxManufacturerId="508" Name="NIKO" ImportRestriction="Own" />
+      <Manufacturer Id="M-01FD" KnxManufacturerId="509" Name="Bosch Rexroth AG" ImportRestriction="Own" />
+      <Manufacturer Id="M-0200" KnxManufacturerId="512" Name="C&amp;M Products" ImportRestriction="Own" />
+      <Manufacturer Id="M-0201" KnxManufacturerId="513" Name="Hörmann KG Verkaufsgesellschaft" ImportRestriction="Own" />
+      <Manufacturer Id="M-0202" KnxManufacturerId="514" Name="Shanghai Rajayasa co.,LTD" ImportRestriction="Own" />
+      <Manufacturer Id="M-0203" KnxManufacturerId="515" Name="SUZUKI" ImportRestriction="Own" />
+      <Manufacturer Id="M-0204" KnxManufacturerId="516" Name="Silent Gliss International Ltd." ImportRestriction="Own" />
+      <Manufacturer Id="M-0205" KnxManufacturerId="517" Name="BEE Controls (ADGSC Group)" ImportRestriction="Own" />
+      <Manufacturer Id="M-0206" KnxManufacturerId="518" Name="xDTecGmbH" ImportRestriction="Own" />
+      <Manufacturer Id="M-0207" KnxManufacturerId="519" Name="OSRAM" ImportRestriction="Own" />
+      <Manufacturer Id="M-0208" KnxManufacturerId="520" Name="Lebenor" ImportRestriction="Own" />
+      <Manufacturer Id="M-0209" KnxManufacturerId="521" Name="automaneng" ImportRestriction="Own" />
+      <Manufacturer Id="M-020A" KnxManufacturerId="522" Name="Honeywell Automation Solution control(China)" ImportRestriction="Own" />
+      <Manufacturer Id="M-020B" KnxManufacturerId="523" Name="Hangzhou binthen Intelligence Technology Co.,Ltd" ImportRestriction="Own" />
+      <Manufacturer Id="M-020C" KnxManufacturerId="524" Name="ETA Heiztechnik" ImportRestriction="Own" />
+      <Manufacturer Id="M-020D" KnxManufacturerId="525" Name="DIVUS GmbH" ImportRestriction="Own" />
+      <Manufacturer Id="M-020E" KnxManufacturerId="526" Name="Nanjing Taijiesai Intelligent Technology Co. Ltd." ImportRestriction="Own" />
+      <Manufacturer Id="M-020F" KnxManufacturerId="527" Name="Lunatone" ImportRestriction="Own" />
+      <Manufacturer Id="M-0210" KnxManufacturerId="528" Name="ZHEJIANG SCTECH BUILDING INTELLIGENT" ImportRestriction="Own" />
+      <Manufacturer Id="M-0211" KnxManufacturerId="529" Name="Foshan Qite Technology Co., Ltd." ImportRestriction="Own" />
+      <Manufacturer Id="M-0212" KnxManufacturerId="530" Name="NOKE" ImportRestriction="Own" />
+      <Manufacturer Id="M-0213" KnxManufacturerId="531" Name="LANDCOM" ImportRestriction="Own" />
+      <Manufacturer Id="M-0214" KnxManufacturerId="532" Name="Stork AS" ImportRestriction="Own" />
+      <Manufacturer Id="M-0215" KnxManufacturerId="533" Name="Hangzhou Shendu Technology Co., Ltd." ImportRestriction="Own" />
+      <Manufacturer Id="M-0216" KnxManufacturerId="534" Name="CoolAutomation" ImportRestriction="Own" />
+      <Manufacturer Id="M-0217" KnxManufacturerId="535" Name="Aprstern" ImportRestriction="Own" />
+      <Manufacturer Id="M-0218" KnxManufacturerId="536" Name="sonnen" ImportRestriction="Own" />
+      <Manufacturer Id="M-0219" KnxManufacturerId="537" Name="DNAKE" ImportRestriction="Own" />
+      <Manufacturer Id="M-021A" KnxManufacturerId="538" Name="Neuberger Gebäudeautomation GmbH" ImportRestriction="Own" />
+      <Manufacturer Id="M-021B" KnxManufacturerId="539" Name="Stiliger" ImportRestriction="Own" />
+      <Manufacturer Id="M-021C" KnxManufacturerId="540" Name="Berghof Automation GmbH" ImportRestriction="Own" />
+      <Manufacturer Id="M-021D" KnxManufacturerId="541" Name="Total Automation and controls GmbH" ImportRestriction="Own" />
+      <Manufacturer Id="M-021E" KnxManufacturerId="542" Name="dovit" ImportRestriction="Own" />
+      <Manufacturer Id="M-021F" KnxManufacturerId="543" Name="Instalighting GmbH" ImportRestriction="Own" />
+      <Manufacturer Id="M-0220" KnxManufacturerId="544" Name="UNI-TEC" ImportRestriction="Own" />
+      <Manufacturer Id="M-0221" KnxManufacturerId="545" Name="CasaTunes" ImportRestriction="Own" />
+      <Manufacturer Id="M-0222" KnxManufacturerId="546" Name="EMT" ImportRestriction="Own" />
+      <Manufacturer Id="M-0223" KnxManufacturerId="547" Name="Senfficient" ImportRestriction="Own" />
+      <Manufacturer Id="M-0224" KnxManufacturerId="548" Name="Aurolite electrical panyu guangzhou limited" ImportRestriction="Own" />
+      <Manufacturer Id="M-0225" KnxManufacturerId="549" Name="ABB Xiamen Smart Technology Co., Ltd." ImportRestriction="Own" />
+      <Manufacturer Id="M-0226" KnxManufacturerId="550" Name="Samson Electric Wire" ImportRestriction="Own" />
+      <Manufacturer Id="M-0227" KnxManufacturerId="551" Name="T-Touching" ImportRestriction="Own" />
+      <Manufacturer Id="M-0228" KnxManufacturerId="552" Name="Core Smart Home" ImportRestriction="Own" />
+      <Manufacturer Id="M-0229" KnxManufacturerId="553" Name="GreenConnect Solutions SA" ImportRestriction="Own" />
+      <Manufacturer Id="M-022A" KnxManufacturerId="554" Name="ELETTRONICA CONDUTTORI" ImportRestriction="Own" />
+      <Manufacturer Id="M-022B" KnxManufacturerId="555" Name="MKFC" ImportRestriction="Own" />
+      <Manufacturer Id="M-022C" KnxManufacturerId="556" Name="Automation+" ImportRestriction="Own" />
+      <Manufacturer Id="M-022D" KnxManufacturerId="557" Name="blue and red" ImportRestriction="Own" />
+      <Manufacturer Id="M-022E" KnxManufacturerId="558" Name="frogblue" ImportRestriction="Own" />
+      <Manufacturer Id="M-022F" KnxManufacturerId="559" Name="SAVESOR" ImportRestriction="Own" />
+      <Manufacturer Id="M-0230" KnxManufacturerId="560" Name="App Tech" ImportRestriction="Own" />
+      <Manufacturer Id="M-0231" KnxManufacturerId="561" Name="sensortec AG" ImportRestriction="Own" />
+      <Manufacturer Id="M-0232" KnxManufacturerId="562" Name="nysa technology &amp; solutions" ImportRestriction="Own" />
+      <Manufacturer Id="M-0233" KnxManufacturerId="563" Name="FARADITE" ImportRestriction="Own" />
+      <Manufacturer Id="M-0234" KnxManufacturerId="564" Name="Optimus" ImportRestriction="Own" />
+      <Manufacturer Id="M-0235" KnxManufacturerId="565" Name="KTS s.r.l." ImportRestriction="Own" />
     </Manufacturers>
     <Languages>
       <Language Identifier="de-DE">
@@ -7177,10 +7418,10 @@
         </TranslationUnit>
         <TranslationUnit RefId="DPT-18" Version="1">
           <TranslationElement RefId="DPT-18">
-            <Translation AttributeName="Text" Text="Szenen Kontrolle" />
+            <Translation AttributeName="Text" Text="Szenensteuerung" />
           </TranslationElement>
           <TranslationElement RefId="DPST-18-1">
-            <Translation AttributeName="Text" Text="Szenen Kontrolle" />
+            <Translation AttributeName="Text" Text="Szenensteuerung" />
           </TranslationElement>
         </TranslationUnit>
         <TranslationUnit RefId="DPT-19" Version="1">

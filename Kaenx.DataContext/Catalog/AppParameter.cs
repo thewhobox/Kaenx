@@ -32,6 +32,7 @@ namespace Kaenx.DataContext.Catalog
             ParameterTypeId = para.ParameterTypeId;
             ApplicationId = para.ApplicationId;
             Text = para.Text;
+            SegmentType = para.SegmentType;
             SegmentId = para.SegmentId;
             Offset = para.Offset;
             OffsetBit = para.OffsetBit;
@@ -42,9 +43,9 @@ namespace Kaenx.DataContext.Catalog
 
     public enum SegmentTypes
     {
-        Memory = 0,
-        Property = 1,
-        None = 255
+        None = 0,
+        Memory = 1,
+        Property = 2
     }
 
     public enum AccessType

@@ -96,7 +96,7 @@ namespace Kaenx.Classes.Bus.Actions
                 _data.ApplicationName = "Applikation nicht im Katalog";
             }
 
-            if(Device != null && !Device.ApplicationId.StartsWith(appId))
+            if(Device != null && !Device.ApplicationId?.StartsWith(appId) == true)
             {
                 _data.Additional = "Warnung! Applikations Id im Gerät stimmt nicht mit dem im Projekt überein!";
             }

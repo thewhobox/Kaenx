@@ -78,6 +78,18 @@ namespace Kaenx.Views.Easy.Controls
             this.SizeChanged += EControlParas2_SizeChanged;
         }
 
+        public EControlParas2(Classes.Bus.Data.DeviceConfigData data)
+        {
+            this.InitializeComponent();
+            device = data.Device;
+            this.DataContext = this;
+
+            AppParas = data.Parameters;
+            device.ApplicationId = data.ApplicationId;
+
+            this.SizeChanged += EControlParas2_SizeChanged;
+        }
+
         private void EControlParas2_SizeChanged(object sender, SizeChangedEventArgs e)
         {
             IsBigView = e.NewSize.Width > 850;
@@ -102,6 +114,11 @@ namespace Kaenx.Views.Easy.Controls
                 }
             }
 
+            _ = Load();
+        }
+
+        public void StartRead()
+        {
             _ = Load();
         }
 
@@ -744,6 +761,9 @@ namespace Kaenx.Views.Easy.Controls
                         else
                             cobj.DisplayName = reg.Replace(cobj.Name, value);
                     }
+                } else
+                {
+                    cobj.DisplayName = cobj.Name;
                 }
                 device.ComObjects.Add(cobj);
 

@@ -47,37 +47,10 @@ namespace Kaenx.View
 
         private void ReadInfo(object sender, RoutedEventArgs e)
         {
-            string[] address = InAddress2.Text.Split(".");
-
-            if(address.Length != 3)
-            {
-                ViewHelper.Instance.ShowNotification("Ungültige Adresse!", 3000, ViewHelper.MessageType.Error);
-                return;
-            }
-
             DeviceInfo action = new DeviceInfo();
 
-            if (InAddr2Device.IsChecked == true)
-            {
-                try
-                {
-                    Line l = SaveHelper._project.Lines.Single(l => l.Id.ToString() == address[0]);
-                    LineMiddle lm = l.Subs.Single(l => l.Id.ToString() == address[1]);
-                    LineDevice ld = lm.Subs.Single(l => l.Id.ToString() == address[2]);
-                    action.Device = ld;
-                }
-                catch
-                {
-                    ViewHelper.Instance.ShowNotification("Adresse konnte keinem Gerät zugewiesen werden.", 3000, ViewHelper.MessageType.Warning);
-                }
-            }
-
-            if (action.Device == null)
-            {
-                Line dM = new Line { Id = int.Parse(address[0]) };
-                LineMiddle dL = new LineMiddle { Id = int.Parse(address[1]), Parent = dM };
-                action.Device = new LineDevice(true) { Name = "Unbekannt", Id = int.Parse(address[2]), Parent = dL };
-            }
+            action.Device = GetDevice();
+            if (action.Device == null) return;
 
             action.Finished += Action_Finished;
             BusConnection.Instance.AddAction(action);
@@ -85,37 +58,10 @@ namespace Kaenx.View
 
         private void ReadConf(object sender, RoutedEventArgs e)
         {
-            string[] address = InAddress2.Text.Split(".");
-
-            if (address.Length != 3)
-            {
-                ViewHelper.Instance.ShowNotification("Ungültige Adresse!", 3000, ViewHelper.MessageType.Error);
-                return;
-            }
-
             DeviceConfig action = new DeviceConfig();
 
-            if (InAddr2Device.IsChecked == true)
-            {
-                try
-                {
-                    Line l = SaveHelper._project.Lines.Single(l => l.Id.ToString() == address[0]);
-                    LineMiddle lm = l.Subs.Single(l => l.Id.ToString() == address[1]);
-                    LineDevice ld = lm.Subs.Single(l => l.Id.ToString() == address[2]);
-                    action.Device = ld;
-                }
-                catch
-                {
-                    ViewHelper.Instance.ShowNotification("Adresse konnte keinem Gerät zugewiesen werden.", 3000, ViewHelper.MessageType.Warning);
-                }
-            }
-            
-            if(action.Device == null)
-            {
-                Line dM = new Line { Id = int.Parse(address[0]) };
-                LineMiddle dL = new LineMiddle { Id = int.Parse(address[1]), Parent = dM };
-                action.Device = new LineDevice(true) { Name = "Unbekannt", Id = int.Parse(address[2]), Parent = dL };
-            }
+            action.Device = GetDevice();
+            if (action.Device == null) return;
 
             action.Finished += Action_Finished;
             BusConnection.Instance.AddAction(action);
@@ -148,7 +94,7 @@ namespace Kaenx.View
         {
             if(_conn == null)
             {
-                _conn = new Connection(new IPEndPoint(IPAddress.Parse("192.168.0.108"), Convert.ToInt32(3671)));
+                _conn = new Connection(BusConnection.Instance.SelectedInterface.Endpoint);
                 _conn.OnTunnelRequest += _conn_OnTunnelAction;
                 _conn.OnTunnelResponse += _conn_OnTunnelAction;
                 _conn.Connect();
@@ -196,7 +142,55 @@ namespace Kaenx.View
                 case DeviceConfigData conf:
                     e.Row.DetailsTemplate = Resources["RowDetailsConfigTemplate"] as DataTemplate;
                     break;
+
+                case ErrorData err:
+                    e.Row.DetailsTemplate = Resources["RowDetailsErrorTemplate"] as DataTemplate;
+                    break;
             }
+        }
+
+        private async void ClickOpenConfig(object sender, RoutedEventArgs e)
+        {
+            DeviceConfigData data = (sender as Button).DataContext as DeviceConfigData;
+            Controls.DiagDeviceConfig diag = new Controls.DiagDeviceConfig(data);
+            await diag.ShowAsync();
+        }
+
+        private LineDevice GetDevice()
+        {
+            LineDevice dev = null;
+
+            string[] address = InAddress2.Text.Split(".");
+
+            if (address.Length != 3)
+            {
+                ViewHelper.Instance.ShowNotification("Ungültige Adresse!", 3000, ViewHelper.MessageType.Error);
+                return null;
+            }
+
+            if (InAddr2Device.IsChecked == true)
+            {
+                try
+                {
+                    Line l = SaveHelper._project.Lines.Single(l => l.Id.ToString() == address[0]);
+                    LineMiddle lm = l.Subs.Single(l => l.Id.ToString() == address[1]);
+                    LineDevice ld = lm.Subs.Single(l => l.Id.ToString() == address[2]);
+                    dev = ld;
+                }
+                catch
+                {
+                    ViewHelper.Instance.ShowNotification("Adresse konnte keinem Gerät zugewiesen werden.", 3000, ViewHelper.MessageType.Warning);
+                }
+            }
+
+            if (dev == null)
+            {
+                Line dM = new Line { Id = int.Parse(address[0]) };
+                LineMiddle dL = new LineMiddle { Id = int.Parse(address[1]), Parent = dM };
+                dev = new LineDevice(true) { Name = "Unbekannt", Id = int.Parse(address[2]), Parent = dL };
+            }
+
+            return dev;
         }
     }
 }

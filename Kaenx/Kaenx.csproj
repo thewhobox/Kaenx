@@ -131,7 +131,9 @@
     <Compile Include="Classes\Bus\BusConnection.cs" />
     <Compile Include="Classes\Bus\BusInterface.cs" />
     <Compile Include="Classes\Bus\BusSettings.cs" />
+    <Compile Include="Classes\Bus\Data\ErrorData.cs" />
     <Compile Include="Classes\Bus\Data\IBusData.cs" />
+    <Compile Include="Classes\Bus\Data\NewDeviceData.cs" />
     <Compile Include="Classes\Device.cs" />
     <Compile Include="Classes\ComboItemSimple.cs" />
     <Compile Include="Classes\Controls\ControlUpdate.xaml.cs">
@@ -147,22 +149,31 @@
     <Compile Include="Classes\Project\GroupAddress.cs" />
     <Compile Include="Classes\Project\GroupMiddle.cs" />
     <Compile Include="MVVM\StoreItem.cs" />
-    <Compile Include="View\Controls\DiagAddDevice.xaml.cs">
+    <Compile Include="View\Controls\Bus\BNewDevices.xaml.cs">
+      <DependentUpon>BNewDevices.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="View\Controls\Dialogs\DiagAddDevice.xaml.cs">
       <DependentUpon>DiagAddDevice.xaml</DependentUpon>
     </Compile>
-    <Compile Include="View\Controls\DiagAddLine.xaml.cs">
+    <Compile Include="View\Controls\Dialogs\DiagAddLine.xaml.cs">
       <DependentUpon>DiagAddLine.xaml</DependentUpon>
     </Compile>
-    <Compile Include="View\Controls\DiagComsDeleted.xaml.cs">
+    <Compile Include="View\Controls\Dialogs\DiagComsDeleted.xaml.cs">
       <DependentUpon>DiagComsDeleted.xaml</DependentUpon>
     </Compile>
-    <Compile Include="View\Controls\DiagLanguage.xaml.cs">
+    <Compile Include="View\Controls\Dialogs\DiagDeviceConfig.xaml.cs">
+      <DependentUpon>DiagDeviceConfig.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="View\Controls\Dialogs\DiagImportDevices.xaml.cs">
+      <DependentUpon>DiagImportDevices.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="View\Controls\Dialogs\DiagLanguage.xaml.cs">
       <DependentUpon>DiagLanguage.xaml</DependentUpon>
     </Compile>
-    <Compile Include="View\Controls\DiagNewName.xaml.cs">
+    <Compile Include="View\Controls\Dialogs\DiagNewName.xaml.cs">
       <DependentUpon>DiagNewName.xaml</DependentUpon>
     </Compile>
-    <Compile Include="View\Controls\DiagSelectApp.xaml.cs">
+    <Compile Include="View\Controls\Dialogs\DiagSelectApp.xaml.cs">
       <DependentUpon>DiagSelectApp.xaml</DependentUpon>
     </Compile>
     <Compile Include="View\Controls\EControlParas2.xaml.cs">
@@ -350,27 +361,39 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="View\Controls\DiagAddDevice.xaml">
+    <Page Include="View\Controls\Bus\BNewDevices.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="View\Controls\DiagAddLine.xaml">
+    <Page Include="View\Controls\Dialogs\DiagAddDevice.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="View\Controls\DiagComsDeleted.xaml">
+    <Page Include="View\Controls\Dialogs\DiagAddLine.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="View\Controls\DiagLanguage.xaml">
+    <Page Include="View\Controls\Dialogs\DiagComsDeleted.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="View\Controls\DiagNewName.xaml">
+    <Page Include="View\Controls\Dialogs\DiagDeviceConfig.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="View\Controls\DiagSelectApp.xaml">
+    <Page Include="View\Controls\Dialogs\DiagImportDevices.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="View\Controls\Dialogs\DiagLanguage.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="View\Controls\Dialogs\DiagNewName.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="View\Controls\Dialogs\DiagSelectApp.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

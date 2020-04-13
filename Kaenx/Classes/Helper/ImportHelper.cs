@@ -1053,6 +1053,7 @@ namespace Kaenx.Classes.Helper
                     param.SegmentId = mem.Attribute("CodeSegment").Value;
                     param.Offset = int.Parse(mem.Attribute("Offset").Value);
                     param.OffsetBit = int.Parse(mem.Attribute("BitOffset").Value);
+                    param.SegmentType = SegmentTypes.Memory;
                 }
                 Params.Add(param.Id, param);
                 position++;

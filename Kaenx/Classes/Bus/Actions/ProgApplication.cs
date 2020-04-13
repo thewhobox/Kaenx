@@ -152,7 +152,7 @@ namespace Kaenx.Classes.Bus.Actions
             TodoText = "Abgeschlossen";
             ProgressValue = 100;
 
-            //Finished?.Invoke(this, null);
+            Finished?.Invoke(this, null);
         }
 
 

@@ -160,8 +160,8 @@
 
         <Border Grid.Column="2" Background="{ThemeResource BrushAccentControlBackground}" BorderThickness="1 0 0 1" BorderBrush="Gray">
             <StackPanel Orientation="Horizontal">
-                <SymbolIcon Symbol="SelectAll" Margin="10 0"  />
-                <AppBarButton x:Uid="/Groups/ToolAddMain" Icon="Add" Click="ClickAddMain" />
+                <SymbolIcon Symbol="Add" Margin="10 0"  />
+                <AppBarButton x:Uid="/Groups/ToolAddMain" Icon="SelectAll" Click="ClickAddMain" />
             </StackPanel>
         </Border>
 

@@ -86,7 +86,10 @@ namespace Kaenx.View.Controls
 
             foreach (DeviceViewModel model in _context.Devices)
             {
-                model.ManufacturerName = manus[model.ManufacturerId];
+                if (manus.ContainsKey(model.ManufacturerId))
+                    model.ManufacturerName = manus[model.ManufacturerId];
+                else
+                    model.ManufacturerName = loader.GetString("AddDeviceNoManu");
                 Devices.Add(model);
                 CatalogDevices.Add(model);
             }

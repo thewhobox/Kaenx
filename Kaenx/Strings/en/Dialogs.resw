@@ -135,6 +135,9 @@
   <data name="AddDeviceCount.Text" xml:space="preserve">
     <value>Count:</value>
   </data>
+  <data name="AddDeviceNoManu" xml:space="preserve">
+    <value>Unknown</value>
+  </data>
   <data name="AddDeviceLine.Text" xml:space="preserve">
     <value>Parent Line:</value>
   </data>

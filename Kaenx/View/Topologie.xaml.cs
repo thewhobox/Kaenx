@@ -205,6 +205,10 @@ namespace Kaenx.View
             {
                 await AddDeviceToLine(diag.SelectedDevice, lineToAdd);
             }
+
+            SaveHelper.CalculateLineCurrent(lineToAdd);
+            UpdateManager.Instance.CountUpdates();
+            CalcCounts();
         }
 
         private void ClickDelete(object sender, RoutedEventArgs e)
@@ -376,10 +380,6 @@ namespace Kaenx.View
             }
 
             device.IsInit = false;
-
-            SaveHelper.CalculateLineCurrent(line);
-            UpdateManager.Instance.CountUpdates();
-            CalcCounts();
         }
 
         private void ClickRestart(object sender, RoutedEventArgs e)

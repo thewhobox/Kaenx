@@ -183,7 +183,14 @@ namespace Kaenx.View
                     jumpList.Items.Insert(0, itemN);
                 }
 
-                await jumpList.SaveAsync();
+                try
+                {
+                    await jumpList.SaveAsync();
+                }
+                catch
+                {
+                    Log.Warning("Jumpliste konnte nicht gespeichert werden.");
+                }
             }
 
 

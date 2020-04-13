@@ -132,6 +132,9 @@
   <data name="AddDeviceRequired" xml:space="preserve">
     <value>Bitte wählen Sie ein Gerät und eine Linie aus.</value>
   </data>
+  <data name="AddDeviceNoManu" xml:space="preserve">
+    <value>Unbekannt</value>
+  </data>
   <data name="AddDeviceCount.Text" xml:space="preserve">
     <value>Anzahl:</value>
   </data>

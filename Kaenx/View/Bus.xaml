@@ -5,6 +5,7 @@
     xmlns:local="using:Kaenx.View"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:bus="using:Kaenx.View.Controls.Bus"
     xmlns:toolkit="using:Microsoft.Toolkit.Uwp.UI.Controls"
     mc:Ignorable="d"
     Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
@@ -55,7 +56,12 @@
         </DataTemplate>
         <DataTemplate x:Key="RowDetailsConfigTemplate">
             <Grid Padding="30 10">
-                <Button Content="Config ansehen" HorizontalAlignment="Stretch" />
+                <Button Content="Config ansehen" HorizontalAlignment="Stretch" Click="ClickOpenConfig" />
+            </Grid>
+        </DataTemplate>
+        <DataTemplate x:Key="RowDetailsErrorTemplate">
+            <Grid Padding="30 10">
+                <TextBlock Text="{Binding Message}" />
             </Grid>
         </DataTemplate>
     </Page.Resources>
@@ -257,6 +263,10 @@
 
 
                 </Grid>
+            </toolkit:TabViewItem>
+
+            <toolkit:TabViewItem Header="Neue Geräte">
+                <bus:BNewDevices />
             </toolkit:TabViewItem>
         </toolkit:TabView>
 
