@@ -22,6 +22,7 @@ namespace Kaenx.DataContext.Project
         public bool LoadedGA { get; set; }
         public bool LoadedApp { get; set; }
         public bool LoadedPA { get; set; }
+        public byte[] Serial { get; set; }
 
         public LineDeviceModel() { }
         public LineDeviceModel(int projId) { ProjectId = projId; }

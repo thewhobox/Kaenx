@@ -1,4 +1,5 @@
-﻿using Kaenx.DataContext.Catalog;
+﻿using Kaenx.Classes.Project;
+using Kaenx.DataContext.Catalog;
 using System;
 using System.Collections.Generic;
 using System.Linq;

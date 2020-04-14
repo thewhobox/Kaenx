@@ -29,15 +29,8 @@
                             <Setter Target="VB3.Height" Value="100" />
                             <Setter Target="VB4.Height" Value="100" />
                             <Setter Target="VB5.Height" Value="100" />
-                            <Setter Target="WrapGrid.Orientation" Value="Vertical" />
-                            <Setter Target="WrapGrid.MaximumRowsOrColumns" Value="1" />
                             <Setter Target="DiagGrid.Height" Value="600" />
                             <Setter Target="DiagGrid.Width" Value="700" />
-                            <Setter Target="FillRow.Height" Value="*" />
-                            <Setter Target="FillRow2.Height" Value="auto" />
-
-                            <Setter Target="ProjectsGrid.ScrollViewer.HorizontalScrollMode" Value="Disabled" />
-                            <Setter Target="ProjectsGrid.ScrollViewer.VerticalScrollMode" Value="Enabled" />
                         </VisualState.Setters>
                     </VisualState>
                 </VisualStateGroup>

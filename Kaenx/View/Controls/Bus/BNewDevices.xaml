@@ -18,10 +18,20 @@
 
         <StackPanel Orientation="Horizontal">
             <Button x:Name="BtnSearch" Margin="10 5" Content="Suchen..." Click="ClickSearch" />
-            <Button Margin="10 5" Content="Ausgewählte in Projekt importieren..." Click="ClickIntegrate" />
         </StackPanel>
 
         <toolkit:DataGrid x:Name="GridNewDevices" Grid.Row="1" ItemsSource="{Binding DeviceList}" AutoGenerateColumns="False" IsReadOnly="True" SelectionMode="Extended">
+            <toolkit:DataGrid.RowStyle>
+                <Style TargetType="toolkit:DataGridRow">
+                    <Setter Property="toolkit:DataGridRow.ContextFlyout">
+                        <Setter.Value>
+                            <MenuFlyout Opening="MenuFlyout_Opening">
+                                <MenuFlyoutItem Text="In Projekt importieren" Click="ClickIntegrate" Icon="OpenWith" />
+                            </MenuFlyout>
+                        </Setter.Value>
+                    </Setter>
+                </Style>
+            </toolkit:DataGrid.RowStyle>
             <toolkit:DataGrid.Columns>
                 <toolkit:DataGridTextColumn Header="Seriennummer" Binding="{Binding SerialText}" />
                 <toolkit:DataGridTextColumn Header="Status" Binding="{Binding Status}" />

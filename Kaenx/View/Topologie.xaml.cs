@@ -1,5 +1,6 @@
 ﻿using Kaenx.Classes;
 using Kaenx.Classes.Bus;
+using Kaenx.Classes.Bus.Actions;
 using Kaenx.Classes.Controls;
 using Kaenx.Classes.Helper;
 using Kaenx.Classes.Project;
@@ -74,8 +75,15 @@ namespace Kaenx.View
 
         private void ClickProAddr(object sender, RoutedEventArgs e)
         {
-            Classes.Bus.Actions.ProgPhysicalAddress action = new Classes.Bus.Actions.ProgPhysicalAddress();
-            action.Device = (LineDevice)((MenuFlyoutItem)e.OriginalSource).DataContext;
+            MenuFlyoutItem item = (MenuFlyoutItem)e.OriginalSource;
+            IBusAction action;
+
+            if (item.Tag.ToString() == "serial")
+                action = new Classes.Bus.Actions.ProgPhysicalAddressSerial();
+            else
+                action = new Classes.Bus.Actions.ProgPhysicalAddress();
+
+            action.Device = (LineDevice)item.DataContext;
             BusConnection.Instance.AddAction(action);
         }
 
@@ -215,27 +223,24 @@ namespace Kaenx.View
         {
             TopologieBase item = (TopologieBase)((MenuFlyoutItem)e.OriginalSource).DataContext;
 
-            switch (item.GetType().ToString())
+            switch (item)
             {
-                case "Kaenx.Classes.Line":
+                case Line line:
                     ObservableCollection<Line> coll = (ObservableCollection<Line>)this.DataContext;
-                    coll.Remove((Line)item);
+                    coll.Remove(line);
                     break;
 
-                case "Kaenx.Classes.LineMiddle":
-                    LineMiddle line = (LineMiddle)item;
-                    line.Parent.Subs.Remove(line);
+                case LineMiddle linem:
+                    linem.Parent.Subs.Remove(linem);
                     break;
 
-                case "Kaenx.Classes.LineDevice":
-                    LineDevice device = (LineDevice)item;
-                    device.Parent.Subs.Remove(device);
-                    SaveHelper.CalculateLineCurrent(device.Parent);
+                case LineDevice dev:
+                    dev.Parent.Subs.Remove(dev);
+                    SaveHelper.CalculateLineCurrent(dev.Parent);
                     break;
             }
 
             //TODO nicht das ganze Project speichern.
-            //Lokale Dateien der Geräte löschen
 
             SaveHelper.SaveProject();
             CalcCounts();
@@ -414,6 +419,7 @@ namespace Kaenx.View
             MenuFlyoutItemBase mPara = menu.Items.Single(i => i.Name == "MFI_Para");
             MenuFlyoutSubItem mActions = (MenuFlyoutSubItem)menu.Items.Single(i => i.Name == "MFI_Actions");
             MenuFlyoutItemBase mToggle = mActions.Items.Single(i => i.Name == "MFI_Toggle");
+            MenuFlyoutItem mProgS = (MenuFlyoutItem)(mProg as MenuFlyoutSubItem).Items.Single(i => i.Name == "MFI_ProgS");
 
             switch (line.Type)
             {
@@ -428,6 +434,7 @@ namespace Kaenx.View
                     mProg.Visibility = Visibility.Visible;
                     mPara.Visibility = Visibility.Visible;
                     mActions.Visibility = Visibility.Visible;
+                    mProgS.Visibility = string.IsNullOrEmpty(dev.SerialText) ? Visibility.Collapsed : Visibility.Visible;
                     break;
 
                 case TopologieType.LineMiddle:

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Kaenx.DataContext.Catalog;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
@@ -33,7 +34,7 @@ namespace Kaenx.Classes.Bus.Data
         public string ApplicationId { get; set; }
         public bool finished { get; set; } = false;
 
-        public List<string> DeviceIds = new List<string>();
+        public List<DeviceViewModel> DeviceModels { get; set; } = new List<DeviceViewModel>();
 
 
         public event PropertyChangedEventHandler PropertyChanged;

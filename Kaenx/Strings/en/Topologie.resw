@@ -186,8 +186,11 @@
   <data name="MenProgAppP.Text" xml:space="preserve">
     <value>Application (Partial)</value>
   </data>
-  <data name="MenProgPh.Text" xml:space="preserve">
-    <value>Physical Address</value>
+  <data name="MenProgPhB.Text" xml:space="preserve">
+    <value>Physical Address (Prog.-Button)</value>
+  </data>
+  <data name="MenProgPhS.Text" xml:space="preserve">
+    <value>Physical Address (Serial No.)</value>
   </data>
   <data name="MenRename.Text" xml:space="preserve">
     <value>Rename</value>
@@ -212,6 +215,9 @@
   </data>
   <data name="SidePropsApp.Header" xml:space="preserve">
     <value>Application:</value>
+  </data>
+  <data name="SidePropsSerial.Header" xml:space="preserve">
+    <value>Serial Number:</value>
   </data>
   <data name="SidePropsCheckA.Content" xml:space="preserve">
     <value>Application</value>

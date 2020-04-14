@@ -12,7 +12,7 @@ using System.Xml.Serialization;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Media;
 
-namespace Kaenx.Classes
+namespace Kaenx.Classes.Project
 {
     public class LineDevice : INotifyPropertyChanged, TopologieBase
     {
@@ -65,6 +65,8 @@ namespace Kaenx.Classes
         }
         public bool IsExpanded { get { return false; } }
         public List<string> Subs { get; }
+        public byte[] Serial { get; set; }
+        public string SerialText { get { return Serial == null ? "" : BitConverter.ToString(Serial).Replace("-", ""); } }
 
         //TODO speichern ändern! Nicht immer das ganze Projekt!
 
@@ -142,6 +144,7 @@ namespace Kaenx.Classes
             Name = model.Name;
             Parent = line;
             ApplicationId = model.ApplicationId;
+            Serial = model.Serial;
 
             LoadedApplication = model.LoadedApp;
             LoadedGroup = model.LoadedGA;

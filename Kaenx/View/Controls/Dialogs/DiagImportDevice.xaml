@@ -1,0 +1,64 @@
+﻿<ContentDialog
+    x:Class="Kaenx.View.Controls.Dialogs.DiagImportDevice"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:Kaenx.Classes.Project"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:toolkit="using:Microsoft.Toolkit.Uwp.UI.Controls"
+    xmlns:controls="using:Kaenx.View.Controls"
+    mc:Ignorable="d"
+    Title="Neue Geräte in Projekt importieren"
+    PrimaryButtonText="Button1"
+    CloseButtonText="Button2"
+    PrimaryButtonClick="ContentDialog_PrimaryButtonClick">
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition />
+            <RowDefinition />
+            <RowDefinition />
+            <RowDefinition />
+            <RowDefinition />
+            <RowDefinition />
+        </Grid.RowDefinitions>
+        <Grid.Resources>
+            <Style TargetType="toolkit:HeaderedContentControl">
+                <Setter Property="Margin" Value="0 5" />
+            </Style>
+        </Grid.Resources>
+
+        <toolkit:HeaderedContentControl Header="Hersteller:">
+            <TextBlock Text="{Binding Device.Manufacturer}" Margin="10 0 0 0" />
+        </toolkit:HeaderedContentControl>
+
+        <toolkit:HeaderedContentControl Grid.Row="1" Header="Gerätename:" HorizontalContentAlignment="Stretch">
+            <ComboBox x:Name="InDevice" ItemsSource="{Binding Device.DeviceModels}" HorizontalAlignment="Stretch" Margin="10 0 0 0" SelectedItem="{Binding SelectedDevice, Mode=TwoWay}">
+                <ComboBox.ItemTemplate>
+                    <DataTemplate>
+                        <TextBlock Text="{Binding Name}" />
+                    </DataTemplate>
+                </ComboBox.ItemTemplate>
+            </ComboBox>
+        </toolkit:HeaderedContentControl>
+
+        <toolkit:HeaderedContentControl Grid.Row="2" Header="Einfügen in:" HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch">
+            <ComboBox x:Name="InLine" ItemsSource="{Binding LineList}" HorizontalAlignment="Stretch" Margin="10 0 0 0" SelectionChanged="InLine_SelectionChanged">
+                <ComboBox.ItemTemplate>
+                    <DataTemplate x:DataType="local:LineMiddle">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="{Binding LineName}" />
+                            <TextBlock Text="{Binding Name}" Margin="5 0 0 0" />
+                        </StackPanel>
+                    </DataTemplate>
+                </ComboBox.ItemTemplate>
+            </ComboBox>
+        </toolkit:HeaderedContentControl>
+
+        <toolkit:HeaderedContentControl Grid.Row="3" Header="Teilnehmernummer:" HorizontalContentAlignment="Stretch">
+            <controls:NumberBox x:Name="InNumber"  Minimum="0" Maximum="255"  Margin="10 0 0 0" IsEnabled="False" PreviewChanged="InNumber_PreviewChanged" />
+        </toolkit:HeaderedContentControl>
+
+        <CheckBox x:Name="InSetAddr" Grid.Row="4" IsChecked="True" Content="Physikalische Adresse direkt setzen" />
+    </Grid>
+</ContentDialog>

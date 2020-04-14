@@ -1,4 +1,5 @@
-﻿using Kaenx.Konnect.Addresses;
+﻿using Kaenx.Classes.Project;
+using Kaenx.Konnect.Addresses;
 using System;
 using System.Collections.Generic;
 using System.Linq;

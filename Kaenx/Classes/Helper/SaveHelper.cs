@@ -178,6 +178,7 @@ namespace Kaenx.Classes.Helper
             model.LoadedApp = dev.LoadedApplication;
             model.LoadedGA = dev.LoadedGroup;
             model.LoadedPA = dev.LoadedPA;
+            model.Serial = dev.Serial;
 
             contextProject.LineDevices.Update(model);
             contextProject.SaveChanges();

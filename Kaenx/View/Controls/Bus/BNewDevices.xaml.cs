@@ -6,6 +6,7 @@ using Kaenx.Konnect;
 using Kaenx.Konnect.Addresses;
 using Kaenx.Konnect.Classes;
 using Kaenx.View.Controls.Dialogs;
+using Microsoft.AppCenter.Analytics;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -91,6 +92,8 @@ namespace Kaenx.View.Controls.Bus
                 ReadInfos();
 
             BtnSearch.IsEnabled = true;
+
+            Analytics.TrackEvent("Neue Geräte gesucht");
         }
 
 
@@ -144,7 +147,7 @@ namespace Kaenx.View.Controls.Bus
                     foreach (DeviceViewModel model in _context.Devices.Where(d => d.HardwareId == h2a.HardwareId))
                     {
                         names.Add(model.Name);
-                        data.DeviceIds.Add(model.Id);
+                        data.DeviceModels.Add(model);
                     }
                     data.DeviceName = string.Join(", ", names);
                 }
@@ -187,9 +190,20 @@ namespace Kaenx.View.Controls.Bus
 
         private async void ClickIntegrate(object sender, RoutedEventArgs e)
         {
-            DiagImportDevices diag = new DiagImportDevices(DeviceList.ToList());
+            MenuFlyoutItem menu = sender as MenuFlyoutItem;
+            NewDeviceData data = menu.DataContext as NewDeviceData;
+
+            DiagImportDevice diag = new DiagImportDevice(data);
 
             await diag.ShowAsync();
+        }
+
+        private void MenuFlyout_Opening(object sender, object e)
+        {
+            MenuFlyout menu = sender as MenuFlyout;
+            NewDeviceData data = (menu.Target as FrameworkElement).DataContext as NewDeviceData;
+
+            (menu.Items[0] as MenuFlyoutItem).IsEnabled = data.finished;
         }
     }
 }

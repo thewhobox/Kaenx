@@ -2,6 +2,7 @@
 using Kaenx.DataContext.Catalog;
 using Kaenx.Konnect;
 using Kaenx.Konnect.Classes;
+using Microsoft.AppCenter.Analytics;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -81,6 +82,7 @@ namespace Kaenx.Classes.Bus.Actions
 
             Device.IsDeactivated = !Device.IsDeactivated;
 
+            Analytics.TrackEvent("Gerät de-/aktivieren");
             Finished?.Invoke(this, null);
         }
 

@@ -2,6 +2,7 @@
     x:Class="Kaenx.View.Topologie"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:localP="using:Kaenx.Classes.Project"
     xmlns:local="using:Kaenx.Classes"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
@@ -84,18 +85,19 @@
                     </Style>
                 </TreeView.ItemContainerStyle>
                 <TreeView.ItemTemplate>
-                    <DataTemplate x:DataType="local:Line">
+                    <DataTemplate x:DataType="localP:Line">
                         <TreeViewItem Margin="-20 0 0 0" Padding="0 0 5 0" VerticalAlignment="Stretch" GlyphBrush="White" ToolTipService.ToolTip="{Binding Name}" DoubleTapped="TreeViewItem_DoubleTapped" Background="{Binding CurrentBackBrush}" BorderThickness="0" Content="{Binding}" ItemsSource="{Binding Subs}" IsExpanded="{Binding IsExpanded, Mode=TwoWay}">
                             <TreeViewItem.ContextFlyout>
                                 <MenuFlyout Opening="MenuFlyout_Opening">
                                     <MenuFlyoutItem x:Name="MFI_AddLine" x:Uid="/Topologie/MenAddLine" Icon="Add" Click="ClickAdd" />
                                     <MenuFlyoutItem x:Name="MFI_AddDevice" x:Uid="/Topologie/MenAddDevice" Icon="Add" Click="ClickAddDevice" />
                                     <MenuFlyoutSubItem x:Name="MFI_Prog" x:Uid="/Topologie/MenProg" Icon="PostUpdate">
-                                        <MenuFlyoutItem x:Uid="/Topologie/MenProgPh" Icon="MapPin" Click="ClickProAddr" />
+                                        <MenuFlyoutItem x:Name="MFI_ProgS" x:Uid="/Topologie/MenProgPhS" Icon="MapPin" Tag="serial" Click="ClickProAddr" />
+                                        <MenuFlyoutItem x:Uid="/Topologie/MenProgPhB" Icon="MapPin" Tag="button" Click="ClickProAddr" />
                                         <MenuFlyoutSeparator />
                                         <MenuFlyoutItem x:Uid="/Topologie/MenProgAppK" Icon="FourBars" Tag="0" Click="ClickProApp" />
-                                        <MenuFlyoutItem x:Uid="/Topologie/MenProgAppP" Icon="ThreeBars" Tag="1" Click="ClickProApp" />
-                                        <MenuFlyoutItem x:Uid="/Topologie/MenProgAppM" Icon="Onebar" Tag="2" Click="ClickProApp" />
+                                        <MenuFlyoutItem x:Uid="/Topologie/MenProgAppP" Icon="ThreeBars" Tag="1" Click="ClickProApp" IsEnabled="False" />
+                                        <MenuFlyoutItem x:Uid="/Topologie/MenProgAppM" Icon="Onebar" Tag="2" Click="ClickProApp" IsEnabled="False" />
                                     </MenuFlyoutSubItem>
                                     <MenuFlyoutSubItem x:Name="MFI_Actions" x:Uid="/Topologie/MenActions" Icon="Share">
                                         <MenuFlyoutItem x:Uid="/Topologie/MenRestart" Icon="Refresh" Click="ClickRestart" />
@@ -202,7 +204,7 @@
 
                     <TextBlock Text="Applikation" Margin="0 20" FontSize="20" />
                     
-                    <Grid Grid.Row="2">
+                    <Grid Grid.Row="3">
                         <Grid.RowDefinitions>
                             <RowDefinition Height="auto" />
                             <RowDefinition Height="auto" />
@@ -213,13 +215,18 @@
                             <ColumnDefinition />
                         </Grid.ColumnDefinitions>
 
-                        <CheckBox x:Uid="/Topologie/SidePropsCheckG" MinWidth="10" IsChecked="{Binding LoadedGroup}" IsEnabled="False" />
-                        <CheckBox x:Uid="/Topologie/SidePropsCheckA" Grid.Row="1" MinWidth="10" IsChecked="{Binding LoadedApplication}" IsEnabled="False" />
-                        <CheckBox x:Uid="/Topologie/SidePropsCheckP" Grid.Row="2" MinWidth="10" IsChecked="{Binding LoadedPA}" IsEnabled="False" />
+                        <CheckBox x:Uid="/Topologie/SidePropsCheckP" MinWidth="10" IsChecked="{Binding LoadedPA}" IsEnabled="False" />
+                        <CheckBox x:Uid="/Topologie/SidePropsCheckG" Grid.Row="1" MinWidth="10" IsChecked="{Binding LoadedGroup}" IsEnabled="False" />
+                        <CheckBox x:Uid="/Topologie/SidePropsCheckA" Grid.Row="2" MinWidth="10" IsChecked="{Binding LoadedApplication}" IsEnabled="False" />
                     </Grid>
 
                     <toolkit:HeaderedContentControl x:Uid="/Topologie/SidePropsApp" Grid.Row="1" HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch">
                         <TextBlock x:Name="InfoAppName" />
+                    </toolkit:HeaderedContentControl>
+
+
+                    <toolkit:HeaderedContentControl x:Uid="/Topologie/SidePropsSerial" Grid.Row="2" HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch">
+                        <TextBlock Text="{Binding SerialText}" />
                     </toolkit:HeaderedContentControl>
                 </Grid>
 

@@ -7,6 +7,7 @@ using Kaenx.DataContext.Project;
 using Kaenx.Konnect;
 using Kaenx.Konnect.Builders;
 using Kaenx.View.Controls;
+using Microsoft.AppCenter.Analytics;
 using Microsoft.AppCenter.Crashes;
 using Newtonsoft.Json.Linq;
 using Serilog;
@@ -340,6 +341,7 @@ namespace Kaenx.View
 
             Serilog.Log.Debug("Projekt wird geöffnet: " + proj.Id + " - " + proj.Name);
 
+            Analytics.TrackEvent("Projekt erstellt");
             App.AppFrame.Navigate(typeof(WorkdeskEasy), proj);
         }
     }

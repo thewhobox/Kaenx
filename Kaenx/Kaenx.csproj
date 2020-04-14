@@ -124,6 +124,7 @@
     <Compile Include="Classes\Bus\Actions\DeviceRestart.cs" />
     <Compile Include="Classes\Bus\Actions\IBusAction.cs" />
     <Compile Include="Classes\Bus\Actions\DeviceInfo.cs" />
+    <Compile Include="Classes\Bus\Actions\ProgPhysicalAddressSerial.cs" />
     <Compile Include="Classes\Bus\Data\DeviceConfigData.cs" />
     <Compile Include="Classes\Bus\Data\DeviceInfoData.cs" />
     <Compile Include="Classes\Bus\Actions\ProgApplication.cs" />
@@ -164,8 +165,8 @@
     <Compile Include="View\Controls\Dialogs\DiagDeviceConfig.xaml.cs">
       <DependentUpon>DiagDeviceConfig.xaml</DependentUpon>
     </Compile>
-    <Compile Include="View\Controls\Dialogs\DiagImportDevices.xaml.cs">
-      <DependentUpon>DiagImportDevices.xaml</DependentUpon>
+    <Compile Include="View\Controls\Dialogs\DiagImportDevice.xaml.cs">
+      <DependentUpon>DiagImportDevice.xaml</DependentUpon>
     </Compile>
     <Compile Include="View\Controls\Dialogs\DiagLanguage.xaml.cs">
       <DependentUpon>DiagLanguage.xaml</DependentUpon>
@@ -381,7 +382,7 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="View\Controls\Dialogs\DiagImportDevices.xaml">
+    <Page Include="View\Controls\Dialogs\DiagImportDevice.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

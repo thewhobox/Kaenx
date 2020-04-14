@@ -1,10 +1,13 @@
-﻿using Kaenx.Konnect;
+﻿using Kaenx.Classes.Helper;
+using Kaenx.Classes.Project;
+using Kaenx.Konnect;
 using Kaenx.Konnect.Addresses;
 using Kaenx.Konnect.Builders;
 using Kaenx.Konnect.Classes;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading;
@@ -170,6 +173,7 @@ namespace Kaenx.Classes.Bus.Actions
 
             await RestartCommands();
 
+
             TodoText = "Erfolgreich abgeschlossen";
 
             _ = App._dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Low, () =>
@@ -186,11 +190,18 @@ namespace Kaenx.Classes.Bus.Actions
             BusDevice dev = new BusDevice(Device.LineName, Connection);
             dev.Connect();
             await Task.Delay(100);
+            string mask = await dev.DeviceDescriptorRead();
+            byte[] serial = await dev.PropertyRead("MV-" + mask, "DeviceSerialNumber");
             dev.Restart();
 
+            Device.Serial = serial;
+
+            _ = App._dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Low, () =>
+            {
+                SaveHelper.UpdateDevice(Device);
+            });
+
             ProgressValue = 100;
-            //TodoText = "Erfolgreich abgeschlossen";
-            await Task.Delay(2000);
         }
 
         private void Changed(string name)

@@ -1,5 +1,6 @@
 ﻿using Kaenx.Classes;
 using Kaenx.Classes.Helper;
+using Kaenx.Classes.Project;
 using Kaenx.DataContext.Catalog;
 using Microsoft.Toolkit.Uwp.UI.Controls;
 using System;

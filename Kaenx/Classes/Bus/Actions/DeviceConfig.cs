@@ -1,10 +1,12 @@
 ﻿using Kaenx.Classes.Bus.Data;
 using Kaenx.Classes.Helper;
+using Kaenx.Classes.Project;
 using Kaenx.DataContext.Catalog;
 using Kaenx.Konnect;
 using Kaenx.Konnect.Addresses;
 using Kaenx.Konnect.Builders;
 using Kaenx.Konnect.Classes;
+using Microsoft.AppCenter.Analytics;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -390,6 +392,7 @@ namespace Kaenx.Classes.Bus.Actions
                 Finished?.Invoke(this, new ErrorData(_data, errmsg));
             }
 
+            Analytics.TrackEvent("Geräte Konfig auslesen");
         }
 
         private void Changed(string name)

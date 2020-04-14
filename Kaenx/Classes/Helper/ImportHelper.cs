@@ -898,7 +898,6 @@ namespace Kaenx.Classes.Helper
                 Log.Information("Keine Baggages vorhanden");
 
             CatalogContext context = new CatalogContext();
-            context.ChangeTracker.AutoDetectChangesEnabled = false;
 
 
 
