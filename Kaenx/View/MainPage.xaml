@@ -15,27 +15,26 @@
     mc:Ignorable="d">
 
     <Grid>
-        <Grid>
-            <VisualStateManager.VisualStateGroups>
-                <VisualStateGroup>
-                    <VisualState>
-                        <VisualState.StateTriggers>
-                            <AdaptiveTrigger MinWindowWidth="800" />
-                        </VisualState.StateTriggers>
-                        <VisualState.Setters>
-                            <Setter Target="LogoImage.Height" Value="270" />
-                            <Setter Target="VB1.Height" Value="100" />
-                            <Setter Target="VB2.Height" Value="100" />
-                            <Setter Target="VB3.Height" Value="100" />
-                            <Setter Target="VB4.Height" Value="100" />
-                            <Setter Target="VB5.Height" Value="100" />
-                            <Setter Target="DiagGrid.Height" Value="600" />
-                            <Setter Target="DiagGrid.Width" Value="700" />
-                        </VisualState.Setters>
-                    </VisualState>
-                </VisualStateGroup>
-            </VisualStateManager.VisualStateGroups>
+        <VisualStateManager.VisualStateGroups>
+            <VisualStateGroup>
+                <VisualState>
+                    <VisualState.StateTriggers>
+                        <AdaptiveTrigger MinWindowWidth="800" />
+                    </VisualState.StateTriggers>
+                    <VisualState.Setters>
+                        <Setter Target="LogoImage.Height" Value="270" />
+                        <Setter Target="VB1.Height" Value="100" />
+                        <Setter Target="VB2.Height" Value="100" />
+                        <Setter Target="VB3.Height" Value="100" />
+                        <Setter Target="VB4.Height" Value="100" />
+                        <Setter Target="DiagGrid.Height" Value="600" />
+                        <Setter Target="DiagGrid.Width" Value="700" />
+                    </VisualState.Setters>
+                </VisualState>
+            </VisualStateGroup>
+        </VisualStateManager.VisualStateGroups>
 
+        <Grid>
             <Grid.RowDefinitions>
                 <RowDefinition Height="auto" />
                 <RowDefinition Height="auto" />
@@ -102,7 +101,7 @@
 
                 <Button Grid.Column="5" Click="OpenSettings">
                     <StackPanel>
-                        <Viewbox x:Name="VB5" Height="70">
+                        <Viewbox x:Name="VB4" Height="70">
                             <SymbolIcon Symbol="Setting" />
                         </Viewbox>
                         <TextBlock x:Uid="/MainPage/BtnSettings" />
@@ -169,14 +168,6 @@
 
             <TextBlock x:Name="AppVersion" VerticalAlignment="Top" HorizontalAlignment="Right" Margin="20"/>
 
-            <toolkit:Loading Grid.RowSpan="6" x:Name="LoadScreen">
-                <toolkit:Loading.Background>
-                    <SolidColorBrush Color="Gray" Opacity="0.6" />
-                </toolkit:Loading.Background>
-                <ProgressRing IsActive="True" Foreground="Black" Height="100" Width="100" />
-            </toolkit:Loading>
-
-            <toolkit:InAppNotification Grid.Row="2"  x:Name="Notify" />
         </Grid>
 
 
@@ -238,5 +229,14 @@
                 </Grid>
             </Grid>
         </Border>
+
+        <toolkit:Loading Grid.RowSpan="6" x:Name="LoadScreen">
+            <toolkit:Loading.Background>
+                <SolidColorBrush Color="Gray" Opacity="0.6" />
+            </toolkit:Loading.Background>
+            <ProgressRing IsActive="True" Foreground="Black" Height="100" Width="100" />
+        </toolkit:Loading>
+
+        <toolkit:InAppNotification Grid.Row="2"  x:Name="Notify" />
     </Grid>
 </Page>

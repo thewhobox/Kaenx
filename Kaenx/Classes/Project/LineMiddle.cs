@@ -53,10 +53,12 @@ namespace Kaenx.Classes.Project
         public LineMiddle() { }
         public LineMiddle(int id, string name, Line parent)
         {
+            IsInit = true;
             Id = id;
             Name = name;
             Parent = parent;
             Parent.PropertyChanged += Parent_PropertyChanged;
+            IsInit = false;
         }
 
         private void Parent_PropertyChanged(object sender, PropertyChangedEventArgs e)
