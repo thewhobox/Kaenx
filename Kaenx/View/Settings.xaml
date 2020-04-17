@@ -5,15 +5,21 @@
     xmlns:local="using:Kaenx.View"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:ctrl="using:Kaenx.View.Controls.Settings"
+    xmlns:toolkit="using:Microsoft.Toolkit.Uwp.UI.Controls"
     mc:Ignorable="d"
     Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
 
-    <Pivot x:Uid="/Settings/MainTabs">
-        <PivotItem x:Uid="/Settings/TabGeneral">
-            <TextBlock Text="Allgemeine Einstellungen wie Sprache und so kommen hier hin..." />
-        </PivotItem>
-        <PivotItem x:Uid="/Settings/TabConnections">
-            <TextBlock Text="Einstellungen für die verbindungen kommen hier her..." />
-        </PivotItem>
-    </Pivot>
+    <Grid>
+        <Pivot x:Uid="/Settings/MainTabs">
+            <PivotItem x:Uid="/Settings/TabGeneral">
+                <TextBlock Text="Allgemeine Einstellungen wie Sprache und so kommen hier hin..." />
+            </PivotItem>
+            <PivotItem x:Uid="/Settings/TabConnections">
+                <ctrl:SBusConnections />
+            </PivotItem>
+        </Pivot>
+
+        <toolkit:InAppNotification x:Name="Notify" />
+    </Grid>
 </Page>

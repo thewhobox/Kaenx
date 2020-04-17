@@ -47,12 +47,8 @@ namespace Kaenx.View
             set { _importDevice = value; Update("ImportDevice"); }
         }
 
-        private ObservableCollection<string> _importError = new ObservableCollection<string>();
-        public ObservableCollection<string> ImportError
-        {
-            get { return _importError; }
-            set { _importError = value; Update("ImportError"); }
-        }
+        public ObservableCollection<string> ImportError { get; set; } = new ObservableCollection<string>();
+        public ObservableCollection<string> ImportWarning { get; set; } = new ObservableCollection<string>();
 
         private ObservableCollection<DeviceImportInfo> _devicesList = new ObservableCollection<DeviceImportInfo>();
         public ObservableCollection<DeviceImportInfo> DevicesList
@@ -74,10 +70,16 @@ namespace Kaenx.View
             Helper.ProgressAppMaxChanged += Helper_ProgressAppMaxChanged;
             Helper.OnDeviceChanged += Helper_OnDeviceChanged;
             Helper.OnError += Helper_OnError;
+            Helper.OnWarning += Helper_OnWarning;
             Helper.OnStateChanged += Helper_OnStateChanged;
 
             var currentView = SystemNavigationManager.GetForCurrentView();
             currentView.AppViewBackButtonVisibility = AppViewBackButtonVisibility.Collapsed;
+        }
+
+        private void Helper_OnWarning(string value)
+        {
+            ImportWarning.Add(value);
         }
 
         private void Helper_ProgressChanged(int count)
@@ -117,7 +119,6 @@ namespace Kaenx.View
         private void Helper_OnError(string Error)
         {
             ImportError.Add(Error);
-            Update("ImportError");
         }
 
         protected override void OnNavigatedTo(NavigationEventArgs e)

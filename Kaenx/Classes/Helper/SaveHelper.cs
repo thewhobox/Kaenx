@@ -324,7 +324,7 @@ namespace Kaenx.Classes.Helper
                 catch
                 {
                     Serilog.Log.Error($"Project-Verbindung {helper.Local.ConnectionId} konnte nicht gefunden werden.");
-                    ViewHelper.Instance.ShowNotification("Die Verbindung wo das Projekt gespeichert sein soll konnt enicht gefunden werden.", 3000, ViewHelper.MessageType.Error);
+                    ViewHelper.Instance.ShowNotification("all", "Die Verbindung wo das Projekt gespeichert sein soll konnt enicht gefunden werden.", 3000, ViewHelper.MessageType.Error);
                     return null;
                 }
                 contextProject = new ProjectContext(lconn);
@@ -452,7 +452,7 @@ namespace Kaenx.Classes.Helper
                 catch
                 {
                     Serilog.Log.Error($"Project-Verbindung {helper.Local.ConnectionId} konnte nicht gefunden werden.");
-                    ViewHelper.Instance.ShowNotification("Die Verbindung wo das Projekt gespeichert sein soll konnt enicht gefunden werden.", 3000, ViewHelper.MessageType.Error);
+                    ViewHelper.Instance.ShowNotification("all", "Die Verbindung wo das Projekt gespeichert sein soll konnt enicht gefunden werden.", 3000, ViewHelper.MessageType.Error);
                     return;
                 }
                 contextProject = new ProjectContext(lconn);
@@ -747,12 +747,12 @@ namespace Kaenx.Classes.Helper
             if ((maxCurrent - current) <= 0)
             {
                 line.CurrentBrush = new Windows.UI.Xaml.Media.SolidColorBrush(Windows.UI.Colors.Red);
-                if (!noNotify) ViewHelper.Instance.ShowNotification("Die Spannungsquelle der Linie ist möglicherweise nicht ausreichend.\r\n(Verfügbar: " + maxCurrent + " Berechnet: " + current, 5000, ViewHelper.MessageType.Warning);
+                if (!noNotify) ViewHelper.Instance.ShowNotification("main", "Die Spannungsquelle der Linie ist möglicherweise nicht ausreichend.\r\n(Verfügbar: " + maxCurrent + " Berechnet: " + current, 5000, ViewHelper.MessageType.Warning);
             }
             else if ((maxCurrent - current) < 80)
             {
                 line.CurrentBrush = new Windows.UI.Xaml.Media.SolidColorBrush(Windows.UI.Colors.Orange);
-                if (!noNotify) ViewHelper.Instance.ShowNotification("In der Linie sind nur noch " + (maxCurrent - current) + " mA Reserve verfügbar.", 5000, ViewHelper.MessageType.Info);
+                if (!noNotify) ViewHelper.Instance.ShowNotification("main", "In der Linie sind nur noch " + (maxCurrent - current) + " mA Reserve verfügbar.", 5000, ViewHelper.MessageType.Info);
             }
             else
                 line.CurrentBrush = new Windows.UI.Xaml.Media.SolidColorBrush(Windows.UI.Colors.White);

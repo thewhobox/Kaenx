@@ -72,7 +72,7 @@ namespace Kaenx.View
         {
             _ = this.Dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Normal, () =>
             {
-                ReadList.Add(info);
+                ReadList.Insert(0, info);
             });
         }
 
@@ -95,6 +95,11 @@ namespace Kaenx.View
         {
             if(_conn == null)
             {
+                if(BusConnection.Instance.SelectedInterface == null)
+                {
+                    ViewHelper.Instance.ShowNotification("main", "Bitte wählen Sie erst eine Schnittstelle aus", 3000, ViewHelper.MessageType.Error);
+                    return;
+                }
                 _conn = new Connection(BusConnection.Instance.SelectedInterface.Endpoint);
                 _conn.OnTunnelRequest += _conn_OnTunnelAction;
                 _conn.OnTunnelResponse += _conn_OnTunnelAction;
@@ -165,7 +170,7 @@ namespace Kaenx.View
 
             if (address.Length != 3)
             {
-                ViewHelper.Instance.ShowNotification("Ungültige Adresse!", 3000, ViewHelper.MessageType.Error);
+                ViewHelper.Instance.ShowNotification("main", "Ungültige Adresse!", 3000, ViewHelper.MessageType.Error);
                 return null;
             }
 
@@ -180,14 +185,14 @@ namespace Kaenx.View
                 }
                 catch
                 {
-                    ViewHelper.Instance.ShowNotification("Adresse konnte keinem Gerät zugewiesen werden.", 3000, ViewHelper.MessageType.Warning);
+                    ViewHelper.Instance.ShowNotification("main", "Adresse konnte keinem Gerät zugewiesen werden.", 3000, ViewHelper.MessageType.Warning);
                 }
             }
 
             if (dev == null)
             {
-                Line dM = new Line { Id = int.Parse(address[0]) };
-                LineMiddle dL = new LineMiddle { Id = int.Parse(address[1]), Parent = dM };
+                Line dM = new Line { IsInit = true, Id = int.Parse(address[0]) };
+                LineMiddle dL = new LineMiddle { IsInit = true, Id = int.Parse(address[1]), Parent = dM };
                 dev = new LineDevice(true) { Name = "Unbekannt", Id = int.Parse(address[2]), Parent = dL };
             }
 

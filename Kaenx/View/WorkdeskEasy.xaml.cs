@@ -80,16 +80,23 @@ namespace Kaenx.View
             NavView.SelectedItem = NavView.MenuItems[0];
         }
 
-        private void Instance_OnShowNotification(string text, int duration, ViewHelper.MessageType type)
+        private void Instance_OnShowNotification(string view, string text, int duration, ViewHelper.MessageType type)
         {
-            object style;
-            Resources.TryGetValue("NotifyStyle" + type.ToString(), out style);
-            Notify.Style = (Style)style;
+            if (view != "all" && view != "main") return;
 
-            if (duration == -1)
-                Notify.Show(text);
-            else
-                Notify.Show(text, duration);
+            try
+            {
+                object style;
+                Resources.TryGetValue("NotifyStyle" + type.ToString(), out style);
+                if(style != null)
+                    Notify.Style = (Style)style;
+
+                if (duration == -1)
+                    Notify.Show(text);
+                else
+                    Notify.Show(text, duration);
+            }
+            catch { }
         }
 
         private void ContentFrame_Navigated(object sender, NavigationEventArgs e)

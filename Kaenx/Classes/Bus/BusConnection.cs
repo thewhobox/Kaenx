@@ -9,6 +9,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Kaenx.Classes.Bus.Actions;
 using Kaenx.Classes.Helper;
+using Kaenx.DataContext.Local;
 using Kaenx.Konnect;
 using Kaenx.Konnect.Builders;
 using Windows.ApplicationModel.Resources;
@@ -46,7 +47,7 @@ namespace Kaenx.Classes.Bus
             set { _selectedInterface = value; Changed("SelectedInterface"); }
         }
         private Connection searchConn = new Connection(new IPEndPoint(IPAddress.Parse("224.0.23.12"), 3671));
-        private DispatcherTimer searchTimer = new DispatcherTimer() { Interval = TimeSpan.FromSeconds(30) };
+        private DispatcherTimer searchTimer = new DispatcherTimer() { Interval = TimeSpan.FromSeconds(10) };
 
 
 
@@ -75,6 +76,18 @@ namespace Kaenx.Classes.Bus
             searchConn.OnSearchResponse += SearchConn_OnSearchResponse;
             searchTimer.Tick += (a, b) => SearchForDevices();
             SearchForDevices();
+
+            //InterfaceList.CollectionChanged += (a,b) => InterfaceList.Sort(i => i.Name);
+
+            LocalContext _context = new LocalContext();
+            foreach(LocalInterface inter in _context.Interfaces)
+            {
+                BusInterface binter = new BusInterface();
+                binter.Name = inter.Name;
+                binter.Endpoint = new IPEndPoint(IPAddress.Parse(inter.Ip), inter.Port);
+                binter.Hash = inter.Id.ToString();
+                InterfaceList.Add(binter);
+            }
         }
 
         private void SearchConn_OnSearchResponse(Konnect.Responses.SearchResponse response)
@@ -102,7 +115,8 @@ namespace Kaenx.Classes.Bus
             List<BusInterface> toDelete = new List<BusInterface>();
             foreach(BusInterface inter in InterfaceList)
             {
-                if ((DateTime.Now - TimeSpan.FromMinutes(2)) > inter.LastFound)
+                if (inter.LastFound == null) continue;
+                if ((DateTime.Now - TimeSpan.FromMinutes(1)) > inter.LastFound)
                     toDelete.Add(inter);
             }
             _ = App._dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Normal, () =>
@@ -165,7 +179,7 @@ namespace Kaenx.Classes.Bus
                 {
                     if (!alreadyShowedWarning)
                     {
-                        ViewHelper.Instance.ShowNotification(loader.GetString("NoInterfaceSelected"), 3000, ViewHelper.MessageType.Error);
+                        ViewHelper.Instance.ShowNotification("all", loader.GetString("NoInterfaceSelected"), 3000, ViewHelper.MessageType.Error);
                         alreadyShowedWarning = true;
                     }
                     continue;

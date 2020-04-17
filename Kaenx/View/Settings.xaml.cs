@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Kaenx.Classes.Helper;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -30,6 +31,35 @@ namespace Kaenx.View
         public Settings()
         {
             this.InitializeComponent();
+
+            this.Loaded += (a,b) =>
+            {
+                ViewHelper.Instance.OnShowNotification += Instance_OnShowNotification;
+            };
+            this.Unloaded += (a, b) =>
+            {
+                ViewHelper.Instance.OnShowNotification -= Instance_OnShowNotification;
+            };
+        }
+
+        
+
+        private void Instance_OnShowNotification(string view, string text, int duration, ViewHelper.MessageType type)
+        {
+            if (view != "all" && view != "settings") return;
+            try
+            {
+                object style;
+                Resources.TryGetValue("NotifyStyle" + type.ToString(), out style);
+                if(style != null)
+                    Notify.Style = (Style)style;
+
+                if (duration == -1)
+                    Notify.Show(text);
+                else
+                    Notify.Show(text, duration);
+            }
+            catch { }
         }
 
         protected override void OnNavigatedTo(NavigationEventArgs e)

@@ -23,9 +23,9 @@ namespace Kaenx.Classes.Helper
 
 
         // Notification Helper
-        public delegate void ShowNotificationHandler(string text, int duration, MessageType type);
+        public delegate void ShowNotificationHandler(string view, string text, int duration, MessageType type);
         public event ShowNotificationHandler OnShowNotification;
-        public void ShowNotification(string text, int duration = -1, MessageType type = MessageType.Success) { OnShowNotification?.Invoke(text, duration, type); }
+        public void ShowNotification(string view, string text, int duration = -1, MessageType type = MessageType.Success) { OnShowNotification?.Invoke(view, text, duration, type); }
 
         public enum MessageType
         {

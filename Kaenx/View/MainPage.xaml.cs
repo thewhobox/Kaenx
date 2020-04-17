@@ -30,6 +30,7 @@ using Windows.Services.Store;
 using Windows.Storage;
 using Windows.Storage.Pickers;
 using Windows.Storage.Streams;
+using Windows.System;
 using Windows.UI.StartScreen;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
@@ -57,6 +58,7 @@ namespace Kaenx.View
         private ResourceLoader loaderG = ResourceLoader.GetForCurrentView("Global");
         private ResourceLoader loaderD = ResourceLoader.GetForCurrentView("Dialogs");
 
+        private bool _openHandled = false;
         private bool _projectSelected = false;
         private LocalContext _contextL = new LocalContext();
         private FlyoutBase _currentFlyout = null;
@@ -124,13 +126,13 @@ namespace Kaenx.View
 
         private void OpenCatalog(object sender, RoutedEventArgs e)
         {
-            Serilog.Log.Debug("Katalog öffnen");
+            Serilog.Log.Information("Katalog öffnen");
             App.Navigate(typeof(Catalog), "main");
         }
 
         private void OpenSettings(object sender, RoutedEventArgs e)
         {
-            Serilog.Log.Debug("Einstellungen öffnen");
+            Serilog.Log.Information("Einstellungen öffnen");
             App.Navigate(typeof(Settings), "main");
         }
 
@@ -149,21 +151,25 @@ namespace Kaenx.View
 
         private async void OpenProject(object sender, RoutedEventArgs e)
         {
-            _currentFlyout.Hide();
+            ProjectViewHelper helper = (ProjectViewHelper)ProjectsGrid.SelectedItem;
+            DoOpenProject(helper);
+        }
+
+        private async void DoOpenProject(ProjectViewHelper helper)
+        {
+            _currentFlyout?.Hide();
             LoadScreen.IsLoading = true;
             await Task.Delay(200);
 
-            ProjectViewHelper helper = (ProjectViewHelper)ProjectsGrid.SelectedItem;
-
             Project project = SaveHelper.LoadProject(helper);
-            if(project == null)
+            if (project == null)
             {
                 LoadScreen.IsLoading = true;
                 return;
             }
 
             ChangeHandler.Instance = new ChangeHandler(project.Id);
-            Serilog.Log.Debug("Neues Projekt erstellt: " + project.Id + " - " + project.Name);
+            Serilog.Log.Information("Projekt geöffnet: " + project.Id + " - " + project.Name);
 
             if (JumpList.IsSupported())
             {
@@ -172,12 +178,13 @@ namespace Kaenx.View
                 jumpList.SystemGroupKind = JumpListSystemGroupKind.None;
 
 
-                if(jumpList.Items.Any(i => i.Arguments == "open:" + helper.Id))
+                if (jumpList.Items.Any(i => i.Arguments == "open:" + helper.Id))
                 {
                     JumpListItem itemN = jumpList.Items.Single(i => i.Arguments == "open:" + helper.Id);
                     jumpList.Items.Remove(itemN);
                     jumpList.Items.Insert(0, itemN);
-                } else
+                }
+                else
                 {
                     JumpListItem itemN = JumpListItem.CreateWithArguments("open:" + helper.Id, helper.Name);
                     itemN.GroupName = "Projekte";
@@ -194,9 +201,6 @@ namespace Kaenx.View
                 }
             }
 
-
-
-
             App.AppFrame.Navigate(typeof(WorkdeskEasy), project);
         }
 
@@ -211,13 +215,11 @@ namespace Kaenx.View
             SaveHelper.DeleteProject(proj);
             Notify.Show(loader.GetString("MsgProjectDeleted"), 3000);
 
-            Serilog.Log.Debug("Projekt wurde gelöscht: " + proj.Id + " - " + proj.Name);
+            Serilog.Log.Information("Projekt wurde gelöscht: " + proj.Id + " - " + proj.Name);
         }
 
-        private void GridItemTapped(object sender, TappedRoutedEventArgs e)
+        private async void GridItemTapped(object sender, TappedRoutedEventArgs e)
         {
-            _currentFlyout = FlyoutBase.GetAttachedFlyout((FrameworkElement)sender);
-            _currentFlyout.ShowAt((FrameworkElement)sender);
         }
 
         private async void ClickChangePicFile(object sender, RoutedEventArgs e)
@@ -339,10 +341,28 @@ namespace Kaenx.View
 
             ChangeHandler.Instance = new ChangeHandler(proj.Id);
 
-            Serilog.Log.Debug("Projekt wird geöffnet: " + proj.Id + " - " + proj.Name);
+            Serilog.Log.Information("Projekt wird geöffnet: " + proj.Id + " - " + proj.Name);
 
             Analytics.TrackEvent("Projekt erstellt");
             App.AppFrame.Navigate(typeof(WorkdeskEasy), proj);
+        }
+
+        private void GridTemplate_DoubleTapped(object sender, DoubleTappedRoutedEventArgs e)
+        {
+            _openHandled = true;
+            ProjectViewHelper helper = (sender as Grid).DataContext as ProjectViewHelper;
+            DoOpenProject(helper);
+        }
+
+        private void OpenArchive(object sender, RoutedEventArgs e)
+        {
+            Launcher.LaunchFolderPathAsync(ApplicationData.Current.LocalFolder.Path + "\\Logs");
+        }
+
+        private void GridTemplate_RightTapped(object sender, RightTappedRoutedEventArgs e)
+        {
+            _currentFlyout = FlyoutBase.GetAttachedFlyout((FrameworkElement)sender);
+            _currentFlyout.ShowAt((FrameworkElement)sender);
         }
     }
 }

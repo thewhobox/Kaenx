@@ -108,8 +108,18 @@ namespace Kaenx
 #endif
 
 
+            this.UnhandledException += App_UnhandledException;
+
         }
 
+        private void App_UnhandledException(object sender, Windows.UI.Xaml.UnhandledExceptionEventArgs e)
+        {
+            Log.Error(e.Exception, "UnhandledException!");
+            if (e.Exception.InnerException != null)
+                Log.Error(e.Exception.InnerException, "InnerException!");
+
+            throw e.Exception;
+        }
 
         protected override void OnFileActivated(FileActivatedEventArgs args)
         {

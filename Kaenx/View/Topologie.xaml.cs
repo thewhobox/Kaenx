@@ -306,7 +306,7 @@ namespace Kaenx.View
             {
                 if (line.Subs.Any(s => s.Id == 0))
                 {
-                    ViewHelper.Instance.ShowNotification(loader.GetString("ErrMsgCoupler"), 4000, ViewHelper.MessageType.Error);
+                    ViewHelper.Instance.ShowNotification("main", loader.GetString("ErrMsgCoupler"), 4000, ViewHelper.MessageType.Error);
                     return;
                 }
                 device.Id = 0;
@@ -315,7 +315,7 @@ namespace Kaenx.View
             {
                 if (_context.Devices.Any(d => d.IsPowerSupply && line.Subs.Any(l => l.DeviceId == d.Id)))
                 {
-                    ViewHelper.Instance.ShowNotification(loader.GetString("ErrMsgPowerSupply"), 4000, ViewHelper.MessageType.Error);
+                    ViewHelper.Instance.ShowNotification("main", loader.GetString("ErrMsgPowerSupply"), 4000, ViewHelper.MessageType.Error);
                     return;
                 }
                 device.Id = -1;
@@ -326,7 +326,7 @@ namespace Kaenx.View
                 {
                     if (line.Subs.Count(s => s.Id != -1) > 255)
                     {
-                        ViewHelper.Instance.ShowNotification(loader.GetString("ErrMsgMaxDevices"), 4000, ViewHelper.MessageType.Error);
+                        ViewHelper.Instance.ShowNotification("main", loader.GetString("ErrMsgMaxDevices"), 4000, ViewHelper.MessageType.Error);
                         return;
                     }
                     device.Id = getFirstFreeIdDev(line);

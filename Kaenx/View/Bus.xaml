@@ -168,13 +168,13 @@
                         <RowDefinition />
                     </Grid.RowDefinitions>
                     
-                    <TextBlock Text="Ausgewählte Schnittstellen:" Foreground="{ThemeResource SystemAccentColorDark1}" Margin="10 0 0 0" />
+                    <TextBlock Text="Ausgewählte Schnittstelle:" Foreground="{ThemeResource SystemAccentColorDark1}" Margin="10 0 0 0" />
                     <StackPanel Grid.Row="1" DataContext="{Binding SelectedInterface}" Orientation="Vertical" Margin="10 5">
                         <TextBlock Text="{Binding Name}" />
                         <TextBlock Text="{Binding Endpoint}" FontSize="10" Foreground="Gray" />
                     </StackPanel>
 
-                    <TextBlock Grid.Row="2" Text="Gefundene Schnittstellen:" Foreground="{ThemeResource SystemAccentColorDark1}" Margin="10 20 0 0" />
+                    <TextBlock Grid.Row="2" Text="Schnittstellen:" Foreground="{ThemeResource SystemAccentColorDark1}" Margin="10 20 0 0" />
                     <ListView x:Name="ListInterfaces" Grid.Row="3" ItemsSource="{Binding InterfaceList}" SelectedItem="{Binding SelectedInterface, Mode=TwoWay}">
                         <ListView.ItemTemplate>
                             <DataTemplate>
@@ -185,7 +185,6 @@
                             </DataTemplate>
                         </ListView.ItemTemplate>
                     </ListView>
-
 
                     <!--<TextBlock Grid.Row="4" Text="Gespeicherte Schnittstellen:" Foreground="{ThemeResource SystemAccentColorDark1}" Margin="10 20 0 0" />
                     <Button Grid.Row="4" HorizontalAlignment="Right">

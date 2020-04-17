@@ -63,15 +63,8 @@ namespace Kaenx.Classes.Bus.Actions
 
         private async void CheckProgMode()
         {
-
-            await Task.Delay(1000);
-
-            bus.IndividualAddressRead();
-
-            await Task.Delay(3000);
-
-
             TodoText = "Bitte Programmierknopf drücken...";
+
             ProgressIsIndeterminate = true;
             progDevices.Clear();
 
@@ -88,9 +81,13 @@ namespace Kaenx.Classes.Bus.Actions
                     if(progDevices[0] == Device.LineName)
                     {
                         TodoText = "Gerät hat bereits die Adresse";
-                        Device.LoadedPA = true;
+                        _ = App._dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Low, () =>
+                        {
+                            Device.LoadedPA = true;
+                        });
                         await Task.Delay(1000);
                         await RestartCommands();
+                        TodoText = "Erfolgreich abgeschlossen";
                         Finished?.Invoke(this, new EventArgs());
                         break;
                     }
@@ -191,15 +188,20 @@ namespace Kaenx.Classes.Bus.Actions
             dev.Connect();
             await Task.Delay(100);
             string mask = await dev.DeviceDescriptorRead();
-            byte[] serial = await dev.PropertyRead("MV-" + mask, "DeviceSerialNumber");
+            try
+            {
+                byte[] serial = await dev.PropertyRead("MV-" + mask, "DeviceSerialNumber");
+                Device.Serial = serial;
+                _ = App._dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Low, () =>
+                {
+                    SaveHelper.UpdateDevice(Device);
+                });
+            } catch { }
+
+
             dev.Restart();
 
-            Device.Serial = serial;
 
-            _ = App._dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Low, () =>
-            {
-                SaveHelper.UpdateDevice(Device);
-            });
 
             ProgressValue = 100;
         }

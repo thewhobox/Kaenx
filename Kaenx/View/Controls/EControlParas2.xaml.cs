@@ -71,7 +71,7 @@ namespace Kaenx.Views.Easy.Controls
             if (!_context.Applications.Any(a => a.Id == device.ApplicationId))
             {
                 LoadRing.Visibility = Visibility.Collapsed;
-                ViewHelper.Instance.ShowNotification("Achtung!!! Applikation konnte nicht gefunden werden. Bitte importieren Sie das Produkt erneut.", 4000, ViewHelper.MessageType.Error);
+                ViewHelper.Instance.ShowNotification("main", "Achtung!!! Applikation konnte nicht gefunden werden. Bitte importieren Sie das Produkt erneut.", 4000, ViewHelper.MessageType.Error);
                 return;
             }
 
@@ -92,7 +92,7 @@ namespace Kaenx.Views.Easy.Controls
 
         private void EControlParas2_SizeChanged(object sender, SizeChangedEventArgs e)
         {
-            IsBigView = e.NewSize.Width > 850;
+            IsBigView = e.NewSize.Width > 1400;
         }
 
         public void Start()
@@ -138,7 +138,7 @@ namespace Kaenx.Views.Easy.Controls
                 watch.Stop();
                 Log.Error(e, "Fehler beim Laden der ControlParas");
                 LoadRing.Visibility = Visibility.Collapsed;
-                ViewHelper.Instance.ShowNotification("Es trat ein Fehler beim Laden auf: " + e.Message, 3000, ViewHelper.MessageType.Error);
+                ViewHelper.Instance.ShowNotification("main", "Es trat ein Fehler beim Laden auf: " + e.Message, 3000, ViewHelper.MessageType.Error);
                 return;
             }
 
@@ -158,7 +158,7 @@ namespace Kaenx.Views.Easy.Controls
             LoadRing.Visibility = Visibility.Collapsed;
 
             watch.Stop();
-            ViewHelper.Instance.ShowNotification("Geladen nach: " + watch.Elapsed.TotalSeconds + "s", 3000);
+            ViewHelper.Instance.ShowNotification("main", "Geladen nach: " + watch.Elapsed.TotalSeconds + "s", 3000);
         }
 
 

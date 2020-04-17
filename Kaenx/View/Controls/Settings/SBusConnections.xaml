@@ -1,0 +1,125 @@
+﻿<UserControl
+    x:Class="Kaenx.View.Controls.Settings.SBusConnections"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:Kaenx.View.Controls"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:toolkit="using:Microsoft.Toolkit.Uwp.UI.Controls"
+    mc:Ignorable="d"
+    d:DesignHeight="300"
+    d:DesignWidth="400">
+
+    <Grid>
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition />
+                <ColumnDefinition />
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="auto" />
+                <RowDefinition Height="auto" />
+                <RowDefinition Height="auto" />
+                <RowDefinition Height="auto" />
+            </Grid.RowDefinitions>
+
+            <StackPanel Orientation="Horizontal">
+                <Button Click="ClickToggleAddInterface">
+                    <SymbolIcon Symbol="Add" />
+                </Button>
+                <TextBlock Text="Schnittstellen" VerticalAlignment="Center" FontSize="22" Margin="10 0 0 0" />
+            </StackPanel>
+
+            <ListView Grid.Row="1"  ItemsSource="{Binding ListInterfaces}" Margin="0 10 0 0">
+                <ListView.ItemContainerStyle>
+                    <Style TargetType="ListViewItem">
+                        <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+                        <Setter Property="Padding" Value="0" />
+                    </Style>
+                </ListView.ItemContainerStyle>
+                <ListView.ItemTemplate>
+                    <DataTemplate>
+                        <Grid Padding="5 10" BorderBrush="{ThemeResource BrushAccentColor2}" BorderThickness="0 0 0 1">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition />
+                                <ColumnDefinition Width="auto" />
+                                <ColumnDefinition Width="auto" />
+                            </Grid.ColumnDefinitions>
+
+                            <StackPanel VerticalAlignment="Center" Margin="10 0">
+                                <TextBlock Text="{Binding Name}" FontSize="16" />
+                                <TextBlock Grid.Row="1" Foreground="Gray">
+                                    <Run Text="{Binding Ip}" />
+                                    <Run Text=":" />
+                                    <Run Text="{Binding Port}" />
+                                </TextBlock>
+                            </StackPanel>
+
+                            <Button Grid.Column="1" Background="Transparent" VerticalAlignment="Center">
+                                <SymbolIcon Symbol="Edit" />
+                            </Button>
+                            <Button Grid.Column="2" Background="Transparent" VerticalAlignment="Center" Click="ClickDelete">
+                                <SymbolIcon Symbol="Delete" />
+                            </Button>
+                        </Grid>
+                    </DataTemplate>
+                </ListView.ItemTemplate>
+            </ListView>
+
+
+
+            <StackPanel Grid.Column="1" Orientation="Horizontal">
+                <Button>
+                    <SymbolIcon Symbol="Add" />
+                </Button>
+                <TextBlock Text="Datenbanken" VerticalAlignment="Center" FontSize="22" Margin="10 0 0 0" />
+            </StackPanel>
+
+        </Grid>
+
+
+        <Border x:Name="DiagNewInterface" Visibility="Collapsed">
+            <Border.Background>
+                <SolidColorBrush Color="Gray" Opacity="0.6" />
+            </Border.Background>
+            <Grid x:Name="GridNewInterface" Width="300" VerticalAlignment="Center" BorderBrush="Gray" BorderThickness="1" Padding="10" Background="{ThemeResource BrushAccentControlBackground}">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition />
+                    <ColumnDefinition />
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="auto" />
+                    <RowDefinition />
+                    <RowDefinition Height="auto" />
+                </Grid.RowDefinitions>
+
+                <TextBlock Grid.ColumnSpan="2" Text="Neue Schnittstelle" VerticalAlignment="Center" FontSize="22" Margin="5 5 0 10" />
+                <Button Grid.Column="1" HorizontalAlignment="Right" Click="ClickToggleAddInterface">
+                    <SymbolIcon Symbol="Cancel" />
+                </Button>
+
+                <StackPanel Grid.ColumnSpan="2" Grid.Row="1">
+                    <toolkit:HeaderedContentControl Header="Name" HorizontalContentAlignment="Stretch">
+                        <TextBox x:Name="InInterName" HorizontalAlignment="Stretch" />
+                    </toolkit:HeaderedContentControl>
+
+                    <toolkit:HeaderedContentControl Header="Adresse" HorizontalContentAlignment="Stretch">
+                        <TextBox x:Name="InInterAddress" HorizontalAlignment="Stretch" />
+                    </toolkit:HeaderedContentControl>
+
+                    <toolkit:HeaderedContentControl Header="Port" HorizontalContentAlignment="Stretch">
+                        <TextBox x:Name="InInterPort" HorizontalAlignment="Stretch" />
+                    </toolkit:HeaderedContentControl>
+
+                    <toolkit:HeaderedContentControl Header="Physikalische Adresse" HorizontalContentAlignment="Stretch">
+                        <TextBox x:Name="InInterPhAddr" HorizontalAlignment="Stretch" />
+                    </toolkit:HeaderedContentControl>
+                </StackPanel>
+
+                <Button Grid.Row="2" Margin="5" Content="Testen" HorizontalAlignment="Stretch" Click="ClickTest" />
+                <Button Grid.Row="2" Grid.Column="1" Margin="5" Content="Speichern" HorizontalAlignment="Stretch" Click="ClickSaveInterface" />
+            </Grid>
+        </Border>
+        
+    </Grid>
+</UserControl>

@@ -31,6 +31,7 @@ namespace Kaenx.Classes.Helper
 
         public delegate void ValueHandler(string value);
         public event ValueHandler OnError;
+        public event ValueHandler OnWarning;
         public event ValueHandler OnDeviceChanged;
         public event ValueHandler OnStateChanged;
 
@@ -850,10 +851,26 @@ namespace Kaenx.Classes.Helper
                 ZipArchiveEntry entryBags = Imports.Archive.GetEntry(app.Id.Substring(0, 6) + "/Baggages.xml");
                 List<XElement> baggs = XDocument.Load(entryBags.Open()).Root.Descendants(GetXName("Baggage")).ToList();
                 StorageFolder appData = await ApplicationData.Current.LocalFolder.CreateFolderAsync("Baggages", CreationCollisionOption.OpenIfExists);
+                List<string> acceptedFiles = new List<string>() { ".png", ".jpeg", ".jpg", ".bmp" };
+                bool alreadySentWarning = false;
 
                 foreach(XElement xbag in tempList)
                 {
                     XElement ebag = baggs.Single(b => b.Attribute("Id").Value == xbag.Attribute("RefId").Value);
+
+                    string fileName = ebag.Attribute("Name").Value;
+                    string fileExtension = fileName.Substring(fileName.LastIndexOf('.'));
+                    if (!acceptedFiles.Contains(fileExtension))
+                    {
+                        Log.Warning("Nicht unterstützter Baggage Filetyp: " + fileName);
+                        if (!alreadySentWarning)
+                        {
+                            OnWarning?.Invoke("Applikation enthält nicht unterstützte Baggages");
+                            alreadySentWarning = true;
+                        }
+                        continue;
+                    }
+
                     bool flagSaveBag= true;
                     string bagId = ebag.Attribute("Id").Value;
                     DateTime time = DateTime.Parse(ebag.Element(GetXName("FileInfo")).Attribute("TimeInfo").Value);

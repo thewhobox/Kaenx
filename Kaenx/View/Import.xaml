@@ -66,13 +66,43 @@
             <Button x:Name="BtnBack" x:Uid="/Import/Back" HorizontalAlignment="Center" Margin="10" Click="ClickBack" IsEnabled="False"/>
         </StackPanel>
 
-        <toolkit:HeaderedContentControl Grid.Row="5" VerticalAlignment="Bottom">
-            <toolkit:HeaderedContentControl.Header>
-                <Border Background="LightGray">
-                    <TextBlock x:Uid="/Import/Error" FontSize="26" Foreground="OrangeRed" Margin="10" />
-                </Border>
-            </toolkit:HeaderedContentControl.Header>
-            <ListBox ItemsSource="{Binding ImportError}" MinHeight="150" MaxHeight="300" />
-        </toolkit:HeaderedContentControl>
+        <toolkit:Expander Grid.Row="5" ExpandDirection="Up" BorderBrush="Orange" BorderThickness="0 5 0 0" HorizontalContentAlignment="Stretch" >
+            <toolkit:Expander.Header>
+                <StackPanel  Orientation="Horizontal" HorizontalAlignment="Stretch">
+                    <TextBlock FontSize="18" Margin="20 0">
+                            <Run Text="Fehler:" />
+                            <Run Text="{Binding ImportError.Count}" />
+                    </TextBlock>
+
+                    <TextBlock FontSize="18" Margin="20 0">
+                        <Run Text="Warnungen:" />
+                        <Run Text="{Binding ImportWarning.Count}" />
+                    </TextBlock>
+                </StackPanel>
+            </toolkit:Expander.Header>
+
+            <Grid>
+                <Grid.Resources>
+                    <DataTemplate x:Key="ImportItemTemplate">
+                        <TextBlock Text="{Binding}" TextWrapping="WrapWholeWords" />
+                    </DataTemplate>
+                </Grid.Resources>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition />
+                    <ColumnDefinition />
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="auto" />
+                    <RowDefinition />
+                </Grid.RowDefinitions>
+
+                <TextBlock Text="Fehler:" Margin="5" FontSize="16" />
+                <TextBlock Grid.Column="1" Text="Warnungen:" Margin="5" FontSize="16" />
+
+                <ListView Grid.Row="1" ItemsSource="{Binding ImportError}" ItemTemplate="{StaticResource ImportItemTemplate}" />
+                <ListView Grid.Row="1" Grid.Column="1" ItemsSource="{Binding ImportWarning}" ItemTemplate="{StaticResource ImportItemTemplate}" />
+            </Grid>
+        </toolkit:Expander>
+        
     </Grid>
 </Page>

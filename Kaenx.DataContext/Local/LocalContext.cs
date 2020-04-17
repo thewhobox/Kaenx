@@ -10,6 +10,7 @@ namespace Kaenx.DataContext.Local
         public DbSet<LocalProject> Projects { get; set; }
         public DbSet<LocalConnectionProject> ConnsProject { get; set; }
         public DbSet<LocalConnectionCatalog> ConnsCatalog { get; set; }
+        public DbSet<LocalInterface> Interfaces { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {

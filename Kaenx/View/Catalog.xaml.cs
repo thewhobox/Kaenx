@@ -117,7 +117,9 @@ namespace Kaenx.View
             catch (Exception ex)
             {
                 string msg = loader.GetString("MsgNotCopied");
-                Notifi.Show(msg + "\r\n" + ex.Message);
+                Serilog.Log.Error(ex, "Fehler beim Kopieren der KNX-Prod Datei");
+                //Add notify
+                //Notifi.Show(msg + "\r\n" + ex.Message);
                 return;
             }
             
@@ -129,7 +131,7 @@ namespace Kaenx.View
             if (!success)
             {
                 //todo blabla
-                ViewHelper.Instance.ShowNotification("Es trat ein Fehler beim auslesen der Geräte auf.", 3000, ViewHelper.MessageType.Error);
+                ViewHelper.Instance.ShowNotification("main", "Es trat ein Fehler beim auslesen der Geräte auf.", 3000, ViewHelper.MessageType.Error);
                 return;
             }
 

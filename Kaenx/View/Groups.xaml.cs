@@ -339,7 +339,7 @@ namespace Kaenx.View
         {
             if(SelectedGroup.Id == -1)
             {
-                ViewHelper.Instance.ShowNotification("Bitte wählen Sie erst eine Gruppe aus.", 3000, ViewHelper.MessageType.Error);
+                ViewHelper.Instance.ShowNotification("main", "Bitte wählen Sie erst eine Gruppe aus.", 3000, ViewHelper.MessageType.Error);
                 return;
             }
 
@@ -363,13 +363,13 @@ namespace Kaenx.View
         {
             if(BtnToggleView.IsChecked == true)
             {
-                ViewHelper.Instance.ShowNotification("Das Verbinden ist in dieser Ansicht nicht verfügbar.", 3000, ViewHelper.MessageType.Warning);
+                ViewHelper.Instance.ShowNotification("main", "Das Verbinden ist in dieser Ansicht nicht verfügbar.", 3000, ViewHelper.MessageType.Warning);
                 return;
             }
 
             if(ListComs.SelectedItem == null)
             {
-                ViewHelper.Instance.ShowNotification("Bitte wähle erst ein KO aus.", 3000, ViewHelper.MessageType.Error);
+                ViewHelper.Instance.ShowNotification("main", "Bitte wähle erst ein KO aus.", 3000, ViewHelper.MessageType.Error);
                 return;
             }
 

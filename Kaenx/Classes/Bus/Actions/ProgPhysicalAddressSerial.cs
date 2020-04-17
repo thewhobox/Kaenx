@@ -81,12 +81,6 @@ namespace Kaenx.Classes.Bus.Actions
             await Task.Delay(100);
             dev.Restart();
             await Task.Delay(1000);
-
-            _ = App._dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Low, () =>
-            {
-                SaveHelper.UpdateDevice(Device);
-            });
-
             ProgressValue = 100;
         }
 

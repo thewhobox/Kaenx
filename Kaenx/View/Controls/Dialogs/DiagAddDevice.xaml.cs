@@ -121,9 +121,9 @@ namespace Kaenx.View.Controls
             else
                 if (_oldBorderBrush != null) LineList.BorderBrush = _oldBorderBrush;
 
-
-            if(SelectedDevice == null || SelectedLine == null)
-                Notify.Show(loader.GetString("AddDeviceRequired"), 3000);
+            //Addnotify
+            //if(SelectedDevice == null || SelectedLine == null)
+            //    Notify.Show(loader.GetString("AddDeviceRequired"), 3000);
 
             args.Cancel = SelectedDevice == null || SelectedLine == null;
         }

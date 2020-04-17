@@ -8,12 +8,6 @@
     mc:Ignorable="d"
     Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
     <Page.Resources>
-        <Style x:Key="InfobarButton" TargetType="Button">
-            <Setter Property="Background" Value="Transparent" />
-            <Setter Property="Foreground" Value="White" />
-            <Setter Property="Padding" Value="10 5" />
-            <Setter Property="BorderThickness" Value="0" />
-        </Style>
         <Style x:Key="NotifyStyleError" TargetType="toolkit:InAppNotification">
             <Setter Property="BorderBrush" Value="Red" />
         </Style>
@@ -25,6 +19,12 @@
         </Style>
         <Style x:Key="NotifyStyleInfo" TargetType="toolkit:InAppNotification">
             <Setter Property="BorderBrush" Value="DarkCyan" />
+        </Style>
+        <Style x:Key="InfobarButton" TargetType="Button">
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="Foreground" Value="White" />
+            <Setter Property="Padding" Value="10 5" />
+            <Setter Property="BorderThickness" Value="0" />
         </Style>
         <SolidColorBrush  x:Key="NavigationViewTopPaneBackground" Color="{Binding Source={ThemeResource BrushAccentColor1}, Path=Color}" />
     </Page.Resources>

@@ -27,7 +27,7 @@
     <AppInstallerCheckForUpdateFrequency>OnApplicationRun</AppInstallerCheckForUpdateFrequency>
     <PackageCertificateThumbprint>C554126408FAF38E210787F6EC62EC5E77D59B00</PackageCertificateThumbprint>
     <AppxPackageSigningTimestampDigestAlgorithm>SHA256</AppxPackageSigningTimestampDigestAlgorithm>
-    <GenerateTestArtifacts>False</GenerateTestArtifacts>
+    <GenerateTestArtifacts>True</GenerateTestArtifacts>
     <HoursBetweenUpdateChecks>0</HoursBetweenUpdateChecks>
     <AppxPackageSigningEnabled>True</AppxPackageSigningEnabled>
     <AppxSymbolPackageEnabled>True</AppxSymbolPackageEnabled>
@@ -207,6 +207,9 @@
     </Compile>
     <Compile Include="View\Controls\Paras\ParamText.xaml.cs">
       <DependentUpon>ParamText.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="View\Controls\Settings\SBusConnections.xaml.cs">
+      <DependentUpon>SBusConnections.xaml</DependentUpon>
     </Compile>
     <Compile Include="View\Controls\SlideListItemBase.cs" />
     <Compile Include="Classes\Converter\Checked2VisibilityConverter.cs" />
@@ -443,6 +446,10 @@
       <SubType>Designer</SubType>
     </Page>
     <Page Include="View\Controls\EControlBusAction.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="View\Controls\Settings\SBusConnections.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
