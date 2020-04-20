@@ -189,7 +189,7 @@ namespace Kaenx.Views.Easy.Controls
                         else
                             mBlock.Name = xele.Attribute("Text").Value;
 
-                        List<ParamCondition> conds = SaveHelper.GetConditions(xele);
+                        List<Classes.Dynamic.ParamCondition> conds = SaveHelper.GetConditions(xele);
                         if(conds.Count != 0)
                         {
                             helperBlock.Add(new BlockVisHelper(mBlock) { Conditions = conds });
@@ -309,7 +309,8 @@ namespace Kaenx.Views.Easy.Controls
                             case ParamTypes.Enum:
                                 IEnumerable<AppParameterTypeEnumViewModel> enums = _context.AppParameterTypeEnums.Where(e => e.ParameterId == paraType.Id).OrderBy(e => e.Order).ToList();
 
-                                if (enums.Count() == 0)
+                                int enumsCount = enums.Count();
+                                if (enumsCount == 0)
                                 {
                                     Log.Warning("ParameterTyp Enum hat keine Enums! " + paraType.Id);
                                     Border b2 = new Border();
@@ -320,7 +321,7 @@ namespace Kaenx.Views.Easy.Controls
                                     b2.Visibility = vis2vis(visibility);
                                     parent.Children.Add(b2);
                                 }
-                                else if (enums.Count() > 2)
+                                else if (enumsCount > 2 || enumsCount == 1)
                                 {
                                     ParamEnum paraviewE = new ParamEnum(para, paraType, enums) { Name = para.Id, Hash = hash };
                                     paraviewE.ParamChanged += ParamChanged;
@@ -452,7 +453,7 @@ namespace Kaenx.Views.Easy.Controls
                 {
                     case "when":
                         if (finished) continue;
-                        ParamCondition cond = new ParamCondition();
+                        Classes.Dynamic.ParamCondition cond = new Classes.Dynamic.ParamCondition();
                         int tempOut2;
                         if (xtemp.Attribute("default")?.Value == "true")
                         {
@@ -516,51 +517,51 @@ namespace Kaenx.Views.Easy.Controls
             return Convert.ToBase64String(Encoding.UTF8.GetBytes(ids));
         }
 
-        private bool CheckConditions(List<ParamCondition> conds)
+        private bool CheckConditions(List<Classes.Dynamic.ParamCondition> conds)
         {
             bool flag = true;
 
-            foreach (ParamCondition cond in conds)
+            foreach (Classes.Dynamic.ParamCondition cond in conds)
             {
                 if (flag == false) break;
                 AppParameter paraCond = AppParas[cond.SourceId];
 
                 switch (cond.Operation)
                 {
-                    case ConditionOperation.IsInValue:
+                    case Classes.Dynamic.ConditionOperation.IsInValue:
                         if (!cond.Values.Split(",").Contains(paraCond.Value))
                             flag = false;
                         break;
 
-                    case ConditionOperation.Default:
+                    case Classes.Dynamic.ConditionOperation.Default:
                         //if(!checkDefault)
                         //{
                             
                         //}
                         break;
 
-                    case ConditionOperation.LowerThan:
+                    case Classes.Dynamic.ConditionOperation.LowerThan:
                         int valLT = int.Parse(paraCond.Value);
                         int valLTo = int.Parse(cond.Values);
                         if ((valLT < valLTo) == false)
                             flag = false;
                         break;
 
-                    case ConditionOperation.LowerEqualThan:
+                    case Classes.Dynamic.ConditionOperation.LowerEqualThan:
                         int valLET = int.Parse(paraCond.Value);
                         int valLETo = int.Parse(cond.Values);
                         if ((valLET <= valLETo) == false)
                             flag = false;
                         break;
 
-                    case ConditionOperation.GreatherThan:
+                    case Classes.Dynamic.ConditionOperation.GreatherThan:
                         int valGT = int.Parse(paraCond.Value);
                         int valGTo = int.Parse(cond.Values);
                         if ((valGT > valGTo) == false)
                             flag = false;
                         break;
 
-                    case ConditionOperation.GreatherEqualThan:
+                    case Classes.Dynamic.ConditionOperation.GreatherEqualThan:
                         int valGET = int.Parse(paraCond.Value);
                         int valGETo = int.Parse(cond.Values);
                         if ((valGET >= valGETo) == false)

@@ -17,6 +17,8 @@ namespace Kaenx.DataContext.Catalog
         [MaxLength(100)]
         public string ApplicationId { get; set; }
         public string Text { get; set; }
+        [MaxLength(20)]
+        public string SuffixText { get; set; }
         public string Value { get; set; }
 
         [MaxLength(100)]
@@ -32,6 +34,7 @@ namespace Kaenx.DataContext.Catalog
             ParameterTypeId = para.ParameterTypeId;
             ApplicationId = para.ApplicationId;
             Text = para.Text;
+            SuffixText = para.SuffixText;
             SegmentType = para.SegmentType;
             SegmentId = para.SegmentId;
             Offset = para.Offset;

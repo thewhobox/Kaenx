@@ -1,0 +1,196 @@
+﻿<UserControl
+    x:Class="Kaenx.Views.Easy.Controls.EControlParas"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:Kaenx.View.Controls"
+    xmlns:dyn="using:Kaenx.Classes.Dynamic"
+    xmlns:toolkit="using:Microsoft.Toolkit.Uwp.UI.Controls"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:selectors="using:Kaenx.Classes.TemplateSelectors"
+    mc:Ignorable="d"
+    x:Name="ParaControl"
+    d:DesignHeight="300"
+    d:DesignWidth="400">
+    
+    <UserControl.Resources>
+        <SolidColorBrush x:Key="SystemControlHighlightListAccentLowBrush" Color="{Binding Source={ThemeResource BrushAccentColor2}, Path=Color}" />
+        <DataTemplate x:Key="ChannelTemplate">
+            <toolkit:Expander Header="{Binding Text}" Visibility="{Binding Visible}">
+                <ListView ItemsSource="{Binding Blocks}" SelectedItem="{Binding SelectedParaBlock, ElementName=ParaControl, Mode=TwoWay}" SelectedValue="{Binding SelectedParaBlockId, ElementName=ParaControl, Mode=TwoWay}" SelectedValuePath="Id" >
+                    <ListView.ItemContainerStyle>
+                        <Style TargetType="ListViewItem">
+                            <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+                            <Setter Property="Padding" Value="0" />
+                            <Setter Property="Margin" Value="0" />
+                            <Setter Property="MinHeight" Value="0" />
+                        </Style>
+                    </ListView.ItemContainerStyle>
+                    <ListView.ItemTemplate>
+                        <DataTemplate x:DataType="dyn:ParameterBlock">
+                            <Border Height="40" Visibility="{Binding Visible}" >
+                                <TextBlock Text="{Binding Text}" VerticalAlignment="Center" Margin="25 0 10 0" />
+                            </Border>
+                        </DataTemplate>
+                    </ListView.ItemTemplate>
+                </ListView>
+            </toolkit:Expander>
+        </DataTemplate>
+        <DataTemplate x:Key="IndependentTemplate">
+            <ListView ItemsSource="{Binding Blocks}" SelectedItem="{Binding SelectedParaBlock, ElementName=ParaControl, Mode=TwoWay}" SelectedValue="{Binding SelectedParaBlockId, ElementName=ParaControl, Mode=TwoWay}" SelectedValuePath="Id" >
+                <ListView.ItemContainerStyle>
+                    <Style TargetType="ListViewItem">
+                        <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+                        <Setter Property="Padding" Value="0" />
+                        <Setter Property="MinHeight" Value="0" />
+                    </Style>
+                </ListView.ItemContainerStyle>
+                <ListView.ItemTemplate>
+                    <DataTemplate x:DataType="dyn:ParameterBlock">
+                        <Border Height="40" Visibility="{Binding Visible}" >
+                            <TextBlock Text="{Binding Text}" VerticalAlignment="Center" Margin="40 0 10 0" />
+                        </Border>
+                    </DataTemplate>
+                </ListView.ItemTemplate>
+            </ListView>
+        </DataTemplate>
+        <DataTemplate x:Key="TypeNotFound">
+            <TextBlock>
+                <Run Text="Type nicht gefunden..." />
+                <LineBreak />
+                <Run Text="{Binding Id}" />
+            </TextBlock>
+        </DataTemplate>
+
+        <DataTemplate x:Key="TypeNumber">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition />
+                    <ColumnDefinition Width="230" />
+                    <ColumnDefinition Width="60" />
+                </Grid.ColumnDefinitions>
+                <TextBlock Text="{Binding Text}" Margin="10 0" VerticalAlignment="Center" />
+
+                <local:NumberBox Grid.Column="1" Value="{Binding Value}" ValueOk="{Binding Value, Mode=TwoWay}" Minimum="{Binding Minimum}" Maximum="{Binding Maximum}" />
+                <TextBlock Grid.Column="2" Width="60" Text="{Binding SuffixText}" Margin="10 0" VerticalAlignment="Center" />
+            </Grid>
+        </DataTemplate>
+        <DataTemplate x:Key="TypeText">
+            <Grid Height="40" Visibility="{Binding Visible}">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition />
+                    <ColumnDefinition Width="290" />
+                </Grid.ColumnDefinitions>
+                <TextBlock Text="{Binding Text}" Margin="10 0" VerticalAlignment="Center" TextWrapping="WrapWholeWords" />
+                <TextBox Grid.Column="1" MaxLength="{Binding MaxLength}" Text="{Binding Value, Mode=TwoWay}" Margin="0 0 60 0" VerticalAlignment="Center" />
+            </Grid>
+        </DataTemplate>
+        <DataTemplate x:Key="TypeTextRead">
+            <Grid Height="40" Visibility="{Binding Visible}">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition />
+                    <ColumnDefinition Width="290" />
+                </Grid.ColumnDefinitions>
+                <TextBlock Text="{Binding Text}" Margin="10 0" VerticalAlignment="Center" TextWrapping="WrapWholeWords" />
+                <TextBlock Grid.Column="1" Text="{Binding Value, Mode=TwoWay}" VerticalAlignment="Center" Margin="0 0 60 0" />
+            </Grid>
+        </DataTemplate>
+        <DataTemplate x:Key="TypeEnums">
+            <Grid Height="40" Visibility="{Binding Visible}">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition />
+                    <ColumnDefinition Width="290" />
+                </Grid.ColumnDefinitions>
+                <TextBlock Text="{Binding Text}" Margin="10 0" VerticalAlignment="Center" TextWrapping="WrapWholeWords" />
+                <ComboBox Grid.Column="1" ItemsSource="{Binding Options}" DisplayMemberPath="Text" SelectedValuePath="Value" SelectedValue="{Binding Value, Mode=TwoWay}" Margin="0 0 60 0" VerticalAlignment="Center" HorizontalAlignment="Stretch" />
+            </Grid>
+        </DataTemplate>
+
+        <selectors:BlockSelector x:Key="BlockSelector" Channel="{StaticResource ChannelTemplate}" Independent="{StaticResource IndependentTemplate}" />
+        <selectors:ControlsParamTypesSelector x:Key="ParaTypeSelector" 
+                                              NotFound="{StaticResource TypeNotFound}" 
+                                              Number="{StaticResource TypeNumber}"
+                                              Text="{StaticResource TypeText}"
+                                              TextRead="{StaticResource TypeTextRead}"
+                                              Enums="{StaticResource TypeEnums}"/>
+    </UserControl.Resources>
+
+    <Grid>
+        <VisualStateManager.VisualStateGroups>
+            <VisualStateGroup>
+                <VisualState>
+                    <VisualState.StateTriggers>
+                        <StateTrigger IsActive="{Binding IsBigView}" />
+                    </VisualState.StateTriggers>
+                    <VisualState.Setters>
+                        <Setter Target="ColsPara.Width" Value="850" />
+                        <Setter Target="ColsComs.Width" Value="*" />
+                        <Setter Target="ShowComsToggler.Visibility" Value="Collapsed" />
+                    </VisualState.Setters>
+                </VisualState>
+                <VisualState>
+                    <VisualState.StateTriggers>
+                        <StateTrigger IsActive="{Binding ElementName=ShowComsToggler, Path=IsOn}" />
+                    </VisualState.StateTriggers>
+                    <VisualState.Setters>
+                        <Setter Target="ColsPara.Width" Value="0" />
+                        <Setter Target="ColsComs.Width" Value="*" />
+                    </VisualState.Setters>
+                </VisualState>
+            </VisualStateGroup>
+        </VisualStateManager.VisualStateGroups>
+
+        <Grid.RowDefinitions>
+            <RowDefinition Height="auto" />
+            <RowDefinition />
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition x:Name="ColsPara"  />
+            <ColumnDefinition x:Name="ColsComs" Width="0" />
+        </Grid.ColumnDefinitions>
+
+        <ToggleSwitch x:Name="ShowComsToggler" Grid.ColumnSpan="2" HorizontalAlignment="Center" OnContent="Kommunikationsobjekte anzeigen" OffContent="Kommunikationsobjekte ausblenden"  />
+
+        <Grid Grid.Row="1" BorderBrush="{ThemeResource BrushAccentColorDark2}" BorderThickness="1" >
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="auto" MaxWidth="250" />
+                <ColumnDefinition />
+            </Grid.ColumnDefinitions>
+
+            <ListView ItemsSource="{Binding Channels}" ItemTemplateSelector="{StaticResource BlockSelector}" SelectionMode="None"
+                BorderBrush="{ThemeResource BrushAccentColorDark2}" BorderThickness="0 0 1 0">
+                <ListView.ItemContainerStyle>
+                    <Style TargetType="ListViewItem">
+                        <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+                        <Setter Property="Padding" Value="0" />
+                    </Style>
+                </ListView.ItemContainerStyle>
+            </ListView>
+
+            <ListView Grid.Column="1" ItemTemplateSelector="{StaticResource ParaTypeSelector}" ItemsSource="{Binding SelectedParaBlock.Parameters, ElementName=ParaControl}" SelectionMode="None">
+                <ListView.ItemContainerStyle>
+                    <Style TargetType="ListViewItem">
+                        <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+                        <Setter Property="Padding" Value="0" />
+                    </Style>
+                </ListView.ItemContainerStyle>
+            </ListView>
+        </Grid>
+
+        <toolkit:DataGrid x:Name="ComList" Grid.Row="1"  Grid.Column="1" BorderBrush="LightGray" BorderThickness="1 1 1 0" Margin="5 0 0 0" AutoGenerateColumns="False"
+                          ItemsSource="{Binding device.ComObjects, Mode=OneWay}" IsReadOnly="True" Background="{ThemeResource BrushAccentControlBackground}" CornerRadius="2 2 0 0">
+            <toolkit:DataGrid.Columns>
+                <toolkit:DataGridTextColumn x:Uid="/Groups/LComsNumb" Tag="Number" Width="SizeToCells" Binding="{Binding Number}" />
+                <toolkit:DataGridTextColumn x:Uid="/Groups/LComsName" Tag="Name" Width="SizeToCells" Binding="{Binding DisplayName}" />
+                <toolkit:DataGridTextColumn x:Uid="/Groups/LComsFunc" Tag="Function" Width="SizeToCells" Binding="{Binding Function}" />
+                <toolkit:DataGridTextColumn x:Uid="/Groups/LComsConn" Tag="Connections" Width="SizeToCells" Binding="{Binding Connections}" />
+            </toolkit:DataGrid.Columns>
+        </toolkit:DataGrid>
+
+
+        <Border x:Name="LoadRing" Grid.RowSpan="3" Grid.ColumnSpan="2" Background="LightGray" Opacity="0.6">
+            <ProgressRing HorizontalAlignment="Center" IsActive="true" Width="100" Height="100"  Visibility="Visible"/>
+        </Border>
+
+    </Grid>
+</UserControl>

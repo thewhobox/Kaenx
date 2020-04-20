@@ -12,6 +12,8 @@ namespace Kaenx.DataContext.Catalog
         [Key]
         [MaxLength(255)]
         public string Id { get; set; }
+        [MaxLength(255)]
+        public string BindedId { get; set; }
         [MaxLength(100)]
         public string ApplicationId { get; set; }
 
@@ -27,6 +29,7 @@ namespace Kaenx.DataContext.Catalog
         public bool Flag_Update { get; set; }
         public bool Flag_ReadOnInit { get; set; }
 
+        public string Group { get; set; }
         public int Number { get; set; }
         public int Size { get; set; }
         public int Datapoint { get; set; }
@@ -35,6 +38,8 @@ namespace Kaenx.DataContext.Catalog
         public void LoadComp(AppComObject com)
         {
             Id = com.Id;
+            BindedId = com.BindedId;
+            Group = com.Group;
             ApplicationId = com.ApplicationId;
             Text = com.Text;
             FunctionText = com.FunctionText;

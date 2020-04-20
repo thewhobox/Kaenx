@@ -18,6 +18,7 @@ using System.Diagnostics;
 using Windows.ApplicationModel.Resources;
 using System.IO;
 using System.Text;
+using System.Text.RegularExpressions;
 
 namespace Kaenx.Classes.Helper
 {
@@ -834,7 +835,7 @@ namespace Kaenx.Classes.Helper
 
         private async Task ReadApplication(XElement doc, ApplicationViewModel app, int maxcount)
         {
-            List<AppError> Errors = new List<AppError>();
+            List<string> Errors = new List<string>();
             Dictionary<string, AppParameter> Params = new Dictionary<string, AppParameter>();
             Dictionary<string, AppComObject> ComObjects = new Dictionary<string, AppComObject>();
             currentNamespace = doc.Name.NamespaceName;
@@ -937,6 +938,7 @@ namespace Kaenx.Classes.Helper
             foreach (AppParameterTypeViewModel x in context.AppParameterTypes)
                 contextIds.Add(x.Id);
 
+            string msg = "";
             OnDeviceChanged?.Invoke(currentAppName + " ParameterTypes");
             Log.Information("Parameter Typen werden eingelesen");
             tempList = doc.Descendants(GetXName("ParameterType")).ToList();
@@ -964,7 +966,9 @@ namespace Kaenx.Classes.Helper
                                 paramt.Type = ParamTypes.NumberUInt;
                                 break;
                             default:
-                                Errors.Add(new AppError(app.Id, "ParameterType", child.Name.LocalName, child.Attribute("Type").Value, "Unbekannter Nummerntype"));
+                                msg = "Unbekannter Nummerntype: " + child.Attribute("Type").Value;
+                                if (!Errors.Contains(msg))
+                                    Errors.Add(msg);
                                 Log.Error("Unbekannter Nummerntyp: " + child.Name.LocalName + " - " + child.Attribute("Type").Value);
                                 break;
                         }
@@ -1004,7 +1008,6 @@ namespace Kaenx.Classes.Helper
                                 paramt.Type = ParamTypes.Float9;
                                 break;
                             default:
-                                Errors.Add(new AppError(app.Id, "ParameterType", "TypeFloat", child.Attribute("Encoding").Value, "Unbekannter Floattype"));
                                 break;
                         }
                         paramt.Tag1 = child.Attribute("minInclusive").Value;
@@ -1023,10 +1026,14 @@ namespace Kaenx.Classes.Helper
                         paramt.Type = ParamTypes.None;
                         break;
                     default:
-                        Errors.Add(new AppError(app.Id, "ParameterType", child.Name.LocalName, "", "Unbekannter Parametertype"));
+                        msg = "Unbekannter Paremetertype: " + child.Name.LocalName;
+                        if (!Errors.Contains(msg))
+                            Errors.Add(msg);
                         Log.Error("Unbekannter Parametertyp: " + child.Name.LocalName);
                         break;
                 }
+
+                paramt.ApplicationId = app.Id;
 
                 if (existed)
                     context.AppParameterTypes.Update(paramt);
@@ -1049,6 +1056,9 @@ namespace Kaenx.Classes.Helper
                 param.Text = para.Attribute("Text").Value;
                 param.ParameterTypeId = para.Attribute("ParameterType").Value;
                 param.Value = para.Attribute("Value")?.Value;
+                string suffix = para.Attribute("SuffixText")?.Value;
+                if (!string.IsNullOrEmpty(suffix))
+                    param.SuffixText = suffix;
                 switch (para.Attribute("Access")?.Value)
                 {
                     case "None":
@@ -1109,6 +1119,9 @@ namespace Kaenx.Classes.Helper
                         segType = SegmentTypes.Property;
                     } else
                     {
+                        msg = "Union hat keinen bekannten Speicher! " + union.ToString();
+                        if (!Errors.Contains(msg))
+                            Errors.Add(msg);
                         Log.Error("Union hat keinen bekannten Speicher! " + union.ToString());
                     }
                 }
@@ -1133,6 +1146,7 @@ namespace Kaenx.Classes.Helper
 
 
             OnDeviceChanged?.Invoke(currentAppName + " ParameterRefs");
+            List<string> ParamrefIds = new List<string>();
             Log.Information("ParameterRefs werden eingelesen");
             tempList = doc.Descendants(GetXName("ParameterRef")).ToList();
             foreach (XElement pref in tempList)
@@ -1159,6 +1173,7 @@ namespace Kaenx.Classes.Helper
                 AccessType access = (pref.Attribute("Access")) == null ? AccessType.Null : ((pref.Attribute("Access").Value == "None") ? AccessType.None : AccessType.Full);
                 final.Access = access == AccessType.Null ? old.Access : access;
 
+                ParamrefIds.Add(final.Id);
                 context.AppParameters.Add(final);
             }
 
@@ -1211,6 +1226,7 @@ namespace Kaenx.Classes.Helper
             }
 
             //TODO zusammenbringen mit ComObject auslesen
+
             OnDeviceChanged?.Invoke(currentAppName + " ComObjectRefs");
             Log.Information("ComObjectRefs werden eingelesen");
             tempList = doc.Descendants(GetXName("ComObjectRef")).ToList();
@@ -1262,6 +1278,8 @@ namespace Kaenx.Classes.Helper
                 AppComObject obj= new AppComObject();
                 obj.LoadComp(ComObjects[cobjr.RefId]);
                 obj.Id = cobjr.Id;
+
+                
                 
 
                 obj.ApplicationId = app.Id;
@@ -1278,8 +1296,22 @@ namespace Kaenx.Classes.Helper
                 if (cobjr.Flag_Update != null) obj.Flag_Update = (bool)cobjr.Flag_Update;
                 if (cobjr.Flag_Write != null) obj.Flag_Write = (bool)cobjr.Flag_Write;
 
+                if (obj.Text.Contains("{{"))
+                {
+                    Regex reg = new Regex("{{((.+):(.+))}}");
+                    Match m = reg.Match(obj.Text);
+                    if (m.Success)
+                    {
+                        obj.BindedId = ParamrefIds.Single(c => c.EndsWith("R-" + m.Groups[2].Value));
+                    }
+                }
+
+
+
                 context.AppComObjects.Add(obj);
             }
+            ParamrefIds.Clear();
+            ParamrefIds = null;
 
 
 
@@ -1357,13 +1389,29 @@ namespace Kaenx.Classes.Helper
                                 context.AppAbsoluteSegments.Add(aas);
                             break;
                         default:
-                            Log.Error("Unbekanntes Segment!", seg.ToString());
+                            msg = "Unbekanntes Segment: " + seg.ToString();
+                            if (!Errors.Contains(msg))
+                                Errors.Add(msg);
                             break;
                     }
                 }
             }
             else
                 Log.Information("Keine Code Segmente vorhanden");
+
+
+
+
+            if (Errors.Count != 0)
+            {
+                string err = "";
+                foreach (string ae in Errors)
+                    err += Environment.NewLine + "     " + ae;
+                Log.Error("Es traten " + Errors.Count.ToString() + " Fehler auf...");
+                throw new Exception("Es traten " + Errors.Count.ToString() + " Fehler auf!" + err);
+            }
+
+
 
             Log.Information("Applikation in Datenbank speichern");
             try
@@ -1376,15 +1424,6 @@ namespace Kaenx.Classes.Helper
             {
                 context.SaveChanges();
                 context.Applications.Update(app);
-            }
-
-            if (Errors.Count != 0)
-            {
-                string err = "";
-                foreach (AppError ae in Errors)
-                    err += ae.Message + "\r\n";
-                Log.Error("Es traten " + Errors.Count.ToString() + " Fehler auf...");
-                OnError("Es traten " + Errors.Count.ToString() + " Fehler auf!");
             }
 
             try
@@ -1426,6 +1465,10 @@ namespace Kaenx.Classes.Helper
             }
             else
                 Log.Information("Kein Dynamic vorhanden");
+
+
+            SaveHelper.GenerateDynamic(adds);
+
 
             Log.Information("Standard ComObjects werden generiert");
             ProgressChanged?.Invoke(3);

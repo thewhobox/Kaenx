@@ -370,18 +370,18 @@ namespace Kaenx.Classes.Bus.Actions
 
 
 
-        private bool CheckConditions(Dictionary<string, AppParameter> paras, List<Controls.Paras.ParamCondition> conds)
+        private bool CheckConditions(Dictionary<string, AppParameter> paras, List<Dynamic.ParamCondition> conds)
         {
             bool isVisible = true;
 
-            foreach (Controls.Paras.ParamCondition cond in conds)
+            foreach (Dynamic.ParamCondition cond in conds)
             {
                 if (!isVisible) break;
 
                 AppParameter para = paras[cond.SourceId];
                 switch (cond.Operation)
                 {
-                    case Controls.Paras.ConditionOperation.IsInValue:
+                    case Dynamic.ConditionOperation.IsInValue:
                         if (!cond.Values.Split(",").Contains(para.Value))
                             isVisible = false;
                         break;

@@ -99,21 +99,9 @@
                 </Button>
 
                 <StackPanel Grid.ColumnSpan="2" Grid.Row="1">
-                    <toolkit:HeaderedContentControl Header="Name" HorizontalContentAlignment="Stretch">
-                        <TextBox x:Name="InInterName" HorizontalAlignment="Stretch" />
-                    </toolkit:HeaderedContentControl>
-
-                    <toolkit:HeaderedContentControl Header="Adresse" HorizontalContentAlignment="Stretch">
-                        <TextBox x:Name="InInterAddress" HorizontalAlignment="Stretch" />
-                    </toolkit:HeaderedContentControl>
-
-                    <toolkit:HeaderedContentControl Header="Port" HorizontalContentAlignment="Stretch">
-                        <TextBox x:Name="InInterPort" HorizontalAlignment="Stretch" />
-                    </toolkit:HeaderedContentControl>
-
-                    <toolkit:HeaderedContentControl Header="Physikalische Adresse" HorizontalContentAlignment="Stretch">
-                        <TextBox x:Name="InInterPhAddr" HorizontalAlignment="Stretch" />
-                    </toolkit:HeaderedContentControl>
+                    <TextBox x:Name="InInterName" HorizontalAlignment="Stretch" Header="Name" />
+                    <TextBox x:Name="InInterAddress" HorizontalAlignment="Stretch" Header="IP Adresse" InputScope="NumberFullWidth" />
+                    <TextBox x:Name="InInterPort" HorizontalAlignment="Stretch" Header="Port" Text="3671" InputScope="NumberFullWidth" />
                 </StackPanel>
 
                 <Button Grid.Row="2" Margin="5" Content="Testen" HorizontalAlignment="Stretch" Click="ClickTest" />

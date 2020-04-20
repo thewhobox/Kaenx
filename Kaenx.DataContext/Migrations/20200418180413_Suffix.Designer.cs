@@ -3,14 +3,16 @@ using System;
 using Kaenx.DataContext.Catalog;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace Kaenx.DataContext.Migrations
 {
     [DbContext(typeof(CatalogContext))]
-    partial class CatalogContextModelSnapshot : ModelSnapshot
+    [Migration("20200418180413_Suffix")]
+    partial class Suffix
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -55,8 +57,6 @@ namespace Kaenx.DataContext.Migrations
 
                     b.Property<byte[]>("ParameterDefault");
 
-                    b.Property<byte[]>("ParamsHelper");
-
                     b.HasKey("Id");
 
                     b.ToTable("AppAdditionals");
@@ -70,9 +70,6 @@ namespace Kaenx.DataContext.Migrations
 
                     b.Property<string>("ApplicationId")
                         .HasMaxLength(100);
-
-                    b.Property<string>("BindedId")
-                        .HasMaxLength(255);
 
                     b.Property<int>("Datapoint");
 
@@ -92,8 +89,6 @@ namespace Kaenx.DataContext.Migrations
 
                     b.Property<string>("FunctionText")
                         .HasMaxLength(100);
-
-                    b.Property<string>("Group");
 
                     b.Property<int>("Number");
 
@@ -169,8 +164,6 @@ namespace Kaenx.DataContext.Migrations
                     b.Property<string>("Id")
                         .ValueGeneratedOnAdd()
                         .HasMaxLength(255);
-
-                    b.Property<string>("ApplicationId");
 
                     b.Property<int>("Size");
 

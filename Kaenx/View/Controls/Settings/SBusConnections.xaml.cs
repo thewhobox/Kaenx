@@ -54,7 +54,6 @@ namespace Kaenx.View.Controls.Settings
             inter.Ip = InInterAddress.Text;
             inter.Port = int.Parse(InInterPort.Text);
             inter.Name = InInterName.Text;
-            inter.PhAddr = InInterPhAddr.Text;
 
             _context.Interfaces.Add(inter);
             _context.SaveChanges();
@@ -64,7 +63,6 @@ namespace Kaenx.View.Controls.Settings
             InInterAddress.Text = "";
             InInterName.Text = "";
             InInterPort.Text = "";
-            InInterPhAddr.Text = "";
 
             BusInterface binter = new BusInterface();
             binter.Name = inter.Name;
@@ -109,27 +107,6 @@ namespace Kaenx.View.Controls.Settings
             {
                 ViewHelper.Instance.ShowNotification("settings", "Bitte gib einen gültige Port ein.", 3000, ViewHelper.MessageType.Error);
                 return false;
-            }
-
-            string[] addr = InInterPhAddr.Text.Split(".");
-            if (addr.Count() != 3)
-            {
-                ViewHelper.Instance.ShowNotification("settings", "Bitte gib eine gültige Physikalische Adresse ein.", 3000, ViewHelper.MessageType.Error);
-                return false;
-            }
-            else
-            {
-                bool fail = false;
-                int main, line, device;
-                if (!int.TryParse(addr[0], out main) || main > 15) fail = true;
-                if (!int.TryParse(addr[1], out line) || line > 15) fail = true;
-                if (!int.TryParse(addr[2], out device) || device > 255) fail = true;
-
-                if (fail)
-                {
-                    ViewHelper.Instance.ShowNotification("settings", "Bitte gib eine gültige Physikalische Adresse ein.", 3000, ViewHelper.MessageType.Error);
-                    return false;
-                }
             }
 
             return true;

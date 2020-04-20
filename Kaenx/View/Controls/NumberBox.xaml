@@ -6,7 +6,6 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:converter="using:Kaenx.Classes.Converter"
     mc:Ignorable="d"
-    ToolTipService.ToolTip="{Binding Tooltip}"
     d:DesignHeight="50"
     d:DesignWidth="400">
     <UserControl.Resources>

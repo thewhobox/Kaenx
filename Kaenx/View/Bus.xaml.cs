@@ -82,7 +82,7 @@ namespace Kaenx.View
             {
                 IBusData d = (IBusData)data;
                 d.Device = action.Device;
-                ReadList.Add(d);
+                ReadList.Insert(0, d);
             });
         }
 
@@ -109,7 +109,8 @@ namespace Kaenx.View
                 tel.To = Konnect.Addresses.UnicastAddress.FromString("0.0.0");
                 tel.Time = DateTime.Now;
                 tel.Type = Konnect.Parser.ApciTypes.Connect;
-                TelegramList.Add(tel);
+                TelegramList.Insert(0, tel);
+                (BtnMonitorToggle.Content as SymbolIcon).Symbol = Symbol.Pause;
             } else
             {
                 _conn.Disconnect();
@@ -119,7 +120,8 @@ namespace Kaenx.View
                 tel.To = Konnect.Addresses.UnicastAddress.FromString("0.0.0");
                 tel.Time = DateTime.Now;
                 tel.Type = Konnect.Parser.ApciTypes.Disconnect;
-                TelegramList.Add(tel);
+                TelegramList.Insert(0, tel);
+                (BtnMonitorToggle.Content as SymbolIcon).Symbol = Symbol.Play;
             }
         }
 
@@ -133,7 +135,7 @@ namespace Kaenx.View
             tel.Type = response.APCI;
             _=App._dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Normal, () =>
             {
-                TelegramList.Add(tel);
+                TelegramList.Insert(0, tel);
             });
         }
 
@@ -166,27 +168,27 @@ namespace Kaenx.View
         {
             LineDevice dev = null;
 
-            string[] address = InAddress2.Text.Split(".");
 
-            if (address.Length != 3)
+            bool valid = Microsoft.Toolkit.Uwp.UI.Extensions.TextBoxRegex.GetIsValid(InAddress2);
+
+            if (!valid)
             {
                 ViewHelper.Instance.ShowNotification("main", "Ungültige Adresse!", 3000, ViewHelper.MessageType.Error);
                 return null;
             }
 
-            if (InAddr2Device.IsChecked == true)
+            string[] address = InAddress2.Text.Split(".");
+
+            try
             {
-                try
-                {
-                    Line l = SaveHelper._project.Lines.Single(l => l.Id.ToString() == address[0]);
-                    LineMiddle lm = l.Subs.Single(l => l.Id.ToString() == address[1]);
-                    LineDevice ld = lm.Subs.Single(l => l.Id.ToString() == address[2]);
-                    dev = ld;
-                }
-                catch
-                {
-                    ViewHelper.Instance.ShowNotification("main", "Adresse konnte keinem Gerät zugewiesen werden.", 3000, ViewHelper.MessageType.Warning);
-                }
+                Line l = SaveHelper._project.Lines.Single(l => l.Id.ToString() == address[0]);
+                LineMiddle lm = l.Subs.Single(l => l.Id.ToString() == address[1]);
+                LineDevice ld = lm.Subs.Single(l => l.Id.ToString() == address[2]);
+                dev = ld;
+            }
+            catch
+            {
+                ViewHelper.Instance.ShowNotification("main", "Adresse konnte keinem Gerät zugewiesen werden.", 3000, ViewHelper.MessageType.Warning);
             }
 
             if (dev == null)
@@ -197,6 +199,11 @@ namespace Kaenx.View
             }
 
             return dev;
+        }
+
+        private void Monitor_Delete(object sender, RoutedEventArgs e)
+        {
+            TelegramList.Clear();
         }
     }
 }

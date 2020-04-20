@@ -295,6 +295,39 @@ namespace Kaenx.View
         }
 
 
+        private async void ClickOpenParas2(object sender, RoutedEventArgs e)
+        {
+            if ((((MenuFlyoutItem)e.OriginalSource).DataContext is LineDevice) == false) return;
+
+            LineDevice device = (LineDevice)((MenuFlyoutItem)e.OriginalSource).DataContext;
+            
+            bool isFromCache = false;
+
+            Windows.UI.Xaml.Data.Binding bindLine = new Windows.UI.Xaml.Data.Binding();
+            bindLine.Path = new PropertyPath("LineName");
+            bindLine.Source = device;
+            ParamHeaderLine.SetBinding(TextBlock.TextProperty, bindLine);
+
+            Windows.UI.Xaml.Data.Binding bindName = new Windows.UI.Xaml.Data.Binding();
+            bindName.Path = new PropertyPath("Name");
+            bindName.Source = device;
+            ParamHeaderName.SetBinding(TextBlock.TextProperty, bindName);
+
+            EControlParas paras = new EControlParas(device);
+
+            ParamPresenter.Content = paras;
+
+            if (ColsPara.Width.Value == 0)
+                SubNavPanel.SelectedItem = SubNavPanel.MenuItems[1];
+
+            if (!isFromCache)
+            {
+                await Task.Delay(500);
+                paras.Start();
+            }
+        }
+
+
 
 
         private async Task AddDeviceToLine(DeviceViewModel model, LineMiddle line)

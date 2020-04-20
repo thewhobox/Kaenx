@@ -12,7 +12,7 @@ namespace Kaenx.Classes.Helper
     {
         public string ParameterId { get; set; }
         public string Hash { get; set; }
-        public List<ParamCondition> Conditions { get; set; }
+        public List<Dynamic.ParamCondition> Conditions { get; set; }
 
         public ParamVisHelper() { }
 

@@ -155,6 +155,7 @@ namespace Kaenx.View.Controls
             this.InitializeComponent();
             DataGrid.DataContext = this;
         }
+
         private void InputBox_PreviewKeyDown(object sender, KeyRoutedEventArgs e)
         {
             switch (e.Key)

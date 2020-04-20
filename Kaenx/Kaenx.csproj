@@ -141,6 +141,17 @@
       <DependentUpon>ControlUpdate.xaml</DependentUpon>
     </Compile>
     <Compile Include="Classes\DeviceImportInfo.cs" />
+    <Compile Include="Classes\Dynamic\ChannelBlock.cs" />
+    <Compile Include="Classes\Dynamic\ChannelIndependentBlock.cs" />
+    <Compile Include="Classes\Dynamic\IDynChannel.cs" />
+    <Compile Include="Classes\Dynamic\IDynParameter.cs" />
+    <Compile Include="Classes\Dynamic\ParamCondition.cs" />
+    <Compile Include="Classes\Dynamic\ParamEnum.cs" />
+    <Compile Include="Classes\Dynamic\ParamEnumOption.cs" />
+    <Compile Include="Classes\Dynamic\ParameterBlock.cs" />
+    <Compile Include="Classes\Dynamic\ParamNumber.cs" />
+    <Compile Include="Classes\Dynamic\ParamTextRead.cs" />
+    <Compile Include="Classes\Dynamic\ParamText.cs" />
     <Compile Include="Classes\Helper\BlockVisHelper.cs" />
     <Compile Include="Classes\Helper\ParamVisHelper.cs" />
     <Compile Include="Classes\Helper\ProjectViewHelper.cs" />
@@ -149,6 +160,9 @@
     <Compile Include="Classes\Project\DeviceComObject.cs" />
     <Compile Include="Classes\Project\GroupAddress.cs" />
     <Compile Include="Classes\Project\GroupMiddle.cs" />
+    <Compile Include="Classes\TemplateSelectors\BlockSelector.cs" />
+    <Compile Include="Classes\TemplateSelectors\ControlParamsSelector.cs" />
+    <Compile Include="Classes\TemplateSelectors\ControlsParamTypesSelector.cs" />
     <Compile Include="MVVM\StoreItem.cs" />
     <Compile Include="View\Controls\Bus\BNewDevices.xaml.cs">
       <DependentUpon>BNewDevices.xaml</DependentUpon>
@@ -177,6 +191,9 @@
     <Compile Include="View\Controls\Dialogs\DiagSelectApp.xaml.cs">
       <DependentUpon>DiagSelectApp.xaml</DependentUpon>
     </Compile>
+    <Compile Include="View\Controls\EControlParas.xaml.cs">
+      <DependentUpon>EControlParas.xaml</DependentUpon>
+    </Compile>
     <Compile Include="View\Controls\EControlParas2.xaml.cs">
       <DependentUpon>EControlParas2.xaml</DependentUpon>
     </Compile>
@@ -186,7 +203,6 @@
       <DependentUpon>NumberBox.xaml</DependentUpon>
     </Compile>
     <Compile Include="View\Controls\Paras\IParam.cs" />
-    <Compile Include="View\Controls\Paras\ParamCondition.cs" />
     <Compile Include="View\Controls\Paras\ParamEnum.xaml.cs">
       <DependentUpon>ParamEnum.xaml</DependentUpon>
     </Compile>
@@ -401,6 +417,10 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
+    <Page Include="View\Controls\EControlParas.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
     <Page Include="View\Controls\EControlParas2.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -538,9 +558,7 @@
       <Name>Kaenx.DataContext</Name>
     </ProjectReference>
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Classes\TemplateSelectors\" />
-  </ItemGroup>
+  <ItemGroup />
   <PropertyGroup Condition=" '$(VisualStudioVersion)' == '' or '$(VisualStudioVersion)' &lt; '14.0' ">
     <VisualStudioVersion>14.0</VisualStudioVersion>
   </PropertyGroup>

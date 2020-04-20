@@ -15,12 +15,16 @@
                     <SolidColorBrush x:Key="BrushAccentColor1" Color="#5a7834" />
                     <SolidColorBrush x:Key="BrushAccentColor2" Color="#778f59" />
                     <SolidColorBrush x:Key="BrushAccentColorLight1" Color="White" />
+                    <SolidColorBrush x:Key="BrushAccentColorDark1" Color="Gray" />
+                    <SolidColorBrush x:Key="BrushAccentColorDark2" Color="LightGray" />
                     <SolidColorBrush x:Key="BrushAccentControlBackground" Color="#FFF2F2F2" />
                 </ResourceDictionary>
                 <ResourceDictionary x:Key="Dark">
                     <SolidColorBrush x:Key="BrushAccentColor1" Color="#5a7834" />
                     <SolidColorBrush x:Key="BrushAccentColor2" Color="#778f59" />
                     <SolidColorBrush x:Key="BrushAccentColorLight1" Color="Black" />
+                    <SolidColorBrush x:Key="BrushAccentColorDark1" Color="LightGray" />
+                    <SolidColorBrush x:Key="BrushAccentColorDark2" Color="Gray" />
                     <SolidColorBrush x:Key="BrushAccentControlBackground" Color="#FF2E2E2E" />
                 </ResourceDictionary>
             </ResourceDictionary.ThemeDictionaries>

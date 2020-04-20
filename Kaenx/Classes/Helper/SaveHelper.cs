@@ -1,4 +1,5 @@
 ﻿using Kaenx.Classes.Controls.Paras;
+using Kaenx.Classes.Dynamic;
 using Kaenx.Classes.Project;
 using Kaenx.DataContext.Catalog;
 using Kaenx.DataContext.Local;
@@ -14,6 +15,7 @@ using System.Runtime.Serialization.Formatters.Binary;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using System.Xml;
 using System.Xml.Linq;
 using Windows.Storage;
 
@@ -24,6 +26,9 @@ namespace Kaenx.Classes.Helper
         public static Project.Project _project;
         public static ProjectContext contextProject;
         private static CatalogContext contextC = new CatalogContext(new LocalConnectionCatalog() { DbHostname = "Catalog.db", Type = LocalConnectionCatalog.DbConnectionType.SqlLite });
+
+        private static Dictionary<string, AppParameter> AppParas;
+        private static Dictionary<string, AppParameterTypeViewModel> AppParaTypes;
 
         public static ProjectModel SaveProject(Project.Project _pro = null)
         {
@@ -398,7 +403,7 @@ namespace Kaenx.Classes.Helper
                                 }
                             }
 
-                            if (dcom.Name.Contains("{{"))
+                            if (!string.IsNullOrEmpty(dcom.BindedId))
                             {
                                 Regex reg = new Regex("{{((.+):(.+))}}");
                                 Match m = reg.Match(dcom.Name);
@@ -407,7 +412,7 @@ namespace Kaenx.Classes.Helper
                                     string value = "";
                                     try
                                     {
-                                        ChangeParamModel changeB = contextProject.ChangesParam.Where(c => c.DeviceId == ld.UId && c.ParamId.EndsWith("R-" + m.Groups[2].Value)).OrderByDescending(c => c.StateId).First();
+                                        ChangeParamModel changeB = contextProject.ChangesParam.Where(c => c.DeviceId == ld.UId && c.ParamId == dcom.BindedId).OrderByDescending(c => c.StateId).First();
                                         value = changeB.Value;
                                     }
                                     catch { }
@@ -474,6 +479,268 @@ namespace Kaenx.Classes.Helper
             contextProject.SaveChanges();
         }
 
+
+        public static void GenerateDynamic(AppAdditional adds)
+        {
+            XDocument dynamic = XDocument.Parse(System.Text.Encoding.UTF8.GetString(adds.Dynamic));
+            XmlReader reader = dynamic.CreateReader();
+
+            Dictionary<string, XElement> Id2Element = new Dictionary<string, XElement>();
+            Dictionary<string, ParameterBlock> Id2ParamBlock = new Dictionary<string, ParameterBlock>();
+            List<IDynChannel> Channels = new List<IDynChannel>();
+            IDynChannel currentChannel = null;
+
+
+            foreach(XElement ele in dynamic.Root.Descendants(XName.Get("ParameterBlock", dynamic.Root.Name.NamespaceName)))
+            {
+                Id2Element.Add(ele.Attribute("Id").Value, ele);
+            }
+            foreach(XElement ele in dynamic.Root.Descendants(XName.Get("Channel", dynamic.Root.Name.NamespaceName)))
+            {
+                Id2Element.Add(ele.Attribute("Id").Value, ele);
+            }
+
+            while (reader.Read())
+            {
+                if (reader.NodeType == XmlNodeType.EndElement) continue;
+
+                switch (reader.LocalName)
+                {
+                    case "ChannelIndependentBlock":
+                        ChannelIndependentBlock cib = new ChannelIndependentBlock();
+                        currentChannel = cib;
+                        Channels.Add(cib);
+                        break;
+
+                    case "Channel":
+                        if(reader.GetAttribute("Name") == "Generic" && reader.GetAttribute("Text") == "")
+                        {
+                            ChannelIndependentBlock cib2 = new ChannelIndependentBlock();
+                            currentChannel = cib2;
+                            Channels.Add(cib2);
+                        } else
+                        {
+                            ChannelBlock cb = new ChannelBlock();
+                            cb.Id = reader.GetAttribute("Id");
+                            cb.Name = reader.GetAttribute("Name");
+                            cb.Text = reader.GetAttribute("Text");
+                            cb.Conditions = GetConditions(Id2Element[cb.Id]);
+                            Channels.Add(cb);
+                            currentChannel = cb;
+                        }
+                        break;
+
+
+                    case "ParameterBlock":
+                        ParameterBlock pb = new ParameterBlock();
+                        pb.Id = reader.GetAttribute("Id");
+                        if (reader.GetAttribute("ParamRefId") != null)
+                        {
+                            try
+                            {
+                                string paramId = reader.GetAttribute("ParamRefId");
+                                AppParameter para = contextC.AppParameters.Single(p => p.Id == paramId);
+                                pb.Text = para.Text;
+                            }
+                            catch
+                            {
+
+                            }
+                        }
+                        else
+                            pb.Text = reader.GetAttribute("Text");
+
+                        pb.Conditions = GetConditions(Id2Element[pb.Id]);
+                        currentChannel.Blocks.Add(pb);
+                        Id2ParamBlock.Add(pb.Id, pb);
+                        break;
+
+                    case "choose":
+                    case "when":
+                    case "Dynamic":
+                    case "ParameterRefRef":
+                    case "ParameterSeparator":
+                    case "ComObjectRefRef":
+                        break;
+
+                    default:
+                        Log.Warning("Unbekanntes Element in Dynamic: " + reader.LocalName);
+                        System.Diagnostics.Debug.WriteLine("Unbekanntest Element in Dynamic: " + reader.LocalName);
+                        break;
+                }
+            }
+
+            string appId = Id2Element.Keys.ElementAt(0).Substring(0, 21);
+            AppParas = new Dictionary<string, AppParameter>();
+            AppParaTypes = new Dictionary<string, AppParameterTypeViewModel>();
+
+            foreach (AppParameter para in contextC.AppParameters.Where(p => p.ApplicationId == appId))
+                AppParas.Add(para.Id, para);
+
+            foreach (AppParameterTypeViewModel type in contextC.AppParameterTypes.Where(t => t.ApplicationId == appId))
+                AppParaTypes.Add(type.Id, type);
+
+
+            foreach (XElement elePB in dynamic.Root.Descendants(XName.Get("ParameterBlock", dynamic.Root.Name.NamespaceName)))
+            {
+                ParameterBlock block = Id2ParamBlock[elePB.Attribute("Id").Value];
+                GetChildItems(elePB, block);
+            }
+
+            adds.ParamsHelper = ObjectToByteArray(Channels, true);
+        }
+
+        private static void GetChildItems(XElement parent, ParameterBlock block)
+        {
+            foreach(XElement ele in parent.Elements())
+            {
+                switch (ele.Name.LocalName)
+                {
+                    case "when":
+                    case "choose":
+                        GetChildItems(ele, block);
+                        break;
+                    case "ParameterRefRef":
+                        ParseParameterRefRef(ele, block);
+                        break;
+                    case "ParameterSeparator":
+
+                        break;
+                    case "ComObjectRefRef":
+
+                        break;
+                }
+            }
+        }
+
+        private static void ParseParameterRefRef(XElement xele, ParameterBlock block)
+        {
+            AppParameter para = AppParas[xele.Attribute("RefId").Value];
+            if (para.Access == AccessType.None) return;
+            //TODO überprüfen
+            AppParameterTypeViewModel paraType = AppParaTypes[para.ParameterTypeId];
+
+            switch (paraType.Type)
+            {
+                case ParamTypes.NumberInt:
+                case ParamTypes.NumberUInt:
+                case ParamTypes.Float9:
+                    Dynamic.ParamNumber pnu = new Dynamic.ParamNumber();
+                    pnu.Id = para.Id;
+                    pnu.Text = para.Text;
+                    pnu.SuffixText = para.SuffixText;
+                    pnu.Minimum = int.Parse(paraType.Tag1);
+                    pnu.Maximum = int.Parse(paraType.Tag2);
+                    pnu.Value = para.Value;
+                    pnu.Default = para.Value;
+                    block.Parameters.Add(pnu);
+                    break;
+
+                case ParamTypes.Text:
+                    Dynamic.ParamText pte = new Dynamic.ParamText();
+                    pte.Id = para.Id;
+                    pte.Text = para.Text;
+                    pte.SuffixText = para.SuffixText;
+                    pte.Default = para.Value;
+                    pte.Value = para.Value;
+                    block.Parameters.Add(pte);
+                    break;
+
+                case ParamTypes.Enum:
+                    List<ParamEnumOption> options = new List<ParamEnumOption>();
+                    foreach(AppParameterTypeEnumViewModel enu in contextC.AppParameterTypeEnums.Where(e => e.ParameterId == paraType.Id).OrderBy(e => e.Order))
+                    {
+                        options.Add(new ParamEnumOption() { Text = enu.Text, Value = enu.Value });
+                    }
+                    int count = options.Count();
+
+                    if (count > 2 || count == 1)
+                    {
+                        Dynamic.ParamEnum pen = new Dynamic.ParamEnum();
+                        pen.Id = para.Id;
+                        pen.Text = para.Text;
+                        pen.SuffixText = para.SuffixText;
+                        pen.Default = para.Value;
+                        pen.Value = para.Value;
+                        pen.Options = options;
+                        block.Parameters.Add(pen);
+                    }
+                    break;
+            }
+
+            //switch (paraType.Type)
+            //{
+            //    case ParamTypes.Picture:
+            //        ParamPicture paraviewP = new ParamPicture(para, paraType) { Hash = hash };
+            //        parent.Children.Add(paraviewP);
+            //        Params.Add(hash, paraviewP);
+            //        break;
+            //    case ParamTypes.NumberInt:
+            //    case ParamTypes.NumberUInt:
+            //        ParamNumber paraviewN = new ParamNumber(para, paraType) { Hash = hash };
+            //        paraviewN.SetVisibility(vis2vis(visibility));
+            //        paraviewN.ParamChanged += ParamChanged;
+            //        parent.Children.Add(paraviewN);
+            //        Params.Add(hash, paraviewN);
+            //        break;
+            //    case ParamTypes.Text:
+            //        if (para.Access == AccessType.Read)
+            //        {
+            //            ParamText paraviewT = new ParamText(para, paraType);
+            //            paraviewT.SetVisibility(vis2vis(visibility));
+            //            parent.Children.Add(paraviewT);
+            //            Params.Add(hash, paraviewT);
+            //        }
+            //        else
+            //        {
+            //            ParamInput paraviewI = new ParamInput(para, paraType) { Name = para.Id, Hash = hash };
+            //            paraviewI.ParamChanged += ParamChanged;
+            //            paraviewI.SetVisibility(vis2vis(visibility));
+            //            parent.Children.Add(paraviewI);
+            //            Params.Add(hash, paraviewI);
+            //        }
+            //        break;
+            //    case ParamTypes.Enum:
+            //        IEnumerable<AppParameterTypeEnumViewModel> enums = _context.AppParameterTypeEnums.Where(e => e.ParameterId == paraType.Id).OrderBy(e => e.Order).ToList();
+
+            //        int enumsCount = enums.Count();
+            //        if (enumsCount == 0)
+            //        {
+            //            Log.Warning("ParameterTyp Enum hat keine Enums! " + paraType.Id);
+            //            Border b2 = new Border();
+            //            b2.BorderBrush = new SolidColorBrush(Windows.UI.Colors.Red);
+            //            b2.BorderThickness = new Thickness(0, 1, 0, 0);
+            //            b2.Margin = new Thickness(10, 20, 10, 20);
+            //            b2.Child = new TextBlock() { Text = para.Text + " - Keine Enums" };
+            //            b2.Visibility = vis2vis(visibility);
+            //            parent.Children.Add(b2);
+            //        }
+            //        else if (enumsCount > 2 || enumsCount == 1)
+            //        {
+            //            ParamEnum paraviewE = new ParamEnum(para, paraType, enums) { Name = para.Id, Hash = hash };
+            //            paraviewE.ParamChanged += ParamChanged;
+            //            paraviewE.SetVisibility(vis2vis(visibility));
+            //            parent.Children.Add(paraviewE);
+            //            Params.Add(hash, paraviewE);
+            //        }
+            //        else
+            //        {
+            //            ParamEnum2 paraviewE2 = new ParamEnum2(para, paraType, enums) { Name = para.Id, Hash = hash };
+            //            paraviewE2.ParamChanged += ParamChanged;
+            //            paraviewE2.SetVisibility(vis2vis(visibility));
+            //            parent.Children.Add(paraviewE2);
+            //            Params.Add(hash, paraviewE2);
+            //        }
+            //        break;
+
+            //    case ParamTypes.None:
+            //        ParamNone paraviewNo = new ParamNone(para, paraType);
+            //        paraviewNo.SetVisibility(vis2vis(visibility));
+            //        parent.Children.Add(paraviewNo);
+            //        Params.Add(hash, paraviewNo);
+            //        break;
+            //}
+        }
 
 
         public static void GenerateDefaultComs(AppAdditional adds)
@@ -789,15 +1056,44 @@ namespace Kaenx.Classes.Helper
             return current;
         }
 
-        public static byte[] ObjectToByteArray(object obj)
+
+
+        public static byte[] ObjectToByteArray(object obj, bool full = false)
         {
-            string text = Newtonsoft.Json.JsonConvert.SerializeObject(obj);
+            string text;
+
+            if (full)
+            {
+                text = Newtonsoft.Json.JsonConvert.SerializeObject(obj, Newtonsoft.Json.Formatting.Indented, new Newtonsoft.Json.JsonSerializerSettings
+                {
+                    TypeNameHandling = Newtonsoft.Json.TypeNameHandling.Objects,
+                    TypeNameAssemblyFormatHandling = Newtonsoft.Json.TypeNameAssemblyFormatHandling.Simple
+                });
+            }
+            else
+            {
+                text = Newtonsoft.Json.JsonConvert.SerializeObject(obj);
+            }
             return System.Text.Encoding.UTF8.GetBytes(text);
         }
-        public static T ByteArrayToObject<T>(byte[] obj)
+
+        public static T ByteArrayToObject<T>(byte[] obj, bool full = false)
         {
             string text = Encoding.UTF8.GetString(obj);
-            return Newtonsoft.Json.JsonConvert.DeserializeObject<T>(text);
+
+            if (full)
+            {
+                return Newtonsoft.Json.JsonConvert.DeserializeObject<T>(text, new Newtonsoft.Json.JsonSerializerSettings
+                {
+                    TypeNameHandling = Newtonsoft.Json.TypeNameHandling.Objects,
+                    TypeNameAssemblyFormatHandling = Newtonsoft.Json.TypeNameAssemblyFormatHandling.Simple
+                });
+            }
+            else
+            {
+                return Newtonsoft.Json.JsonConvert.DeserializeObject<T>(text);
+            }
+
         }
 
     }

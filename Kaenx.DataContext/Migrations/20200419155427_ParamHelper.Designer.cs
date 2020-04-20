@@ -3,14 +3,16 @@ using System;
 using Kaenx.DataContext.Catalog;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace Kaenx.DataContext.Migrations
 {
     [DbContext(typeof(CatalogContext))]
-    partial class CatalogContextModelSnapshot : ModelSnapshot
+    [Migration("20200419155427_ParamHelper")]
+    partial class ParamHelper
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -93,8 +95,6 @@ namespace Kaenx.DataContext.Migrations
                     b.Property<string>("FunctionText")
                         .HasMaxLength(100);
 
-                    b.Property<string>("Group");
-
                     b.Property<int>("Number");
 
                     b.Property<int>("Size");
@@ -169,8 +169,6 @@ namespace Kaenx.DataContext.Migrations
                     b.Property<string>("Id")
                         .ValueGeneratedOnAdd()
                         .HasMaxLength(255);
-
-                    b.Property<string>("ApplicationId");
 
                     b.Property<int>("Size");
 

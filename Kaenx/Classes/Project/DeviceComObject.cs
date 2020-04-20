@@ -22,6 +22,7 @@ namespace Kaenx.Classes.Project
         public DeviceComObject(AppComObject comObj)
         {
             Id = comObj.Id;
+            BindedId = comObj.BindedId;
             Number = comObj.Number;
             Name = comObj.Text;
             Function = comObj.FunctionText;
@@ -49,6 +50,7 @@ namespace Kaenx.Classes.Project
         private string _dname;
 
         public string Id { get; set; }
+        public string BindedId { get; set; }
         public int Datapoint { get; set; }
         public int DatapointSub { get; set; }
         public string DP_Full { get { if (Datapoint == -1) return "-"; else { if (DatapointSub == -1) return Datapoint + ".0"; else return Datapoint + "." + DatapointSub; } } }
@@ -56,7 +58,7 @@ namespace Kaenx.Classes.Project
         public string Name { get { return _name; } set { _name = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Name")); } }
         public string DisplayName { get { return _dname; } set { _dname = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("DisplayName")); } }
         public string Function { get; set; }
-        public List<ParamCondition> Conditions { get; set; }
+        public List<Dynamic.ParamCondition> Conditions { get; set; }
         [JsonIgnore]
         public ObservableCollection<GroupAddress> Groups { get; set; } = new ObservableCollection<GroupAddress>();
         [JsonIgnore]

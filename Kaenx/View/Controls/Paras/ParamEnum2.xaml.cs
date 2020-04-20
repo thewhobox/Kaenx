@@ -46,16 +46,19 @@ namespace Kaenx.Classes.Controls.Paras
             if (ParaValue1.IsChecked == true)
                 toolTip.Content = "Default: " + enums.ElementAt(0).Text;
 
-            ParaValue2.Content = enums.ElementAt(1).Text;
-            ParaValue2.GroupName = ParamId;
-            ParaValue2.Tag = enums.ElementAt(1).Value;
-            ParaValue2.IsChecked = value == enums.ElementAt(1).Value;
-            ParaValue2.Checked += ParaValue_Checked;
-            if(ParaValue2.IsChecked == true)
-                toolTip.Content = "Default: " + enums.ElementAt(1).Text;
+            if(enums.ElementAt(1) != null)
+            {
+                ParaValue2.Content = enums.ElementAt(1).Text;
+                ParaValue2.GroupName = ParamId;
+                ParaValue2.Tag = enums.ElementAt(1).Value;
+                ParaValue2.IsChecked = value == enums.ElementAt(1).Value;
+                ParaValue2.Checked += ParaValue_Checked;
+                if (ParaValue2.IsChecked == true)
+                    toolTip.Content = "Default: " + enums.ElementAt(1).Text;
 
-            if ((enums.ElementAt(0).Text.Length + enums.ElementAt(1).Text.Length) < 30)
-                ValuePanel.Orientation = Orientation.Horizontal;
+                if ((enums.ElementAt(0).Text.Length + enums.ElementAt(1).Text.Length) < 30)
+                    ValuePanel.Orientation = Orientation.Horizontal;
+            }
 
             ToolTipService.SetToolTip(ValuePanel, toolTip);
 

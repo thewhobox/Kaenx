@@ -3,14 +3,16 @@ using System;
 using Kaenx.DataContext.Catalog;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace Kaenx.DataContext.Migrations
 {
     [DbContext(typeof(CatalogContext))]
-    partial class CatalogContextModelSnapshot : ModelSnapshot
+    [Migration("20200420080103_TypeAppId")]
+    partial class TypeAppId
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -92,8 +94,6 @@ namespace Kaenx.DataContext.Migrations
 
                     b.Property<string>("FunctionText")
                         .HasMaxLength(100);
-
-                    b.Property<string>("Group");
 
                     b.Property<int>("Number");
 
