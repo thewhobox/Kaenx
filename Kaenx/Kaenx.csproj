@@ -148,6 +148,7 @@
     <Compile Include="Classes\Dynamic\ParamCondition.cs" />
     <Compile Include="Classes\Dynamic\ParamEnum.cs" />
     <Compile Include="Classes\Dynamic\ParamEnumOption.cs" />
+    <Compile Include="Classes\Dynamic\ParamEnumTwo.cs" />
     <Compile Include="Classes\Dynamic\ParameterBlock.cs" />
     <Compile Include="Classes\Dynamic\ParamNumber.cs" />
     <Compile Include="Classes\Dynamic\ParamTextRead.cs" />

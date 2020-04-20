@@ -8,7 +8,7 @@ using Windows.UI.Xaml;
 
 namespace Kaenx.Classes.Dynamic
 {
-    public class ParamText : IDynParameter
+    public class ParamEnumTwo : IDynParameter
     {
         public string Id { get; set; }
         public string Text { get; set; }
@@ -30,11 +30,13 @@ namespace Kaenx.Classes.Dynamic
             set { _visible = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Visible")); }
         }
 
-        public int MaxLength { get; set; }
-
         public Visibility SuffixIsVisible { get { return string.IsNullOrEmpty(SuffixText) ? Visibility.Collapsed : Visibility.Visible; } }
 
+        public ParamEnumOption Option1 { get; set; }
+        public ParamEnumOption Option2 { get; set; }
+
         public List<ParamCondition> Conditions { get; set; }
+        Visibility IDynParameter.Visible { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
 
         public event PropertyChangedEventHandler PropertyChanged;
     }

@@ -619,6 +619,7 @@ namespace Kaenx.Classes.Helper
             if (para.Access == AccessType.None) return;
             //TODO überprüfen
             AppParameterTypeViewModel paraType = AppParaTypes[para.ParameterTypeId];
+            var conds = GetConditions(xele, true);
 
             switch (paraType.Type)
             {
@@ -633,6 +634,8 @@ namespace Kaenx.Classes.Helper
                     pnu.Maximum = int.Parse(paraType.Tag2);
                     pnu.Value = para.Value;
                     pnu.Default = para.Value;
+                    pnu.Conditions = conds.paramList;
+                    pnu.Hash = conds.hash;
                     block.Parameters.Add(pnu);
                     break;
 
@@ -643,6 +646,8 @@ namespace Kaenx.Classes.Helper
                     pte.SuffixText = para.SuffixText;
                     pte.Default = para.Value;
                     pte.Value = para.Value;
+                    pte.Conditions = conds.paramList;
+                    pte.Hash = conds.hash;
                     block.Parameters.Add(pte);
                     break;
 
@@ -663,7 +668,21 @@ namespace Kaenx.Classes.Helper
                         pen.Default = para.Value;
                         pen.Value = para.Value;
                         pen.Options = options;
+                        pen.Conditions = conds.paramList;
+                        pen.Hash = conds.hash;
                         block.Parameters.Add(pen);
+                    } else
+                    {
+                        Dynamic.ParamEnumTwo pent = new ParamEnumTwo();
+                        pent.Id = para.Id;
+                        pent.Text = para.Text;
+                        pent.SuffixText = para.SuffixText;
+                        pent.Default = para.Value;
+                        pent.Value = para.Value;
+                        pent.Option1 = options[0];
+                        pent.Option2 = options[1];
+                        pent.Conditions = conds.paramList;
+                        pent.Hash = conds.hash;
                     }
                     break;
             }
