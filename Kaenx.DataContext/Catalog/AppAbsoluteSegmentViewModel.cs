@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace Kaenx.DataContext.Catalog
 {
-    public class AppAbsoluteSegmentViewModel
+    public class AppSegmentViewModel
     {
         [Key]
         [MaxLength(255)]
@@ -15,6 +15,8 @@ namespace Kaenx.DataContext.Catalog
         public string ApplicationId { get; set; }
         public int Address { get; set; }
         public int Size { get; set; }
+        public int Offset { get; set; } = 0;
+        public int LsmId { get; set; }
         public string Data { get; set; }
         public string Mask { get; set; }
     }

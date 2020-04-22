@@ -151,8 +151,13 @@
     <Compile Include="Classes\Dynamic\ParamEnumTwo.cs" />
     <Compile Include="Classes\Dynamic\ParameterBlock.cs" />
     <Compile Include="Classes\Dynamic\ParamNumber.cs" />
+    <Compile Include="Classes\Dynamic\ParamColor.cs" />
+    <Compile Include="Classes\Dynamic\ParamCheckBox.cs" />
+    <Compile Include="Classes\Dynamic\ParamSeperatorBox.cs" />
+    <Compile Include="Classes\Dynamic\ParamSeperator.cs" />
     <Compile Include="Classes\Dynamic\ParamTextRead.cs" />
     <Compile Include="Classes\Dynamic\ParamText.cs" />
+    <Compile Include="Classes\Dynamic\ViewParamModel.cs" />
     <Compile Include="Classes\Helper\BlockVisHelper.cs" />
     <Compile Include="Classes\Helper\ParamVisHelper.cs" />
     <Compile Include="Classes\Helper\ProjectViewHelper.cs" />
@@ -244,7 +249,6 @@
     <Compile Include="Classes\Project\Project.cs" />
     <Compile Include="Classes\Project\UpdateManager.cs" />
     <Compile Include="Classes\Helper\SaveHelper.cs" />
-    <Compile Include="Classes\Helper\CatalogHelper.cs" />
     <Compile Include="Classes\Helper\SettingsHelper.cs" />
     <Compile Include="Classes\TopologieBase.cs" />
     <Compile Include="Classes\TreeViewNode.cs" />

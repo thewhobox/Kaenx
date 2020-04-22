@@ -30,6 +30,8 @@ namespace Kaenx.DataContext.Catalog
         Float9,
         Picture,
         None,
-        IpAdress
+        IpAdress,
+        Color,
+        CheckBox
     }
 }

@@ -16,6 +16,11 @@ namespace Kaenx.Classes.TemplateSelectors
         public DataTemplate Text { get; set; }
         public DataTemplate TextRead { get; set; }
         public DataTemplate Enums { get; set; }
+        public DataTemplate EnumsTwo { get; set; }
+        public DataTemplate CheckBox { get; set; }
+        public DataTemplate Color { get; set; }
+        public DataTemplate Seperator { get; set; }
+        public DataTemplate SeperatorBox { get; set; }
 
         protected override DataTemplate SelectTemplateCore(object item)
         {
@@ -29,6 +34,21 @@ namespace Kaenx.Classes.TemplateSelectors
 
                 case ParamEnum pen:
                     return Enums;
+
+                case ParamEnumTwo pent:
+                    return EnumsTwo;
+
+                case ParamCheckBox pch:
+                    return CheckBox;
+
+                case ParamColor pco:
+                    return Color;
+
+                case ParamSeperator pse:
+                    return Seperator;
+
+                case ParamSeperatorBox psex:
+                    return SeperatorBox;
             }
 
             return NotFound;

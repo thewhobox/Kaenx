@@ -119,7 +119,7 @@ namespace Kaenx.View
                 string msg = loader.GetString("MsgNotCopied");
                 Serilog.Log.Error(ex, "Fehler beim Kopieren der KNX-Prod Datei");
                 //Add notify
-                //Notifi.Show(msg + "\r\n" + ex.Message);
+                Notifi.Show(msg + "\r\n" + ex.Message);
                 return;
             }
             
@@ -135,14 +135,7 @@ namespace Kaenx.View
                 return;
             }
 
-            if(Import.DeviceList.Count == 1)
-            {
-                ((Frame)this.Parent).Navigate(typeof(Import), Import);
-            } else
-            {
-                GridImportDevices.Visibility = Visibility.Visible;
-            }
-
+            GridImportDevices.Visibility = Visibility.Visible;
 
             if (!string.IsNullOrEmpty(Import.SelectedLanguage))
                 OutSelectedLang.Text = new System.Globalization.CultureInfo(Import.SelectedLanguage).DisplayName;
@@ -356,37 +349,9 @@ namespace Kaenx.View
 
         private async void HyperlinkChangeLang_Click(Windows.UI.Xaml.Documents.Hyperlink sender, Windows.UI.Xaml.Documents.HyperlinkClickEventArgs args)
         {
-            foreach (ZipArchiveEntry entry in Import.Archive.Entries)
-            {
-                if (entry.FullName.StartsWith("M-") && entry.FullName.EndsWith("/Catalog.xml"))
-                {
-                    XDocument catXML = XDocument.Load(entry.Open());
-                    string ns = catXML.Root.Name.NamespaceName;
-                    List<XElement> langs = catXML.Descendants(XName.Get("Language", ns)).ToList();
-
-                    ObservableCollection<string> tempLangs = new ObservableCollection<string>();
-                    foreach (XElement lang in langs)
-                    {
-                        tempLangs.Add(lang.Attribute("Identifier").Value);
-                    }
-
-                    DiagLanguage diaglang = new DiagLanguage(tempLangs);
-                    await diaglang.ShowAsync();
-                    Import.SelectedLanguage = diaglang.SelectedLanguage;
-                    ImportHelper.TranslateXml(catXML.Root, diaglang.SelectedLanguage);
-                    OutSelectedLang.Text = new System.Globalization.CultureInfo(Import.SelectedLanguage).DisplayName;
-                    XElement catalogXML = catXML.Descendants(XName.Get("Catalog", ns)).ElementAt<XElement>(0);
-                    Import.DeviceList = CatalogHelper.GetDevicesFromCatalog(catalogXML);
-
-                    foreach (Device device in Import.DeviceList)
-                    {
-                        SlideListItemBase swipe = new SlideListItemBase();
-                        swipe.LeftSymbol = Symbol.Accept;
-                        swipe.LeftBackground = new SolidColorBrush(Windows.UI.Color.FromArgb(255, 22, 128, 34));
-                        device.SlideSettings = swipe;
-                    }
-                }
-            }
+            Import.SelectedLanguage = null;
+            ImportHelper helper = new ImportHelper();
+            await helper.GetDeviceList(Import, true);
         }
 
         private void ImportList_ItemClick(object sender, ItemClickEventArgs e)

@@ -39,21 +39,24 @@
                 <StackPanel  Orientation="Horizontal" HorizontalAlignment="Right">
                     <TextBox Width="200" x:Uid="/Catalog/BarSearch" x:Name="BarSearchIn" VerticalAlignment="Center" BorderBrush="White" Foreground="White" TextChanged="SearchTextChanged" />
                     <AppBarSeparator Foreground="White" Margin="10 0" />
-                    <Button x:Uid="/Catalog/BarDelete" x:Name="BarDelete" Click="ClickDelete" IsEnabled="False" Background="Transparent" Padding="25 11" CornerRadius="0">
-                        <SymbolIcon Symbol="Delete" Foreground="White" />
-                    </Button>
-                    <Button x:Uid="/Catalog/BarExport" Background="Transparent" Padding="25 11" CornerRadius="0" IsEnabled="False">
-                        <Button.KeyboardAccelerators>
-                            <KeyboardAccelerator Modifiers="Control" Key="E" />
-                        </Button.KeyboardAccelerators>
-                        <SymbolIcon Symbol="Upload" Foreground="White" />
-                    </Button>
-                    <Button x:Uid="/Catalog/BarImport" Click="ClickImport" Background="Transparent" Padding="25 11" CornerRadius="0">
-                        <Button.KeyboardAccelerators>
+                   
+                    <AppBarButton x:Uid="/Catalog/BarDelete" x:Name="BarDelete" Click="ClickDelete" Icon="Delete" Foreground="White" IsEnabled="False">
+                        <AppBarButton.KeyboardAccelerators>
                             <KeyboardAccelerator Modifiers="Control" Key="I" />
-                        </Button.KeyboardAccelerators>
-                        <SymbolIcon Symbol="Download" Foreground="White" />
-                    </Button>
+                        </AppBarButton.KeyboardAccelerators>
+                    </AppBarButton>
+
+                    <AppBarButton x:Uid="/Catalog/BarExport" Icon="Upload" Foreground="White" IsEnabled="False">
+                        <AppBarButton.KeyboardAccelerators>
+                            <KeyboardAccelerator Modifiers="Control" Key="I" />
+                        </AppBarButton.KeyboardAccelerators>
+                    </AppBarButton>
+
+                    <AppBarButton x:Uid="/Catalog/BarImport" Click="ClickImport" Icon="Download" Foreground="White">
+                        <AppBarButton.KeyboardAccelerators>
+                            <KeyboardAccelerator Modifiers="Control" Key="I" />
+                        </AppBarButton.KeyboardAccelerators>
+                    </AppBarButton>
                 </StackPanel>
             </Border>
             
@@ -156,7 +159,7 @@
                     <ColumnDefinition />
                 </Grid.ColumnDefinitions>
 
-                <StackPanel Grid.ColumnSpan="3" Margin="10" BorderBrush="{ThemeResource SystemControlBackgroundAccentBrush}" BorderThickness="0,0,0,5">
+                <StackPanel Grid.ColumnSpan="3" Margin="10" BorderBrush="{ThemeResource BrushAccentColor1}" BorderThickness="0,0,0,5">
                     <TextBlock x:Uid="/Catalog/ImportHeader" FontSize="25" Padding="10" TextWrapping="WrapWholeWords" />
                     <TextBlock Padding="10 0 10 10">
                         <Run x:Uid="/Catalog/ImportSelectedLang" />
@@ -166,9 +169,14 @@
                 </StackPanel>
 
                 <ListView Grid.Row="1" Grid.ColumnSpan="3" x:Name="ImportList" ItemsSource="{Binding Import.DeviceList}" SelectionMode="None" ItemClick="ImportList_ItemClick" IsItemClickEnabled="True" >
+                    <ListView.ItemContainerStyle>
+                        <Style TargetType="ListViewItem">
+                            <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+                        </Style>
+                    </ListView.ItemContainerStyle>
                     <ListView.ItemTemplate>
                         <DataTemplate>
-                            <Grid>
+                            <Grid BorderBrush="{ThemeResource BrushAccentColor2}" BorderThickness="0 0 0 1">
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="40" />
                                     <ColumnDefinition />
@@ -181,6 +189,11 @@
                                 <StackPanel Grid.Column="1" Margin="15">
                                     <TextBlock Text="{Binding Name}" FontSize="20" />
                                     <TextBlock Text="{Binding VisibleDescription}" Foreground="{ThemeResource SystemControlForegroundBaseMediumBrush}" />
+                                    <TextBlock Visibility="{Binding InfoVisible}" Foreground="OrangeRed">
+                                        <Run Text="Das Gerät benötigt Eigenschaften die möglicherweise nicht komplett unterstützt werden:" />
+                                        <LineBreak />
+                                        <Run Text="{Binding Info}" />
+                                    </TextBlock>
                                 </StackPanel>
                             </Grid>
                         </DataTemplate>

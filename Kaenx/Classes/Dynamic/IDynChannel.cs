@@ -11,5 +11,7 @@ namespace Kaenx.Classes.Dynamic
     {
         public List<ParameterBlock> Blocks { get; set; }
         public Visibility Visible { get; set; }
+
+        public List<ParamCondition> Conditions { get; set; }
     }
 }

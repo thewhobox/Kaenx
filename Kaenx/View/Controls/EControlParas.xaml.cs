@@ -19,7 +19,6 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Xml.Linq;
-using System.Windows.Da;
 using Windows.Foundation;
 using Windows.Foundation.Collections;
 using Windows.Storage;
@@ -78,7 +77,6 @@ namespace Kaenx.Views.Easy.Controls
         private Dictionary<string, ChangeParamModel> ParaChanges = new Dictionary<string, ChangeParamModel>();
         private Dictionary<string, AppParameterTypeViewModel> AppParaTypess = new Dictionary<string, AppParameterTypeViewModel>();
         Stopwatch watch = new Stopwatch();
-        private XDocument dynamic;
 
         public event PropertyChangedEventHandler PropertyChanged;
 
@@ -94,7 +92,7 @@ namespace Kaenx.Views.Easy.Controls
         }
 
 
-        Dictionary<string, (string Value, List<IDynParameter> Paras)> Id2Param = new Dictionary<string, (string Value, List<IDynParameter> Paras)>();
+        Dictionary<string, ViewParamModel> Id2Param = new Dictionary<string, ViewParamModel>();
         Dictionary<string, IDynParameter> Hash2Param = new Dictionary<string, IDynParameter>();
 
 
@@ -159,43 +157,37 @@ namespace Kaenx.Views.Easy.Controls
             comObjects = SaveHelper.ByteArrayToObject<List<DeviceComObject>>(adds.ComsAll);
             Channels = SaveHelper.ByteArrayToObject<List<IDynChannel>>(adds.ParamsHelper, true);
 
-            try
+            foreach (IDynChannel ch in Channels)
             {
-                //Fülle Liste mit alle IDs und Hashes
-                foreach (IDynChannel ch in Channels)
+                foreach (ParameterBlock block in ch.Blocks)
                 {
-                    foreach (ParameterBlock block in ch.Blocks)
+                    foreach (IDynParameter para in block.Parameters)
                     {
-                        foreach (IDynParameter para in block.Parameters)
-                        {
-                            if (ParaChanges.ContainsKey(para.Id))
-                                para.Value = ParaChanges[para.Id].Value;
+                        if (ParaChanges.ContainsKey(para.Id))
+                            para.Value = ParaChanges[para.Id].Value;
 
-                            if (!Id2Param.ContainsKey(para.Id))
-                                Id2Param.Add(para.Id, (para.Value, new List<IDynParameter>()));
+                        if (!Id2Param.ContainsKey(para.Id))
+                            Id2Param.Add(para.Id, new ViewParamModel(para.Value));
 
-                            Id2Param[para.Id].Paras.Add(para);
-                            Hash2Param.Add(para.Hash, para);
-                            para.PropertyChanged += Para_PropertyChanged;
-                        }
+                        Id2Param[para.Id].Parameters.Add(para);
+                        Hash2Param.Add(para.Hash, para);
+                        para.PropertyChanged += Para_PropertyChanged;
                     }
                 }
-            }
-            catch
-            {
-
             }
 
             //Berechne ob Objekt sichtbar ist
             foreach (IDynChannel ch in Channels)
             {
+                ch.Visible = SaveHelper.CheckConditions(ch.Conditions, Id2Param) ? Visibility.Visible : Visibility.Collapsed;
+
                 foreach (ParameterBlock block in ch.Blocks)
                 {
-                    block.Visible = CheckConditions(block.Conditions);
+                    block.Visible = SaveHelper.CheckConditions(block.Conditions, Id2Param) ? Visibility.Visible : Visibility.Collapsed;
 
                     foreach (IDynParameter para in block.Parameters)
                     {
-                        para.Visible = CheckConditions(para.Conditions);
+                        para.Visible = SaveHelper.CheckConditions(para.Conditions, Id2Param) ? Visibility.Visible : Visibility.Collapsed;
                     }
                 }
             }
@@ -213,73 +205,29 @@ namespace Kaenx.Views.Easy.Controls
 
             IDynParameter para = sender as IDynParameter;
             Debug.WriteLine("Wert geändert! " + para.Id + " -> " + para.Value);
+
+            Id2Param[para.Id].Value = para.Value;
+
+            List<ParameterBlock> list2 = new List<ParameterBlock>();
+            foreach(IDynChannel ch in Channels)
+            {
+                list2.AddRange(ch.Blocks.Where(b => b.Conditions.Any(c => c.SourceId == para.Id)));
+            }
+            foreach(ParameterBlock block in list2)
+            {
+                block.Visible = SaveHelper.CheckConditions(block.Conditions, Id2Param) ? Visibility.Visible : Visibility.Collapsed;
+            }
+
+            IEnumerable <IDynParameter> list3 = Hash2Param.Values.Where(p => p.Conditions.Any(c => c.SourceId == para.Id));
+            foreach(IDynParameter par in list3)
+            {
+                par.Visible = SaveHelper.CheckConditions(par.Conditions, Id2Param) ? Visibility.Visible : Visibility.Collapsed;
+            }
         }
 
         
 
-        private Visibility CheckConditions(List<ParamCondition> conds)
-        {
-            bool flag = true;
-
-            foreach (ParamCondition cond in conds)
-            {
-                if (flag == false) break;
-                string paraValue = "";
-                if (Id2Param.ContainsKey(cond.SourceId))
-                {
-                    paraValue = Id2Param[cond.SourceId].Value;
-                } else
-                {
-                    AppParameter para = _context.AppParameters.Single(p => p.Id == cond.SourceId);
-                    paraValue = para.Value;
-                }
-
-                switch (cond.Operation)
-                {
-                    case ConditionOperation.IsInValue:
-                        if (!cond.Values.Split(",").Contains(paraValue))
-                            flag = false;
-                        break;
-
-                    case ConditionOperation.Default:
-                        //if(!checkDefault)
-                        //{
-                            
-                        //}
-                        break;
-
-                    case ConditionOperation.LowerThan:
-                        int valLT = int.Parse(paraValue);
-                        int valLTo = int.Parse(cond.Values);
-                        if ((valLT < valLTo) == false)
-                            flag = false;
-                        break;
-
-                    case ConditionOperation.LowerEqualThan:
-                        int valLET = int.Parse(paraValue);
-                        int valLETo = int.Parse(cond.Values);
-                        if ((valLET <= valLETo) == false)
-                            flag = false;
-                        break;
-
-                    case ConditionOperation.GreatherThan:
-                        int valGT = int.Parse(paraValue);
-                        int valGTo = int.Parse(cond.Values);
-                        if ((valGT > valGTo) == false)
-                            flag = false;
-                        break;
-
-                    case ConditionOperation.GreatherEqualThan:
-                        int valGET = int.Parse(paraValue);
-                        int valGETo = int.Parse(cond.Values);
-                        if ((valGET >= valGETo) == false)
-                            flag = false;
-                        break;
-                }
-            }
-
-            return flag ? Visibility.Visible : Visibility.Collapsed;
-        }
+        
         /*
 
         private async void ParamChanged(IParam param)

@@ -8,7 +8,7 @@ using Windows.UI.Xaml;
 
 namespace Kaenx.Classes.Dynamic
 {
-    public class ParamEnum : IDynParameter
+    public class ParamCheckBox : IDynParameter
     {
         public string Id { get; set; }
         public string Text { get; set; }
@@ -31,8 +31,6 @@ namespace Kaenx.Classes.Dynamic
         }
 
         public Visibility SuffixIsVisible { get { return string.IsNullOrEmpty(SuffixText) ? Visibility.Collapsed : Visibility.Visible; } }
-
-        public List<ParamEnumOption> Options { get; set; }
 
         public List<ParamCondition> Conditions { get; set; }
 

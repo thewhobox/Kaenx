@@ -19,6 +19,7 @@ using Windows.ApplicationModel.Resources;
 using System.IO;
 using System.Text;
 using System.Text.RegularExpressions;
+using Kaenx.View;
 
 namespace Kaenx.Classes.Helper
 {
@@ -36,7 +37,7 @@ namespace Kaenx.Classes.Helper
         public event ValueHandler OnDeviceChanged;
         public event ValueHandler OnStateChanged;
 
-        public ImportDevices Imports;
+        public ImportDevices Imports = null;
 
         private string currentNamespace;
         private List<ManufacturerViewModel> tempManus;
@@ -159,7 +160,8 @@ namespace Kaenx.Classes.Helper
 
                     string manuId = device.ApplicationId.Substring(0, device.ApplicationId.IndexOf('_'));
                     ZipArchiveEntry appEntry = Imports.Archive.GetEntry(manuId + "/" + device.ApplicationId + ".xml");
-                    List<string> errs = CheckApplication(XmlReader.Create(appEntry.Open()));
+                    List<string> errs = new List<string>();
+                    CheckApplication(XmlReader.Create(appEntry.Open()), errs);
 
                     if (errs.Count > 0)
                     {
@@ -290,65 +292,84 @@ namespace Kaenx.Classes.Helper
 
         public async Task<bool> GetDeviceList(ImportDevices Import, bool changeLang = false)
         {
-            string manName = "";
+            Import.DeviceList.Clear();
+
+            List<string> manus = new List<string>();
 
             foreach(ZipArchiveEntry entryTemp in Import.Archive.Entries)
             {
                 if (entryTemp.FullName.StartsWith("M-"))
+                {
+                    string manName = "";
                     manName = entryTemp.FullName.Substring(0, 6);
-            }
-
-            if (manName == "")
-                return false;
-
-                
-            ZipArchiveEntry entry = Import.Archive.GetEntry(manName + "/Catalog.xml");
-
-            XDocument catXML = XDocument.Load(entry.Open());
-            string ns = catXML.Root.Name.NamespaceName;
-            List<XElement> langs = catXML.Descendants(XName.Get("Language", ns)).ToList();
-
-            ObservableCollection<string> tempLangs = new ObservableCollection<string>();
-            foreach (XElement lang in langs)
-            {
-                tempLangs.Add(lang.Attribute("Identifier").Value);
-            }
-
-            if (tempLangs.Count > 1)
-            {
-                ApplicationDataContainer container = ApplicationData.Current.LocalSettings;
-                string defaultLang = container.Values["defaultLang"]?.ToString();
-
-                if (!tempLangs.Contains(defaultLang) || changeLang)
-                {
-                    if (!changeLang && !string.IsNullOrEmpty(defaultLang) && tempLangs.Any(l => l.StartsWith(defaultLang.Split("-")[0])))
-                    {
-
-                    }
-                    else
-                    {
-                        DiagLanguage diaglang = new DiagLanguage(tempLangs);
-                        await diaglang.ShowAsync();
-                        Import.SelectedLanguage = diaglang.SelectedLanguage;
-                        ImportHelper.TranslateXml(catXML.Root, diaglang.SelectedLanguage);
-                    }
-                }
-                else
-                {
-                    Import.SelectedLanguage = defaultLang;
-                    ImportHelper.TranslateXml(catXML.Root, defaultLang);
+                    if (!manus.Contains(manName))
+                        manus.Add(manName);
                 }
             }
-            else if (tempLangs.Count == 1)
+
+
+            foreach(string manName in manus)
             {
-                Import.SelectedLanguage = tempLangs[0];
-                ImportHelper.TranslateXml(catXML.Root, tempLangs[0]);
+                ZipArchiveEntry entry = Import.Archive.GetEntry(manName + "/Catalog.xml");
+                XDocument catXML = XDocument.Load(entry.Open());
+
+
+                string ns = catXML.Root.Name.NamespaceName;
+                List<XElement> langs = catXML.Descendants(XName.Get("Language", ns)).ToList();
+
+                if (string.IsNullOrEmpty(Import.SelectedLanguage))
+                {
+                    ObservableCollection<string> tempLangs = new ObservableCollection<string>();
+                    foreach (XElement lang in langs)
+                    {
+                        tempLangs.Add(lang.Attribute("Identifier").Value);
+                    }
+
+                    if (tempLangs.Count > 1)
+                    {
+                        ApplicationDataContainer container = ApplicationData.Current.LocalSettings;
+                        string defaultLang = container.Values["defaultLang"]?.ToString();
+
+                        if (!tempLangs.Contains(defaultLang) || changeLang)
+                        {
+                            if (!changeLang && !string.IsNullOrEmpty(defaultLang) && tempLangs.Any(l => l.StartsWith(defaultLang.Split("-")[0])))
+                            {
+
+                            }
+                            else
+                            {
+                                DiagLanguage diaglang = new DiagLanguage(tempLangs);
+                                await diaglang.ShowAsync();
+                                Import.SelectedLanguage = diaglang.SelectedLanguage;
+                                ImportHelper.TranslateXml(catXML.Root, diaglang.SelectedLanguage);
+                            }
+                        }
+                        else
+                        {
+                            Import.SelectedLanguage = defaultLang;
+                            ImportHelper.TranslateXml(catXML.Root, defaultLang);
+                        }
+                    }
+                    else if (tempLangs.Count == 1)
+                    {
+                        Import.SelectedLanguage = tempLangs[0];
+                        ImportHelper.TranslateXml(catXML.Root, tempLangs[0]);
+                    }
+                } else
+                {
+                    ImportHelper.TranslateXml(catXML.Root, Import.SelectedLanguage);
+                }
+
+                XElement catalogXML = catXML.Descendants(XName.Get("Catalog", ns)).ElementAt<XElement>(0);
+                foreach(Device dev in GetDevicesFromCatalog(catalogXML, Import))
+                {
+                    Import.DeviceList.Add(dev);
+                }
+
             }
 
-            XElement catalogXML = catXML.Descendants(XName.Get("Catalog", ns)).ElementAt<XElement>(0);
-            Import.DeviceList = CatalogHelper.GetDevicesFromCatalog(catalogXML);
 
-            if (Import.DeviceList.Count == 0) return false ;
+            if (Import.DeviceList.Count == 0) return false;
 
             if (Import.DeviceList.Count > 0)
             {
@@ -359,14 +380,51 @@ namespace Kaenx.Classes.Helper
                     swipe.LeftBackground = new SolidColorBrush(Windows.UI.Color.FromArgb(255, 22, 128, 34));
                     device.SlideSettings = swipe;
                 }
-
-                if(Import.DeviceList.Count == 1)
-                {
-                    Import.DeviceList[0].SlideSettings.IsSelected = true;
-                }
             }
 
+
             return true;
+        }
+
+        public ObservableCollection<Device> GetDevicesFromCatalog(XElement catalogXML, ImportDevices Import)
+        {
+            ObservableCollection<Device> deviceList = new ObservableCollection<Device>();
+            IEnumerable<XElement> catalogItems = catalogXML.Descendants(XName.Get("CatalogItem", catalogXML.Name.NamespaceName));
+            catalogItems = catalogItems.OrderBy(c => c.Attribute("Name").Value);
+
+            ZipArchiveEntry entry = Import.Archive.GetEntry(catalogItems.ElementAt(0).Attribute("Id").Value.Substring(0,6) + "/Hardware.xml");
+            XElement hardXML = XDocument.Load(entry.Open()).Root;
+
+            foreach (XElement catalogItem in catalogItems)
+            {
+                Device device = new Device();
+                device.Id = catalogItem.Attribute("Id").Value;
+                device.Name = catalogItem.Attribute("Name").Value;
+                device.VisibleDescription = catalogItem.Attribute("VisibleDescription")?.Value;
+                device.ProductRefId = catalogItem.Attribute("ProductRefId").Value;
+                device.Hardware2ProgramRefId = catalogItem.Attribute("Hardware2ProgramRefId").Value;
+
+                XElement hard = hardXML.Descendants(XName.Get("Product", hardXML.Name.NamespaceName)).Single(p => p.Attribute("Id").Value == device.ProductRefId);
+                if(hard.Parent.Parent.Attribute("NoDownloadWithoutPlugin")?.Value == "1")
+                {
+                    device.Info = "Gerät benötigt ein Plugin!";
+                } else
+                {
+                    XElement app = hardXML.Descendants(XName.Get("ApplicationProgramRef", hardXML.Name.NamespaceName)).Single(ap => ap.Parent.Attribute("Id").Value == device.Hardware2ProgramRefId);
+                    entry = Import.Archive.GetEntry(device.Id.Substring(0, 6) + "/" + app.Attribute("RefId").Value + ".xml");
+                    XElement appXML = XDocument.Load(entry.Open()).Root;
+
+                    List<string> errors = new List<string>();
+                    device.IsEnabled = CheckApplication(appXML.CreateReader(), errors);
+                    device.Info = string.Join(", ", errors);
+
+                }
+
+
+                deviceList.Add(device);
+            }
+
+            return deviceList;
         }
 
 
@@ -569,13 +627,13 @@ namespace Kaenx.Classes.Helper
 
             foreach (string appId in App2Hardware.Keys)
             {
-                IEnumerable<AppAbsoluteSegmentViewModel> segmentsList = _context.AppAbsoluteSegments.Where(s => s.ApplicationId == appId);
+                IEnumerable<AppSegmentViewModel> segmentsList = _context.AppAbsoluteSegments.Where(s => s.ApplicationId == appId);
 
                 Dictionary<string, byte[]> segments = new Dictionary<string, byte[]>();
                 //Dictionary<string, int> cachedTypeLength = new Dictionary<string, int>();
                 //Dictionary<string, AppParameterTypeViewModel> cachedType = new Dictionary<string, AppParameterTypeViewModel>();
 
-                foreach (AppAbsoluteSegmentViewModel s2p in segmentsList)
+                foreach (AppSegmentViewModel s2p in segmentsList)
                 {
                     if (s2p.Data == null) continue;
                     byte[] bytes = Convert.FromBase64String(s2p.Data);
@@ -746,7 +804,7 @@ namespace Kaenx.Classes.Helper
 
                 foreach (string segId in segments.Keys)
                 {
-                    AppAbsoluteSegmentViewModel seg = _context.AppAbsoluteSegments.FirstOrDefault(a => a.Id == segId);
+                    AppSegmentViewModel seg = _context.AppAbsoluteSegments.FirstOrDefault(a => a.Id == segId);
                     seg.Data = Convert.ToBase64String(segments[segId]);
                     _context.AppAbsoluteSegments.Update(seg);
                 }
@@ -920,7 +978,7 @@ namespace Kaenx.Classes.Helper
 
 
             List<string> contextIds = new List<string>();
-            foreach (AppAbsoluteSegmentViewModel x in context.AppAbsoluteSegments)
+            foreach (AppSegmentViewModel x in context.AppAbsoluteSegments)
                 contextIds.Add(x.Id);
 
             foreach (AppComObject x in context.AppComObjects)
@@ -957,20 +1015,26 @@ namespace Kaenx.Classes.Helper
                 switch (child.Name.LocalName)
                 {
                     case "TypeNumber":
-                        switch (child.Attribute("Type").Value)
+                        if (child.Attribute("UIHint")?.Value == "CheckBox")
                         {
-                            case "signedInt":
-                                paramt.Type = ParamTypes.NumberInt;
-                                break;
-                            case "unsignedInt":
-                                paramt.Type = ParamTypes.NumberUInt;
-                                break;
-                            default:
-                                msg = "Unbekannter Nummerntype: " + child.Attribute("Type").Value;
-                                if (!Errors.Contains(msg))
-                                    Errors.Add(msg);
-                                Log.Error("Unbekannter Nummerntyp: " + child.Name.LocalName + " - " + child.Attribute("Type").Value);
-                                break;
+                            paramt.Type = ParamTypes.CheckBox;
+                        } else 
+                        { 
+                            switch (child.Attribute("Type").Value)
+                            {
+                                case "signedInt":
+                                    paramt.Type = ParamTypes.NumberInt;
+                                    break;
+                                case "unsignedInt":
+                                    paramt.Type = ParamTypes.NumberUInt;
+                                    break;
+                                default:
+                                    msg = "Unbekannter Nummerntype: " + child.Attribute("Type").Value;
+                                    if (!Errors.Contains(msg))
+                                        Errors.Add(msg);
+                                    Log.Error("Unbekannter Nummerntyp: " + child.Name.LocalName + " - " + child.Attribute("Type").Value);
+                                    break;
+                            }
                         }
                         paramt.Size = int.Parse(child.Attribute("SizeInBit").Value);
                         paramt.Tag1 = child.Attribute("minInclusive").Value;
@@ -1025,8 +1089,13 @@ namespace Kaenx.Classes.Helper
                     case "TypeNone":
                         paramt.Type = ParamTypes.None;
                         break;
+                    case "TypeColor":
+                        paramt.Type = ParamTypes.Color;
+                        paramt.Tag1 = child.Attribute("Space").Value;
+                        break;
+
                     default:
-                        msg = "Unbekannter Paremetertype: " + child.Name.LocalName;
+                        msg = "Unbekannter Parametertype: " + child.Name.LocalName;
                         if (!Errors.Contains(msg))
                             Errors.Add(msg);
                         Log.Error("Unbekannter Parametertyp: " + child.Name.LocalName);
@@ -1280,8 +1349,6 @@ namespace Kaenx.Classes.Helper
                 obj.Id = cobjr.Id;
 
                 
-                
-
                 obj.ApplicationId = app.Id;
                 if (cobjr.FunctionText != null) obj.FunctionText = cobjr.FunctionText;
                 if (cobjr.Text != null) obj.Text = cobjr.Text;
@@ -1302,7 +1369,41 @@ namespace Kaenx.Classes.Helper
                     Match m = reg.Match(obj.Text);
                     if (m.Success)
                     {
-                        obj.BindedId = ParamrefIds.Single(c => c.EndsWith("R-" + m.Groups[2].Value));
+                        if(m.Groups[2].Value == "0")
+                        {
+                            obj.BindedId = "parent";
+                        } else
+                        {
+                            try
+                            {
+                                obj.BindedId = ParamrefIds.Single(c => c.EndsWith("R-" + m.Groups[2].Value));
+                            } catch(Exception e)
+                            {
+                                throw new Exception("Kein ParameterRef zum Binden gefunden", e);
+                            }
+                        }
+                    } else
+                    {
+                        reg = new Regex("{{(.+)}}");
+                        m = reg.Match(obj.Text);
+                        if (m.Success)
+                        {
+                            if (m.Groups[2].Value == "0")
+                            {
+                                obj.BindedId = "parent";
+                            }
+                            else
+                            {
+                                try
+                                {
+                                    obj.BindedId = ParamrefIds.Single(c => c.EndsWith("R-" + m.Groups[2].Value));
+                                }
+                                catch (Exception e)
+                                {
+                                    throw new Exception("Kein ParameterRef zum Binden gefunden", e);
+                                }
+                            }
+                        }
                     }
                 }
 
@@ -1366,16 +1467,18 @@ namespace Kaenx.Classes.Helper
 
                 foreach(XElement seg in table.Elements())
                 {
+                    AppSegmentViewModel aas;
+                    bool existed = false ;
+
                     switch (seg.Name.LocalName)
                     {
                         case "AbsoluteSegment":
-                            AppAbsoluteSegmentViewModel aas;
-                            bool existed = contextIds.Contains(seg.Attribute("Id").Value);
+                            existed = contextIds.Contains(seg.Attribute("Id").Value);
 
                             if (existed)
                                 aas = context.AppAbsoluteSegments.Single(a => a.Id == seg.Attribute("Id").Value);
                             else
-                                aas = new AppAbsoluteSegmentViewModel() { Id = seg.Attribute("Id").Value };
+                                aas = new AppSegmentViewModel() { Id = seg.Attribute("Id").Value };
                             
                             aas.ApplicationId = app.Id;
                             aas.Address = int.Parse(seg.Attribute("Address").Value);
@@ -1388,8 +1491,26 @@ namespace Kaenx.Classes.Helper
                             else
                                 context.AppAbsoluteSegments.Add(aas);
                             break;
+
+                        case "RelativeSegment":
+                            existed = contextIds.Contains(seg.Attribute("Id").Value);
+
+                            if (existed) aas = context.AppAbsoluteSegments.Single(a => a.Id == seg.Attribute("Id").Value);
+                            else aas = new AppSegmentViewModel() { Id = seg.Attribute("Id").Value };
+
+                            aas.ApplicationId = app.Id;
+                            aas.Offset = int.Parse(seg.Attribute("Offset").Value);
+                            aas.Size = int.Parse(seg.Attribute("Size").Value);
+                            aas.LsmId = int.Parse(seg.Attribute("LoadStateMachine").Value);
+
+                            if (existed)
+                                context.AppAbsoluteSegments.Update(aas);
+                            else
+                                context.AppAbsoluteSegments.Add(aas);
+                            break;
+
                         default:
-                            msg = "Unbekanntes Segment: " + seg.ToString();
+                            msg = "Unbekanntes Segment: " + seg.Name.LocalName;
                             if (!Errors.Contains(msg))
                                 Errors.Add(msg);
                             break;
@@ -1528,9 +1649,9 @@ namespace Kaenx.Classes.Helper
             }
         }
 
-        public List<string> CheckApplication(XmlReader reader)
+        public bool CheckApplication(XmlReader reader, List<string> errs)
         {
-            List<string> errs = new List<string>();
+            bool flag = true;
 
             while (reader.Read())
             {
@@ -1540,7 +1661,6 @@ namespace Kaenx.Classes.Helper
                 switch (reader.Name)
                 {
                     case "Extension":
-                        Log.Warning("Applikation enthält Extension: " + reader.Name, reader.ReadOuterXml());
                         string plugdown = reader.GetAttribute("EtsDownloadPlugin");
                         string plugrequ = reader.GetAttribute("RequiresExternalSoftware");
                         string plugui = reader.GetAttribute("EtsUiPlugin");
@@ -1549,10 +1669,15 @@ namespace Kaenx.Classes.Helper
                         if (plugui != null && !errs.Contains("EtsUiPlugin")) errs.Add("EtsUiPlugin");
                         if (plughand != null && !errs.Contains("EtsDataHandler")) errs.Add("EtsDataHandler");
                         if (plugrequ != null && (plugrequ == "1" || plugrequ == "true") && !errs.Contains("RequiresExternalSoftware")) errs.Add("RequiresExternalSoftware");
+                        Log.Warning("Applikation enthält Extension: " + reader.Name, reader.ReadOuterXml());
                         break;
                     case "ParameterCalculations":
-                        Log.Warning("Applikation enthält Berechnungen: " + reader.Name);
-                        if (!errs.Contains("ParameterCalculations")) errs.Add("ParameterCalculations");
+                        if (!errs.Contains("ParameterCalculations"))
+                        {
+                            Log.Warning("Applikation enthält Berechnungen: " + reader.Name);
+                            errs.Add("ParameterCalculations");
+                            flag = false;
+                        }
                         reader.ReadOuterXml();
                         break;
                         //case "Property":
@@ -1563,7 +1688,7 @@ namespace Kaenx.Classes.Helper
                 }
             }
 
-            return errs;
+            return flag;
         }
 
         private XName GetXName(string name)

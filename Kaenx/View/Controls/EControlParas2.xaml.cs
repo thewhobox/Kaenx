@@ -128,7 +128,6 @@ namespace Kaenx.Views.Easy.Controls
             dynamic = XDocument.Parse(Encoding.UTF8.GetString(adds.Dynamic));
 
             comObjects = SaveHelper.ByteArrayToObject<List<DeviceComObject>>(adds.ComsAll);
-            conditions = SaveHelper.ByteArrayToObject<List<ParamVisHelper>>(adds.ParameterAll);
 
             try
             {

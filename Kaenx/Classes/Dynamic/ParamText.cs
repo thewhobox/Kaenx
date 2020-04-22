@@ -20,7 +20,7 @@ namespace Kaenx.Classes.Dynamic
         public string Value
         {
             get { return _value; }
-            set { _value = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Value")); }
+            set { if (string.IsNullOrEmpty(value)) return; _value = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Value")); }
         }
 
         private Visibility _visible;

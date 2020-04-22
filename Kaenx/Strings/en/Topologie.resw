@@ -238,7 +238,7 @@
     <value>Name:</value>
   </data>
   <data name="SidePropsNumb.Header" xml:space="preserve">
-    <value>Number:</value>
+    <value>Individual Address</value>
   </data>
   <data name="ToolAddLine.Label" xml:space="preserve">
     <value>Line</value>

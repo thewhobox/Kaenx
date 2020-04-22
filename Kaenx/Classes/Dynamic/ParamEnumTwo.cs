@@ -20,7 +20,7 @@ namespace Kaenx.Classes.Dynamic
         public string Value
         {
             get { return _value; }
-            set { _value = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Value")); }
+            set { if (string.IsNullOrEmpty(value)) return; _value = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Value")); }
         }
 
         private Visibility _visible;
@@ -36,7 +36,6 @@ namespace Kaenx.Classes.Dynamic
         public ParamEnumOption Option2 { get; set; }
 
         public List<ParamCondition> Conditions { get; set; }
-        Visibility IDynParameter.Visible { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
 
         public event PropertyChangedEventHandler PropertyChanged;
     }

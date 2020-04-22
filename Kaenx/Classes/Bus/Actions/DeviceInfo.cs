@@ -119,7 +119,7 @@ namespace Kaenx.Classes.Bus.Actions
 
                 if (appModel.Table_Group != "" || appModel.Table_Group != null)
                 {
-                    AppAbsoluteSegmentViewModel segmentModel = context.AppAbsoluteSegments.Single(s => s.Id == appModel.Table_Group);
+                    AppSegmentViewModel segmentModel = context.AppAbsoluteSegments.Single(s => s.Id == appModel.Table_Group);
                     grpAddr = segmentModel.Address;
                 }
             }
@@ -164,7 +164,7 @@ namespace Kaenx.Classes.Bus.Actions
             {
                 if (appModel.Table_Assosiations != "" || appModel.Table_Assosiations != null)
                 {
-                    AppAbsoluteSegmentViewModel segmentModel = context.AppAbsoluteSegments.Single(s => s.Id == appModel.Table_Assosiations);
+                    AppSegmentViewModel segmentModel = context.AppAbsoluteSegments.Single(s => s.Id == appModel.Table_Assosiations);
                     int assoAddr = segmentModel.Address;
 
                     byte[] datax = await dev.MemoryRead(assoAddr, 1);

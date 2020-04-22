@@ -8,20 +8,16 @@ using Windows.UI.Xaml;
 
 namespace Kaenx.Classes.Dynamic
 {
-    public class ParamEnum : IDynParameter
+    public class ParamSeperator : IDynParameter
     {
         public string Id { get; set; }
         public string Text { get; set; }
         public string Hash { get; set; }
         public string SuffixText { get; set; }
         public string Default { get; set; }
+        public string Hint { get; set; }
 
-        private string _value;
-        public string Value
-        {
-            get { return _value; }
-            set { if (string.IsNullOrEmpty(value)) return; _value = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Value")); }
-        }
+        public string Value { get; set; }
 
         private Visibility _visible;
         public Visibility Visible
@@ -30,9 +26,9 @@ namespace Kaenx.Classes.Dynamic
             set { _visible = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Visible")); }
         }
 
-        public Visibility SuffixIsVisible { get { return string.IsNullOrEmpty(SuffixText) ? Visibility.Collapsed : Visibility.Visible; } }
-
-        public List<ParamEnumOption> Options { get; set; }
+        public Visibility IsTextVisible { get { return string.IsNullOrEmpty(Text) ? Visibility.Collapsed : Visibility.Visible; } }
+        public Visibility IsLineVisible { get { return Hint == "HorizontalRuler" ? Visibility.Visible : Visibility.Collapsed; } }
+        public Visibility SuffixIsVisible { get { return Visibility.Collapsed; } }
 
         public List<ParamCondition> Conditions { get; set; }
 

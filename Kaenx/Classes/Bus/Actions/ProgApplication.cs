@@ -197,7 +197,7 @@ namespace Kaenx.Classes.Bus.Actions
             TodoText = "Berechne Speicher...";
             List<AppParameter> paras = GetVisibleParams(adds);
             Dictionary<string, byte[]> memsData = new Dictionary<string, byte[]>();
-            Dictionary<string, AppAbsoluteSegmentViewModel> mems = new Dictionary<string, AppAbsoluteSegmentViewModel>();
+            Dictionary<string, AppSegmentViewModel> mems = new Dictionary<string, AppSegmentViewModel>();
             Dictionary<string, AppParameterTypeViewModel> types = new Dictionary<string, AppParameterTypeViewModel>();
             List<int> changed = new List<int>();
 
@@ -209,7 +209,7 @@ namespace Kaenx.Classes.Bus.Actions
                 if (para.SegmentId == null) continue;
                 if (!mems.ContainsKey(para.SegmentId))
                 {
-                    AppAbsoluteSegmentViewModel seg = _context.AppAbsoluteSegments.Single(a => a.Id == para.SegmentId);
+                    AppSegmentViewModel seg = _context.AppAbsoluteSegments.Single(a => a.Id == para.SegmentId);
                     memsData[para.SegmentId] = Convert.FromBase64String(seg.Data);
                     mems[para.SegmentId] = seg;
                 }
@@ -254,7 +254,7 @@ namespace Kaenx.Classes.Bus.Actions
             switch (_type)
             {
                 case ProgAppType.Komplett:
-                    foreach (AppAbsoluteSegmentViewModel seg in mems.Values)
+                    foreach (AppSegmentViewModel seg in mems.Values)
                     {
                         await dev.MemoryWriteSync(seg.Address, memsData[seg.Id]);
                     }

@@ -17,11 +17,12 @@ using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Xml;
 using System.Xml.Linq;
+using Windows.Devices.Bluetooth.Advertisement;
 using Windows.Storage;
 
 namespace Kaenx.Classes.Helper
 {
-    public class SaveHelper
+    public class SaveHelper 
     {
         public static Project.Project _project;
         public static ProjectContext contextProject;
@@ -29,6 +30,7 @@ namespace Kaenx.Classes.Helper
 
         private static Dictionary<string, AppParameter> AppParas;
         private static Dictionary<string, AppParameterTypeViewModel> AppParaTypes;
+        private static Dictionary<string, AppComObject> ComObjects;
 
         public static ProjectModel SaveProject(Project.Project _pro = null)
         {
@@ -513,7 +515,7 @@ namespace Kaenx.Classes.Helper
                         break;
 
                     case "Channel":
-                        if(reader.GetAttribute("Name") == "Generic" && reader.GetAttribute("Text") == "")
+                        if(reader.GetAttribute("Text") == "")
                         {
                             ChannelIndependentBlock cib2 = new ChannelIndependentBlock();
                             currentChannel = cib2;
@@ -573,6 +575,7 @@ namespace Kaenx.Classes.Helper
             string appId = Id2Element.Keys.ElementAt(0).Substring(0, 21);
             AppParas = new Dictionary<string, AppParameter>();
             AppParaTypes = new Dictionary<string, AppParameterTypeViewModel>();
+            ComObjects = new Dictionary<string, AppComObject>();
 
             foreach (AppParameter para in contextC.AppParameters.Where(p => p.ApplicationId == appId))
                 AppParas.Add(para.Id, para);
@@ -580,12 +583,30 @@ namespace Kaenx.Classes.Helper
             foreach (AppParameterTypeViewModel type in contextC.AppParameterTypes.Where(t => t.ApplicationId == appId))
                 AppParaTypes.Add(type.Id, type);
 
+            foreach (AppComObject co in contextC.AppComObjects.Where(t => t.ApplicationId == appId))
+                ComObjects.Add(co.Id, co);
+
 
             foreach (XElement elePB in dynamic.Root.Descendants(XName.Get("ParameterBlock", dynamic.Root.Name.NamespaceName)))
             {
                 ParameterBlock block = Id2ParamBlock[elePB.Attribute("Id").Value];
                 GetChildItems(elePB, block);
             }
+
+            List<string> updatedComs = new List<string>();
+            foreach (XElement eleCH in dynamic.Root.Descendants(XName.Get("Channel", dynamic.Root.Name.NamespaceName)).Where(ch => !string.IsNullOrEmpty(ch.Attribute("Text")?.Value)))
+            {
+                foreach(XElement co in eleCH.Descendants(XName.Get("ComObjectRefRef", dynamic.Root.Name.NamespaceName)))
+                {
+                    if (updatedComs.Contains(co.Attribute("RefId").Value)) continue;
+                    AppComObject aco = ComObjects[co.Attribute("RefId").Value];
+                    aco.Group = eleCH.Attribute("Text").Value;
+                    contextC.AppComObjects.Update(aco);
+                    updatedComs.Add(aco.Id);
+                }
+            }
+            contextC.SaveChanges();
+
 
             adds.ParamsHelper = ObjectToByteArray(Channels, true);
         }
@@ -604,13 +625,60 @@ namespace Kaenx.Classes.Helper
                         ParseParameterRefRef(ele, block);
                         break;
                     case "ParameterSeparator":
-
+                        ParseSeparator(ele, block);
                         break;
                     case "ComObjectRefRef":
-
+                        //Todo get BindId!!!
                         break;
                 }
             }
+        }
+
+        private static void ParseSeparator(XElement xele, ParameterBlock block)
+        {
+            int vers = int.Parse(xele.Name.NamespaceName.Substring(xele.Name.NamespaceName.LastIndexOf("/") + 1));
+
+            (List<ParamCondition> Conds, string Hash) list = GetConditions(xele, true);
+
+            if(vers < 14)
+            {
+                ParamSeperator sepe = new ParamSeperator();
+                sepe.Id = xele.Attribute("Id").Value;
+                sepe.Text = xele.Attribute("Text").Value;
+                if(string.IsNullOrEmpty(sepe.Text))
+                    sepe.Hint = "HorizontalRuler";
+                sepe.Conditions = list.Conds;
+                sepe.Hash = list.Hash;
+                block.Parameters.Add(sepe);
+                return;
+            }
+
+            IDynParameter sep = null;
+
+            string hint = xele.Attribute("UIHint")?.Value;
+            switch (hint)
+            {
+                case null:
+                case "HeadLine":
+                case "HorizontalRuler":
+                    sep = new ParamSeperator() { Hint = hint };
+                    break;
+
+                case "Error":
+                case "Information":
+                    sep = new ParamSeperatorBox() { Hint = hint };
+                    break;
+
+                default:
+                    Log.Error("Unbekannter UIHint: " + hint);
+                    return;
+            }
+
+            sep.Conditions = list.Conds;
+            sep.Hash = list.Hash;
+            sep.Id = xele.Attribute("Id").Value;
+            sep.Text = xele.Attribute("Text").Value;
+            block.Parameters.Add(sep);
         }
 
         private static void ParseParameterRefRef(XElement xele, ParameterBlock block)
@@ -630,8 +698,15 @@ namespace Kaenx.Classes.Helper
                     pnu.Id = para.Id;
                     pnu.Text = para.Text;
                     pnu.SuffixText = para.SuffixText;
-                    pnu.Minimum = int.Parse(paraType.Tag1);
-                    pnu.Maximum = int.Parse(paraType.Tag2);
+                    try
+                    {
+                        pnu.Minimum = int.Parse(paraType.Tag1);
+                        pnu.Maximum = int.Parse(paraType.Tag2);
+                    }
+                    catch
+                    {
+
+                    }
                     pnu.Value = para.Value;
                     pnu.Default = para.Value;
                     pnu.Conditions = conds.paramList;
@@ -683,82 +758,34 @@ namespace Kaenx.Classes.Helper
                         pent.Option2 = options[1];
                         pent.Conditions = conds.paramList;
                         pent.Hash = conds.hash;
+                        block.Parameters.Add(pent);
                     }
                     break;
+
+                case ParamTypes.CheckBox:
+                    ParamCheckBox pch = new ParamCheckBox();
+                    pch.Id = para.Id;
+                    pch.Text = para.Text;
+                    pch.SuffixText = para.SuffixText;
+                    pch.Default = para.Value;
+                    pch.Value = para.Value;
+                    pch.Conditions = conds.paramList;
+                    pch.Hash = conds.hash;
+                    block.Parameters.Add(pch);
+                    break;
+
+                case ParamTypes.Color:
+                    ParamColor pco = new ParamColor();
+                    pco.Id = para.Id;
+                    pco.Text = para.Text;
+                    pco.SuffixText = para.SuffixText;
+                    pco.Default = para.Value;
+                    pco.Value = para.Value;
+                    pco.Conditions = conds.paramList;
+                    pco.Hash = conds.hash;
+                    block.Parameters.Add(pco);
+                    break;
             }
-
-            //switch (paraType.Type)
-            //{
-            //    case ParamTypes.Picture:
-            //        ParamPicture paraviewP = new ParamPicture(para, paraType) { Hash = hash };
-            //        parent.Children.Add(paraviewP);
-            //        Params.Add(hash, paraviewP);
-            //        break;
-            //    case ParamTypes.NumberInt:
-            //    case ParamTypes.NumberUInt:
-            //        ParamNumber paraviewN = new ParamNumber(para, paraType) { Hash = hash };
-            //        paraviewN.SetVisibility(vis2vis(visibility));
-            //        paraviewN.ParamChanged += ParamChanged;
-            //        parent.Children.Add(paraviewN);
-            //        Params.Add(hash, paraviewN);
-            //        break;
-            //    case ParamTypes.Text:
-            //        if (para.Access == AccessType.Read)
-            //        {
-            //            ParamText paraviewT = new ParamText(para, paraType);
-            //            paraviewT.SetVisibility(vis2vis(visibility));
-            //            parent.Children.Add(paraviewT);
-            //            Params.Add(hash, paraviewT);
-            //        }
-            //        else
-            //        {
-            //            ParamInput paraviewI = new ParamInput(para, paraType) { Name = para.Id, Hash = hash };
-            //            paraviewI.ParamChanged += ParamChanged;
-            //            paraviewI.SetVisibility(vis2vis(visibility));
-            //            parent.Children.Add(paraviewI);
-            //            Params.Add(hash, paraviewI);
-            //        }
-            //        break;
-            //    case ParamTypes.Enum:
-            //        IEnumerable<AppParameterTypeEnumViewModel> enums = _context.AppParameterTypeEnums.Where(e => e.ParameterId == paraType.Id).OrderBy(e => e.Order).ToList();
-
-            //        int enumsCount = enums.Count();
-            //        if (enumsCount == 0)
-            //        {
-            //            Log.Warning("ParameterTyp Enum hat keine Enums! " + paraType.Id);
-            //            Border b2 = new Border();
-            //            b2.BorderBrush = new SolidColorBrush(Windows.UI.Colors.Red);
-            //            b2.BorderThickness = new Thickness(0, 1, 0, 0);
-            //            b2.Margin = new Thickness(10, 20, 10, 20);
-            //            b2.Child = new TextBlock() { Text = para.Text + " - Keine Enums" };
-            //            b2.Visibility = vis2vis(visibility);
-            //            parent.Children.Add(b2);
-            //        }
-            //        else if (enumsCount > 2 || enumsCount == 1)
-            //        {
-            //            ParamEnum paraviewE = new ParamEnum(para, paraType, enums) { Name = para.Id, Hash = hash };
-            //            paraviewE.ParamChanged += ParamChanged;
-            //            paraviewE.SetVisibility(vis2vis(visibility));
-            //            parent.Children.Add(paraviewE);
-            //            Params.Add(hash, paraviewE);
-            //        }
-            //        else
-            //        {
-            //            ParamEnum2 paraviewE2 = new ParamEnum2(para, paraType, enums) { Name = para.Id, Hash = hash };
-            //            paraviewE2.ParamChanged += ParamChanged;
-            //            paraviewE2.SetVisibility(vis2vis(visibility));
-            //            parent.Children.Add(paraviewE2);
-            //            Params.Add(hash, paraviewE2);
-            //        }
-            //        break;
-
-            //    case ParamTypes.None:
-            //        ParamNone paraviewNo = new ParamNone(para, paraType);
-            //        paraviewNo.SetVisibility(vis2vis(visibility));
-            //        parent.Children.Add(paraviewNo);
-            //        Params.Add(hash, paraviewNo);
-            //        break;
-            //}
         }
 
 
@@ -802,7 +829,90 @@ namespace Kaenx.Classes.Helper
             }
 
             adds.ParameterAll = ObjectToByteArray(paras);
-            adds.ParameterDefault = ObjectToByteArray(GetDefaultParams(paras));
+        }
+
+
+
+        public static bool CheckConditions(List<ParamCondition> conds, Dictionary<string, ViewParamModel> Id2Param = null)
+        {
+            Dictionary<string, string> tempValues = new Dictionary<string, string>();
+            bool flag = true;
+
+            foreach (ParamCondition cond in conds)
+            {
+                if (flag == false) break;
+                string paraValue = "";
+                if (Id2Param != null && Id2Param.ContainsKey(cond.SourceId))
+                {
+                    paraValue = Id2Param[cond.SourceId].Value;
+                }
+                else
+                {
+                    if (tempValues.ContainsKey(cond.SourceId))
+                        paraValue = tempValues[cond.SourceId];
+                    else
+                    {
+                        AppParameter pbPara = contextC.AppParameters.Single(p => p.Id == cond.SourceId);
+                        paraValue = pbPara.Value;
+                        tempValues.Add(cond.SourceId, paraValue);
+                    }
+                }
+
+                switch (cond.Operation)
+                {
+                    case ConditionOperation.IsInValue:
+                        if (!cond.Values.Split(",").Contains(paraValue))
+                            flag = false;
+                        break;
+
+                    case ConditionOperation.Default:
+                        //if(!checkDefault)
+                        //{
+
+                        //}
+                        break;
+
+                    case ConditionOperation.NotEqual:
+                        if (cond.Values == paraValue)
+                            flag = false;
+                        break;
+
+                    case ConditionOperation.Equal:
+                        if (cond.Values != paraValue)
+                            flag = false;
+                        break;
+
+                    case ConditionOperation.LowerThan:
+                        int valLT = int.Parse(paraValue);
+                        int valLTo = int.Parse(cond.Values);
+                        if ((valLT < valLTo) == false)
+                            flag = false;
+                        break;
+
+                    case ConditionOperation.LowerEqualThan:
+                        int valLET = int.Parse(paraValue);
+                        int valLETo = int.Parse(cond.Values);
+                        if ((valLET <= valLETo) == false)
+                            flag = false;
+                        break;
+
+                    case ConditionOperation.GreatherThan:
+                        int valGT = int.Parse(paraValue);
+                        int valGTo = int.Parse(cond.Values);
+                        if ((valGT > valGTo) == false)
+                            flag = false;
+                        break;
+
+                    case ConditionOperation.GreatherEqualThan:
+                        int valGET = int.Parse(paraValue);
+                        int valGETo = int.Parse(cond.Values);
+                        if ((valGET >= valGETo) == false)
+                            flag = false;
+                        break;
+                }
+            }
+
+            return flag;
         }
 
 
@@ -885,7 +995,17 @@ namespace Kaenx.Classes.Helper
                                     cond.Operation = ConditionOperation.GreatherThan;
                                     cond.Values = xele.Attribute("test").Value.Substring(1);
                                 }
-                            } 
+                            }
+                            else if (xele.Attribute("test")?.Value.StartsWith("!=") == true)
+                            {
+                                cond.Operation = ConditionOperation.NotEqual;
+                                cond.Values = xele.Attribute("test").Value.Substring(2);
+                            }
+                            else if (xele.Attribute("test")?.Value.StartsWith("=") == true)
+                            {
+                                cond.Operation = ConditionOperation.Equal;
+                                cond.Values = xele.Attribute("test").Value.Substring(1);
+                            }
                             else {
                                 string attrs = "";
                                 foreach(XAttribute attr in xele.Attributes())
@@ -920,59 +1040,6 @@ namespace Kaenx.Classes.Helper
             return (conds, "");
         }
 
-        private static List<AppParameter> GetDefaultParams(List<ParamVisHelper> paras)
-        {
-            //TODO nachschauen ob ParamVisHelper.Parameter wirklich als object benötigt wird!
-            Dictionary<string, string> tempValues = new Dictionary<string, string>();
-            ObservableCollection<AppParameter> defObjs = new ObservableCollection<AppParameter>();
-
-            Dictionary<string, AppParameter> parameters = new Dictionary<string, AppParameter>();
-
-            foreach (AppParameter para in contextC.AppParameters)
-                parameters.Add(para.Id, para);
-
-
-
-            foreach (ParamVisHelper obj in paras)
-            {
-                if (obj.Conditions.Count == 0)
-                {
-                    defObjs.Add(parameters[obj.ParameterId]);
-                    continue;
-                }
-
-                bool flag = true;
-                foreach (ParamCondition cond in obj.Conditions)
-                {
-                    string val = parameters[cond.SourceId].Value;
-
-                    switch (cond.Operation)
-                    {
-                        case ConditionOperation.IsInValue:
-                            if (!cond.Values.Split(",").Contains(val))
-                                flag = false;
-                            break;
-                        case ConditionOperation.Default:
-                            if (cond.Values.Split(",").Contains(val))
-                                flag = false;
-                            break;
-                        case ConditionOperation.NotEqual:
-                            if (cond.Values == val)
-                                flag = false;
-                            break;
-                        default:
-                            Log.Warning("GetDefaultParams nicht unterstützte Operation! " + cond.Operation.ToString());
-                            break;
-                    }
-                }
-
-                if (flag)
-                    defObjs.Add(parameters[obj.ParameterId]);
-            }
-
-            return defObjs.ToList();
-        }
-
         private static List<DeviceComObject> GetDefaultComs(List<DeviceComObject> comObjects)
         {
             Dictionary<string, string> tempValues = new Dictionary<string, string>();
@@ -986,36 +1053,8 @@ namespace Kaenx.Classes.Helper
                     continue;
                 }
 
-                bool flag = true;
-                foreach (ParamCondition cond in obj.Conditions)
-                {
-                    string val;
-                    if (tempValues.ContainsKey(cond.SourceId))
-                        val = tempValues[cond.SourceId];
-                    else
-                    {
-                        AppParameter pbPara = contextC.AppParameters.Single(p => p.Id == cond.SourceId);
-                        val = pbPara.Value;
-                        tempValues.Add(cond.SourceId, val);
-                    }
-
-                    switch (cond.Operation)
-                    {
-                        case ConditionOperation.IsInValue:
-                            if (!cond.Values.Split(",").Contains(val))
-                                flag = false;
-                            break;
-                        case ConditionOperation.Default:
-                            if (cond.Values.Split(",").Contains(val))
-                                flag = false;
-                            break;
-                        default:
-                            Log.Warning("GetDefaultParams nicht unterstützte Operation! " + cond.Operation.ToString());
-                            break;
-                    }
-                }
-
-                if (flag)
+                
+                if (CheckConditions(obj.Conditions))
                     defObjs.Add(obj);
             }
             defObjs.Sort(s => s.Number);

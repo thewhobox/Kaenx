@@ -24,7 +24,8 @@ namespace Kaenx.Classes.Dynamic
         GreatherEqualThan,
         LowerThan,
         LowerEqualThan,
-        NotEqual
+        NotEqual,
+        Equal
     }
 
 }

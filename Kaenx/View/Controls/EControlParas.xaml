@@ -63,47 +63,107 @@
         </DataTemplate>
 
         <DataTemplate x:Key="TypeNumber">
-            <Grid>
+            <Grid Visibility="{Binding Visible}" Margin="0 5">
                 <Grid.ColumnDefinitions>
-                    <ColumnDefinition />
-                    <ColumnDefinition Width="230" />
-                    <ColumnDefinition Width="60" />
+                    <ColumnDefinition MaxWidth="550" Width="9*" />
+                    <ColumnDefinition MinWidth="230" MaxWidth="350" Width="3*" />
+                    <ColumnDefinition MaxWidth="120" Width="1*" />
                 </Grid.ColumnDefinitions>
                 <TextBlock Text="{Binding Text}" Margin="10 0" VerticalAlignment="Center" />
 
                 <local:NumberBox Grid.Column="1" Value="{Binding Value}" ValueOk="{Binding Value, Mode=TwoWay}" Minimum="{Binding Minimum}" Maximum="{Binding Maximum}" />
-                <TextBlock Grid.Column="2" Width="60" Text="{Binding SuffixText}" Margin="10 0" VerticalAlignment="Center" />
+                <TextBlock Grid.Column="2" Text="{Binding SuffixText}" Margin="10 0" VerticalAlignment="Center" HorizontalAlignment="Left" />
             </Grid>
         </DataTemplate>
         <DataTemplate x:Key="TypeText">
-            <Grid Height="40" Visibility="{Binding Visible}">
+            <Grid Visibility="{Binding Visible}" Margin="0 5">
                 <Grid.ColumnDefinitions>
-                    <ColumnDefinition />
-                    <ColumnDefinition Width="290" />
+                    <ColumnDefinition MaxWidth="550" Width="9*" />
+                    <ColumnDefinition MinWidth="230" MaxWidth="350" Width="3*" />
+                    <ColumnDefinition MaxWidth="120" Width="1*" />
                 </Grid.ColumnDefinitions>
                 <TextBlock Text="{Binding Text}" Margin="10 0" VerticalAlignment="Center" TextWrapping="WrapWholeWords" />
-                <TextBox Grid.Column="1" MaxLength="{Binding MaxLength}" Text="{Binding Value, Mode=TwoWay}" Margin="0 0 60 0" VerticalAlignment="Center" />
+                <TextBox Grid.Column="1" MaxLength="{Binding MaxLength}" Text="{Binding Value, Mode=TwoWay}" VerticalAlignment="Center" />
+                <TextBlock Grid.Column="2" Text="{Binding SuffixText}" Margin="10 0" VerticalAlignment="Center" HorizontalAlignment="Left" />
             </Grid>
         </DataTemplate>
         <DataTemplate x:Key="TypeTextRead">
-            <Grid Height="40" Visibility="{Binding Visible}">
+            <Grid Visibility="{Binding Visible}" Margin="0 5">
                 <Grid.ColumnDefinitions>
-                    <ColumnDefinition />
-                    <ColumnDefinition Width="290" />
+                    <ColumnDefinition MaxWidth="550" Width="9*" />
+                    <ColumnDefinition MinWidth="230" MaxWidth="350" Width="3*" />
+                    <ColumnDefinition MaxWidth="120" Width="1*" />
                 </Grid.ColumnDefinitions>
                 <TextBlock Text="{Binding Text}" Margin="10 0" VerticalAlignment="Center" TextWrapping="WrapWholeWords" />
-                <TextBlock Grid.Column="1" Text="{Binding Value, Mode=TwoWay}" VerticalAlignment="Center" Margin="0 0 60 0" />
+                <TextBlock Grid.Column="1" Text="{Binding Value, Mode=TwoWay}" VerticalAlignment="Center" />
+                <TextBlock Grid.Column="2" Text="{Binding SuffixText}" Margin="10 0" VerticalAlignment="Center" HorizontalAlignment="Left" />
             </Grid>
         </DataTemplate>
         <DataTemplate x:Key="TypeEnums">
-            <Grid Height="40" Visibility="{Binding Visible}">
+            <Grid Visibility="{Binding Visible}" Margin="0 5">
                 <Grid.ColumnDefinitions>
-                    <ColumnDefinition />
-                    <ColumnDefinition Width="290" />
+                    <ColumnDefinition MaxWidth="550" Width="9*" />
+                    <ColumnDefinition MinWidth="230" MaxWidth="350" Width="3*" />
+                    <ColumnDefinition MaxWidth="120" Width="1*" />
                 </Grid.ColumnDefinitions>
                 <TextBlock Text="{Binding Text}" Margin="10 0" VerticalAlignment="Center" TextWrapping="WrapWholeWords" />
-                <ComboBox Grid.Column="1" ItemsSource="{Binding Options}" DisplayMemberPath="Text" SelectedValuePath="Value" SelectedValue="{Binding Value, Mode=TwoWay}" Margin="0 0 60 0" VerticalAlignment="Center" HorizontalAlignment="Stretch" />
+                <ComboBox Grid.Column="1" ItemsSource="{Binding Options}" DisplayMemberPath="Text" SelectedValuePath="Value" SelectedValue="{Binding Value, Mode=TwoWay}" VerticalAlignment="Center" HorizontalAlignment="Stretch" />
+                <TextBlock Grid.Column="2" Text="{Binding SuffixText}" Margin="10 0" VerticalAlignment="Center" HorizontalAlignment="Left" />
             </Grid>
+        </DataTemplate>
+        <DataTemplate x:Key="TypeEnumsTwo">
+            <Grid Visibility="{Binding Visible}" Margin="0 5">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition MaxWidth="550" Width="9*" />
+                    <ColumnDefinition MinWidth="230" MaxWidth="350" Width="3*" />
+                    <ColumnDefinition MaxWidth="120" Width="1*" />
+                </Grid.ColumnDefinitions>
+                <TextBlock Text="{Binding Text}" Margin="10 0" VerticalAlignment="Center" TextWrapping="WrapWholeWords" />
+
+                <StackPanel Grid.Column="1">
+                    <RadioButton Content="{Binding Option1.Text}" GroupName="{Binding Id}" Visibility="{Binding Visible}" />
+                    <RadioButton Content="{Binding Option2.Text}" GroupName="{Binding Id}" Visibility="{Binding Visible}" />
+                </StackPanel>
+                <TextBlock Grid.Column="2" Text="{Binding SuffixText}" Margin="10 0" VerticalAlignment="Center" HorizontalAlignment="Left" />
+            </Grid>
+        </DataTemplate>
+        <DataTemplate x:Key="TypeCheckBox">
+            <Grid Visibility="{Binding Visible}" Margin="0 5">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition MaxWidth="550" Width="9*" />
+                    <ColumnDefinition MinWidth="230" MaxWidth="350" Width="3*" />
+                    <ColumnDefinition MaxWidth="120" Width="1*" />
+                </Grid.ColumnDefinitions>
+                <TextBlock Text="{Binding Text}" Margin="10 0" VerticalAlignment="Center" TextWrapping="WrapWholeWords" />
+
+                <CheckBox Grid.Column="1" />
+                <TextBlock Grid.Column="2" Text="{Binding SuffixText}" Margin="10 0" VerticalAlignment="Center" HorizontalAlignment="Left" />
+            </Grid>
+        </DataTemplate>
+        <DataTemplate x:Key="TypeSeperator">
+            <Grid Visibility="{Binding Visible}" Margin="0 5">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition MaxWidth="550" Width="9*" />
+                    <ColumnDefinition MinWidth="230" MaxWidth="350" Width="3*" />
+                    <ColumnDefinition MaxWidth="120" Width="1*" />
+                </Grid.ColumnDefinitions>
+
+                <Border Grid.ColumnSpan="3" BorderBrush="{ThemeResource BrushAccentColor2}" BorderThickness="0 1 0 0" Visibility="{Binding IsLineVisible}" />
+                <TextBlock Grid.ColumnSpan="2" Text="{Binding Text}" Foreground="{ThemeResource BrushAccentColorDark1}" Visibility="{Binding IsTextVisible}" Margin="10 0" VerticalAlignment="Center" TextWrapping="WrapWholeWords" />
+            </Grid>
+        </DataTemplate>
+        <DataTemplate x:Key="TypeSeperatorBox">
+            <Border Visibility="{Binding Visible}" Margin="0 5" Padding="10" BorderThickness="1" BorderBrush="{Binding BBorder}" Background="{Binding BBackground}">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="auto" />
+                        <ColumnDefinition />
+                    </Grid.ColumnDefinitions>
+
+                    <SymbolIcon Symbol="{Binding Icon}" Margin="10" />
+                    <TextBlock Grid.Column="1" Text="{Binding Text}" HorizontalAlignment="Center" VerticalAlignment="Center" TextWrapping="WrapWholeWords" />
+                </Grid>
+            </Border>
         </DataTemplate>
 
         <selectors:BlockSelector x:Key="BlockSelector" Channel="{StaticResource ChannelTemplate}" Independent="{StaticResource IndependentTemplate}" />
@@ -112,22 +172,16 @@
                                               Number="{StaticResource TypeNumber}"
                                               Text="{StaticResource TypeText}"
                                               TextRead="{StaticResource TypeTextRead}"
-                                              Enums="{StaticResource TypeEnums}"/>
+                                              Enums="{StaticResource TypeEnums}"
+                                              EnumsTwo="{StaticResource TypeEnumsTwo}"
+                                              CheckBox="{StaticResource TypeCheckBox}"
+                                              Seperator="{StaticResource TypeSeperator}"
+                                              SeperatorBox="{StaticResource TypeSeperatorBox}" />
     </UserControl.Resources>
 
     <Grid>
         <VisualStateManager.VisualStateGroups>
             <VisualStateGroup>
-                <VisualState>
-                    <VisualState.StateTriggers>
-                        <StateTrigger IsActive="{Binding IsBigView}" />
-                    </VisualState.StateTriggers>
-                    <VisualState.Setters>
-                        <Setter Target="ColsPara.Width" Value="850" />
-                        <Setter Target="ColsComs.Width" Value="*" />
-                        <Setter Target="ShowComsToggler.Visibility" Value="Collapsed" />
-                    </VisualState.Setters>
-                </VisualState>
                 <VisualState>
                     <VisualState.StateTriggers>
                         <StateTrigger IsActive="{Binding ElementName=ShowComsToggler, Path=IsOn}" />
@@ -149,7 +203,7 @@
             <ColumnDefinition x:Name="ColsComs" Width="0" />
         </Grid.ColumnDefinitions>
 
-        <ToggleSwitch x:Name="ShowComsToggler" Grid.ColumnSpan="2" HorizontalAlignment="Center" OnContent="Kommunikationsobjekte anzeigen" OffContent="Kommunikationsobjekte ausblenden"  />
+        <ToggleSwitch x:Name="ShowComsToggler" Grid.ColumnSpan="2" HorizontalAlignment="Center" OnContent="Ansicht Kommunikationsobjekte" OffContent="Ansicht Kommunikationsobjekte"  />
 
         <Grid Grid.Row="1" BorderBrush="{ThemeResource BrushAccentColorDark2}" BorderThickness="1" >
             <Grid.ColumnDefinitions>
@@ -163,6 +217,7 @@
                     <Style TargetType="ListViewItem">
                         <Setter Property="HorizontalContentAlignment" Value="Stretch" />
                         <Setter Property="Padding" Value="0" />
+                        <Setter Property="MinHeight" Value="0" />
                     </Style>
                 </ListView.ItemContainerStyle>
             </ListView>
@@ -172,6 +227,7 @@
                     <Style TargetType="ListViewItem">
                         <Setter Property="HorizontalContentAlignment" Value="Stretch" />
                         <Setter Property="Padding" Value="0" />
+                        <Setter Property="MinHeight" Value="0" />
                     </Style>
                 </ListView.ItemContainerStyle>
             </ListView>

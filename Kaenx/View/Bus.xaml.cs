@@ -13,6 +13,7 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Runtime.InteropServices.WindowsRuntime;
+using System.Timers;
 using Windows.Foundation;
 using Windows.Foundation.Collections;
 using Windows.UI.Xaml;
@@ -36,6 +37,7 @@ namespace Kaenx.View
         public ObservableCollection<IBusData> ReadList { get; } = new ObservableCollection<IBusData>();
         public ObservableCollection<MonitorTelegram> TelegramList { get; } = new ObservableCollection<MonitorTelegram>();
 
+        private Timer _statusTimer = new Timer();
         private Connection _conn = null;
 
         public Bus()
@@ -43,8 +45,15 @@ namespace Kaenx.View
             this.InitializeComponent();
             GridReads.DataContext = ReadList;
             GridBusMonitor.DataContext = TelegramList;
+
+            _statusTimer.Interval = TimeSpan.FromSeconds(30).TotalMilliseconds;
+            _statusTimer.Elapsed += _statusTimer_Elapsed;
         }
 
+        private void _statusTimer_Elapsed(object sender, ElapsedEventArgs e)
+        {
+            _conn.SendStatusReq();
+        }
 
         private void ReadInfo(object sender, RoutedEventArgs e)
         {
@@ -111,8 +120,10 @@ namespace Kaenx.View
                 tel.Type = Konnect.Parser.ApciTypes.Connect;
                 TelegramList.Insert(0, tel);
                 (BtnMonitorToggle.Content as SymbolIcon).Symbol = Symbol.Pause;
+                _statusTimer.Start();
             } else
             {
+                _statusTimer.Stop();
                 _conn.Disconnect();
                 _conn = null;
                 MonitorTelegram tel = new MonitorTelegram();
