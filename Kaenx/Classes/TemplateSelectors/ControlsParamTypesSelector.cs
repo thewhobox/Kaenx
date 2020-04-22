@@ -29,8 +29,11 @@ namespace Kaenx.Classes.TemplateSelectors
                 case ParamNumber pnu:
                     return Number;
 
-                case ParamText pte: //TODO implement TextRead
+                case ParamText pte:
                     return Text;
+
+                case ParamTextRead pter:
+                    return TextRead;
 
                 case ParamEnum pen:
                     return Enums;

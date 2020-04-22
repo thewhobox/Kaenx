@@ -33,9 +33,8 @@ namespace Kaenx.Classes.Dynamic
         public Visibility SuffixIsVisible { get { return string.IsNullOrEmpty(SuffixText) ? Visibility.Collapsed : Visibility.Visible; } }
 
         public List<ParamEnumOption> Options { get; set; }
-
+        public bool IsEnabled { get; set; } = true;
         public List<ParamCondition> Conditions { get; set; }
-
         public event PropertyChangedEventHandler PropertyChanged;
     }
 }

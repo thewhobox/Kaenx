@@ -161,14 +161,20 @@ namespace Kaenx.Classes.Helper
                     string manuId = device.ApplicationId.Substring(0, device.ApplicationId.IndexOf('_'));
                     ZipArchiveEntry appEntry = Imports.Archive.GetEntry(manuId + "/" + device.ApplicationId + ".xml");
                     List<string> errs = new List<string>();
-                    CheckApplication(XmlReader.Create(appEntry.Open()), errs);
+                    bool isOk = CheckApplication(XmlReader.Create(appEntry.Open()), errs);
+
+                    if (!isOk)
+                    {
+                        Log.Error("Check mit Warnungen bestanden! " + string.Join(",", errs));
+                        OnWarning?.Invoke(device.ApplicationId + ": Die Applikation hat die Überprüfung nicht bestanden. (evtl. Plugin benötigt) " + string.Join(",", errs));
+                        device.Icon = Symbol.ReportHacked;
+                        continue;
+                    }
 
                     if (errs.Count > 0)
                     {
-                        Log.Error("Check nicht bestanden! " + string.Join(",", errs));
-                        OnError?.Invoke(device.ApplicationId + ": Die Applikation hat die Überprüfung nicht bestanden. (evtl. Plugin benötigt) " + string.Join(",", errs));
-                        device.Icon = Symbol.ReportHacked;
-                        continue;
+                        Log.Error("Check mit Warnungen bestanden! " + string.Join(",", errs));
+                        OnWarning?.Invoke(device.ApplicationId + ": Die Applikation hat die Überprüfung nicht bestanden. (evtl. Plugin benötigt) " + string.Join(",", errs));
                     }
 
                     await Task.Delay(10);
@@ -618,205 +624,6 @@ namespace Kaenx.Classes.Helper
             }
         }
 
-        //TODO really implement a check. dont forget to clean catalog sections
-        public async Task CheckParams()
-        {
-            Dictionary<string, string> App2Hardware = new Dictionary<string, string>();
-            ProgressMaxChanged(App2Hardware.Count);
-            int count = 0;
-
-            foreach (string appId in App2Hardware.Keys)
-            {
-                IEnumerable<AppSegmentViewModel> segmentsList = _context.AppAbsoluteSegments.Where(s => s.ApplicationId == appId);
-
-                Dictionary<string, byte[]> segments = new Dictionary<string, byte[]>();
-                //Dictionary<string, int> cachedTypeLength = new Dictionary<string, int>();
-                //Dictionary<string, AppParameterTypeViewModel> cachedType = new Dictionary<string, AppParameterTypeViewModel>();
-
-                foreach (AppSegmentViewModel s2p in segmentsList)
-                {
-                    if (s2p.Data == null) continue;
-                    byte[] bytes = Convert.FromBase64String(s2p.Data);
-                    segments.Add(s2p.Id, bytes);
-                }
-                segmentsList = null;
-
-                IEnumerable<AppParameter> ps = _context.AppParameters.Where(p => p.ApplicationId == appId);
-
-                ProgressAppMaxChanged(ps.Count());
-
-                #region Generate AppSegment
-                //foreach (AppParameter para in ps)
-                //{
-                //    c++;
-                //    ProgressAppChanged(c);
-                //    if (c % 10 == 0) await Task.Delay(1);
-
-                //    if (para.Access != AccessType.Full)
-                //        continue;
-
-                //    if (para.AbsoluteSegmentId == null || !segments.Keys.Contains(para.AbsoluteSegmentId))
-                //        continue;
-
-                //    AppParameterTypeViewModel paratype = null;
-
-
-                //    if (!cachedType.Keys.Contains(para.ParameterTypeId))
-                //    {
-                //        paratype = _context.AppParameterTypes.Single(p => p.Id == para.ParameterTypeId);
-                //        cachedType.Add(paratype.Id, paratype);
-                //    }
-                //    else
-                //    {
-                //        paratype = cachedType[para.ParameterTypeId];
-                //    }
-
-                //    if (paratype.Type != ParamTypes.Enum)
-                //        continue;
-
-                //    byte[] data = segments[para.AbsoluteSegmentId];
-                //    byte[] readed = null;
-
-                //    int length = 0;
-                //    int lengthToRead = 0;
-
-                //    if (!cachedTypeLength.Keys.Contains(para.ParameterTypeId))
-                //    {
-                //        AppParameterTypeViewModel paraType = _context.AppParameterTypes.Single(pt => pt.Id == para.ParameterTypeId);
-                //        length = paraType.Size;
-                //        cachedTypeLength.Add(para.ParameterTypeId, length);
-                //    }
-                //    else
-                //    {
-                //        length = cachedTypeLength[para.ParameterTypeId];
-                //    }
-
-                //    if (length < 7)
-                //    {
-                //        lengthToRead = 1;
-                //        readed = new byte[1];
-                //    }
-                //    else
-                //    {
-                //        lengthToRead = (length / 8);
-                //        readed = new byte[lengthToRead];
-                //    }
-
-                //    for (int i = para.Offset; i < para.Offset + lengthToRead; i++)
-                //    {
-                //        readed[i - para.Offset] = data[i];
-                //    }
-
-
-                //    string value = "";
-
-                //    if (length < 7)
-                //    {
-                //        byte[] toread = new byte[1];
-                //        toread[0] = readed[0];
-                //        System.Collections.BitArray arr = new System.Collections.BitArray(toread);
-                //        System.Collections.BitArray readedArr = new System.Collections.BitArray(8);
-                //        byte[] readedBytes = new byte[2];
-                //        try
-                //        {
-                //            for (int i = 0; i < length; i++)
-                //            {
-                //                readedArr[i] = arr[i + para.OffsetBit];
-                //            }
-                //        } catch(Exception e)
-                //        {
-
-                //        }
-
-                //        byte a = 0;
-                //        if (readedArr.Get(0)) a++;
-                //        if (readedArr.Get(1)) a += 2;
-                //        if (readedArr.Get(2)) a += 4;
-                //        if (readedArr.Get(3)) a += 8;
-                //        if (readedArr.Get(4)) a += 16;
-                //        if (readedArr.Get(5)) a += 32;
-                //        if (readedArr.Get(6)) a += 64;
-                //        if (readedArr.Get(7)) a += 128;
-
-                //        byte[] y = new byte[2];
-                //        y[0] = a;
-
-                //        uint a1 = BitConverter.ToUInt16(y, 0);
-
-                //        value = a1.ToString();
-                //    }
-                //    else
-                //    {
-                //        if (readed.Count() < 2)
-                //        {
-                //            byte temp = readed[0];
-                //            readed = new byte[2];
-                //            readed[0] = temp;
-                //        }
-                //        readed = readed.Reverse().ToArray();
-                //        value = BitConverter.ToUInt16(readed, 0).ToString();
-                //    }
-
-                //    bool exists = _context.AppParameterTypeEnums.Any(pe => pe.Value == value && pe.ParameterId == paratype.Id);
-
-                //    if (!exists)
-                //    {
-                //        if (length < 8)
-                //        {
-                //            UInt16 numb = UInt16.Parse(para.Value);
-                //            byte[] converted = BitConverter.GetBytes(numb);
-                //            byte[] segBytes = new byte[1];
-                //            segBytes[0] = segments[para.AbsoluteSegmentId][para.Offset];
-                //            System.Collections.BitArray convArr = new System.Collections.BitArray(converted);
-                //            System.Collections.BitArray segmArr = new System.Collections.BitArray(segBytes);
-                //            for (int i = 0; i < length; i++)
-                //            {
-                //                segmArr[i + para.OffsetBit] = convArr[i];
-                //            }
-                //            byte a = 0;
-                //            if (segmArr.Get(0)) a++;
-                //            if (segmArr.Get(1)) a += 2;
-                //            if (segmArr.Get(2)) a += 4;
-                //            if (segmArr.Get(3)) a += 8;
-                //            if (segmArr.Get(4)) a += 16;
-                //            if (segmArr.Get(5)) a += 32;
-                //            if (segmArr.Get(6)) a += 64;
-                //            if (segmArr.Get(7)) a += 128;
-
-                //            segments[para.AbsoluteSegmentId][para.Offset] = a;
-                //        }
-                //        else
-                //        {
-                //            byte[] toWrite = new byte[2];
-                //            UInt16 numb = UInt16.Parse(para.Value);
-                //            byte[] converted = BitConverter.GetBytes(numb);
-                //            if (converted[1] != 0)
-                //                converted = converted.Reverse().ToArray();
-
-                //            for (int i1 = 0; i1 < lengthToRead; i1++)
-                //            {
-                //                segments[para.AbsoluteSegmentId][para.Offset + i1] = converted[i1];
-                //            }
-                //        }
-                //    }
-                //}
-                #endregion
-
-                foreach (string segId in segments.Keys)
-                {
-                    AppSegmentViewModel seg = _context.AppAbsoluteSegments.FirstOrDefault(a => a.Id == segId);
-                    seg.Data = Convert.ToBase64String(segments[segId]);
-                    _context.AppAbsoluteSegments.Update(seg);
-                }
-
-                count++;
-                ProgressChanged(count);
-                await Task.Delay(1000);
-            }
-
-            _context.SaveChanges();
-        }
-
         public async Task<List<DeviceViewModel>> CheckDevices()
         {
 
@@ -1226,10 +1033,16 @@ namespace Kaenx.Classes.Helper
 
                 AppParameter old = Params[pref.Attribute("RefId").Value];
                 bool existed = contextIds.Contains(pref.Attribute("Id").Value);
-                if (existed) continue;
+                AppParameter final;
+                if (existed)
+                {
+                    final = context.AppParameters.Single(p => p.Id == pref.Attribute("Id").Value);
+                } else
+                {
+                    final = new AppParameter();
+                    final.LoadPara(old);
+                }
 
-                AppParameter final = new AppParameter();
-                final.LoadPara(old);
                 final.Id = pref.Attribute("Id").Value;
                 final.ApplicationId = app.Id;
 
@@ -1239,11 +1052,23 @@ namespace Kaenx.Classes.Helper
                 string value = pref.Attribute("Value")?.Value;
                 final.Value = value == null ? old.Value : value;
 
-                AccessType access = (pref.Attribute("Access")) == null ? AccessType.Null : ((pref.Attribute("Access").Value == "None") ? AccessType.None : AccessType.Full);
+                AccessType access = AccessType.Null;
+                switch (pref.Attribute("Access")?.Value)
+                {
+                    case "None":
+                        access = AccessType.None;
+                        break;
+                    case "Read":
+                        access = AccessType.Read;
+                        break;
+                }
                 final.Access = access == AccessType.Null ? old.Access : access;
 
                 ParamrefIds.Add(final.Id);
-                context.AppParameters.Add(final);
+                if (existed)
+                    context.AppParameters.Update(final);
+                else
+                    context.AppParameters.Add(final);
             }
 
 
@@ -1407,14 +1232,10 @@ namespace Kaenx.Classes.Helper
                     }
                 }
 
-
-
                 context.AppComObjects.Add(obj);
             }
             ParamrefIds.Clear();
             ParamrefIds = null;
-
-
 
             if (doc.Descendants(GetXName("AddressTable")).Count() != 0)
             {
@@ -1587,10 +1408,6 @@ namespace Kaenx.Classes.Helper
             else
                 Log.Information("Kein Dynamic vorhanden");
 
-
-            SaveHelper.GenerateDynamic(adds);
-
-
             Log.Information("Standard ComObjects werden generiert");
             ProgressChanged?.Invoke(3);
             OnDeviceChanged(currentAppName + " - Generiere ComObjects");
@@ -1601,15 +1418,15 @@ namespace Kaenx.Classes.Helper
             sw.Stop();
             Debug.WriteLine("Generate Coms: " + sw.Elapsed.TotalSeconds);
 
-            Log.Information("Standard Props werden generiert");
+            Log.Information("Dynamics werden generiert");
             ProgressChanged?.Invoke(4);
-            OnDeviceChanged(currentAppName + " - Generiere Props");
+            OnDeviceChanged(currentAppName + " - Generiere Dynamics");
             await Task.Delay(10);
             sw = new Stopwatch();
             sw.Start();
-            SaveHelper.GenerateVisibleProps(adds);
+            SaveHelper.GenerateDynamic(adds);
             sw.Stop();
-            Debug.WriteLine("Generate Props: " + sw.Elapsed.TotalSeconds);
+            Debug.WriteLine("Generate Dyn: " + sw.Elapsed.TotalSeconds);
 
             if (existedAdds)
                 context.AppAdditionals.Update(adds);

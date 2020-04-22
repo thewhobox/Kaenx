@@ -30,6 +30,7 @@ using Windows.UI.Xaml.Input;
 using Windows.UI.Xaml.Media;
 using Windows.UI.Xaml.Navigation;
 using Microsoft.Toolkit.Uwp.UI.Controls;
+using Windows.ApplicationModel.Background;
 
 // Die Elementvorlage "Benutzersteuerelement" wird unter https://go.microsoft.com/fwlink/?LinkId=234236 dokumentiert.
 
@@ -176,22 +177,13 @@ namespace Kaenx.Views.Easy.Controls
                 }
             }
 
-            //Berechne ob Objekt sichtbar ist
-            foreach (IDynChannel ch in Channels)
+            foreach(ChangeParamModel change in ParaChanges.Values)
             {
-                ch.Visible = SaveHelper.CheckConditions(ch.Conditions, Id2Param) ? Visibility.Visible : Visibility.Collapsed;
-
-                foreach (ParameterBlock block in ch.Blocks)
-                {
-                    block.Visible = SaveHelper.CheckConditions(block.Conditions, Id2Param) ? Visibility.Visible : Visibility.Collapsed;
-
-                    foreach (IDynParameter para in block.Parameters)
-                    {
-                        para.Visible = SaveHelper.CheckConditions(para.Conditions, Id2Param) ? Visibility.Visible : Visibility.Collapsed;
-                    }
-                }
+                IDynParameter para = Id2Param[change.ParamId].Parameters[0];
+                para.Value = change.Value;
+                Id2Param[change.ParamId].Value = para.Value;
+                Para_PropertyChanged(para);
             }
-
 
 
             LoadRing.Visibility = Visibility.Collapsed;
@@ -199,20 +191,30 @@ namespace Kaenx.Views.Easy.Controls
             ViewHelper.Instance.ShowNotification("main", "Geladen nach: " + watch.Elapsed.TotalSeconds + "s", 3000);
         }
 
-        private void Para_PropertyChanged(object sender, PropertyChangedEventArgs e)
+        private void Para_PropertyChanged(object sender, PropertyChangedEventArgs e = null)
         {
-            if (e.PropertyName != "Value") return;
+            if (e != null && e.PropertyName != "Value") return;
 
             IDynParameter para = sender as IDynParameter;
             Debug.WriteLine("Wert geändert! " + para.Id + " -> " + para.Value);
 
+            #region Parameter neu berechnen
             Id2Param[para.Id].Value = para.Value;
 
+            List<ChannelBlock> list = new List<ChannelBlock>();
+
             List<ParameterBlock> list2 = new List<ParameterBlock>();
-            foreach(IDynChannel ch in Channels)
+            foreach (IDynChannel ch in Channels)
             {
+                if (ch is ChannelBlock && ch.Conditions.Any(c => c.SourceId == para.Id)) list.Add(ch as ChannelBlock);
+
                 list2.AddRange(ch.Blocks.Where(b => b.Conditions.Any(c => c.SourceId == para.Id)));
             }
+            foreach (ChannelBlock block in list)
+            {
+                block.Visible = SaveHelper.CheckConditions(block.Conditions, Id2Param) ? Visibility.Visible : Visibility.Collapsed;
+            }
+
             foreach(ParameterBlock block in list2)
             {
                 block.Visible = SaveHelper.CheckConditions(block.Conditions, Id2Param) ? Visibility.Visible : Visibility.Collapsed;
@@ -223,55 +225,23 @@ namespace Kaenx.Views.Easy.Controls
             {
                 par.Visible = SaveHelper.CheckConditions(par.Conditions, Id2Param) ? Visibility.Visible : Visibility.Collapsed;
             }
+            #endregion
+
+
+
+            ChangeParamModel change = new ChangeParamModel
+            {
+                DeviceId = device.UId,
+                ParamId = para.Id,
+                Value = para.Value
+            };
+
+            device.LoadedApplication = false;
+            ChangeHandler.Instance.ChangedParam(change);
         }
 
         
-
-        
         /*
-
-        private async void ParamChanged(IParam param)
-        {
-            string source = param.ParamId;
-            string value = param.GetValue();
-            List<DeviceComObject> deleteList = CheckRemoveComObjects(source, value);
-
-            if(deleteList.Count != 0)
-            {
-                DiagComsDeleted dcoms = new DiagComsDeleted();
-                dcoms.SetComs(deleteList);
-                await dcoms.ShowAsync();
-                if (dcoms.DoDelete == false)
-                {
-                    param.SetValue(AppParas[param.ParamId].Value);
-                    return;
-                }
-            }
-
-            AppParameter para = AppParas[source];
-            para.Value = value;
-            IEnumerable<ParamVisHelper> helpers = conditions.Where(h => h.Conditions.Any(c => c.SourceId == source));
-
-            foreach(ParamVisHelper helper in helpers)
-            {
-                if (!Params.ContainsKey(helper.Hash)) continue;
-
-                bool flag = CheckConditions(helper.Conditions);
-                Params[helper.Hash].SetVisibility(flag ? Visibility.Visible : Visibility.Collapsed);
-            }
-
-
-
-            IEnumerable<BlockVisHelper> helpersB = helperBlock.Where(h => h.Conditions.Any(c => c.SourceId == source));
-            foreach(BlockVisHelper helper in helpersB)
-            {
-                bool flag = CheckConditions(helper.Conditions);
-                helper.Block.Visible = flag ? Visibility.Visible : Visibility.Collapsed;
-            }
-
-            if (helpersB.Count() > 0)
-                filterBlocks();
-
 
             foreach(Binding bind in bindings.Where(b => b.Id == source))
             {
@@ -303,25 +273,6 @@ namespace Kaenx.Views.Easy.Controls
         }
 
         
-
-        private AppParameterTypeViewModel GetParamType(string id)
-        {
-            try
-            {
-                if (AppParaTypess.ContainsKey(id))
-                    return AppParaTypess[id];
-
-                AppParameterTypeViewModel type = _context.AppParameterTypes.Single(pt => pt.Id == id);
-                AppParaTypess.Add(id, type);
-                return type;
-            } catch(Exception e)
-            {
-                Log.Error(e, "GetParamType Fehler!");
-            }
-            return null;
-        }
-
-
 
 
         private List<DeviceComObject> CheckRemoveComObjects(string paraId, string paraValue)

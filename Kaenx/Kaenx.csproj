@@ -135,6 +135,8 @@
     <Compile Include="Classes\Bus\Data\ErrorData.cs" />
     <Compile Include="Classes\Bus\Data\IBusData.cs" />
     <Compile Include="Classes\Bus\Data\NewDeviceData.cs" />
+    <Compile Include="Classes\Converter\ValueRadioButtonConverter.cs" />
+    <Compile Include="Classes\Converter\ValueCheckBoxConverter.cs" />
     <Compile Include="Classes\Device.cs" />
     <Compile Include="Classes\ComboItemSimple.cs" />
     <Compile Include="Classes\Controls\ControlUpdate.xaml.cs">

@@ -38,7 +38,7 @@
             <Border Grid.ColumnSpan="5" Background="{ThemeResource BrushAccentColor2}">
                 <StackPanel  Orientation="Horizontal" HorizontalAlignment="Right">
                     <TextBox Width="200" x:Uid="/Catalog/BarSearch" x:Name="BarSearchIn" VerticalAlignment="Center" BorderBrush="White" Foreground="White" TextChanged="SearchTextChanged" />
-                    <AppBarSeparator Foreground="White" Margin="10 0" />
+                    <AppBarSeparator Foreground="White" Margin="10 0" VerticalAlignment="Center" />
                    
                     <AppBarButton x:Uid="/Catalog/BarDelete" x:Name="BarDelete" Click="ClickDelete" Icon="Delete" Foreground="White" IsEnabled="False">
                         <AppBarButton.KeyboardAccelerators>

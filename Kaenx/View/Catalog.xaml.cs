@@ -297,48 +297,57 @@ namespace Kaenx.View
 
         private void ClickDelete(object sender, RoutedEventArgs e)
         {
-            DeviceViewModel device = CatalogDeviceList.SelectedItem as DeviceViewModel;
-            _context.Devices.Remove(device);
-
-            if (device.HasApplicationProgram)
+            foreach(DeviceViewModel device in CatalogDeviceList.SelectedItems)
             {
-                int count = _context.Devices.Count(d => d != device && d.HardwareId == device.HardwareId);
-                if(count == 0)
+                _context.Devices.Remove(device);
+
+                if (device.HasApplicationProgram)
                 {
-                    Hardware2AppModel h2a = _context.Hardware2App.Single(h => h.HardwareId == device.HardwareId);
-                    _context.Hardware2App.Remove(h2a);
-                    count = _context.Hardware2App.Count(h => h != h2a && h.ApplicationId == h2a.ApplicationId);
-
-                    if(count == 0)
+                    int count = _context.Devices.Count(d => d != device && d.HardwareId == device.HardwareId);
+                    if (count == 0)
                     {
-                        IEnumerable<object> tempList = _context.AppAbsoluteSegments.Where(a => a.ApplicationId == h2a.ApplicationId);
-                        _context.RemoveRange(tempList);
+                        Hardware2AppModel h2a = _context.Hardware2App.Single(h => h.HardwareId == device.HardwareId);
+                        _context.Hardware2App.Remove(h2a);
+                        count = _context.Hardware2App.Count(h => h != h2a && h.ApplicationId == h2a.ApplicationId);
 
-                        tempList = _context.AppComObjects.Where(a => a.ApplicationId == h2a.ApplicationId);
-                        _context.RemoveRange(tempList);
-
-                        tempList = _context.Applications.Where(a => a.Id == h2a.ApplicationId);
-                        _context.RemoveRange(tempList);
-
-                        tempList = _context.AppParameters.Where(a => a.ApplicationId == h2a.ApplicationId);
-                        _context.RemoveRange(tempList);
-
-                        List<object> toDelete = new List<object>();
-                        foreach (AppParameter para in tempList)
+                        if (count == 0)
                         {
-                            AppParameterTypeViewModel pType = _context.AppParameterTypes.Single(p => p.Id == para.ParameterTypeId);
-                            toDelete.Add(pType);
+                            IEnumerable<object> tempList = _context.AppAbsoluteSegments.Where(a => a.ApplicationId == h2a.ApplicationId);
+                            _context.RemoveRange(tempList);
 
-                            if(pType.Type == ParamTypes.Enum)
+                            tempList = _context.AppComObjects.Where(a => a.ApplicationId == h2a.ApplicationId);
+                            _context.RemoveRange(tempList);
+
+                            tempList = _context.Applications.Where(a => a.Id == h2a.ApplicationId);
+                            _context.RemoveRange(tempList);
+
+                            tempList = _context.AppParameters.Where(a => a.ApplicationId == h2a.ApplicationId);
+                            _context.RemoveRange(tempList);
+
+                            List<AppParameterTypeViewModel> toDelete = new List<AppParameterTypeViewModel>();
+                            foreach (AppParameter para in tempList)
                             {
-                                IEnumerable<object> tempList2 = _context.AppParameterTypeEnums.Where(e => e.ParameterId == pType.Id);
-                                _context.RemoveRange(tempList2);
+                                AppParameterTypeViewModel pType = _context.AppParameterTypes.Single(p => p.Id == para.ParameterTypeId);
+                                toDelete.Add(pType);
+
+                                if (pType.Type == ParamTypes.Enum)
+                                {
+                                    IEnumerable<AppParameterTypeEnumViewModel> tempList2 = _context.AppParameterTypeEnums.Where(e => e.ParameterId == pType.Id);
+                                    _context.AppParameterTypeEnums.RemoveRange(tempList2);
+                                }
+                            }
+                            _context.AppParameterTypes.RemoveRange(toDelete);
+
+                            try
+                            {
+                                AppAdditional adds = _context.AppAdditionals.Single(a => a.Id == h2a.ApplicationId);
+                                _context.AppAdditionals.Remove(adds);
+                            }
+                            catch
+                            {
+
                             }
                         }
-                        _context.RemoveRange(toDelete);
-
-                        AppAdditional adds = _context.AppAdditionals.Single(a => a.Id == h2a.ApplicationId);
-                        _context.AppAdditionals.Remove(adds);
                     }
                 }
             }

@@ -19,6 +19,7 @@ using System.Xml;
 using System.Xml.Linq;
 using Windows.Devices.Bluetooth.Advertisement;
 using Windows.Storage;
+using Windows.UI.Xaml;
 
 namespace Kaenx.Classes.Helper
 {
@@ -607,8 +608,50 @@ namespace Kaenx.Classes.Helper
             }
             contextC.SaveChanges();
 
+            Id2Element.Clear();
+            Id2ParamBlock.Clear();
+
+
+            #region Brechne Standard sichtbarkeit
+
+            Dictionary<string, ViewParamModel> Id2Param = new Dictionary<string, ViewParamModel>();
+
+            foreach (IDynChannel ch in Channels)
+            {
+                foreach (ParameterBlock block in ch.Blocks)
+                {
+                    foreach (IDynParameter para in block.Parameters)
+                    {
+                        if (!Id2Param.ContainsKey(para.Id))
+                            Id2Param.Add(para.Id, new ViewParamModel(para.Value));
+
+                        Id2Param[para.Id].Parameters.Add(para);
+                    }
+                }
+            }
+            //Berechne Standard Sichtbarkeit:
+            foreach (IDynChannel ch in Channels)
+            {
+                ch.Visible = SaveHelper.CheckConditions(ch.Conditions, Id2Param) ? Visibility.Visible : Visibility.Collapsed;
+
+                foreach (ParameterBlock block in ch.Blocks)
+                {
+                    block.Visible = SaveHelper.CheckConditions(block.Conditions, Id2Param) ? Visibility.Visible : Visibility.Collapsed;
+
+                    foreach (IDynParameter para in block.Parameters)
+                    {
+                        para.Visible = SaveHelper.CheckConditions(para.Conditions, Id2Param) ? Visibility.Visible : Visibility.Collapsed;
+                    }
+                }
+            }
+            #endregion
 
             adds.ParamsHelper = ObjectToByteArray(Channels, true);
+        }
+
+        private static bool CheckConditions(List<ParamCondition> conditions, object id2Param)
+        {
+            throw new NotImplementedException();
         }
 
         private static void GetChildItems(XElement parent, ParameterBlock block)
@@ -689,6 +732,8 @@ namespace Kaenx.Classes.Helper
             AppParameterTypeViewModel paraType = AppParaTypes[para.ParameterTypeId];
             var conds = GetConditions(xele, true);
 
+            bool IsCtlEnabled = para.Access == AccessType.Read ? false : true;
+
             switch (paraType.Type)
             {
                 case ParamTypes.NumberInt:
@@ -711,11 +756,16 @@ namespace Kaenx.Classes.Helper
                     pnu.Default = para.Value;
                     pnu.Conditions = conds.paramList;
                     pnu.Hash = conds.hash;
+                    pnu.IsEnabled = IsCtlEnabled;
                     block.Parameters.Add(pnu);
                     break;
 
                 case ParamTypes.Text:
-                    Dynamic.ParamText pte = new Dynamic.ParamText();
+                    IDynParameter pte;
+                    if (para.Access == AccessType.Read)
+                        pte = new Dynamic.ParamTextRead();
+                    else
+                        pte = new Dynamic.ParamText();
                     pte.Id = para.Id;
                     pte.Text = para.Text;
                     pte.SuffixText = para.SuffixText;
@@ -723,6 +773,7 @@ namespace Kaenx.Classes.Helper
                     pte.Value = para.Value;
                     pte.Conditions = conds.paramList;
                     pte.Hash = conds.hash;
+                    pte.IsEnabled = IsCtlEnabled;
                     block.Parameters.Add(pte);
                     break;
 
@@ -745,6 +796,7 @@ namespace Kaenx.Classes.Helper
                         pen.Options = options;
                         pen.Conditions = conds.paramList;
                         pen.Hash = conds.hash;
+                        pen.IsEnabled = IsCtlEnabled;
                         block.Parameters.Add(pen);
                     } else
                     {
@@ -758,6 +810,7 @@ namespace Kaenx.Classes.Helper
                         pent.Option2 = options[1];
                         pent.Conditions = conds.paramList;
                         pent.Hash = conds.hash;
+                        pent.IsEnabled = IsCtlEnabled;
                         block.Parameters.Add(pent);
                     }
                     break;
@@ -771,6 +824,7 @@ namespace Kaenx.Classes.Helper
                     pch.Value = para.Value;
                     pch.Conditions = conds.paramList;
                     pch.Hash = conds.hash;
+                    pch.IsEnabled = IsCtlEnabled;
                     block.Parameters.Add(pch);
                     break;
 
@@ -783,6 +837,7 @@ namespace Kaenx.Classes.Helper
                     pco.Value = para.Value;
                     pco.Conditions = conds.paramList;
                     pco.Hash = conds.hash;
+                    pco.IsEnabled = IsCtlEnabled;
                     block.Parameters.Add(pco);
                     break;
             }
@@ -812,25 +867,6 @@ namespace Kaenx.Classes.Helper
             adds.ComsAll = ObjectToByteArray(comObjects);
             adds.ComsDefault = ObjectToByteArray(GetDefaultComs(comObjects));
         }
-
-        public static void GenerateVisibleProps(AppAdditional adds)
-        {
-            List<ParamVisHelper> paras = new List<ParamVisHelper>();
-            XDocument dynamic = XDocument.Parse(System.Text.Encoding.UTF8.GetString(adds.Dynamic));
-            IEnumerable<XElement> elements = dynamic.Root.Descendants(XName.Get("ParameterRefRef", dynamic.Root.Name.NamespaceName));
-
-            foreach (XElement xpara in elements)
-            {
-                ParamVisHelper para = new ParamVisHelper(xpara.Attribute("RefId").Value);
-                (List<ParamCondition> conds, string hash) result = GetConditions(xpara, true);
-                para.Conditions = result.conds;
-                para.Hash = result.hash;
-                paras.Add(para);
-            }
-
-            adds.ParameterAll = ObjectToByteArray(paras);
-        }
-
 
 
         public static bool CheckConditions(List<ParamCondition> conds, Dictionary<string, ViewParamModel> Id2Param = null)
@@ -1053,7 +1089,6 @@ namespace Kaenx.Classes.Helper
                     continue;
                 }
 
-                
                 if (CheckConditions(obj.Conditions))
                     defObjs.Add(obj);
             }
