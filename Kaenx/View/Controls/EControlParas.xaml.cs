@@ -95,7 +95,7 @@ namespace Kaenx.Views.Easy.Controls
 
         Dictionary<string, ViewParamModel> Id2Param = new Dictionary<string, ViewParamModel>();
         Dictionary<string, IDynParameter> Hash2Param = new Dictionary<string, IDynParameter>();
-
+        List<ParamBinding> Bindings;
 
 
         public EControlParas(LineDevice dev)
@@ -157,6 +157,7 @@ namespace Kaenx.Views.Easy.Controls
             AppAdditional adds = _context.AppAdditionals.Single(a => a.Id == device.ApplicationId);
             comObjects = SaveHelper.ByteArrayToObject<List<DeviceComObject>>(adds.ComsAll);
             Channels = SaveHelper.ByteArrayToObject<List<IDynChannel>>(adds.ParamsHelper, true);
+            Bindings = SaveHelper.ByteArrayToObject<List<ParamBinding>>(adds.Bindings);
 
             foreach (IDynChannel ch in Channels)
             {
@@ -225,9 +226,38 @@ namespace Kaenx.Views.Easy.Controls
             {
                 par.Visible = SaveHelper.CheckConditions(par.Conditions, Id2Param) ? Visibility.Visible : Visibility.Collapsed;
             }
+
+            IEnumerable<ParamBinding> list4 = Bindings.Where(b => b.SourceId == para.Id);
+            foreach(ParamBinding bind in list4)
+            {
+                string[] ids = bind.Hash.Split(":");
+
+                switch (ids[0])
+                {
+                    case "CB":
+                        IDynChannel ch = Channels.Single(c => c.Id == ids[1]);
+                        if(ch is ChannelBlock)
+                        {
+                            ChannelBlock chb = ch as ChannelBlock;
+                            chb.Text = bind.DefaultText.Replace("{{dyn}}", para.Value);
+                        }
+                        break;
+
+                    case "PB":
+                        foreach(IDynChannel ch2 in Channels)
+                        {
+                            if(ch2.Blocks.Any(b => b.Id == ids[1]))
+                            {
+                                ParameterBlock bl = ch2.Blocks.Single(b => b.Id == ids[1]);
+                                bl.Text = bind.DefaultText.Replace("{{dyn}}", para.Value);
+                            }
+                        }
+                        break;
+                }
+            }
             #endregion
 
-
+            if (e == null) return;
 
             ChangeParamModel change = new ChangeParamModel
             {
@@ -243,36 +273,6 @@ namespace Kaenx.Views.Easy.Controls
         
         /*
 
-            foreach(Binding bind in bindings.Where(b => b.Id == source))
-            {
-                string newText = bind.TextPlaceholder.Replace("{{dyn}}", para.Value);
-
-                if (bind.Item is ListChannelModel)
-                {
-                    (bind.Item as ListChannelModel).Name = newText;
-                } else if(bind.Item is ListBlockModel)
-                {
-                    (bind.Item as ListBlockModel).Name = newText;
-                } else if(bind.Item is DeviceComObject)
-                {
-                    (bind.Item as DeviceComObject).DisplayName = newText;
-                }
-            }
-
-
-            ChangeParamModel change = new ChangeParamModel
-            {
-                DeviceId = device.UId,
-                ParamId = source,
-                Value = value
-            };
-
-            device.LoadedApplication = false;
-            ChangeHandler.Instance.ChangedParam(change);
-            CheckComObjects();
-        }
-
-        
 
 
         private List<DeviceComObject> CheckRemoveComObjects(string paraId, string paraValue)

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.Toolkit.Uwp.Helpers;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
@@ -16,11 +17,22 @@ namespace Kaenx.Classes.Dynamic
         public string SuffixText { get; set; }
         public string Default { get; set; }
 
-        private string _value;
         public string Value
         {
-            get { return _value; }
-            set { if (string.IsNullOrEmpty(value)) return; _value = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Value")); }
+            get { return ColorHelper.ToHex(Color).Substring(3); }
+            set { 
+                if (string.IsNullOrEmpty(value)) return;
+                try
+                {
+                    Color = ColorHelper.ToColor("#" + value);
+                } catch
+                {
+                    Kaenx.Classes.Helper.ViewHelper.Instance.ShowNotification("main", "Eingegebene Farbe ist inkorrekt!", 3000, Helper.ViewHelper.MessageType.Error);
+                    return;
+                }
+                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Value"));
+                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Color"));
+            }
         }
 
         private Visibility _visible;
@@ -28,6 +40,13 @@ namespace Kaenx.Classes.Dynamic
         {
             get { return _visible; }
             set { _visible = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Visible")); }
+        }
+
+        private Windows.UI.Color _color;
+        public Windows.UI.Color Color
+        {
+            get { return _color; }
+            set { _color = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Color")); PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Value")); }
         }
 
         public Visibility SuffixIsVisible { get { return string.IsNullOrEmpty(SuffixText) ? Visibility.Collapsed : Visibility.Visible; } }

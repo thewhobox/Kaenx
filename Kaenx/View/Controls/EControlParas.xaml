@@ -9,6 +9,8 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:selectors="using:Kaenx.Classes.TemplateSelectors"
     xmlns:converter="using:Kaenx.Classes.Converter"
+    xmlns:conv="using:Microsoft.Toolkit.Uwp.UI.Converters"
+    xmlns:ext="using:Microsoft.Toolkit.Uwp.UI.Extensions"
     xmlns:types="using:Kaenx.Classes.Dynamic"
     mc:Ignorable="d"
     x:Name="ParaControl"
@@ -16,12 +18,15 @@
     d:DesignWidth="400">
 
     <UserControl.Resources>
+        <conv:BoolToObjectConverter x:Key="ConvertBoolToBrush" TrueValue="Red" FalseValue="Blue" />
+        <conv:BoolToObjectConverter x:Key="ConvertBoolToIcon" TrueValue="&#xE998;" FalseValue="&#xE946;" />
+        <conv:StringVisibilityConverter x:Key="ConvertStringVisible" />
         <converter:ValueCheckBoxConverter x:Key="ConvertCheckBox" />
-        <converter:ValueRadioButtonConverter x:Key="ConvertRadioButton"  />
         <SolidColorBrush x:Key="SystemControlHighlightListAccentLowBrush" Color="{Binding Source={ThemeResource BrushAccentColor2}, Path=Color}" />
+        
         <DataTemplate x:Key="ChannelTemplate">
-            <toolkit:Expander Header="{Binding Text}" Visibility="{Binding Visible}">
-                <ListView ItemsSource="{Binding Blocks}" SelectedItem="{Binding SelectedParaBlock, ElementName=ParaControl, Mode=TwoWay}" SelectedValue="{Binding SelectedParaBlockId, ElementName=ParaControl, Mode=TwoWay}" SelectedValuePath="Id" >
+            <toolkit:Expander Header="{Binding Text}" BorderBrush="{ThemeResource BrushAccentColor2}" BorderThickness="0 1" Visibility="{Binding Visible}" HorizontalContentAlignment="Stretch">
+                <ListView ItemsSource="{Binding Blocks}" SelectedItem="{Binding SelectedParaBlock, ElementName=ParaControl, Mode=TwoWay}" SelectedValue="{Binding SelectedParaBlockId, ElementName=ParaControl, Mode=TwoWay}" SelectedValuePath="Id" HorizontalAlignment="Stretch" >
                     <ListView.ItemContainerStyle>
                         <Style TargetType="ListViewItem">
                             <Setter Property="HorizontalContentAlignment" Value="Stretch" />
@@ -33,7 +38,7 @@
                     <ListView.ItemTemplate>
                         <DataTemplate x:DataType="dyn:ParameterBlock">
                             <Border Height="40" Visibility="{Binding Visible}" >
-                                <TextBlock Text="{Binding Text}" VerticalAlignment="Center" Margin="25 0 10 0" />
+                                <TextBlock Text="{Binding Text}" VerticalAlignment="Center" Margin="40 0 10 0" />
                             </Border>
                         </DataTemplate>
                     </ListView.ItemTemplate>
@@ -126,8 +131,8 @@
                 <TextBlock Text="{Binding Text}" Margin="10 0" VerticalAlignment="Center" TextWrapping="WrapWholeWords" />
 
                 <StackPanel Grid.Column="1">
-                    <RadioButton IsEnabled="{Binding IsEnabled}" IsChecked="{Binding Value, Mode=TwoWay,Converter={StaticResource ConvertRadioButton}, ConverterLanguage={Binding Option1}}" Tag="{Binding Option1.Value}"  Content="{Binding Option1.Text}" GroupName="{Binding Id}" />
-                    <RadioButton IsEnabled="{Binding IsEnabled}" IsChecked="{Binding Value, Mode=TwoWay,Converter={StaticResource ConvertRadioButton}, ConverterParameter=0}" Content="{Binding Option2.Text}" GroupName="{Binding Id}" />
+                    <RadioButton IsEnabled="{Binding IsEnabled}" IsChecked="{Binding Selected1, Mode=TwoWay}" Tag="{Binding Option1.Value}"  Content="{Binding Option1.Text}" GroupName="{Binding Id}" />
+                    <RadioButton IsEnabled="{Binding IsEnabled}" IsChecked="{Binding Selected2, Mode=TwoWay}" Content="{Binding Option2.Text}" GroupName="{Binding Id}" />
                 </StackPanel>
                 <TextBlock Grid.Column="2" Text="{Binding SuffixText}" Margin="10 0" VerticalAlignment="Center" HorizontalAlignment="Left" />
             </Grid>
@@ -151,26 +156,62 @@
                     <ColumnDefinition MaxWidth="550" Width="9*" />
                     <ColumnDefinition MinWidth="230" MaxWidth="350" Width="3*" />
                     <ColumnDefinition MaxWidth="120" Width="1*" />
+                    <ColumnDefinition />
                 </Grid.ColumnDefinitions>
 
-                <Border Grid.ColumnSpan="3" BorderBrush="{ThemeResource BrushAccentColor2}" BorderThickness="0 1 0 0" Visibility="{Binding IsLineVisible}" />
-                <TextBlock Grid.ColumnSpan="2" Text="{Binding Text}" Foreground="{ThemeResource BrushAccentColorDark1}" Visibility="{Binding IsTextVisible}" Margin="10 0" VerticalAlignment="Center" TextWrapping="WrapWholeWords" />
+                <Border Grid.ColumnSpan="4" BorderBrush="{ThemeResource BrushAccentColor2}" BorderThickness="0 1 0 0" Visibility="{Binding IsLineVisible}" />
+                <TextBlock Grid.ColumnSpan="2" Text="{Binding Text}" Foreground="{ThemeResource BrushAccentColorDark1}" Visibility="{Binding Text, Converter={StaticResource ConvertStringVisible}}" Margin="10 0" VerticalAlignment="Center" TextWrapping="WrapWholeWords" />
             </Grid>
         </DataTemplate>
         <DataTemplate x:Key="TypeSeperatorBox">
-            <Border Visibility="{Binding Visible}" Margin="0 5" Padding="10" BorderThickness="1" BorderBrush="{Binding BBorder}" Background="{Binding BBackground}">
+            <Border Visibility="{Binding Visible}" Margin="0 5" Padding="10" BorderThickness="1" BorderBrush="{Binding IsError, Converter={StaticResource ConvertBoolToBrush}}">
+                <Border.Background>
+                    <SolidColorBrush Color="{Binding IsError, Converter={StaticResource ConvertBoolToBrush}}" Opacity="0.2" />
+                </Border.Background>
                 <Grid>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="auto" />
                         <ColumnDefinition />
                     </Grid.ColumnDefinitions>
 
-                    <SymbolIcon Symbol="{Binding Icon}" Margin="10" />
+                    <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="{Binding IsError, Converter={StaticResource ConvertBoolToIcon}}" />
                     <TextBlock Grid.Column="1" Text="{Binding Text}" HorizontalAlignment="Center" VerticalAlignment="Center" TextWrapping="WrapWholeWords" />
                 </Grid>
             </Border>
         </DataTemplate>
+        <DataTemplate x:Key="TypeColor">
+            <Grid Visibility="{Binding Visible}" Margin="0 5">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition MaxWidth="550" Width="9*" />
+                    <ColumnDefinition MinWidth="230" MaxWidth="350" Width="3*" />
+                    <ColumnDefinition MaxWidth="120" Width="1*" />
+                </Grid.ColumnDefinitions>
+                <TextBlock Text="{Binding Text}" Margin="10 0" VerticalAlignment="Center" />
 
+                <Grid Grid.Column="1">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition />
+                        <ColumnDefinition />
+                        <ColumnDefinition Width="auto" />
+                    </Grid.ColumnDefinitions>
+
+                    <TextBox x:Name="InCol" Text="{Binding Value, Mode=TwoWay}" MaxLength="6" CornerRadius="2 0 0 2" />
+                    <Border Grid.Column="1" BorderBrush="{ThemeResource TextBoxBorderThemeBrush}" BorderThickness="0 1">
+                        <Border.Background>
+                            <SolidColorBrush Color="{Binding Color}" />
+                        </Border.Background>
+                    </Border>
+                    <Button Grid.Column="2" Content="Picker" CornerRadius="0 2 2 0"  BorderBrush="{ThemeResource TextBoxBorderThemeBrush}" BorderThickness="0 1 1 1">
+                        <Button.Flyout>
+                            <Flyout>
+                                <ColorPicker x:Name="ColorPickerFlyout" Color="{Binding Color, Mode=TwoWay}" IsMoreButtonVisible="True"/>
+                            </Flyout>
+                        </Button.Flyout>
+                    </Button>
+                </Grid>
+            </Grid>
+        </DataTemplate>
+        
         <selectors:BlockSelector x:Key="BlockSelector" Channel="{StaticResource ChannelTemplate}" Independent="{StaticResource IndependentTemplate}" />
         <selectors:ControlsParamTypesSelector x:Key="ParaTypeSelector" 
                                               NotFound="{StaticResource TypeNotFound}" 
@@ -181,7 +222,8 @@
                                               EnumsTwo="{StaticResource TypeEnumsTwo}"
                                               CheckBox="{StaticResource TypeCheckBox}"
                                               Seperator="{StaticResource TypeSeperator}"
-                                              SeperatorBox="{StaticResource TypeSeperatorBox}" />
+                                              SeperatorBox="{StaticResource TypeSeperatorBox}"
+                                              Color="{StaticResource TypeColor}" />
     </UserControl.Resources>
 
     <Grid>
@@ -222,6 +264,7 @@
                     <Style TargetType="ListViewItem">
                         <Setter Property="HorizontalContentAlignment" Value="Stretch" />
                         <Setter Property="Padding" Value="0" />
+                        <Setter Property="Margin" Value="0" />
                         <Setter Property="MinHeight" Value="0" />
                     </Style>
                 </ListView.ItemContainerStyle>

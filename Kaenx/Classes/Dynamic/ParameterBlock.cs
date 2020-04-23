@@ -19,7 +19,17 @@ namespace Kaenx.Classes.Dynamic
         }
 
         public string Id { get; set; }
-        public string Text { get; set; }
+
+        private string _text;
+        public string Text
+        {
+            get { return _text; }
+            set
+            {
+                _text = value;
+                Changed("Text");
+            }
+        }
 
         private Visibility _visible;
         public Visibility Visible

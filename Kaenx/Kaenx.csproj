@@ -135,7 +135,6 @@
     <Compile Include="Classes\Bus\Data\ErrorData.cs" />
     <Compile Include="Classes\Bus\Data\IBusData.cs" />
     <Compile Include="Classes\Bus\Data\NewDeviceData.cs" />
-    <Compile Include="Classes\Converter\ValueRadioButtonConverter.cs" />
     <Compile Include="Classes\Converter\ValueCheckBoxConverter.cs" />
     <Compile Include="Classes\Device.cs" />
     <Compile Include="Classes\ComboItemSimple.cs" />
@@ -147,6 +146,7 @@
     <Compile Include="Classes\Dynamic\ChannelIndependentBlock.cs" />
     <Compile Include="Classes\Dynamic\IDynChannel.cs" />
     <Compile Include="Classes\Dynamic\IDynParameter.cs" />
+    <Compile Include="Classes\Dynamic\ParamBinding.cs" />
     <Compile Include="Classes\Dynamic\ParamCondition.cs" />
     <Compile Include="Classes\Dynamic\ParamEnum.cs" />
     <Compile Include="Classes\Dynamic\ParamEnumOption.cs" />

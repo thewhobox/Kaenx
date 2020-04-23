@@ -4,7 +4,9 @@ using Kaenx.Classes.Project;
 using Kaenx.DataContext.Catalog;
 using Kaenx.DataContext.Local;
 using Kaenx.DataContext.Project;
+using Kaenx.Views.Easy.Controls;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Toolkit.Uwp.UI.Extensions;
 using Serilog;
 using System;
 using System.Collections.Generic;
@@ -482,12 +484,18 @@ namespace Kaenx.Classes.Helper
             contextProject.SaveChanges();
         }
 
+        private static Dictionary<string, ParamBinding> Hash2Bindings;
+        private static Dictionary<string, List<ParamBinding>> Ref2Bindings;
+        private static List<string> updatedComs;
 
         public static void GenerateDynamic(AppAdditional adds)
         {
             XDocument dynamic = XDocument.Parse(System.Text.Encoding.UTF8.GetString(adds.Dynamic));
             XmlReader reader = dynamic.CreateReader();
 
+            updatedComs = new List<string>();
+            Hash2Bindings = new Dictionary<string, ParamBinding>();
+            Ref2Bindings = new Dictionary<string, List<ParamBinding>>();
             Dictionary<string, XElement> Id2Element = new Dictionary<string, XElement>();
             Dictionary<string, ParameterBlock> Id2ParamBlock = new Dictionary<string, ParameterBlock>();
             List<IDynChannel> Channels = new List<IDynChannel>();
@@ -506,6 +514,7 @@ namespace Kaenx.Classes.Helper
             while (reader.Read())
             {
                 if (reader.NodeType == XmlNodeType.EndElement) continue;
+                string text = "";
 
                 switch (reader.LocalName)
                 {
@@ -526,7 +535,65 @@ namespace Kaenx.Classes.Helper
                             ChannelBlock cb = new ChannelBlock();
                             cb.Id = reader.GetAttribute("Id");
                             cb.Name = reader.GetAttribute("Name");
-                            cb.Text = reader.GetAttribute("Text");
+
+                            text = reader.GetAttribute("Text");
+
+                            if (text.Contains("{{"))
+                            {
+                                ParamBinding bind = new ParamBinding()
+                                {
+                                    Hash = "CB:" + cb.Id
+                                };
+
+
+                                Regex reg = new Regex("{{((.+):(.+))}}");
+                                Match m = reg.Match(text);
+                                if (m.Success)
+                                {
+                                    bind.DefaultText = text.Replace(m.Value, "{{dyn}}");
+                                    cb.Text = text.Replace(m.Value, m.Groups[3].Value);
+                                    if (m.Groups[2].Value == "0")
+                                    {
+                                        string textId = reader.GetAttribute("TextParameterRefId");
+                                        if (string.IsNullOrEmpty(textId)) bind.SourceId = "parent";
+                                        else bind.SourceId = textId;
+                                    }
+                                    else
+                                    {
+                                        string refid = m.Groups[2].Value;
+                                        if (!Ref2Bindings.ContainsKey(refid)) Ref2Bindings.Add(refid, new List<ParamBinding>());
+                                        Ref2Bindings[refid].Add(bind);
+                                    }
+                                }
+                                else
+                                {
+                                    reg = new Regex("{{(.+)}}");
+                                    m = reg.Match(text);
+                                    if (m.Success)
+                                    {
+                                        bind.DefaultText = text.Replace(m.Value, "{{dyn}}");
+                                        cb.Text = text.Replace(m.Value, "");
+                                        if (m.Groups[1].Value == "0")
+                                        {
+                                            string textId = reader.GetAttribute("TextParameterRefId");
+                                            if (string.IsNullOrEmpty(textId)) bind.SourceId = "parent";
+                                            else bind.SourceId = textId;
+                                        }
+                                        else
+                                        {
+                                            string refid = m.Groups[2].Value;
+                                            if (!Ref2Bindings.ContainsKey(refid)) Ref2Bindings.Add(refid, new List<ParamBinding>());
+                                            Ref2Bindings[refid].Add(bind);
+                                        }
+                                    }
+                                }
+
+                                Hash2Bindings.Add(bind.Hash, bind);
+                            }
+                            else
+                                cb.Text = text;
+
+
                             cb.Conditions = GetConditions(Id2Element[cb.Id]);
                             Channels.Add(cb);
                             currentChannel = cb;
@@ -543,7 +610,7 @@ namespace Kaenx.Classes.Helper
                             {
                                 string paramId = reader.GetAttribute("ParamRefId");
                                 AppParameter para = contextC.AppParameters.Single(p => p.Id == paramId);
-                                pb.Text = para.Text;
+                                text = para.Text;
                             }
                             catch
                             {
@@ -551,7 +618,73 @@ namespace Kaenx.Classes.Helper
                             }
                         }
                         else
-                            pb.Text = reader.GetAttribute("Text");
+                            text = reader.GetAttribute("Text");
+
+                        if (text?.Contains("{{") == true)
+                        {
+                            ParamBinding bind = new ParamBinding()
+                            {
+                                Hash = "PB:" + pb.Id
+                            };
+
+                            Regex reg = new Regex("{{((.+):(.+))}}");
+                            Match m = reg.Match(text);
+                            if (m.Success)
+                            {
+                                bind.DefaultText = text.Replace(m.Value, "{{dyn}}");
+                                pb.Text = text.Replace(m.Value, m.Groups[3].Value);
+                                if (m.Groups[2].Value == "0")
+                                {
+                                    string textId = reader.GetAttribute("TextParameterRefId");
+                                    if (string.IsNullOrEmpty(textId))
+                                    {
+                                        bind.SourceId = "parent";
+                                        string refid = pb.Id.Substring(pb.Id.LastIndexOf("-") + 1);
+                                        if (!Ref2Bindings.ContainsKey(refid)) Ref2Bindings.Add(refid, new List<ParamBinding>());
+                                        Ref2Bindings[refid].Add(bind);
+                                    }
+                                    else bind.SourceId = textId;
+                                }
+                                else
+                                {
+                                    string refid = m.Groups[2].Value;
+                                    if (!Ref2Bindings.ContainsKey(refid)) Ref2Bindings.Add(refid, new List<ParamBinding>());
+                                    Ref2Bindings[refid].Add(bind);
+                                }
+                            }
+                            else
+                            {
+                                reg = new Regex("{{(.+)}}");
+                                m = reg.Match(text);
+                                if (m.Success)
+                                {
+                                    bind.DefaultText = text.Replace(m.Value, "{{dyn}}");
+                                    pb.Text = text.Replace(m.Value, "");
+                                    if (m.Groups[1].Value == "0")
+                                    {
+                                        string textId = reader.GetAttribute("TextParameterRefId");
+                                        if (string.IsNullOrEmpty(textId))
+                                        {
+                                            bind.SourceId = "parent";
+                                            string refid = pb.Id.Substring(pb.Id.LastIndexOf("-") + 1);
+                                            if (!Ref2Bindings.ContainsKey(refid)) Ref2Bindings.Add(refid, new List<ParamBinding>());
+                                            Ref2Bindings[refid].Add(bind);
+                                        }
+                                        else bind.SourceId = textId;
+                                    }
+                                    else
+                                    {
+                                        string refid = m.Groups[2].Value;
+                                        if (!Ref2Bindings.ContainsKey(refid)) Ref2Bindings.Add(refid, new List<ParamBinding>());
+                                        Ref2Bindings[refid].Add(bind);
+                                    }
+                                }
+                            }
+
+                            Hash2Bindings.Add(bind.Hash, bind);
+                        }
+                        else
+                            pb.Text = text;
 
                         pb.Conditions = GetConditions(Id2Element[pb.Id]);
                         currentChannel.Blocks.Add(pb);
@@ -588,22 +721,29 @@ namespace Kaenx.Classes.Helper
                 ComObjects.Add(co.Id, co);
 
 
-            foreach (XElement elePB in dynamic.Root.Descendants(XName.Get("ParameterBlock", dynamic.Root.Name.NamespaceName)))
-            {
-                ParameterBlock block = Id2ParamBlock[elePB.Attribute("Id").Value];
-                GetChildItems(elePB, block);
-            }
 
-            List<string> updatedComs = new List<string>();
-            foreach (XElement eleCH in dynamic.Root.Descendants(XName.Get("Channel", dynamic.Root.Name.NamespaceName)).Where(ch => !string.IsNullOrEmpty(ch.Attribute("Text")?.Value)))
+            List<XElement> channels = dynamic.Root.Descendants(XName.Get("ChannelIndependentBlock", dynamic.Root.Name.NamespaceName)).ToList();
+            channels.AddRange(dynamic.Root.Descendants(XName.Get("Channel", dynamic.Root.Name.NamespaceName)));
+            foreach (XElement eleCH in channels)
             {
-                foreach(XElement co in eleCH.Descendants(XName.Get("ComObjectRefRef", dynamic.Root.Name.NamespaceName)))
+                string groupText = eleCH.Attribute("Text")?.Value;
+                foreach (XElement elePB in eleCH.Descendants(XName.Get("ParameterBlock", dynamic.Root.Name.NamespaceName)))
                 {
-                    if (updatedComs.Contains(co.Attribute("RefId").Value)) continue;
-                    AppComObject aco = ComObjects[co.Attribute("RefId").Value];
-                    aco.Group = eleCH.Attribute("Text").Value;
-                    contextC.AppComObjects.Update(aco);
-                    updatedComs.Add(aco.Id);
+                    string textRefId = null;
+                    if (elePB.Attribute("TextParameterRefId") != null)
+                    {
+                        textRefId = elePB.Attribute("TextParameterRefId").Value;
+                    }
+                    else
+                    {
+                        XElement temp = elePB.Parent;
+                        while (temp.Name.LocalName == "Channel" || temp.Name.LocalName == "ChannelIndepIndependentBlock")
+                            temp = temp.Parent;
+
+                        textRefId = temp.Attribute("TextParameterRefId")?.Value;
+                    }
+                    ParameterBlock block = Id2ParamBlock[elePB.Attribute("Id").Value];
+                    GetChildItems(elePB, block, textRefId, groupText);
                 }
             }
             contextC.SaveChanges();
@@ -618,8 +758,22 @@ namespace Kaenx.Classes.Helper
 
             foreach (IDynChannel ch in Channels)
             {
+                if (Hash2Bindings.ContainsKey("ID:" + ch.Id))
+                {
+                    ParamBinding bind = Hash2Bindings["ID:" + ch.Id];
+                    if (bind.SourceId != "parent") continue;
+
+                }
+
+
                 foreach (ParameterBlock block in ch.Blocks)
                 {
+                    if (Hash2Bindings.ContainsKey("ID:" + block.Id))
+                    {
+                        ParamBinding bind = Hash2Bindings["ID:" + block.Id];
+                        if (bind.SourceId != "parent") continue;
+                    }
+
                     foreach (IDynParameter para in block.Parameters)
                     {
                         if (!Id2Param.ContainsKey(para.Id))
@@ -646,15 +800,19 @@ namespace Kaenx.Classes.Helper
             }
             #endregion
 
+
+            adds.Bindings = ObjectToByteArray(Hash2Bindings.Values.ToList());
             adds.ParamsHelper = ObjectToByteArray(Channels, true);
+
+            Hash2Bindings.Clear();
+            Hash2Bindings = null;
+            Ref2Bindings.Clear();
+            Ref2Bindings = null;
+            updatedComs.Clear();
+            updatedComs = null;
         }
 
-        private static bool CheckConditions(List<ParamCondition> conditions, object id2Param)
-        {
-            throw new NotImplementedException();
-        }
-
-        private static void GetChildItems(XElement parent, ParameterBlock block)
+        private static void GetChildItems(XElement parent, ParameterBlock block, string textRefId, string groupText)
         {
             foreach(XElement ele in parent.Elements())
             {
@@ -662,18 +820,45 @@ namespace Kaenx.Classes.Helper
                 {
                     case "when":
                     case "choose":
-                        GetChildItems(ele, block);
+                        GetChildItems(ele, block, textRefId, groupText);
                         break;
                     case "ParameterRefRef":
-                        ParseParameterRefRef(ele, block);
+                        ParseParameterRefRef(ele, block, textRefId);
                         break;
                     case "ParameterSeparator":
                         ParseSeparator(ele, block);
                         break;
                     case "ComObjectRefRef":
-                        //Todo get BindId!!!
+                        ParseComObject(ele, textRefId, groupText);
                         break;
                 }
+            }
+        }
+
+
+        private static void ParseComObject(XElement xele, string textRefId, string groupText)
+        {
+            if (updatedComs.Contains(xele.Attribute("RefId").Value)) return;
+            if (string.IsNullOrEmpty(textRefId) && string.IsNullOrEmpty(groupText)) return;
+
+            bool changed = false;
+            AppComObject com = ComObjects[xele.Attribute("RefId").Value];
+            if(com.BindedId == "parent")
+            {
+                com.BindedId = textRefId;
+                changed = true;
+            }
+
+            if (!string.IsNullOrEmpty(groupText))
+            {
+                com.Group = groupText;
+                changed = true;
+            }
+
+            if (changed)
+            {
+                contextC.AppComObjects.Update(com);
+                updatedComs.Add(com.Id);
             }
         }
 
@@ -709,7 +894,10 @@ namespace Kaenx.Classes.Helper
 
                 case "Error":
                 case "Information":
-                    sep = new ParamSeperatorBox() { Hint = hint };
+                    sep = new ParamSeperatorBox() { 
+                        Hint = hint, 
+                        IsError = (hint == "Error") 
+                    };
                     break;
 
                 default:
@@ -724,13 +912,27 @@ namespace Kaenx.Classes.Helper
             block.Parameters.Add(sep);
         }
 
-        private static void ParseParameterRefRef(XElement xele, ParameterBlock block)
+        private static void ParseParameterRefRef(XElement xele, ParameterBlock block, string textRefId)
         {
             AppParameter para = AppParas[xele.Attribute("RefId").Value];
             if (para.Access == AccessType.None) return;
             //TODO überprüfen
             AppParameterTypeViewModel paraType = AppParaTypes[para.ParameterTypeId];
             var conds = GetConditions(xele, true);
+
+            string refid = para.Id.Substring(para.Id.LastIndexOf("-") + 1);
+
+            if (Ref2Bindings.ContainsKey(refid))
+            {
+                foreach (ParamBinding bind in Ref2Bindings[refid])
+                {
+                    if (bind.SourceId == "parent")
+                        bind.SourceId = textRefId;
+                    else
+                        bind.SourceId = para.Id;
+                }
+            }
+
 
             bool IsCtlEnabled = para.Access == AccessType.Read ? false : true;
 
@@ -842,6 +1044,7 @@ namespace Kaenx.Classes.Helper
                     break;
             }
         }
+
 
 
         public static void GenerateDefaultComs(AppAdditional adds)

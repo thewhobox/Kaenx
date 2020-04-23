@@ -9,7 +9,6 @@ namespace Kaenx.Classes.Dynamic
     public class ParamCondition
     {
         public string SourceId { get; set; }
-        public string DestinationId { get; set; }
         public string Values { get; set; }
         public ConditionOperation Operation { get; set; }
 

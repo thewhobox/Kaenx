@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
@@ -26,9 +27,8 @@ namespace Kaenx.Classes.Dynamic
             set { _visible = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Visible")); }
         }
 
-        public Visibility IsTextVisible { get { return string.IsNullOrEmpty(Text) ? Visibility.Collapsed : Visibility.Visible; } }
+        [JsonIgnore]
         public Visibility IsLineVisible { get { return Hint == "HorizontalRuler" ? Visibility.Visible : Visibility.Collapsed; } }
-        public Visibility SuffixIsVisible { get { return Visibility.Collapsed; } }
 
         public List<ParamCondition> Conditions { get; set; }
         public bool IsEnabled { get; set; }

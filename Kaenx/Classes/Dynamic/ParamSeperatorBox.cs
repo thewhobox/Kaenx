@@ -28,8 +28,7 @@ namespace Kaenx.Classes.Dynamic
             set { _visible = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Visible")); }
         }
 
-        //public SolidColorBrush BBorder { get { return new SolidColorBrush(Hint == "Error" ? Colors.Red : Colors.Blue); } }
-        //public SolidColorBrush BBackground { get { return new SolidColorBrush(Hint == "Error" ? Colors.Red : Colors.Blue) { Opacity = 0.4 }; } }
+        public bool IsError { get; set; }
 
         public Visibility SuffixIsVisible { get { return Visibility.Collapsed; } }
 

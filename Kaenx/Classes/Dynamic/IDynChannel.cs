@@ -9,6 +9,7 @@ namespace Kaenx.Classes.Dynamic
 {
     public interface IDynChannel
     {
+        public string Id { get; set; }
         public List<ParameterBlock> Blocks { get; set; }
         public Visibility Visible { get; set; }
 

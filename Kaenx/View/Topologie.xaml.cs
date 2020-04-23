@@ -252,7 +252,7 @@ namespace Kaenx.View
         private async void ClickOpenParas(object sender, RoutedEventArgs e)
         {
             LineDevice device = (LineDevice)((MenuFlyoutItem)e.OriginalSource).DataContext;
-            EControlParas2 paras;
+            EControlParas paras;
             bool isFromCache = false;
 
             Windows.UI.Xaml.Data.Binding bindLine = new Windows.UI.Xaml.Data.Binding();
@@ -268,12 +268,12 @@ namespace Kaenx.View
             if (!Window.Current.CoreWindow.GetKeyState(VirtualKey.Shift).HasFlag(CoreVirtualKeyStates.Down) && ParamStack.Any(p => p.id == device.UId))
             {
                 (UIElement ui, int id) element = ParamStack.Single(i => i.id == device.UId);
-                paras = (EControlParas2) element.ui;
+                paras = (EControlParas) element.ui;
                 ParamStack.Remove(element);
                 isFromCache = true;
             } else
             {
-                paras = new EControlParas2(device);
+                paras = new EControlParas(device);
 
                 if(ParamStack.Count >= 5) //TODO move to app settings
                 {
@@ -293,40 +293,6 @@ namespace Kaenx.View
                 paras.Start();
             }
         }
-
-
-        private async void ClickOpenParas2(object sender, RoutedEventArgs e)
-        {
-            if ((((MenuFlyoutItem)e.OriginalSource).DataContext is LineDevice) == false) return;
-
-            LineDevice device = (LineDevice)((MenuFlyoutItem)e.OriginalSource).DataContext;
-            
-            bool isFromCache = false;
-
-            Windows.UI.Xaml.Data.Binding bindLine = new Windows.UI.Xaml.Data.Binding();
-            bindLine.Path = new PropertyPath("LineName");
-            bindLine.Source = device;
-            ParamHeaderLine.SetBinding(TextBlock.TextProperty, bindLine);
-
-            Windows.UI.Xaml.Data.Binding bindName = new Windows.UI.Xaml.Data.Binding();
-            bindName.Path = new PropertyPath("Name");
-            bindName.Source = device;
-            ParamHeaderName.SetBinding(TextBlock.TextProperty, bindName);
-
-            EControlParas paras = new EControlParas(device);
-
-            ParamPresenter.Content = paras;
-
-            if (ColsPara.Width.Value == 0)
-                SubNavPanel.SelectedItem = SubNavPanel.MenuItems[1];
-
-            if (!isFromCache)
-            {
-                await Task.Delay(500);
-                paras.Start();
-            }
-        }
-
 
 
 

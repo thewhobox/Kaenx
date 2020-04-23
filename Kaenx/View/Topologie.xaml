@@ -106,7 +106,6 @@
                                         <MenuFlyoutItem x:Uid="/Topologie/MenReadConf" Icon="Find" Click="ClickReadConfig" />
                                     </MenuFlyoutSubItem>
                                     <MenuFlyoutItem x:Name="MFI_Para" x:Uid="/Topologie/MenOpenPara" Icon="Bookmarks" Click="ClickOpenParas" />
-                                    <MenuFlyoutItem Text="Parameter 2" Icon="Bookmarks" Click="ClickOpenParas2" />
                                     <MenuFlyoutItem x:Name="MFI_Rename" x:Uid="/Topologie/MenRename" Icon="Rename" Click="ClickRename" />
                                     <MenuFlyoutItem x:Name="MFI_Delete" x:Uid="/Topologie/MenDelete" Icon="Delete" Click="ClickDelete" />
                                 </MenuFlyout>
