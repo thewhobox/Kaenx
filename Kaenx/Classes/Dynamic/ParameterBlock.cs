@@ -19,15 +19,16 @@ namespace Kaenx.Classes.Dynamic
         }
 
         public string Id { get; set; }
+        public string Text { get; set; }
 
-        private string _text;
-        public string Text
+        private string _dtext;
+        public string DisplayText
         {
-            get { return _text; }
+            get { return _dtext; }
             set
             {
-                _text = value;
-                Changed("Text");
+                _dtext = value;
+                Changed("DisplayText");
             }
         }
 

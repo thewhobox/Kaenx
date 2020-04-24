@@ -408,25 +408,20 @@ namespace Kaenx.Classes.Helper
                                 }
                             }
 
-                            if (!string.IsNullOrEmpty(dcom.BindedId))
+                            if (!string.IsNullOrEmpty(dcom.BindedId) && dcom.Name.Contains("{{dyn}}"))
                             {
-                                Regex reg = new Regex("{{((.+):(.+))}}");
-                                Match m = reg.Match(dcom.Name);
-                                if (m.Success)
+                                string value = "";
+                                try
                                 {
-                                    string value = "";
-                                    try
-                                    {
-                                        ChangeParamModel changeB = contextProject.ChangesParam.Where(c => c.DeviceId == ld.UId && c.ParamId == dcom.BindedId).OrderByDescending(c => c.StateId).First();
-                                        value = changeB.Value;
-                                    }
-                                    catch { }
-
-                                    if (value == "")
-                                        dcom.DisplayName = reg.Replace(dcom.Name, m.Groups[3].Value);
-                                    else
-                                        dcom.DisplayName = reg.Replace(dcom.Name, value);
+                                    ChangeParamModel changeB = contextProject.ChangesParam.Where(c => c.DeviceId == ld.UId && c.ParamId == dcom.BindedId).OrderByDescending(c => c.StateId).First();
+                                    value = changeB.Value;
                                 }
+                                catch { }
+
+                                if (value == "")
+                                    dcom.DisplayName = dcom.Name.Replace("{{dyn}}", comObj.BindedDefaultText);
+                                else
+                                    dcom.DisplayName = dcom.Name.Replace("{{dyn}}", value);
                             } else
                             {
                                 dcom.DisplayName = dcom.Name;
@@ -545,13 +540,12 @@ namespace Kaenx.Classes.Helper
                                     Hash = "CB:" + cb.Id
                                 };
 
-
                                 Regex reg = new Regex("{{((.+):(.+))}}");
                                 Match m = reg.Match(text);
                                 if (m.Success)
                                 {
-                                    bind.DefaultText = text.Replace(m.Value, "{{dyn}}");
-                                    cb.Text = text.Replace(m.Value, m.Groups[3].Value);
+                                    bind.DefaultText = m.Groups[3].Value;
+                                    cb.Text = text.Replace(m.Value, "{{dyn}}");
                                     if (m.Groups[2].Value == "0")
                                     {
                                         string textId = reader.GetAttribute("TextParameterRefId");
@@ -571,8 +565,8 @@ namespace Kaenx.Classes.Helper
                                     m = reg.Match(text);
                                     if (m.Success)
                                     {
-                                        bind.DefaultText = text.Replace(m.Value, "{{dyn}}");
-                                        cb.Text = text.Replace(m.Value, "");
+                                        bind.DefaultText = "";
+                                        cb.Text = text.Replace(m.Value, "{{dyn}}");
                                         if (m.Groups[1].Value == "0")
                                         {
                                             string textId = reader.GetAttribute("TextParameterRefId");
@@ -631,13 +625,14 @@ namespace Kaenx.Classes.Helper
                             Match m = reg.Match(text);
                             if (m.Success)
                             {
-                                bind.DefaultText = text.Replace(m.Value, "{{dyn}}");
-                                pb.Text = text.Replace(m.Value, m.Groups[3].Value);
+                                bind.DefaultText = m.Groups[3].Value;
+                                pb.Text = text.Replace(m.Value, "{{dyn}}");
                                 if (m.Groups[2].Value == "0")
                                 {
                                     string textId = reader.GetAttribute("TextParameterRefId");
                                     if (string.IsNullOrEmpty(textId))
                                     {
+
                                         bind.SourceId = "parent";
                                         string refid = pb.Id.Substring(pb.Id.LastIndexOf("-") + 1);
                                         if (!Ref2Bindings.ContainsKey(refid)) Ref2Bindings.Add(refid, new List<ParamBinding>());
@@ -658,8 +653,8 @@ namespace Kaenx.Classes.Helper
                                 m = reg.Match(text);
                                 if (m.Success)
                                 {
-                                    bind.DefaultText = text.Replace(m.Value, "{{dyn}}");
-                                    pb.Text = text.Replace(m.Value, "");
+                                    bind.DefaultText = "";
+                                    pb.Text = text.Replace(m.Value, "{{dyn}}");
                                     if (m.Groups[1].Value == "0")
                                     {
                                         string textId = reader.GetAttribute("TextParameterRefId");
@@ -804,6 +799,8 @@ namespace Kaenx.Classes.Helper
             adds.Bindings = ObjectToByteArray(Hash2Bindings.Values.ToList());
             adds.ParamsHelper = ObjectToByteArray(Channels, true);
 
+
+
             Hash2Bindings.Clear();
             Hash2Bindings = null;
             Ref2Bindings.Clear();
@@ -835,15 +832,17 @@ namespace Kaenx.Classes.Helper
             }
         }
 
-
         private static void ParseComObject(XElement xele, string textRefId, string groupText)
         {
             if (updatedComs.Contains(xele.Attribute("RefId").Value)) return;
-            if (string.IsNullOrEmpty(textRefId) && string.IsNullOrEmpty(groupText)) return;
 
             bool changed = false;
             AppComObject com = ComObjects[xele.Attribute("RefId").Value];
-            if(com.BindedId == "parent")
+
+
+            if (com.BindedId == null && string.IsNullOrEmpty(textRefId) && string.IsNullOrEmpty(groupText)) return;
+
+            if (com.BindedId == "parent")
             {
                 com.BindedId = textRefId;
                 changed = true;
@@ -853,6 +852,36 @@ namespace Kaenx.Classes.Helper
             {
                 com.Group = groupText;
                 changed = true;
+            }
+
+            if(com.BindedId != null)
+            {
+                ParamBinding bind = new ParamBinding()
+                {
+                    Hash = "CO:" + com.Id,
+                    SourceId = com.BindedId
+                };
+
+                Regex reg = new Regex("{{((.+):(.+))}}");
+                Match m = reg.Match(com.Text);
+                if (m.Success)
+                {
+                    bind.DefaultText = m.Groups[3].Value;
+                    com.Text = com.Text.Replace(m.Value, "{{dyn}}");
+                    changed = true;
+                }
+                else
+                {
+                    reg = new Regex("{{(.+)}}");
+                    m = reg.Match(com.Text);
+                    if (m.Success)
+                    {
+                        bind.DefaultText = "";
+                        com.Text = com.Text.Replace(m.Value, "{{dyn}}");
+                        changed = true;
+                    }
+                }
+                Hash2Bindings.Add(bind.Hash, bind);
             }
 
             if (changed)

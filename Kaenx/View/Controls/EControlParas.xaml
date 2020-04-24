@@ -25,7 +25,7 @@
         <SolidColorBrush x:Key="SystemControlHighlightListAccentLowBrush" Color="{Binding Source={ThemeResource BrushAccentColor2}, Path=Color}" />
         
         <DataTemplate x:Key="ChannelTemplate">
-            <toolkit:Expander Header="{Binding Text}" BorderBrush="{ThemeResource BrushAccentColor2}" BorderThickness="0 1" Visibility="{Binding Visible}" HorizontalContentAlignment="Stretch">
+            <toolkit:Expander Header="{Binding DisplayText}" BorderBrush="{ThemeResource BrushAccentColor2}" BorderThickness="0 1" Visibility="{Binding Visible}" HorizontalContentAlignment="Stretch">
                 <ListView ItemsSource="{Binding Blocks}" SelectedItem="{Binding SelectedParaBlock, ElementName=ParaControl, Mode=TwoWay}" SelectedValue="{Binding SelectedParaBlockId, ElementName=ParaControl, Mode=TwoWay}" SelectedValuePath="Id" HorizontalAlignment="Stretch" >
                     <ListView.ItemContainerStyle>
                         <Style TargetType="ListViewItem">
@@ -38,7 +38,7 @@
                     <ListView.ItemTemplate>
                         <DataTemplate x:DataType="dyn:ParameterBlock">
                             <Border Height="40" Visibility="{Binding Visible}" >
-                                <TextBlock Text="{Binding Text}" VerticalAlignment="Center" Margin="40 0 10 0" />
+                                <TextBlock Text="{Binding DisplayText}" VerticalAlignment="Center" Margin="40 0 10 0" />
                             </Border>
                         </DataTemplate>
                     </ListView.ItemTemplate>
@@ -58,7 +58,7 @@
                 <ListView.ItemTemplate>
                     <DataTemplate x:DataType="dyn:ParameterBlock">
                         <Border Height="40" Visibility="{Binding Visible}" >
-                            <TextBlock Text="{Binding Text}" VerticalAlignment="Center" Margin="40 0 10 0" />
+                            <TextBlock Text="{Binding DisplayText}" VerticalAlignment="Center" Margin="40 0 10 0" />
                         </Border>
                     </DataTemplate>
                 </ListView.ItemTemplate>

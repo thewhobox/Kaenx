@@ -1130,9 +1130,6 @@ namespace Kaenx.Classes.Helper
                 ProgressAppChanged(position);
                 if (position % iterationToWait == 0) await Task.Delay(1);
 
-                bool existed = contextIds.Contains(cref.Attribute("Id").Value);
-                if (existed) continue;
-
                 AppComObjectRef cobjr = new AppComObjectRef();
                 cobjr.Id = cref.Attribute("Id").Value;
                 cobjr.RefId = cref.Attribute("RefId").Value;
@@ -1168,12 +1165,19 @@ namespace Kaenx.Classes.Helper
                 if (cref.Attribute("WriteFlag")?.Value == "Disabled")
                     cobjr.Flag_Write = false;
 
+                AppComObject obj;
+                bool existed = contextIds.Contains(cref.Attribute("Id").Value);
+                if (existed)
+                    obj = context.AppComObjects.Single(c => c.Id == cobjr.Id);
+                else
+                {
+                    obj = new AppComObject();
+                    obj.LoadComp(ComObjects[cobjr.RefId]);
+                    obj.Id = cobjr.Id;
+                }
 
-                AppComObject obj= new AppComObject();
-                obj.LoadComp(ComObjects[cobjr.RefId]);
-                obj.Id = cobjr.Id;
 
-                
+
                 obj.ApplicationId = app.Id;
                 if (cobjr.FunctionText != null) obj.FunctionText = cobjr.FunctionText;
                 if (cobjr.Text != null) obj.Text = cobjr.Text;
@@ -1207,6 +1211,7 @@ namespace Kaenx.Classes.Helper
                                 throw new Exception("Kein ParameterRef zum Binden gefunden", e);
                             }
                         }
+                        obj.BindedDefaultText = m.Groups[3].Value;
                     } else
                     {
                         reg = new Regex("{{(.+)}}");
@@ -1228,11 +1233,15 @@ namespace Kaenx.Classes.Helper
                                     throw new Exception("Kein ParameterRef zum Binden gefunden", e);
                                 }
                             }
+                            obj.BindedDefaultText = "";
                         }
                     }
                 }
 
-                context.AppComObjects.Add(obj);
+                if (existed)
+                    context.AppComObjects.Update(obj);
+                else
+                    context.AppComObjects.Add(obj);
             }
             ParamrefIds.Clear();
             ParamrefIds = null;
@@ -1408,25 +1417,25 @@ namespace Kaenx.Classes.Helper
             else
                 Log.Information("Kein Dynamic vorhanden");
 
-            Log.Information("Standard ComObjects werden generiert");
-            ProgressChanged?.Invoke(3);
-            OnDeviceChanged(currentAppName + " - Generiere ComObjects");
-            await Task.Delay(10);
-            Stopwatch sw = new Stopwatch();
-            sw.Start();
-            SaveHelper.GenerateDefaultComs(adds);
-            sw.Stop();
-            Debug.WriteLine("Generate Coms: " + sw.Elapsed.TotalSeconds);
-
             Log.Information("Dynamics werden generiert");
             ProgressChanged?.Invoke(4);
             OnDeviceChanged(currentAppName + " - Generiere Dynamics");
             await Task.Delay(10);
-            sw = new Stopwatch();
+            Stopwatch sw = new Stopwatch();
             sw.Start();
             SaveHelper.GenerateDynamic(adds);
             sw.Stop();
             Debug.WriteLine("Generate Dyn: " + sw.Elapsed.TotalSeconds);
+
+            Log.Information("Standard ComObjects werden generiert");
+            ProgressChanged?.Invoke(3);
+            OnDeviceChanged(currentAppName + " - Generiere ComObjects");
+            await Task.Delay(10);
+            sw = new Stopwatch();
+            sw.Start();
+            SaveHelper.GenerateDefaultComs(adds);
+            sw.Stop();
+            Debug.WriteLine("Generate Coms: " + sw.Elapsed.TotalSeconds);
 
             if (existedAdds)
                 context.AppAdditionals.Update(adds);

@@ -161,8 +161,13 @@ namespace Kaenx.Views.Easy.Controls
 
             foreach (IDynChannel ch in Channels)
             {
+                if (ch is ChannelBlock)
+                    (ch as ChannelBlock).DisplayText = (ch as ChannelBlock).Text;
+
                 foreach (ParameterBlock block in ch.Blocks)
                 {
+                    block.DisplayText = block.Text;
+
                     foreach (IDynParameter para in block.Parameters)
                     {
                         if (ParaChanges.ContainsKey(para.Id))
@@ -186,6 +191,8 @@ namespace Kaenx.Views.Easy.Controls
                 Para_PropertyChanged(para);
             }
 
+            _= CheckComObjects();
+
 
             LoadRing.Visibility = Visibility.Collapsed;
             watch.Stop();
@@ -199,9 +206,20 @@ namespace Kaenx.Views.Easy.Controls
             IDynParameter para = sender as IDynParameter;
             Debug.WriteLine("Wert geändert! " + para.Id + " -> " + para.Value);
 
-            #region Parameter neu berechnen
+            string oldValue = Id2Param[para.Id].Value;
+
             Id2Param[para.Id].Value = para.Value;
 
+            (List<DeviceComObject> allNew, List<DeviceComObject> toDelete) comObjs = (null, null);
+            if (e != null)
+            {
+               comObjs = CheckRemoveComObjects(para.Id, para.Value);
+            }
+
+
+
+
+            #region Parameter neu berechnen
             List<ChannelBlock> list = new List<ChannelBlock>();
 
             List<ParameterBlock> list2 = new List<ParameterBlock>();
@@ -239,7 +257,10 @@ namespace Kaenx.Views.Easy.Controls
                         if(ch is ChannelBlock)
                         {
                             ChannelBlock chb = ch as ChannelBlock;
-                            chb.Text = bind.DefaultText.Replace("{{dyn}}", para.Value);
+                            if (string.IsNullOrEmpty(para.Value))
+                                chb.DisplayText = chb.Text.Replace("{{dyn}}", bind.DefaultText);
+                            else
+                                chb.DisplayText = chb.Text.Replace("{{dyn}}", para.Value);
                         }
                         break;
 
@@ -249,15 +270,32 @@ namespace Kaenx.Views.Easy.Controls
                             if(ch2.Blocks.Any(b => b.Id == ids[1]))
                             {
                                 ParameterBlock bl = ch2.Blocks.Single(b => b.Id == ids[1]);
-                                bl.Text = bind.DefaultText.Replace("{{dyn}}", para.Value);
+                                if (string.IsNullOrEmpty(para.Value))
+                                    bl.DisplayText = bl.Text.Replace("{{dyn}}", bind.DefaultText);
+                                else
+                                    bl.DisplayText = bl.Text.Replace("{{dyn}}", para.Value);
                             }
                         }
+                        break;
+
+                    case "CO":
+                        try
+                        {
+                            DeviceComObject com = device.ComObjects.Single(c => c.Id == ids[1]);
+                            if (string.IsNullOrEmpty(para.Value))
+                                com.DisplayName = com.Name.Replace("{{dyn}}", bind.DefaultText);
+                            else
+                                com.DisplayName = com.Name.Replace("{{dyn}}", para.Value);
+                        }
+                        catch { }
                         break;
                 }
             }
             #endregion
 
             if (e == null) return;
+
+            _= CheckComObjects(comObjs.allNew);
 
             ChangeParamModel change = new ChangeParamModel
             {
@@ -270,12 +308,8 @@ namespace Kaenx.Views.Easy.Controls
             ChangeHandler.Instance.ChangedParam(change);
         }
 
-        
-        /*
 
-
-
-        private List<DeviceComObject> CheckRemoveComObjects(string paraId, string paraValue)
+        private (List<DeviceComObject> allNew, List<DeviceComObject> toDelete) CheckRemoveComObjects(string paraId, string paraValue)
         {
             List<DeviceComObject> newObjs = new List<DeviceComObject>();
 
@@ -287,7 +321,7 @@ namespace Kaenx.Views.Easy.Controls
                     continue;
                 }
 
-                bool flag = CheckConditions(obj.Conditions);
+                bool flag = SaveHelper.CheckConditions(obj.Conditions, Id2Param);
                 if (flag)
                     newObjs.Add(obj);
             }
@@ -297,26 +331,30 @@ namespace Kaenx.Views.Easy.Controls
                 if (!newObjs.Any(co => co.Id == cobj.Id) && cobj.Groups.Count != 0)
                     toDelete.Add(cobj);
 
-            return toDelete;
+            return (newObjs, toDelete);
         }
 
-        private void CheckComObjects()
+
+        private async Task CheckComObjects(List<DeviceComObject> newObjs = null)
         {
-            List<DeviceComObject> newObjs = new List<DeviceComObject>();
-
-            foreach (DeviceComObject obj in comObjects)
+            if(newObjs == null)
             {
-                if (obj.Conditions.Count == 0)
+                newObjs = new List<DeviceComObject>();
+
+                foreach (DeviceComObject obj in comObjects)
                 {
-                    newObjs.Add(obj);
-                    continue;
+                    if (obj.Conditions.Count == 0)
+                    {
+                        newObjs.Add(obj);
+                        continue;
+                    }
+
+                    bool flag = SaveHelper.CheckConditions(obj.Conditions, Id2Param);
+                    if (flag)
+                        newObjs.Add(obj);
                 }
-
-                bool flag = CheckConditions(obj.Conditions);
-
-                if (flag)
-                    newObjs.Add(obj);
             }
+
 
             List<DeviceComObject> toAdd = new List<DeviceComObject>();
             foreach (DeviceComObject cobj in newObjs)
@@ -334,7 +372,7 @@ namespace Kaenx.Views.Easy.Controls
 
             Dictionary<string, ComObject> coms = new Dictionary<string, ComObject>();
             foreach (ComObject com in _contextP.ComObjects)
-                if(!coms.ContainsKey(com.ComId))
+                if (!coms.ContainsKey(com.ComId))
                     coms.Add(com.ComId, com);
 
             foreach (DeviceComObject cobj in toDelete)
@@ -345,135 +383,35 @@ namespace Kaenx.Views.Easy.Controls
             }
 
 
-            foreach (DeviceComObject cobj in toAdd)
+            foreach (DeviceComObject dcom in toAdd)
             {
-                if (cobj.Name.Contains("{{"))
+                if (dcom.Name.Contains("{{"))
                 {
-                    Regex reg = new Regex("{{((.+):(.+))}}");
-                    Match m = reg.Match(cobj.Name);
-                    if (m.Success)
-                    {
-                        Binding bind = new Binding()
-                        {
-                            DefaultText = m.Groups[3].Value,
-                            TextPlaceholder = reg.Replace(cobj.Name, "{{dyn}}")
-                        };
-                        string rId = m.Groups[2].Value;
-                        bind.Id = AppParas.Keys.Single(k => k.Contains("P-") && k.EndsWith("R-" + rId));
-                        bind.Item = cobj;
-                        bindings.Add(bind);
-
-                        string value = AppParas[bind.Id].Value;
-
-                        if (string.IsNullOrEmpty(value))
-                            cobj.DisplayName = reg.Replace(cobj.Name, bind.DefaultText);
-                        else
-                            cobj.DisplayName = reg.Replace(cobj.Name, value);
-                    }
-                } else
-                {
-                    cobj.DisplayName = cobj.Name;
+                    ParamBinding bind = Bindings.Single(b => b.Hash == "CO:" + dcom.Id);
+                    string value = Id2Param[dcom.BindedId].Value;
+                    if (string.IsNullOrEmpty(value))
+                        dcom.DisplayName = dcom.Name.Replace("{{dyn}}", bind.DefaultText);
+                    else
+                        dcom.DisplayName = dcom.Name.Replace("{{dyn}}", value);
                 }
-                device.ComObjects.Add(cobj);
+                else
+                {
+                    dcom.DisplayName = dcom.Name;
+                }
+                device.ComObjects.Add(dcom);
 
 
                 ComObject com = new ComObject();
-                com.ComId = cobj.Id;
+                com.ComId = dcom.Id;
                 com.DeviceId = device.UId;
                 _contextP.ComObjects.Add(com);
             }
 
             device.ComObjects.Sort(s => s.Number);
             _contextP.SaveChanges();
+
+            await Task.Delay(1);
         }
 
-        private void PrepareBindings()
-        {
-            foreach (DeviceComObject com in device.ComObjects)
-            {
-                if (com.Name.Contains("{{"))
-                {
-                    Regex reg = new Regex("{{((.+):(.+))}}");
-                    Match m = reg.Match(com.Name);
-                    if (m.Success)
-                    {
-                        Binding bind = new Binding()
-                        {
-                            DefaultText = m.Groups[3].Value,
-                            TextPlaceholder = reg.Replace(com.Name, "{{dyn}}")
-                        };
-                        string rId = m.Groups[2].Value;
-                        bind.Id = AppParas.Keys.Single(k => k.Contains("P-") && k.EndsWith("R-" + rId));
-                        bind.Item = com;
-
-                        string value = AppParas[bind.Id].Value;
-
-                        if (!string.IsNullOrEmpty(value))
-                            com.DisplayName = bind.TextPlaceholder.Replace("{{dyn}}", value);
-                        else
-                            com.DisplayName = bind.TextPlaceholder.Replace("{{dyn}}", bind.DefaultText);
-
-                        bindings.Add(bind);
-                    }
-                }
-            }
-            
-
-            foreach(ListChannelModel ch in ListNavChannel)
-            {
-                if (ch.Name.Contains("{{"))
-                {
-                    Regex reg = new Regex("{{((.+):(.+))}}");
-                    Match m = reg.Match(ch.Name);
-                    if (m.Success)
-                    {
-                        Binding bind = new Binding()
-                        {
-                            DefaultText = m.Groups[3].Value,
-                            TextPlaceholder = reg.Replace(ch.Name, "{{dyn}}")
-                        };
-                        string rId = m.Groups[2].Value;
-                        bind.Id = AppParas.Keys.Single(k => k.Contains("P-") && k.EndsWith("R-" + rId));
-                        bind.Item = ch;
-
-                        string value = AppParas[bind.Id].Value;
-                        if (!string.IsNullOrEmpty(value))
-                            ch.Name = bind.TextPlaceholder.Replace("{{dyn}}", value);
-                        else
-                            ch.Name = bind.TextPlaceholder.Replace("{{dyn}}", bind.DefaultText);
-
-                        bindings.Add(bind);
-                    }
-                }
-
-                foreach(ListBlockModel bl in ch.Blocks)
-                {
-                    if (bl.Name.Contains("{{"))
-                    {
-                        Regex reg = new Regex("{{((.+):(.+))}}");
-                        Match m = reg.Match(bl.Name);
-                        if (m.Success)
-                        {
-                            Binding bind = new Binding()
-                            {
-                                DefaultText = m.Groups[3].Value,
-                                TextPlaceholder = reg.Replace(bl.Name, "{{dyn}}")
-                            };
-                            string rId = m.Groups[2].Value;
-                            bind.Id = AppParas.Keys.Single(k => k.Contains("P-") && k.EndsWith("R-" + rId));
-                            bind.Item = bl;
-
-                            string value = AppParas[bind.Id].Value;
-                            if (!string.IsNullOrEmpty(value))
-                                bl.Name = bind.TextPlaceholder.Replace("{{dyn}}", value);
-                            else
-                                bl.Name = bind.TextPlaceholder.Replace("{{dyn}}", bind.DefaultText);
-
-                            bindings.Add(bind);
-                        }
-                    }
-                }
-            }
-        }*/
     }
 }

@@ -22,6 +22,13 @@ namespace Kaenx.Classes.Dynamic
         public string Text { get; set; }
         public int Number { get; set; }
 
+        private string _dtext;
+        public string DisplayText
+        {
+            get { return (_dtext == null) ? Text : _dtext; }
+            set { _dtext = value; Changed("DisplayText"); }
+        }
+
         public List<ParameterBlock> Blocks { get; set; } = new List<ParameterBlock>();
         public List<ParamCondition> Conditions { get; set; } = new List<ParamCondition>();
 

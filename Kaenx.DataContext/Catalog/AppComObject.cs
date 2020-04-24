@@ -14,6 +14,7 @@ namespace Kaenx.DataContext.Catalog
         public string Id { get; set; }
         [MaxLength(255)]
         public string BindedId { get; set; }
+        public string BindedDefaultText { get; set; }
         [MaxLength(100)]
         public string ApplicationId { get; set; }
 
