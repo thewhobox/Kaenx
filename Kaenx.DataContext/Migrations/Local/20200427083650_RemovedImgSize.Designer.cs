@@ -3,14 +3,16 @@ using System;
 using Kaenx.DataContext.Local;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace Kaenx.DataContext.Migrations.Local
 {
     [DbContext(typeof(LocalContext))]
-    partial class LocalContextModelSnapshot : ModelSnapshot
+    [Migration("20200427083650_RemovedImgSize")]
+    partial class RemovedImgSize
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -84,8 +86,6 @@ namespace Kaenx.DataContext.Migrations.Local
                         .ValueGeneratedOnAdd();
 
                     b.Property<int>("ConnectionId");
-
-                    b.Property<bool>("IsReconstruct");
 
                     b.Property<string>("Name");
 

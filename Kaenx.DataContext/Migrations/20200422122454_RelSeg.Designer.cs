@@ -190,7 +190,7 @@ namespace Kaenx.DataContext.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("AppAbsoluteSegments");
+                    b.ToTable("AppSegments");
                 });
 
             modelBuilder.Entity("Kaenx.DataContext.Catalog.ApplicationViewModel", b =>

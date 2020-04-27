@@ -8,13 +8,13 @@ namespace Kaenx.DataContext.Migrations
         {
             migrationBuilder.AddColumn<int>(
                 name: "LsmId",
-                table: "AppAbsoluteSegments",
+                table: "AppSegments",
                 nullable: false,
                 defaultValue: 0);
 
             migrationBuilder.AddColumn<int>(
                 name: "Offset",
-                table: "AppAbsoluteSegments",
+                table: "AppSegments",
                 nullable: false,
                 defaultValue: 0);
         }
@@ -23,11 +23,11 @@ namespace Kaenx.DataContext.Migrations
         {
             migrationBuilder.DropColumn(
                 name: "LsmId",
-                table: "AppAbsoluteSegments");
+                table: "AppSegments");
 
             migrationBuilder.DropColumn(
                 name: "Offset",
-                table: "AppAbsoluteSegments");
+                table: "AppSegments");
         }
     }
 }

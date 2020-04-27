@@ -63,8 +63,6 @@ namespace Kaenx.Classes.Helper
 
             model.Name = _project.Name;
             model.Image = _project.Image;
-            model.ImageH = _project.ImageH;
-            model.ImageW = _project.ImageW;
 
 
             foreach (Line line in _project.Lines)
@@ -351,8 +349,6 @@ namespace Kaenx.Classes.Helper
             project.Name = pm.Name;
             project.Id = pm.Id;
             project.Image = pm.Image;
-            project.ImageH = pm.ImageH;
-            project.ImageW = pm.ImageW;
 
             Dictionary<int, GroupAddress> groups = new Dictionary<int, GroupAddress>();
 

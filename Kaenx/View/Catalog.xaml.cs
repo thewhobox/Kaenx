@@ -312,7 +312,7 @@ namespace Kaenx.View
 
                         if (count == 0)
                         {
-                            IEnumerable<object> tempList = _context.AppAbsoluteSegments.Where(a => a.ApplicationId == h2a.ApplicationId);
+                            IEnumerable<object> tempList = _context.AppSegments.Where(a => a.ApplicationId == h2a.ApplicationId);
                             _context.RemoveRange(tempList);
 
                             tempList = _context.AppComObjects.Where(a => a.ApplicationId == h2a.ApplicationId);

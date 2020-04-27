@@ -785,7 +785,7 @@ namespace Kaenx.Classes.Helper
 
 
             List<string> contextIds = new List<string>();
-            foreach (AppSegmentViewModel x in context.AppAbsoluteSegments)
+            foreach (AppSegmentViewModel x in context.AppSegments)
                 contextIds.Add(x.Id);
 
             foreach (AppComObject x in context.AppComObjects)
@@ -1306,7 +1306,7 @@ namespace Kaenx.Classes.Helper
                             existed = contextIds.Contains(seg.Attribute("Id").Value);
 
                             if (existed)
-                                aas = context.AppAbsoluteSegments.Single(a => a.Id == seg.Attribute("Id").Value);
+                                aas = context.AppSegments.Single(a => a.Id == seg.Attribute("Id").Value);
                             else
                                 aas = new AppSegmentViewModel() { Id = seg.Attribute("Id").Value };
                             
@@ -1317,15 +1317,15 @@ namespace Kaenx.Classes.Helper
                             aas.Mask = seg.Element(GetXName("Mask"))?.Value;
 
                             if (existed)
-                                context.AppAbsoluteSegments.Update(aas);
+                                context.AppSegments.Update(aas);
                             else
-                                context.AppAbsoluteSegments.Add(aas);
+                                context.AppSegments.Add(aas);
                             break;
 
                         case "RelativeSegment":
                             existed = contextIds.Contains(seg.Attribute("Id").Value);
 
-                            if (existed) aas = context.AppAbsoluteSegments.Single(a => a.Id == seg.Attribute("Id").Value);
+                            if (existed) aas = context.AppSegments.Single(a => a.Id == seg.Attribute("Id").Value);
                             else aas = new AppSegmentViewModel() { Id = seg.Attribute("Id").Value };
 
                             aas.ApplicationId = app.Id;
@@ -1334,9 +1334,9 @@ namespace Kaenx.Classes.Helper
                             aas.LsmId = int.Parse(seg.Attribute("LoadStateMachine").Value);
 
                             if (existed)
-                                context.AppAbsoluteSegments.Update(aas);
+                                context.AppSegments.Update(aas);
                             else
-                                context.AppAbsoluteSegments.Add(aas);
+                                context.AppSegments.Add(aas);
                             break;
 
                         default:

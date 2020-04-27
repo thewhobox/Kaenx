@@ -144,8 +144,6 @@ namespace Kaenx.DataContext.Migrations.Project
                         .Annotation("Sqlite:Autoincrement", true),
                     Name = table.Column<string>(nullable: true),
                     Image = table.Column<byte[]>(nullable: true),
-                    ImageH = table.Column<int>(nullable: false),
-                    ImageW = table.Column<int>(nullable: false)
                 },
                 constraints: table =>
                 {

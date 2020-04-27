@@ -177,10 +177,6 @@ namespace Kaenx.DataContext.Migrations.Project
 
                     b.Property<byte[]>("Image");
 
-                    b.Property<int>("ImageH");
-
-                    b.Property<int>("ImageW");
-
                     b.Property<string>("Name");
 
                     b.HasKey("Id");

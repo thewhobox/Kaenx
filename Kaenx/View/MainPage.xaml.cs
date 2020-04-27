@@ -95,11 +95,12 @@ namespace Kaenx.View
                 helper.Id = model.Id;
                 helper.Name = model.Name;
                 helper.Local = model;
+                helper.IsReconstruct = model.IsReconstruct;
                 helper.ProjectId = model.ProjectId;
 
                 if(model.Thumbnail != null)
                 {
-                    var wb = new WriteableBitmap(model.ThumbWidth, model.ThumbHeight);
+                    var wb = new WriteableBitmap(512,512);
                     using (Stream stream = wb.PixelBuffer.AsStream())
                     {
                         await stream.WriteAsync(model.Thumbnail, 0, model.Thumbnail.Length);
@@ -201,7 +202,11 @@ namespace Kaenx.View
                 }
             }
 
-            App.AppFrame.Navigate(typeof(WorkdeskEasy), project);
+
+            if(helper.IsReconstruct)
+                App.AppFrame.Navigate(typeof(Reconstruct), project);
+            else
+                App.AppFrame.Navigate(typeof(WorkdeskEasy), project);
         }
 
 
@@ -216,10 +221,6 @@ namespace Kaenx.View
             Notify.Show(loader.GetString("MsgProjectDeleted"), 3000);
 
             Serilog.Log.Information("Projekt wurde gelöscht: " + proj.Id + " - " + proj.Name);
-        }
-
-        private async void GridItemTapped(object sender, TappedRoutedEventArgs e)
-        {
         }
 
         private async void ClickChangePicFile(object sender, RoutedEventArgs e)
@@ -324,27 +325,35 @@ namespace Kaenx.View
                 await stream.ReadAsync(pixels, 0, pixels.Length);
             }
             proj.Image = pixels;
-            proj.ImageH = image.PixelHeight;
-            proj.ImageW = image.PixelWidth;
 
             proj.Id = SaveHelper.SaveProject(proj).Id;
-            
+
+            string tag = (sender as Button).Tag.ToString();
+
             LocalProject lp = new LocalProject();
             lp.ProjectId = proj.Id;
             lp.Name = proj.Name;
             lp.Thumbnail = proj.Image;
-            lp.ThumbHeight = proj.ImageH;
-            lp.ThumbWidth = proj.ImageW;
             lp.ConnectionId = proj.Connection.Id;
+            lp.IsReconstruct = tag == "rec";
             _contextL.Projects.Add(lp);
             _contextL.SaveChanges();
 
             ChangeHandler.Instance = new ChangeHandler(proj.Id);
 
-            Serilog.Log.Information("Projekt wird geöffnet: " + proj.Id + " - " + proj.Name);
+            Serilog.Log.Information("Projekt wird geöffnet: " + proj.Id + " - " + proj.Name + " / " + tag);
 
             Analytics.TrackEvent("Projekt erstellt");
-            App.AppFrame.Navigate(typeof(WorkdeskEasy), proj);
+
+            switch (tag)
+            {
+                case "new":
+                    App.AppFrame.Navigate(typeof(WorkdeskEasy), proj);
+                    break;
+                case "rec":
+                    App.AppFrame.Navigate(typeof(Reconstruct), proj);
+                    break;
+            }
         }
 
         private void GridTemplate_DoubleTapped(object sender, DoubleTappedRoutedEventArgs e)
@@ -356,7 +365,7 @@ namespace Kaenx.View
 
         private void OpenArchive(object sender, RoutedEventArgs e)
         {
-            Launcher.LaunchFolderPathAsync(ApplicationData.Current.LocalFolder.Path + "\\Logs");
+            _= Launcher.LaunchFolderPathAsync(ApplicationData.Current.LocalFolder.Path + "\\Logs");
         }
 
         private void GridTemplate_RightTapped(object sender, RightTappedRoutedEventArgs e)

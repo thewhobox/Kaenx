@@ -2,21 +2,21 @@
 
 namespace Kaenx.DataContext.Migrations.Local
 {
-    public partial class Thumbs : Migration
+    public partial class AddedReconstruct : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-
+            migrationBuilder.AddColumn<bool>(
+                name: "IsReconstruct",
+                table: "Projects",
+                nullable: false,
+                defaultValue: false);
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropColumn(
-                name: "ThumbHeight",
-                table: "Projects");
-
-            migrationBuilder.DropColumn(
-                name: "ThumbWidth",
+                name: "IsReconstruct",
                 table: "Projects");
         }
     }

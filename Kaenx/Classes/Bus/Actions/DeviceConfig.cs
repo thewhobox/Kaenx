@@ -130,7 +130,7 @@ namespace Kaenx.Classes.Bus.Actions
             {
                 if (appModel.Table_Assosiations != "" || appModel.Table_Assosiations != null)
                 {
-                    AppSegmentViewModel segmentModel = context.AppAbsoluteSegments.Single(s => s.Id == appModel.Table_Assosiations);
+                    AppSegmentViewModel segmentModel = context.AppSegments.Single(s => s.Id == appModel.Table_Assosiations);
                     int assoAddr = segmentModel.Address;
 
                     byte[] datax = await dev.MemoryRead(assoAddr, 1);
@@ -291,7 +291,7 @@ namespace Kaenx.Classes.Bus.Actions
 
             if(!mems.ContainsKey(para.SegmentId))
             {
-                AppSegmentViewModel seg = _context.AppAbsoluteSegments.Single(s => s.Id == para.SegmentId);
+                AppSegmentViewModel seg = _context.AppSegments.Single(s => s.Id == para.SegmentId);
                 byte[] temp = await dev.MemoryRead(seg.Address, seg.Size);
                 mems.Add(para.SegmentId, temp);
             }

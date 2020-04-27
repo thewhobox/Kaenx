@@ -209,7 +209,7 @@ namespace Kaenx.Classes.Bus.Actions
                 if (para.SegmentId == null) continue;
                 if (!mems.ContainsKey(para.SegmentId))
                 {
-                    AppSegmentViewModel seg = _context.AppAbsoluteSegments.Single(a => a.Id == para.SegmentId);
+                    AppSegmentViewModel seg = _context.AppSegments.Single(a => a.Id == para.SegmentId);
                     memsData[para.SegmentId] = Convert.FromBase64String(seg.Data);
                     mems[para.SegmentId] = seg;
                 }

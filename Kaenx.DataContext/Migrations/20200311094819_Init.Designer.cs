@@ -18,7 +18,7 @@ namespace Kaenx.DataContext.Migrations
             modelBuilder
                 .HasAnnotation("ProductVersion", "2.2.6-servicing-10079");
 
-            modelBuilder.Entity("Kaenx.DataContext.Catalog.AppAbsoluteSegmentViewModel", b =>
+            modelBuilder.Entity("Kaenx.DataContext.Catalog.AppSegmentViewModel", b =>
                 {
                     b.Property<string>("Id")
                         .ValueGeneratedOnAdd()
@@ -36,7 +36,7 @@ namespace Kaenx.DataContext.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("AppAbsoluteSegments");
+                    b.ToTable("AppSegments");
                 });
 
             modelBuilder.Entity("Kaenx.DataContext.Catalog.AppAdditional", b =>
@@ -87,21 +87,9 @@ namespace Kaenx.DataContext.Migrations
 
                     b.Property<bool>("Flag_Write");
 
-                    b.Property<string>("FunctionText_DE")
-                        .HasMaxLength(100);
-
-                    b.Property<string>("FunctionText_EN")
-                        .HasMaxLength(100);
-
                     b.Property<int>("Number");
 
                     b.Property<int>("Size");
-
-                    b.Property<string>("Text_DE")
-                        .HasMaxLength(100);
-
-                    b.Property<string>("Text_EN")
-                        .HasMaxLength(100);
 
                     b.HasKey("Id");
 

@@ -6,15 +6,6 @@ namespace Kaenx.DataContext.Migrations
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.RenameColumn(
-                name: "Text_EN",
-                table: "AppComObjects",
-                newName: "Text");
-
-            migrationBuilder.RenameColumn(
-                name: "Text_DE",
-                table: "AppComObjects",
-                newName: "FunctionText");
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)

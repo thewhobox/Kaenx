@@ -3,14 +3,16 @@ using System;
 using Kaenx.DataContext.Local;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace Kaenx.DataContext.Migrations.Local
 {
     [DbContext(typeof(LocalContext))]
-    partial class LocalContextModelSnapshot : ModelSnapshot
+    [Migration("20200427091325_AddedReconstruct")]
+    partial class AddedReconstruct
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

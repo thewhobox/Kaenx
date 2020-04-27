@@ -9,8 +9,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Kaenx.DataContext.Migrations.Project
 {
     [DbContext(typeof(ProjectContext))]
-    [Migration("20200414083156_Serial")]
-    partial class Serial
+    [Migration("20200427083623_RemovedImgSize")]
+    partial class RemovedImgSize
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {

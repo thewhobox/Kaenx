@@ -2,7 +2,7 @@
 
 namespace Kaenx.DataContext.Migrations.Local
 {
-    public partial class Thumbs : Migration
+    public partial class RemovedImgSize : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
@@ -11,13 +11,17 @@ namespace Kaenx.DataContext.Migrations.Local
 
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropColumn(
+            migrationBuilder.AddColumn<int>(
                 name: "ThumbHeight",
-                table: "Projects");
+                table: "Projects",
+                nullable: false,
+                defaultValue: 0);
 
-            migrationBuilder.DropColumn(
+            migrationBuilder.AddColumn<int>(
                 name: "ThumbWidth",
-                table: "Projects");
+                table: "Projects",
+                nullable: false,
+                defaultValue: 0);
         }
     }
 }

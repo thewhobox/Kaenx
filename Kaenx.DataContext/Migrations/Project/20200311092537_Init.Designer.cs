@@ -173,10 +173,6 @@ namespace Kaenx.DataContext.Migrations.Project
 
                     b.Property<int>("ImageH");
 
-                    b.Property<int>("ImageW");
-
-                    b.Property<string>("Name");
-
                     b.HasKey("Id");
 
                     b.ToTable("Projects");

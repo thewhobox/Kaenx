@@ -136,7 +136,7 @@
                 </GridView.ItemsPanel>
                 <GridView.ItemTemplate>
                     <DataTemplate>
-                        <Grid x:Name="GridTemplate" RightTapped="GridTemplate_RightTapped" Tapped="GridItemTapped" DoubleTapped="GridTemplate_DoubleTapped" IsDoubleTapEnabled="True" IsTapEnabled="True" Height="240" Width="240" BorderBrush="LightGray" BorderThickness="1">
+                        <Grid x:Name="GridTemplate" RightTapped="GridTemplate_RightTapped" DoubleTapped="GridTemplate_DoubleTapped" IsDoubleTapEnabled="True" IsTapEnabled="True" Height="240" Width="240" BorderBrush="LightGray" BorderThickness="1">
                             <Grid.RowDefinitions>
                                 <RowDefinition />
                                 <RowDefinition Height="auto" />
@@ -232,9 +232,12 @@
                         <ColumnDefinition />
                         <ColumnDefinition Width="20" />
                         <ColumnDefinition />
+                        <ColumnDefinition Width="20" />
+                        <ColumnDefinition />
                     </Grid.ColumnDefinitions>
-                    <Button x:Uid="/MainPage/NewCreate" HorizontalAlignment="Stretch" Click="CickDiagCreate" Background="{ThemeResource SystemAccentColor}" Foreground="White" />
-                    <Button x:Uid="/MainPage/NewCancel" Grid.Column="2" HorizontalAlignment="Stretch" Click="CickDiagCancel" />
+                    <Button x:Uid="/MainPage/NewCreate" HorizontalAlignment="Stretch" Click="CickDiagCreate" Background="{ThemeResource SystemAccentColor}" Tag="new" Foreground="White" />
+                    <Button x:Uid="/MainPage/NewReconstruate" Grid.Column="2" Content="Rekonstruieren" HorizontalAlignment="Stretch" Click="CickDiagCreate" Tag="rec" Background="{ThemeResource SystemAccentColor}" Foreground="White" />
+                    <Button x:Uid="/MainPage/NewCancel" Grid.Column="4" HorizontalAlignment="Stretch" Click="CickDiagCancel" />
                 </Grid>
             </Grid>
         </Border>

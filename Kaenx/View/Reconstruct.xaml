@@ -1,0 +1,63 @@
+﻿<Page
+    x:Class="Kaenx.View.Reconstruct"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:Kaenx.View"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:toolkit="using:Microsoft.Toolkit.Uwp.UI.Controls"
+    mc:Ignorable="d"
+    Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="auto" />
+            <RowDefinition />
+            <RowDefinition Height="auto" />
+        </Grid.RowDefinitions>
+
+        <StackPanel Orientation="Horizontal" Background="{ThemeResource BrushAccentColor1}">
+            <AppBarButton Label="Scannen" Foreground="White" Click="ClickScanStart">
+                <AppBarButton.Icon>
+                    <FontIcon Glyph="&#xEE6F;" />
+                </AppBarButton.Icon>
+            </AppBarButton>
+
+            <TextBlock Foreground="White" FontSize="20" Margin="20 0" VerticalAlignment="Center" Text="{Binding Action}" />
+        </StackPanel>
+
+        <toolkit:DataGrid x:Name="GridDevices" Grid.Row="1" ItemsSource="{Binding Devices}" AutoGenerateColumns="False" IsReadOnly="true">
+            <toolkit:DataGrid.Columns>
+                <toolkit:DataGridTextColumn Header="Adresse" Binding="{Binding Address}" />
+                <toolkit:DataGridTextColumn Header="Status" Binding="{Binding Status}" />
+                <toolkit:DataGridTextColumn Header="Hersteller" Binding="{Binding Manufacturer}" />
+                <toolkit:DataGridTextColumn Header="Seriennummer" Binding="{Binding Serial}" />
+                <toolkit:DataGridTextColumn Header="Gerätename" Binding="{Binding DeviceName}" />
+                <toolkit:DataGridTextColumn Header="Applikation" Binding="{Binding ApplicationName}" />
+            </toolkit:DataGrid.Columns>
+        </toolkit:DataGrid>
+
+        <Grid x:Name="GridInterfaces" Grid.Row="2" Background="Green">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="auto" />
+                <ColumnDefinition Width="auto" />
+                <ColumnDefinition Width="auto" />
+            </Grid.ColumnDefinitions>
+            <TextBlock Text="Schnittstelle:"  Foreground="White" Margin="10 0" VerticalAlignment="Center"/>
+
+            <ComboBox x:Name="InfoInterfaces" ItemsSource="{Binding InterfaceList}" SelectedItem="{Binding SelectedInterface, Mode=TwoWay}" Grid.Column="1" Height="29" MinWidth="200">
+                <ComboBox.ItemTemplate>
+                    <DataTemplate>
+                        <StackPanel Orientation="Vertical">
+                            <TextBlock Text="{Binding Name}" />
+                            <TextBlock Text="{Binding Endpoint}" FontSize="12" Foreground="Gray" />
+                        </StackPanel>
+                    </DataTemplate>
+                </ComboBox.ItemTemplate>
+            </ComboBox>
+        </Grid>
+
+
+        <toolkit:InAppNotification x:Name="Notify" Grid.RowSpan="3" />
+    </Grid>
+</Page>

@@ -11,10 +11,8 @@ namespace Kaenx.DataContext.Local
         public int Id { get; set; }
         public int ProjectId { get; set; }
         public string Name { get; set; }
+        public bool IsReconstruct { get; set; } = false;
         public int ConnectionId { get; set; }
         public byte[] Thumbnail { get; set; }
-        public int ThumbWidth { get; set; }
-        public int ThumbHeight { get; set; }
-
     }
 }

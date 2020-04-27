@@ -168,6 +168,7 @@
     <Compile Include="Classes\Project\DeviceComObject.cs" />
     <Compile Include="Classes\Project\GroupAddress.cs" />
     <Compile Include="Classes\Project\GroupMiddle.cs" />
+    <Compile Include="Classes\ReconstructDevice.cs" />
     <Compile Include="Classes\TemplateSelectors\BlockSelector.cs" />
     <Compile Include="Classes\TemplateSelectors\ControlParamsSelector.cs" />
     <Compile Include="Classes\TemplateSelectors\ControlsParamTypesSelector.cs" />
@@ -270,6 +271,9 @@
     </Compile>
     <Compile Include="View\Home.xaml.cs">
       <DependentUpon>Home.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="View\Reconstruct.xaml.cs">
+      <DependentUpon>Reconstruct.xaml</DependentUpon>
     </Compile>
     <Compile Include="View\Settings.xaml.cs">
       <DependentUpon>Settings.xaml</DependentUpon>
@@ -485,6 +489,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="View\Home.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="View\Reconstruct.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

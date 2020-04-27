@@ -14,6 +14,7 @@ namespace Kaenx.Classes.Helper
         public int Id { get; set; }
         public int ProjectId { get; set; }
         public string Name { get; set; }
+        public bool IsReconstruct { get; set; }
         public ImageSource Image { get; set; }
         public LocalProject Local { get; set; }
     }

@@ -54,7 +54,7 @@ namespace Kaenx.Classes.Bus.Actions
 
             CatalogContext context = new CatalogContext();
             ApplicationViewModel app = context.Applications.Single(a => a.Id == Device.ApplicationId);
-            AppSegmentViewModel seg = context.AppAbsoluteSegments.Single(s => s.Id == app.Table_Group);
+            AppSegmentViewModel seg = context.AppSegments.Single(s => s.Id == app.Table_Group);
             int addr = seg.Address;
 
             if (Device.IsDeactivated)

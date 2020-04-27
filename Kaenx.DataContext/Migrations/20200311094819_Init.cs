@@ -8,7 +8,7 @@ namespace Kaenx.DataContext.Migrations
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.CreateTable(
-                name: "AppAbsoluteSegments",
+                name: "AppSegments",
                 columns: table => new
                 {
                     Id = table.Column<string>(maxLength: 255, nullable: false),
@@ -20,7 +20,7 @@ namespace Kaenx.DataContext.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_AppAbsoluteSegments", x => x.Id);
+                    table.PrimaryKey("PK_AppSegments", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -46,10 +46,8 @@ namespace Kaenx.DataContext.Migrations
                 {
                     Id = table.Column<string>(maxLength: 255, nullable: false),
                     ApplicationId = table.Column<string>(maxLength: 100, nullable: true),
-                    Text_DE = table.Column<string>(maxLength: 100, nullable: true),
-                    Text_EN = table.Column<string>(maxLength: 100, nullable: true),
-                    FunctionText_DE = table.Column<string>(maxLength: 100, nullable: true),
-                    FunctionText_EN = table.Column<string>(maxLength: 100, nullable: true),
+                    Text = table.Column<string>(maxLength: 100, nullable: false),
+                    FunctionText = table.Column<string>(maxLength: 100, nullable: false),
                     Flag_Read = table.Column<bool>(nullable: false),
                     Flag_Write = table.Column<bool>(nullable: false),
                     Flag_Communicate = table.Column<bool>(nullable: false),
@@ -197,7 +195,7 @@ namespace Kaenx.DataContext.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "AppAbsoluteSegments");
+                name: "AppSegments");
 
             migrationBuilder.DropTable(
                 name: "AppAdditionals");

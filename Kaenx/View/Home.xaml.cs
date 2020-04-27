@@ -39,7 +39,7 @@ namespace Kaenx.View
 
             if(project.Image != null)
             {
-                var wb = new WriteableBitmap(project.ImageW, project.ImageH);
+                var wb = new WriteableBitmap(512,512);
                 using (Stream stream = wb.PixelBuffer.AsStream())
                 {
                     await stream.WriteAsync(project.Image, 0, project.Image.Length);
