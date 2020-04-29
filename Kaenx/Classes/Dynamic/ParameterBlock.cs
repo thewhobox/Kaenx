@@ -1,5 +1,4 @@
-﻿using Kaenx.Classes.Controls.Paras;
-using Kaenx.Classes.Helper;
+﻿using Kaenx.Classes.Helper;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -20,6 +19,7 @@ namespace Kaenx.Classes.Dynamic
 
         public string Id { get; set; }
         public string Text { get; set; }
+        public bool HasAccess { get; set; } = true;
 
         private string _dtext;
         public string DisplayText

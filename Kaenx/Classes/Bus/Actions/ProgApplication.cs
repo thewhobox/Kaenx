@@ -1,4 +1,5 @@
-﻿using Kaenx.Classes.Helper;
+﻿using Kaenx.Classes.Dynamic;
+using Kaenx.Classes.Helper;
 using Kaenx.Classes.Project;
 using Kaenx.DataContext.Catalog;
 using Kaenx.DataContext.Project;
@@ -57,44 +58,82 @@ namespace Kaenx.Classes.Bus.Actions
             _token = token;
 
 
-            Start3();
-
-            //Start();
+            Start();
         }
 
 
-        private async void Start3()
+        private async void Start()
         {
             dev = new BusDevice(Device.LineName, Connection);
             TodoText = "Applikation schreiben";
 
-            XElement merges = null;
-            XElement loadprocedures = null;
+
             CatalogContext _context = new CatalogContext();
+            AppAdditional adds = _context.AppAdditionals.Single(a => a.Id == Device.ApplicationId);
             ApplicationViewModel app = _context.Applications.Single(a => a.Id == Device.ApplicationId);
 
-            AppAdditional adds = _context.AppAdditionals.Single(a => a.Id == Device.ApplicationId);
-            XElement prod = XDocument.Parse(Encoding.UTF8.GetString(adds.LoadProcedures)).Root;
-            loadprocedures = prod.Element(XName.Get("LoadProcedure", prod.Name.NamespaceName));
+            XElement temp;
+            XElement procedure = null;
 
-            if(prod.Elements().Any(e => e.Attribute("MergeId") != null))
+            switch (app.LoadProcedure)
             {
-                merges = prod;
-                XDocument master = await GetKnxMaster();
-                XElement mask = master.Descendants(XName.Get("MaskVersion", master.Root.Name.NamespaceName)).Single(m => m.Attribute("Id").Value == app.Mask);
-                loadprocedures = mask.Descendants(XName.Get("Procedure", master.Root.Name.NamespaceName)).Single(m => m.Attribute("ProcedureType").Value == "Load");
+                case LoadProcedureTypes.Unknown:
+                    TodoText = "LadeProzedur ist unbekannt";
+                    Finished?.Invoke(this, null);
+                    break;
+
+                case LoadProcedureTypes.Product:
+                    temp = XDocument.Parse(Encoding.UTF8.GetString(adds.LoadProcedures)).Root;
+                    procedure = temp.Descendants(XName.Get("LoadProcedure", temp.Name.NamespaceName)).First();
+                    break;
+
+                case LoadProcedureTypes.Default:
+                    temp = await GetKnxMaster();
+                    temp = temp.Descendants(XName.Get("MaskVersion", temp.Name.NamespaceName)).Single(m => m.Attribute("Id").Value == app.Mask);
+                    procedure = temp.Descendants(XName.Get("Procedure", temp.Name.NamespaceName)).First(m => m.Attribute("ProcedureType").Value == "Load"); //TODO beachte ob komplett, minimal, etc
+                    break;
+
+                case LoadProcedureTypes.Merge:
+                    XElement temp2 = XDocument.Parse(Encoding.UTF8.GetString(adds.LoadProcedures)).Root;
+                    temp = await GetKnxMaster();
+                    temp = temp.Descendants(XName.Get("MaskVersion", temp.Name.NamespaceName)).Single(m => m.Attribute("Id").Value == app.Mask);
+                    temp = temp.Descendants(XName.Get("Procedure", temp.Name.NamespaceName)).First(m => m.Attribute("ProcedureType").Value == "Load"); //TODO beachte ob komplett, minimal, etc
+
+                    IEnumerable<XElement> merges = temp2.Descendants(XName.Get("LoadProcedure", temp.Name.NamespaceName));
+
+                    while (temp.Descendants(XName.Get("LdCtrlMerge", temp.Name.NamespaceName)).Count() > 0)
+                    {
+                        XElement merge = temp.Descendants(XName.Get("LdCtrlMerge", temp.Name.NamespaceName)).First();
+                        if (!merges.Any(m => m.Attribute("MergeId").Value == merge.Attribute("MergeId").Value))
+                        {
+                            merge.Remove();
+                            continue;
+                        }
+
+                        XElement corres = merges.Single(m => m.Attribute("MergeId").Value == merge.Attribute("MergeId").Value);
+                        merge.PreviousNode.AddAfterSelf(corres.Elements());
+                        merge.Remove();
+
+                    }
+                    procedure = temp;
+                    break;
             }
 
 
-            double stepSize = 100.0 / loadprocedures.Elements().Count();
-            double currentProg = 0;
-            Debug.WriteLine("StepSize: " + stepSize + " - " + prod.Elements().Count());
 
-            foreach(XElement ctrl in loadprocedures.Elements())
+            double stepSize = 100.0 / procedure.Elements().Count();
+            double currentProg = 0;
+            Debug.WriteLine("StepSize: " + stepSize + " - " + procedure.Elements().Count());
+
+            foreach(XElement ctrl in procedure.Elements())
             {
+                if (_token.IsCancellationRequested) 
+                    return;
+
                 currentProg += stepSize;
                 ProgressValue = (int)currentProg;
 
+                Debug.WriteLine(ctrl.Name.LocalName);
                 switch (ctrl.Name.LocalName)
                 {
                     case "LdCtrlConnect":
@@ -128,23 +167,40 @@ namespace Kaenx.Classes.Bus.Actions
                     case "LdCtrlUnload":
                     case "LdCtrlLoad":
                     case "LdCtrlLoadCompleted":
-                        //if (ctrl.Attribute("LsmIdx").Value == "3") continue;
                         await LsmState(ctrl);
                         break;
 
                     case "LdCtrlTaskSegment":
-                        //if (ctrl.Attribute("LsmIdx").Value == "3") continue;
                         await AllocSegment(ctrl, 2);
                         break;
 
                     case "LdCtrlAbsSegment":
-                        //if (ctrl.Attribute("LsmIdx").Value == "3") continue;
                         await WriteAbsSegment(ctrl, adds);
+                        break;
+
+                    case "LdCtrlRelSegment":
+
+                        break;
+
+                    case "LdCtrlWriteProp":
+                        //nicht ausgereift
+                        byte[] data = new byte[2];
+                        uint num = uint.Parse(ctrl.Attribute("InlineData").Value, System.Globalization.NumberStyles.AllowHexSpecifier);
+                        byte[] floatVals = BitConverter.GetBytes(num);
+                        await dev.PropertyWrite(Convert.ToByte(ctrl.Attribute("ObjIdx").Value), Convert.ToByte(ctrl.Attribute("PropId").Value), data);
+                        break;
+
+                    case "LdCtrlWriteRelMem":
+
                         break;
 
                     case "LdCtrlDelay":
                         int ms = int.Parse(ctrl.Attribute("MilliSeconds").Value);
                         await Task.Delay(ms);
+                        break;
+
+                    default:
+                        Debug.WriteLine("Unbekanntes Element: " + ctrl.Name.LocalName);
                         break;
                 }
             }
@@ -274,95 +330,77 @@ namespace Kaenx.Classes.Bus.Actions
         private List<AppParameter> GetVisibleParams(AppAdditional adds)
         {
             Dictionary<string, AppParameter> AppParas = new Dictionary<string, AppParameter>();
+            Dictionary<string, ChangeParamModel> ParaChanges = new Dictionary<string, ChangeParamModel>();
             List<AppParameter> paras = new List<AppParameter>();
-            XDocument dynamic = XDocument.Parse(Encoding.UTF8.GetString(adds.Dynamic));
 
             foreach (AppParameter para in _context.AppParameters.Where(p => p.ApplicationId == Device.ApplicationId))
                 AppParas.Add(para.Id, para);
 
-            ProjectContext _contextP = SaveHelper.contextProject;
+            ProjectContext _c = SaveHelper.contextProject;
 
-            if (_contextP.ChangesParam.Any(c => c.DeviceId == Device.UId))
+            if (_c.ChangesParam.Any(c => c.DeviceId == Device.UId))
             {
-                List<string> updated = new List<string>();
-                var changes = _contextP.ChangesParam.Where(c => c.DeviceId == Device.UId).OrderByDescending(c => c.StateId);
+                var changes = _c.ChangesParam.Where(c => c.DeviceId == Device.UId).OrderByDescending(c => c.StateId);
                 foreach (ChangeParamModel model in changes)
                 {
-                    if (updated.Contains(model.ParamId)) continue;
-                    AppParas[model.ParamId].Value = model.Value;
-                    updated.Add(model.ParamId);
+                    if (ParaChanges.ContainsKey(model.ParamId)) continue;
+                    ParaChanges.Add(model.ParamId, model);
                 }
             }
 
-            Dictionary<string, ParamVisHelper> conditions = new Dictionary<string, ParamVisHelper>();
-            foreach (ParamVisHelper helper in SaveHelper.ByteArrayToObject<List<ParamVisHelper>>(adds.ParameterAll))
-                conditions.Add(helper.ParameterId, helper);
+            Dictionary<string, ViewParamModel> Id2Param = new Dictionary<string, ViewParamModel>();
+            List<IDynChannel> Channels = SaveHelper.ByteArrayToObject<List<IDynChannel>>(adds.ParamsHelper, true);
 
-            int visibleBlocks = 0;
-            foreach (XElement paraBlock in dynamic.Descendants(XName.Get("ParameterBlock", dynamic.Root.Name.NamespaceName)))
+            foreach (IDynChannel ch in Channels)
             {
-                XElement parent = paraBlock;
-                XElement lastWhen = null;
-                bool stop = false;
-                bool isVisibleBlock = true;
-                int lastNr;
-
-                while (!stop)
+                foreach (ParameterBlock block in ch.Blocks)
                 {
-                    parent = parent.Parent;
-
-                    switch (parent.Name.LocalName)
+                    foreach (IDynParameter para in block.Parameters)
                     {
-                        case "Dynamic":
-                            stop = true;
-                            break;
+                        if (ParaChanges.ContainsKey(para.Id))
+                            para.Value = ParaChanges[para.Id].Value;
 
-                        case "when":
-                            lastWhen = parent;
-                            break;
+                        if (!Id2Param.ContainsKey(para.Id))
+                            Id2Param.Add(para.Id, new ViewParamModel(para.Value));
 
-                        case "choose":
-                            //TODO choose ausweiten auf < > <= >=
-                            AppParameter cPara = AppParas[parent.Attribute("ParamRefId").Value];
-                            if (lastWhen.Attribute("default") != null) //Test default
+                        Id2Param[para.Id].Parameters.Add(para);
+                    }
+                }
+            }
+
+
+            foreach (IDynChannel ch in Channels)
+            {
+                bool visible = SaveHelper.CheckConditions(ch.Conditions, Id2Param);
+
+                if (visible)
+                {
+                    foreach (ParameterBlock block in ch.Blocks)
+                    {
+                        bool vis2 = SaveHelper.CheckConditions(block.Conditions, Id2Param);
+
+                        if (vis2)
+                        {
+                            foreach (IDynParameter para in block.Parameters)
                             {
-
-                            }
-                            else if (int.TryParse(lastWhen.Attribute("test")?.Value, out lastNr)) //Test isequal
-                            {
-                                if (cPara.Value != lastWhen.Attribute("test").Value)
+                                bool vis3 = SaveHelper.CheckConditions(para.Conditions, Id2Param);
+                                if (vis3)
                                 {
-                                    isVisibleBlock = false;
-                                    stop = true;
+                                    AppParameter xpara = AppParas[para.Id];
+                                    if (!paras.Contains(xpara))
+                                    {
+                                        xpara.Value = para.Value;
+                                        paras.Add(xpara);
+                                    }
                                 }
                             }
-                            else if (lastWhen.Attribute("test").Value.Contains(" "))
-                            {
-                                if (!lastWhen.Attribute("test").Value.Split(" ").Contains(cPara.Value)) //Test contains
-                                {
-                                    isVisibleBlock = false;
-                                    stop = true;
-                                }
-                            }
-                            break;
+                        }
+                        
                     }
                 }
 
-                if (!isVisibleBlock) continue;
-                visibleBlocks++;
-
-                foreach(XElement param in paraBlock.Descendants(XName.Get("ParameterRefRef", paraBlock.Name.NamespaceName)))
-                {
-                    string paraId = param.Attribute("RefId").Value;
-                    ParamVisHelper helper = conditions[paraId];
-
-                    if (CheckConditions(AppParas, helper.Conditions))
-                        paras.Add(AppParas[paraId]);
-                }
+                
             }
-
-
-
 
 
             return paras;
@@ -595,7 +633,7 @@ namespace Kaenx.Classes.Bus.Actions
             }
         }
 
-        private async Task<XDocument> GetKnxMaster()
+        private async Task<XElement> GetKnxMaster()
         {
             StorageFile masterFile;
 
@@ -612,7 +650,7 @@ namespace Kaenx.Classes.Bus.Actions
 
 
             XDocument masterXml = XDocument.Load(await masterFile.OpenStreamForReadAsync());
-            return masterXml;
+            return masterXml.Root;
         }
 
 

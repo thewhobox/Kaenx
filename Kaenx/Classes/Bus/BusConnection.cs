@@ -206,6 +206,7 @@ namespace Kaenx.Classes.Bus
             
             CurrentAction.ProgressIsIndeterminate = true;
             CurrentAction.TodoText = loader.GetString("Action_Connecting");
+
             _cancelTokenSource = new CancellationTokenSource();
 
             int c = 0;

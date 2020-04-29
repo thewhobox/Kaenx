@@ -1,5 +1,4 @@
-﻿using Kaenx.Classes.Controls.Paras;
-using Kaenx.DataContext.Catalog;
+﻿using Kaenx.DataContext.Catalog;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;

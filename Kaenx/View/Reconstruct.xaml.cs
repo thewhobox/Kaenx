@@ -1,5 +1,6 @@
 ﻿using Kaenx.Classes;
 using Kaenx.Classes.Bus;
+using Kaenx.Classes.Project;
 using Kaenx.DataContext.Catalog;
 using Kaenx.Konnect;
 using Kaenx.Konnect.Addresses;
@@ -19,6 +20,8 @@ using System.Xml.Linq;
 using Windows.Foundation;
 using Windows.Foundation.Collections;
 using Windows.Storage;
+using Windows.UI.Core;
+using Windows.UI.ViewManagement;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Controls.Primitives;
@@ -43,8 +46,16 @@ namespace Kaenx.View
             set { _action = value; Changed("Action"); }
         }
 
+        private bool _cando;
+        public bool CanDo
+        {
+            get { return _cando; }
+            set { _cando = value; Changed("CanDo"); }
+        }
+
         public ObservableCollection<ReconstructDevice> Devices { get; set; } = new ObservableCollection<ReconstructDevice>();
 
+        private Project _project;
         private BusConnection conn = new BusConnection();
         private Dictionary<string, string> manus = new Dictionary<string, string>();
         private CatalogContext _context = new CatalogContext();
@@ -55,7 +66,32 @@ namespace Kaenx.View
             this.InitializeComponent();
             GridInterfaces.DataContext = conn;
             this.DataContext = this;
-            Init();           
+            Init();
+
+        }
+
+        private void CurrentView_BackRequested(object sender, BackRequestedEventArgs e)
+        {
+            App.Navigate(typeof(MainPage));
+            e.Handled = true;
+        }
+
+        protected override void OnNavigatedTo(NavigationEventArgs e)
+        {
+            base.OnNavigatedTo(e);
+            _project = e.Parameter as Project;
+            ApplicationView.GetForCurrentView().Title = _project.Name + " - Rekonstruktion";
+
+            var currentView = SystemNavigationManager.GetForCurrentView();
+            currentView.AppViewBackButtonVisibility = AppViewBackButtonVisibility.Visible;
+            currentView.BackRequested += CurrentView_BackRequested;
+        }
+
+        protected override void OnNavigatedFrom(NavigationEventArgs e)
+        {
+            base.OnNavigatedFrom(e);
+            var currentView = SystemNavigationManager.GetForCurrentView();
+            currentView.BackRequested -= CurrentView_BackRequested;
         }
 
         private async void Init()
@@ -77,6 +113,8 @@ namespace Kaenx.View
 
             foreach (XElement ele in master.Descendants(XName.Get("Manufacturer", master.Root.Name.NamespaceName)))
                 manus.Add(ele.Attribute("Id").Value, ele.Attribute("Name").Value);
+
+            CanDo = true;
         }
 
         public event PropertyChangedEventHandler PropertyChanged;
@@ -98,6 +136,7 @@ namespace Kaenx.View
 
         private async void DoScan()
         {
+            CanDo = false;
             Connection _conn = new Connection(conn.SelectedInterface.Endpoint);
             _conn.Connect();
 
@@ -134,17 +173,20 @@ namespace Kaenx.View
                 }
                 catch (OperationCanceledException e)
                 {
-                    device.Status = "Fehler";
+                    device.Status = "Fehler 0x01";
                     device.StateId = -1;
                 }
-                catch
+                catch(Exception ex)
                 {
-
+                    device.Status = "Fehler 0x00";
+                    device.StateId = -1;
+                    Serilog.Log.Error(ex, "Fehler beim Auslesen von Gerät");
                 }
             }
 
 
             _conn.Disconnect();
+            CanDo = true;
         }
 
         private async Task ReadDevice(ReconstructDevice device, Connection _conn)
@@ -170,20 +212,18 @@ namespace Kaenx.View
 
             appId = $"M-{appId.Substring(0, 4)}_A-{appId.Substring(4, 4)}-{appId.Substring(8, 2)}-";
 
-            ApplicationViewModel model;
             try
             {
-                model = _context.Applications.Single(a => a.Id.StartsWith(appId));
-                device.ApplicationName = model.Name;
-                Hardware2AppModel h2a = _context.Hardware2App.Single(h => h.ApplicationId.StartsWith(appId));
+                Hardware2AppModel h2a = _context.Hardware2App.First(h => h.ApplicationId.StartsWith(appId));
+                device.ApplicationName = h2a.Name;
                 DeviceViewModel devm = _context.Devices.First(d => d.HardwareId == h2a.HardwareId);
                 device.DeviceName = devm.Name;
             }
             catch
             {
                 if (string.IsNullOrEmpty(device.ApplicationName))
-                    device.ApplicationName = "-";
-                device.DeviceName = "-";
+                    device.ApplicationName = "Fehler 0x03";
+                device.DeviceName = "Fehler 0x03";
             }
 
 
@@ -192,7 +232,17 @@ namespace Kaenx.View
             {
                 device.Serial = await dev.PropertyRead<string>(mask, "DeviceSerialNumber");
             }
-            catch { device.Serial = "-"; }
+            catch {
+                try
+                {
+                    device.Serial = await dev.PropertyRead<string>(0, 11, 6);
+                }
+                catch
+                {
+
+                    device.Serial = "Fehler 0x02";
+                }
+            }
 
 
             device.Status = "Infos gelesen";
@@ -212,6 +262,11 @@ namespace Kaenx.View
                     Devices.Add(dev);
                 });
             }
+        }
+
+        private void ClickReadStart(object sender, RoutedEventArgs e)
+        {
+
         }
     }
 }

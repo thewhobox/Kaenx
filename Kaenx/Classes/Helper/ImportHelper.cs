@@ -203,6 +203,19 @@ namespace Kaenx.Classes.Helper
                     Log.Information("Import Applikationen abgeschlossen");
                     loadedIds.Add(device.ApplicationId);
                 }
+                else
+                {
+                    Hardware2AppModel hard2App = _context.Hardware2App.Single(h => h.ApplicationId == device.ApplicationId && h.Name != null);
+
+                    foreach(Hardware2AppModel model in _context.Hardware2App.Where(h => h.ApplicationId == device.ApplicationId && h.Name == null))
+                    {
+                        model.Name = hard2App.Name;
+                        model.Version = hard2App.Version;
+                        model.Number = hard2App.Number;
+                        _context.Hardware2App.Update(model);
+                    }
+                    _context.SaveChanges();
+                }
                 ProgressChanged?.Invoke(5);
 
 
@@ -563,6 +576,25 @@ namespace Kaenx.Classes.Helper
             app.Version = int.Parse(appXml.Attribute("ApplicationVersion").Value);
             app.Mask = appXml.Attribute("MaskVersion").Value;
             app.Name = appXml.Attribute("Name").Value;
+
+            switch (appXml.Attribute("LoadProcedureStyle").Value)
+            {
+                case "ProductProcedure":
+                    app.LoadProcedure = LoadProcedureTypes.Product;
+                    break;
+
+                case "MergedProcedure":
+                    app.LoadProcedure = LoadProcedureTypes.Merge;
+                    break;
+
+                case "DefaultProcedure":
+                    app.LoadProcedure = LoadProcedureTypes.Default;
+                    break;
+
+                default:
+                    app.LoadProcedure = LoadProcedureTypes.Unknown;
+                    break;
+            }
 
             Hardware2AppModel hard2App = _context.Hardware2App.Single(h => h.ApplicationId == app.Id && h.HardwareId == device.HardwareId);
             hard2App.Name = app.Name;

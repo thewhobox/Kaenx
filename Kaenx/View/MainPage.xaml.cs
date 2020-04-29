@@ -58,7 +58,6 @@ namespace Kaenx.View
         private ResourceLoader loaderG = ResourceLoader.GetForCurrentView("Global");
         private ResourceLoader loaderD = ResourceLoader.GetForCurrentView("Dialogs");
 
-        private bool _openHandled = false;
         private bool _projectSelected = false;
         private LocalContext _contextL = new LocalContext();
         private FlyoutBase _currentFlyout = null;
@@ -358,7 +357,6 @@ namespace Kaenx.View
 
         private void GridTemplate_DoubleTapped(object sender, DoubleTappedRoutedEventArgs e)
         {
-            _openHandled = true;
             ProjectViewHelper helper = (sender as Grid).DataContext as ProjectViewHelper;
             DoOpenProject(helper);
         }
@@ -372,6 +370,11 @@ namespace Kaenx.View
         {
             _currentFlyout = FlyoutBase.GetAttachedFlyout((FrameworkElement)sender);
             _currentFlyout.ShowAt((FrameworkElement)sender);
+        }
+
+        private void GridItemTapped(object sender, TappedRoutedEventArgs e)
+        {
+
         }
     }
 }

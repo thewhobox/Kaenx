@@ -188,16 +188,27 @@ namespace Kaenx.Classes.Bus.Actions
             dev.Connect();
             await Task.Delay(100);
             string mask = await dev.DeviceDescriptorRead();
+
+            byte[] serial = null;
             try
             {
-                byte[] serial = await dev.PropertyRead("MV-" + mask, "DeviceSerialNumber");
+                serial = await dev.PropertyRead("MV-" + mask, "DeviceSerialNumber");
+            } catch {
+                try
+                {
+                    serial = await dev.PropertyRead(0, 11, 6);
+                }
+                catch { }
+            }
+
+            if(serial != null)
+            {
                 Device.Serial = serial;
                 _ = App._dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Low, () =>
                 {
                     SaveHelper.UpdateDevice(Device);
                 });
-            } catch { }
-
+            }
 
             dev.Restart();
 

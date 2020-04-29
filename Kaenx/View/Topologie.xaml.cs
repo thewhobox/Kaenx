@@ -183,6 +183,9 @@ namespace Kaenx.View
             {
                 TopologieBase line = (sender as MenuFlyoutItem).DataContext as TopologieBase;
                 diag.SelectedLine = line;
+            } else
+            {
+
             }
 
             await diag.ShowAsync();

@@ -72,6 +72,8 @@ namespace Kaenx.View
             LoadSections(mainNode.SectionId, mainNode);
             
             this.DataContext = this;
+
+
         }
 
         protected override void OnNavigatedTo(NavigationEventArgs e)
@@ -83,19 +85,28 @@ namespace Kaenx.View
                 Import.wasFromMain = true;
             } else if(e.Parameter is string && e.Parameter.ToString() == "main") 
             {
+                Import.wasFromMain = true;
+                ApplicationView.GetForCurrentView().Title = loader.GetString("WindowTitle");
+
                 var currentView = SystemNavigationManager.GetForCurrentView();
                 currentView.AppViewBackButtonVisibility = AppViewBackButtonVisibility.Visible;
                 currentView.BackRequested += CurrentView_BackRequested;
-                Import.wasFromMain = true;
-                ApplicationView.GetForCurrentView().Title = loader.GetString("WindowTitle");
             }
+        }
+
+        protected override void OnNavigatedFrom(NavigationEventArgs e)
+        {
+            base.OnNavigatedFrom(e);
+            var currentView = SystemNavigationManager.GetForCurrentView();
+            currentView.BackRequested -= CurrentView_BackRequested;
         }
 
         private void CurrentView_BackRequested(object sender, BackRequestedEventArgs e)
         {
-            App.Navigate(typeof(MainPage));
+            if (e.Handled) return;
 
             e.Handled = true;
+            App.Navigate(typeof(MainPage));
         }
 
         private async void ClickImport(object sender, RoutedEventArgs e)

@@ -77,6 +77,19 @@ namespace Kaenx.View
             currentView.AppViewBackButtonVisibility = AppViewBackButtonVisibility.Collapsed;
         }
 
+        private void CurrentView_BackRequested(object sender, BackRequestedEventArgs e)
+        {
+            if (e.Handled) return;
+            e.Handled = true;
+
+            if (BtnBack.IsEnabled)
+            {
+                var currentView = SystemNavigationManager.GetForCurrentView();
+                currentView.BackRequested -= CurrentView_BackRequested;
+                ((Frame)this.Parent).Navigate(typeof(Catalog), Imports.wasFromMain ? "main" : null);
+            }
+        }
+
         private void Helper_OnWarning(string value)
         {
             ImportWarning.Add(value);
@@ -126,11 +139,15 @@ namespace Kaenx.View
             base.OnNavigatedTo(e);
             Imports = (ImportDevices)e.Parameter;
             StartImport();
+            var currentView = SystemNavigationManager.GetForCurrentView();
+            currentView.BackRequested += CurrentView_BackRequested;
         }
 
         protected override void OnNavigatedFrom(NavigationEventArgs e)
         {
             base.OnNavigatedFrom(e);
+            var currentView = SystemNavigationManager.GetForCurrentView();
+            currentView.BackRequested -= CurrentView_BackRequested;
         }
         #endregion
 
@@ -167,6 +184,10 @@ namespace Kaenx.View
             BtnBack.IsEnabled = true;
             ViewDevicesList.SelectedItem = null;
             Analytics.TrackEvent("Gerät(e) importiert");
+
+
+            var currentView = SystemNavigationManager.GetForCurrentView();
+            currentView.AppViewBackButtonVisibility = AppViewBackButtonVisibility.Visible;
             return;
 
 

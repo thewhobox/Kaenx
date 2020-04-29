@@ -1,5 +1,4 @@
 ﻿using Kaenx.Classes;
-using Kaenx.Classes.Controls.Paras;
 using Kaenx.Classes.Dynamic;
 using Kaenx.Classes.Helper;
 using Kaenx.Classes.Project;
@@ -185,10 +184,14 @@ namespace Kaenx.Views.Easy.Controls
 
             foreach(ChangeParamModel change in ParaChanges.Values)
             {
-                IDynParameter para = Id2Param[change.ParamId].Parameters[0];
-                para.Value = change.Value;
-                Id2Param[change.ParamId].Value = para.Value;
-                Para_PropertyChanged(para);
+                try
+                {
+                    IDynParameter para = Id2Param[change.ParamId].Parameters[0];
+                    para.Value = change.Value;
+                    Id2Param[change.ParamId].Value = para.Value;
+                    Para_PropertyChanged(para);
+                }
+                catch { }
             }
 
             _= CheckComObjects();
@@ -287,7 +290,8 @@ namespace Kaenx.Views.Easy.Controls
                             else
                                 com.DisplayName = com.Name.Replace("{{dyn}}", para.Value);
                         }
-                        catch { }
+                        catch {
+                        }
                         break;
                 }
             }

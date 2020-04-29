@@ -1,5 +1,4 @@
-﻿using Kaenx.Classes.Controls.Paras;
-using Kaenx.Classes.Dynamic;
+﻿using Kaenx.Classes.Dynamic;
 using Kaenx.Classes.Project;
 using Kaenx.DataContext.Catalog;
 using Kaenx.DataContext.Local;
@@ -481,7 +480,7 @@ namespace Kaenx.Classes.Helper
 
         public static void GenerateDynamic(AppAdditional adds)
         {
-            XDocument dynamic = XDocument.Parse(System.Text.Encoding.UTF8.GetString(adds.Dynamic));
+            XDocument dynamic = XDocument.Parse(Encoding.UTF8.GetString(adds.Dynamic));
             XmlReader reader = dynamic.CreateReader();
 
             updatedComs = new List<string>();
@@ -511,6 +510,11 @@ namespace Kaenx.Classes.Helper
                 {
                     case "ChannelIndependentBlock":
                         ChannelIndependentBlock cib = new ChannelIndependentBlock();
+                        if (reader.GetAttribute("Access") == "None")
+                        {
+                            cib.HasAccess = false;
+                            cib.Visible = Visibility.Collapsed;
+                        }
                         currentChannel = cib;
                         Channels.Add(cib);
                         break;
@@ -519,6 +523,11 @@ namespace Kaenx.Classes.Helper
                         if(reader.GetAttribute("Text") == "")
                         {
                             ChannelIndependentBlock cib2 = new ChannelIndependentBlock();
+                            if (reader.GetAttribute("Access") == "None")
+                            {
+                                cib2.HasAccess = false;
+                                cib2.Visible = Visibility.Collapsed;
+                            }
                             currentChannel = cib2;
                             Channels.Add(cib2);
                         } else
@@ -526,6 +535,11 @@ namespace Kaenx.Classes.Helper
                             ChannelBlock cb = new ChannelBlock();
                             cb.Id = reader.GetAttribute("Id");
                             cb.Name = reader.GetAttribute("Name");
+                            if (reader.GetAttribute("Access") == "None")
+                            {
+                                cb.HasAccess = false;
+                                cb.Visible = Visibility.Collapsed;
+                            }
 
                             text = reader.GetAttribute("Text");
 
@@ -594,6 +608,11 @@ namespace Kaenx.Classes.Helper
                     case "ParameterBlock":
                         ParameterBlock pb = new ParameterBlock();
                         pb.Id = reader.GetAttribute("Id");
+                        if (reader.GetAttribute("Access") == "None")
+                        {
+                            pb.HasAccess = false;
+                            pb.Visible = Visibility.Collapsed;
+                        }
                         if (reader.GetAttribute("ParamRefId") != null)
                         {
                             try
@@ -601,6 +620,11 @@ namespace Kaenx.Classes.Helper
                                 string paramId = reader.GetAttribute("ParamRefId");
                                 AppParameter para = contextC.AppParameters.Single(p => p.Id == paramId);
                                 text = para.Text;
+                                if (para.Access == AccessType.None)
+                                {
+                                    pb.HasAccess = false;
+                                    pb.Visible = Visibility.Collapsed;
+                                }
                             }
                             catch
                             {
@@ -697,7 +721,7 @@ namespace Kaenx.Classes.Helper
                 }
             }
 
-            string appId = Id2Element.Keys.ElementAt(0).Substring(0, 21);
+            string appId = Id2Element.Keys.ElementAt(0).Substring(0, Id2Element.Keys.ElementAt(0).LastIndexOf("_"));
             AppParas = new Dictionary<string, AppParameter>();
             AppParaTypes = new Dictionary<string, AppParameterTypeViewModel>();
             ComObjects = new Dictionary<string, AppComObject>();
@@ -777,15 +801,18 @@ namespace Kaenx.Classes.Helper
             //Berechne Standard Sichtbarkeit:
             foreach (IDynChannel ch in Channels)
             {
-                ch.Visible = SaveHelper.CheckConditions(ch.Conditions, Id2Param) ? Visibility.Visible : Visibility.Collapsed;
+                if(ch.HasAccess)
+                    ch.Visible = SaveHelper.CheckConditions(ch.Conditions, Id2Param) ? Visibility.Visible : Visibility.Collapsed;
 
                 foreach (ParameterBlock block in ch.Blocks)
                 {
-                    block.Visible = SaveHelper.CheckConditions(block.Conditions, Id2Param) ? Visibility.Visible : Visibility.Collapsed;
+                    if(block.HasAccess)
+                        block.Visible = SaveHelper.CheckConditions(block.Conditions, Id2Param) ? Visibility.Visible : Visibility.Collapsed;
 
                     foreach (IDynParameter para in block.Parameters)
                     {
-                        para.Visible = SaveHelper.CheckConditions(para.Conditions, Id2Param) ? Visibility.Visible : Visibility.Collapsed;
+                        if(block.HasAccess)
+                            para.Visible = SaveHelper.CheckConditions(para.Conditions, Id2Param) ? Visibility.Visible : Visibility.Collapsed;
                     }
                 }
             }

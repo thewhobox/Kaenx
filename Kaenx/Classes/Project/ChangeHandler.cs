@@ -60,7 +60,7 @@ namespace Kaenx.Classes.Project
                 string oldVal = "";
 
                 try {
-                    ChangeParamModel changeOld2 = _context.ChangesParam.Single(s => s.DeviceId == change.DeviceId && s.ParamId == change.ParamId && s.StateId == _currentStateId && s.Id != changeOld.Id);
+                    ChangeParamModel changeOld2 = _context.ChangesParam.Where(s => s.DeviceId == change.DeviceId && s.ParamId == change.ParamId && s.Id != changeOld.Id).OrderByDescending(c => c.StateId).First();
                     oldVal = changeOld2.Value;
                 } catch
                 {

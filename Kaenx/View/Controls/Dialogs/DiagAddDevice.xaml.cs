@@ -103,6 +103,8 @@ namespace Kaenx.View.Controls
                     Lines.Add(middle);
                 }
             }
+
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("SelectedLine"));
         }
 
         private void ContentDialog_PrimaryButtonClick(ContentDialog sender, ContentDialogButtonClickEventArgs args)

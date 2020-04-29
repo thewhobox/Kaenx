@@ -99,8 +99,8 @@
                 <TextBlock Text="Fehler:" Margin="5" FontSize="16" />
                 <TextBlock Grid.Column="1" Text="Warnungen:" Margin="5" FontSize="16" />
 
-                <ListView Grid.Row="1" ItemsSource="{Binding ImportError}" ItemTemplate="{StaticResource ImportItemTemplate}" />
-                <ListView Grid.Row="1" Grid.Column="1" ItemsSource="{Binding ImportWarning}" ItemTemplate="{StaticResource ImportItemTemplate}" />
+                <ListView Grid.Row="1" ItemsSource="{Binding ImportError}" ItemTemplate="{StaticResource ImportItemTemplate}" SelectionMode="None" />
+                <ListView Grid.Row="1" Grid.Column="1" ItemsSource="{Binding ImportWarning}" ItemTemplate="{StaticResource ImportItemTemplate}" SelectionMode="None" />
             </Grid>
         </toolkit:Expander>
         

@@ -27,7 +27,7 @@
     <AppInstallerCheckForUpdateFrequency>OnApplicationRun</AppInstallerCheckForUpdateFrequency>
     <PackageCertificateThumbprint>C554126408FAF38E210787F6EC62EC5E77D59B00</PackageCertificateThumbprint>
     <AppxPackageSigningTimestampDigestAlgorithm>SHA256</AppxPackageSigningTimestampDigestAlgorithm>
-    <GenerateTestArtifacts>True</GenerateTestArtifacts>
+    <GenerateTestArtifacts>False</GenerateTestArtifacts>
     <HoursBetweenUpdateChecks>0</HoursBetweenUpdateChecks>
     <AppxPackageSigningEnabled>True</AppxPackageSigningEnabled>
     <AppxSymbolPackageEnabled>True</AppxSymbolPackageEnabled>
@@ -185,9 +185,6 @@
     <Compile Include="View\Controls\Dialogs\DiagComsDeleted.xaml.cs">
       <DependentUpon>DiagComsDeleted.xaml</DependentUpon>
     </Compile>
-    <Compile Include="View\Controls\Dialogs\DiagDeviceConfig.xaml.cs">
-      <DependentUpon>DiagDeviceConfig.xaml</DependentUpon>
-    </Compile>
     <Compile Include="View\Controls\Dialogs\DiagImportDevice.xaml.cs">
       <DependentUpon>DiagImportDevice.xaml</DependentUpon>
     </Compile>
@@ -203,35 +200,10 @@
     <Compile Include="View\Controls\EControlParas.xaml.cs">
       <DependentUpon>EControlParas.xaml</DependentUpon>
     </Compile>
-    <Compile Include="View\Controls\EControlParas2.xaml.cs">
-      <DependentUpon>EControlParas2.xaml</DependentUpon>
-    </Compile>
     <Compile Include="View\Controls\ListBlockModel.cs" />
     <Compile Include="View\Controls\ListChannelModel.cs" />
     <Compile Include="View\Controls\NumberBox.xaml.cs">
       <DependentUpon>NumberBox.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="View\Controls\Paras\IParam.cs" />
-    <Compile Include="View\Controls\Paras\ParamEnum.xaml.cs">
-      <DependentUpon>ParamEnum.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="View\Controls\Paras\ParamEnum2.xaml.cs">
-      <DependentUpon>ParamEnum2.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="View\Controls\Paras\ParamInput.xaml.cs">
-      <DependentUpon>ParamInput.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="View\Controls\Paras\ParamNone.xaml.cs">
-      <DependentUpon>ParamNone.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="View\Controls\Paras\ParamNumber.xaml.cs">
-      <DependentUpon>ParamNumber.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="View\Controls\Paras\ParamPicture.xaml.cs">
-      <DependentUpon>ParamPicture.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="View\Controls\Paras\ParamText.xaml.cs">
-      <DependentUpon>ParamText.xaml</DependentUpon>
     </Compile>
     <Compile Include="View\Controls\Settings\SBusConnections.xaml.cs">
       <DependentUpon>SBusConnections.xaml</DependentUpon>
@@ -408,10 +380,6 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="View\Controls\Dialogs\DiagDeviceConfig.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
     <Page Include="View\Controls\Dialogs\DiagImportDevice.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -432,41 +400,9 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
-    <Page Include="View\Controls\EControlParas2.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
     <Page Include="View\Controls\NumberBox.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
-    </Page>
-    <Page Include="View\Controls\Paras\ParamEnum.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="View\Controls\Paras\ParamEnum2.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="View\Controls\Paras\ParamInput.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="View\Controls\Paras\ParamNone.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="View\Controls\Paras\ParamNumber.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="View\Controls\Paras\ParamPicture.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="View\Controls\Paras\ParamText.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="View\Bus.xaml">
       <SubType>Designer</SubType>

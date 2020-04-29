@@ -159,10 +159,10 @@
   <data name="NewImageHouse.Content" xml:space="preserve">
     <value>Gebäude</value>
   </data>
-  <data name="NewImageSkyline" xml:space="preserve">
+  <data name="NewImageSkyline.Content" xml:space="preserve">
     <value>Hochhaus</value>
   </data>
-  <data name="NewImageChruch.Content" xml:space="preserve">
+  <data name="NewImageChurch.Content" xml:space="preserve">
     <value>Kirche</value>
   </data>
   <data name="NewCreate.Content" xml:space="preserve">

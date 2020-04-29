@@ -168,11 +168,9 @@ namespace Kaenx.View
             }
         }
 
-        private async void ClickOpenConfig(object sender, RoutedEventArgs e)
+        private void ClickOpenConfig(object sender, RoutedEventArgs e)
         {
-            DeviceConfigData data = (sender as Button).DataContext as DeviceConfigData;
-            Controls.DiagDeviceConfig diag = new Controls.DiagDeviceConfig(data);
-            await diag.ShowAsync();
+            ViewHelper.Instance.ShowNotification("main", "Nichts passiert");
         }
 
         private LineDevice GetDevice()

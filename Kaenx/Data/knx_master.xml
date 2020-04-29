@@ -1,6 +1,5 @@
-﻿<?xml version="1.0" encoding="UTF-8"?>
-<KNX xmlns="http://knx.org/xml/project/11">
-  <MasterData Version="395" Signature="Q+pd6lMLllbgA3hgIJR5P0CpEbjwI13xRNfXHDcKkLXKwzje3UjGJFrAMtnlSL+DfeBVIcWXI/Jqt7sfsxaduSM3kOWJTtIC4Wk0mYshg1Piv7U5S4qW8GKdm1UfA5f3mdtqqgqpQ0PuU9h0Bjr4KWt08ubuJ31zw9M0VBvp3i8=">
+﻿<KNX xmlns="http://knx.org/xml/project/11">
+  <MasterData Version="397" Signature="c7whwflymWPxcZxposqpDIq7Tr4SBr5ieGVlX31YAXfqY7i3k70u4+zV87q1ufOzEO6PNt74yrj6CDcn2xrMSImahlmw6Q1VAr/jXZaCxKcAJU4nglnm8GXHuAv6rI37EErSz3W23ntf/UgPsa8FIWF9pOAumiFhVxodNjn8hOg=">
     <DatapointTypes>
       <DatapointType Id="DPT-1" Number="1" Name="1.xxx" Text="1-bit" SizeInBit="1">
         <DatapointSubtypes>
@@ -6187,14 +6186,20 @@
       <Manufacturer Id="M-007D" KnxManufacturerId="125" Name="TEAM FOR TRONICS" ImportRestriction="Own" />
       <Manufacturer Id="M-007E" KnxManufacturerId="126" Name="CIAT" ImportRestriction="Own" />
       <Manufacturer Id="M-007F" KnxManufacturerId="127" Name="Remeha BV" ImportRestriction="Own" />
-      <Manufacturer Id="M-0080" KnxManufacturerId="128" Name="ESYLUX" ImportRestriction="Own" />
+      <Manufacturer Id="M-0080" KnxManufacturerId="128" Name="ESYLUX" DefaultLanguage="en" ImportRestriction="Own" />
       <Manufacturer Id="M-0081" KnxManufacturerId="129" Name="BASALTE" ImportRestriction="Own" />
       <Manufacturer Id="M-0082" KnxManufacturerId="130" Name="Vestamatic" ImportRestriction="Own" />
       <Manufacturer Id="M-0083" KnxManufacturerId="131" Name="MDT technologies" ImportRestriction="Own">
         <PublicKeys>
-          <PublicKey Id="M-0083_K-1" Number="1">
+          <PublicKey Id="M-0083_K-1" Number="1" Revoked="true">
             <RSAKeyValue>
               <Modulus>6JSqeiYqIVc3EnF+KH95dddM2tB7bO+ViCN5d9++tymG/EYOlByToRx/Vxe8dVedx+pR03bWjw+YX7UlyNbeaBIeaGAD99IVri9k8z26BUKIiy7S/+UVU6VAawVad9xmto2q9URyHyf9y90k3c2+3Ex/e+qPXcwvDTVNxhAHse0=</Modulus>
+              <Exponent>AQAB</Exponent>
+            </RSAKeyValue>
+          </PublicKey>
+          <PublicKey Id="M-0083_K-2" Number="2">
+            <RSAKeyValue>
+              <Modulus>vpPJiNUjRTHe/WeRG6+PvwOoa2OY/DvlbWbCWgwz34F6WLVLEx4G7mjmn8JjguxPXDo9ie0vNk3iicG1fAaPQZcPDq/WZqXgtyajfEU/lFfGhvpgqIT4VfUIv/S0UsNBbTIySOC7yXnbaaybzwPPRYMGQdPz81x6Hof1xuU9u00=</Modulus>
               <Exponent>AQAB</Exponent>
             </RSAKeyValue>
           </PublicKey>
@@ -6773,6 +6778,8 @@
       <Manufacturer Id="M-0233" KnxManufacturerId="563" Name="FARADITE" ImportRestriction="Own" />
       <Manufacturer Id="M-0234" KnxManufacturerId="564" Name="Optimus" ImportRestriction="Own" />
       <Manufacturer Id="M-0235" KnxManufacturerId="565" Name="KTS s.r.l." ImportRestriction="Own" />
+      <Manufacturer Id="M-0236" KnxManufacturerId="566" Name="Ramcro SPA" ImportRestriction="Own" />
+      <Manufacturer Id="M-0237" KnxManufacturerId="567" Name="Wuhan WiseCreate Universe Technology Co., Ltd" ImportRestriction="Own" />
     </Manufacturers>
     <Languages>
       <Language Identifier="de-DE">

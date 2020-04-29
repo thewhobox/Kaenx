@@ -8,6 +8,7 @@ using System.Runtime.InteropServices.WindowsRuntime;
 using Windows.ApplicationModel.Resources;
 using Windows.Foundation;
 using Windows.Foundation.Collections;
+using Windows.UI.Core;
 using Windows.UI.ViewManagement;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
@@ -78,6 +79,23 @@ namespace Kaenx.View
             InfoBus.DataContext = Classes.Bus.BusConnection.Instance;
 
             NavView.SelectedItem = NavView.MenuItems[0];
+
+            var currentView = SystemNavigationManager.GetForCurrentView();
+            currentView.BackRequested += CurrentView_BackRequested;
+        }
+
+        protected override void OnNavigatedFrom(NavigationEventArgs e)
+        {
+            base.OnNavigatedFrom(e);
+            var currentView = SystemNavigationManager.GetForCurrentView();
+            currentView.BackRequested -= CurrentView_BackRequested;
+        }
+
+        private void CurrentView_BackRequested(object sender, BackRequestedEventArgs e)
+        {
+            if(e.Handled) return;
+            e.Handled = true;
+            App.Navigate(typeof(MainPage));
         }
 
         private void Instance_OnShowNotification(string view, string text, int duration, ViewHelper.MessageType type)

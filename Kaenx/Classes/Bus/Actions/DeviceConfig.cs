@@ -1,15 +1,19 @@
 ﻿using Kaenx.Classes.Bus.Data;
+using Kaenx.Classes.Dynamic;
 using Kaenx.Classes.Helper;
 using Kaenx.Classes.Project;
 using Kaenx.DataContext.Catalog;
+using Kaenx.DataContext.Project;
 using Kaenx.Konnect;
 using Kaenx.Konnect.Addresses;
 using Kaenx.Konnect.Builders;
 using Kaenx.Konnect.Classes;
 using Microsoft.AppCenter.Analytics;
+using Serilog;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -17,7 +21,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Xml.Linq;
 using Windows.Storage;
-using static Kaenx.Classes.Bus.Actions.IBusAction;
 
 namespace Kaenx.Classes.Bus.Actions
 {
@@ -32,8 +35,9 @@ namespace Kaenx.Classes.Bus.Actions
         private CatalogContext _context = new CatalogContext();
         private BusDevice dev;
         private List<int> connectedCOs = new List<int>();
+        private Dictionary<string, string> defParas = new Dictionary<string, string>();
 
-        public string Type { get; } = "Geräte Speicher";
+        public string Type { get; } = "Geräte Konfiguration";
         public LineDevice Device { get; set; }
         public int ProgressValue { get { return _progress; } set { _progress = value; Changed("ProgressValue"); } }
         public bool ProgressIsIndeterminate { get { return _progressIsIndeterminate; } set { _progressIsIndeterminate = value; Changed("ProgressIsIndeterminate"); } }
@@ -41,7 +45,7 @@ namespace Kaenx.Classes.Bus.Actions
 
         public Connection Connection { get; set; }
 
-        public event ActionFinishedHandler Finished;
+        public event IBusAction.ActionFinishedHandler Finished;
         public event PropertyChangedEventHandler PropertyChanged;
 
         public DeviceConfig()
@@ -51,7 +55,7 @@ namespace Kaenx.Classes.Bus.Actions
         public void Run(CancellationToken token)
         {
             _token = token; // TODO implement cancellation
-            TodoText = "Lese Gerätespeicher...";
+            TodoText = "Verbinden...";
 
             Start();
         }
@@ -71,16 +75,41 @@ namespace Kaenx.Classes.Bus.Actions
 
             _data.MaskVersion = "MV-" + await dev.DeviceDescriptorRead();
 
-            ProgressValue = 10;
-            TodoText = "Lese Seriennummer...";
-            await Task.Delay(500);
-            try
+
+            if(Device.Serial == null)
             {
-                _data.SerialNumber = await dev.PropertyRead<string>(_data.MaskVersion, "DeviceSerialNumber");
-            }
-            catch (Exception e)
-            {
-                _data.SerialNumber = e.Message;
+                ProgressValue = 10;
+                TodoText = "Lese Seriennummer...";
+                await Task.Delay(500);
+
+                byte[] serial = new byte[0];
+                try
+                {
+                    serial = await dev.PropertyRead(_data.MaskVersion, "DeviceSerialNumber");
+                    _data.SerialNumber = BitConverter.ToString(serial).Replace("-", "");
+                }
+                catch
+                {
+                    try
+                    {
+                        serial = await dev.PropertyRead(0, 11, 6);
+                        _data.SerialNumber = BitConverter.ToString(serial).Replace("-", "");
+                    }
+                    catch (Exception e)
+                    {
+                        _data.SerialNumber = e.Message;
+                        Log.Error(e, "Fehler beim holen der Seirennummer");
+                    }
+                }
+
+                if (serial.Length > 0)
+                {
+                    _ = App._dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Normal, () =>
+                    {
+                        Device.Serial = serial;
+                        SaveHelper.UpdateDevice(Device);
+                    });
+                }
             }
 
 
@@ -113,6 +142,16 @@ namespace Kaenx.Classes.Bus.Actions
                 return;
             }
 
+            if(Device.ApplicationId != _data.ApplicationId)
+            {
+                System.Diagnostics.Debug.WriteLine("Jetzt");
+                _= App._dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Normal, () => {
+                    ViewHelper.Instance.ShowNotification("main", $"Applikation für '{Device.LineName}-{Device.Name}' wurde dem physischen Gerät angepasst.", 4000, ViewHelper.MessageType.Info);
+                });
+                Device.ApplicationId = _data.ApplicationId;
+            }
+
+
             #endregion
 
             ProgressValue = 30;
@@ -123,12 +162,12 @@ namespace Kaenx.Classes.Bus.Actions
 
             if (context.Applications.Any(a => a.Id.StartsWith(appId)))
             {
-                appModel = context.Applications.Single(a => a.Id.StartsWith(appId)); //TODO check if now complete appid is returned
+                appModel = context.Applications.Single(a => a.Id.StartsWith(appId));
             }
 
             if(appModel != null)
             {
-                if (appModel.Table_Assosiations != "" || appModel.Table_Assosiations != null)
+                if (!string.IsNullOrEmpty(appModel.Table_Assosiations))
                 {
                     AppSegmentViewModel segmentModel = context.AppSegments.Single(s => s.Id == appModel.Table_Assosiations);
                     int assoAddr = segmentModel.Address;
@@ -149,17 +188,15 @@ namespace Kaenx.Classes.Bus.Actions
                                 connectedCOs.Add(COnr);
                         }
                     }
-
                 }
             }
 
 
             ProgressValue = 40;
-            TodoText = "Berechne Kofiguration...";
+            TodoText = "Berechne Konfiguration...";
 
             GetConfig(h2a);
         }
-
 
 
 
@@ -168,10 +205,12 @@ namespace Kaenx.Classes.Bus.Actions
             Dictionary<string, AppParameter> paras = new Dictionary<string, AppParameter>();
 
             foreach (AppParameter param in _context.AppParameters.Where(p => p.ApplicationId == h2a.ApplicationId))
+            {
                 paras.Add(param.Id, param);
+                defParas.Add(param.Id, param.Value);
+            }
 
             AppAdditional adds = _context.AppAdditionals.Single(a => a.Id == h2a.ApplicationId);
-
 
             foreach(AppParameter para in paras.Values)
             {
@@ -195,9 +234,103 @@ namespace Kaenx.Classes.Bus.Actions
             }
 
             _data.Parameters = paras;
-            Finish();
+            SaveConfig(adds);
         }
 
+        private async void SaveConfig(AppAdditional adds)
+        {
+            TodoText = "Speichere Konfiguration...";
+
+            Dictionary<string, ChangeParamModel> ParaChanges = new Dictionary<string, ChangeParamModel>();
+            Dictionary<string, ViewParamModel> Id2Param = new Dictionary<string, ViewParamModel>();
+            Dictionary<string, ViewParamModel> VisibleParams = new Dictionary<string, ViewParamModel>();
+            List<IDynChannel> Channels = SaveHelper.ByteArrayToObject<List<IDynChannel>>(adds.ParamsHelper, true);
+            ProjectContext _c = SaveHelper.contextProject;
+
+            if (_c.ChangesParam.Any(c => c.DeviceId == Device.UId))
+            {
+                var changes = _c.ChangesParam.Where(c => c.DeviceId == Device.UId).OrderByDescending(c => c.StateId);
+                foreach (ChangeParamModel model in changes)
+                {
+                    if (ParaChanges.ContainsKey(model.ParamId)) continue;
+                    ParaChanges.Add(model.ParamId, model);
+                }
+            }
+
+
+            foreach (IDynChannel ch in Channels)
+            {
+                foreach (ParameterBlock block in ch.Blocks)
+                {
+                    foreach (IDynParameter para in block.Parameters)
+                    {
+                        if (_data.Parameters.ContainsKey(para.Id))
+                            para.Value = _data.Parameters[para.Id].Value;
+
+                        if (!Id2Param.ContainsKey(para.Id))
+                            Id2Param.Add(para.Id, new ViewParamModel(para.Value));
+
+                        Id2Param[para.Id].Parameters.Add(para);
+                    }
+                }
+            }
+
+
+            foreach (IDynChannel ch in Channels)
+            {
+                if (SaveHelper.CheckConditions(ch.Conditions, Id2Param))
+                {
+                    foreach (ParameterBlock block in ch.Blocks)
+                    {
+                        if(SaveHelper.CheckConditions(block.Conditions, Id2Param))
+                        {
+                            foreach (IDynParameter para in block.Parameters)
+                            {
+                                if (!VisibleParams.ContainsKey(para.Id))
+                                    VisibleParams.Add(para.Id, Id2Param[para.Id]);
+                            }
+                        }
+                    }
+                }
+            }
+
+
+
+            foreach (AppParameter newPara in _data.Parameters.Values)
+            {
+                if (newPara.Access != AccessType.Full || !VisibleParams.ContainsKey(newPara.Id)) continue;
+
+                bool isOneVisible = false;
+                foreach (IDynParameter dPara in VisibleParams[newPara.Id].Parameters)
+                {
+                    if (SaveHelper.CheckConditions(dPara.Conditions, Id2Param))
+                        isOneVisible = true;
+                }
+
+                if (!isOneVisible) continue;
+
+
+                string oldPara = defParas[newPara.Id];
+                bool changeExists = ParaChanges.ContainsKey(newPara.Id);
+                ChangeParamModel change = null;
+                if (changeExists)
+                    change = ParaChanges[newPara.Id];
+
+                if ((changeExists && newPara.Value != change.Value) || (!changeExists && newPara.Value != oldPara))
+                {
+                    ChangeParamModel ch = new ChangeParamModel();
+                    ch.DeviceId = Device.UId;
+                    ch.ParamId = newPara.Id;
+                    ch.Value = newPara.Value;
+                    _= App._dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Normal, () =>
+                    {
+                        ChangeHandler.Instance.ChangedParam(ch);
+                    });
+                }
+            }
+
+            Finish();
+        }
 
         private async Task HandleParamGhost(AppParameter para, AppParameterTypeViewModel paraT, AppAdditional adds)
         {
@@ -278,7 +411,6 @@ namespace Kaenx.Classes.Bus.Actions
                 {
                     KeyValuePair<string, bool> success = val2success.Single(y => y.Value == true);
                     para.Value = success.Key;
-                    para.Access = AccessType.Read;
                 }
                 
             }
@@ -367,9 +499,6 @@ namespace Kaenx.Classes.Bus.Actions
                     para.Value = Encoding.UTF8.GetString(bdata);
                     break;
             }
-
-            if (para.Access == AccessType.Full)
-                para.Access = AccessType.Read;
         }
 
 

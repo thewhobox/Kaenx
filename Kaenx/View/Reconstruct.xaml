@@ -17,9 +17,14 @@
         </Grid.RowDefinitions>
 
         <StackPanel Orientation="Horizontal" Background="{ThemeResource BrushAccentColor1}">
-            <AppBarButton Label="Scannen" Foreground="White" Click="ClickScanStart">
+            <AppBarButton Label="Scannen" Foreground="White" Click="ClickScanStart" IsEnabled="{Binding CanDo}">
                 <AppBarButton.Icon>
                     <FontIcon Glyph="&#xEE6F;" />
+                </AppBarButton.Icon>
+            </AppBarButton>
+            <AppBarButton Label="Auslesen" Foreground="White" Click="ClickReadStart" IsEnabled="{Binding CanDo}">
+                <AppBarButton.Icon>
+                    <FontIcon Glyph="&#xF259;" />
                 </AppBarButton.Icon>
             </AppBarButton>
 

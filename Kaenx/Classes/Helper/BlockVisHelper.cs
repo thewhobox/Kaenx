@@ -1,5 +1,4 @@
-﻿using Kaenx.Classes.Controls.Paras;
-using Kaenx.View.Controls;
+﻿using Kaenx.View.Controls;
 using System;
 using System.Collections.Generic;
 using System.Linq;

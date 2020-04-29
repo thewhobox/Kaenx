@@ -31,6 +31,7 @@ namespace Kaenx.DataContext.Catalog
         public string Table_Assosiations { get; set; }
         public int Table_Assosiations_Offset { get; set; }
         public int Table_Assosiations_Max { get; set; }
+        public LoadProcedureTypes LoadProcedure { get; set; }
 
 
         public string VersionString
@@ -42,5 +43,13 @@ namespace Kaenx.DataContext.Catalog
                 return "V" + full.ToString() + "." + rest.ToString();
             }
         }
+    }
+
+    public enum LoadProcedureTypes
+    {
+        Unknown,
+        Default,
+        Product,
+        Merge
     }
 }
