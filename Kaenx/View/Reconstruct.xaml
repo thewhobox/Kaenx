@@ -27,8 +27,17 @@
                     <FontIcon Glyph="&#xF259;" />
                 </AppBarButton.Icon>
             </AppBarButton>
+            <AppBarButton Label="Speichern" Icon="Save" Foreground="White" Click="ClickSave" IsEnabled="{Binding CanDo}" />
 
             <TextBlock Foreground="White" FontSize="20" Margin="20 0" VerticalAlignment="Center" Text="{Binding Action}" />
+        </StackPanel>
+
+        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+            <AppBarButton Label="Als Projekt" Foreground="White" Click="ClickToProject" IsEnabled="{Binding CanDo}">
+                <AppBarButton.Icon>
+                    <FontIcon Glyph="&#xE8A7;" />
+                </AppBarButton.Icon>
+            </AppBarButton>
         </StackPanel>
 
         <toolkit:DataGrid x:Name="GridDevices" Grid.Row="1" ItemsSource="{Binding Devices}" AutoGenerateColumns="False" IsReadOnly="true">

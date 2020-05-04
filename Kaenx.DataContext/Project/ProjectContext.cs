@@ -34,13 +34,33 @@ namespace Kaenx.DataContext.Project
             switch (_conn.Type)
             {
                 case LocalConnectionProject.DbConnectionType.SqlLite:
-                    optionsBuilder.UseSqlite($"Data Source={_conn.DbHostname}");
+                    if (string.IsNullOrEmpty(_conn.DbPassword))
+                    {
+                        optionsBuilder.UseSqlite("Data Source=" + _conn.DbHostname);
+                    } else
+                    {
+                        var conn = new System.Data.SQLite.SQLiteConnection(@"Data Source=C:\Users\mikeg\AppData\Local\Packages\55505Exe-Creation.KAENX_zkfs9vqf4wsm0\LocalState\Projetcs.db;");
+                        conn.Open();
+
+                        var command = conn.CreateCommand();
+                        command.CommandText = $"PRAGMA key = {_conn.DbPassword};";
+                        command.ExecuteNonQuery();
+
+                        optionsBuilder.UseSqlite(conn);
+                    }
                     break;
 
                 case LocalConnectionProject.DbConnectionType.MySQL:
                     optionsBuilder.UseMySql($"Server={_conn.DbHostname};Database={_conn.DbName};Uid={_conn.DbUsername};Pwd={_conn.DbPassword};");
                     break;
             }
+        }
+
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            base.OnModelCreating(modelBuilder);
+
+            modelBuilder.Entity<ChangeParamModel>().Property(p => p.Id).HasComputedColumnSql("Id");
         }
     }
 }

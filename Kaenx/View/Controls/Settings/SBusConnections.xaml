@@ -55,7 +55,7 @@
                                 </TextBlock>
                             </StackPanel>
 
-                            <Button Grid.Column="1" Background="Transparent" VerticalAlignment="Center">
+                            <Button Grid.Column="1" Background="Transparent" VerticalAlignment="Center" IsEnabled="False">
                                 <SymbolIcon Symbol="Edit" />
                             </Button>
                             <Button Grid.Column="2" Background="Transparent" VerticalAlignment="Center" Click="ClickDelete">
@@ -69,11 +69,42 @@
 
 
             <StackPanel Grid.Column="1" Orientation="Horizontal">
-                <Button>
+                <Button Click="ClickToggleAddProj">
                     <SymbolIcon Symbol="Add" />
                 </Button>
                 <TextBlock Text="Datenbanken" VerticalAlignment="Center" FontSize="22" Margin="10 0 0 0" />
             </StackPanel>
+
+            <ListView Grid.Row="1" Grid.Column="1" ItemsSource="{Binding ListDatabases}" Margin="0 10 0 0">
+                <ListView.ItemContainerStyle>
+                    <Style TargetType="ListViewItem">
+                        <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+                        <Setter Property="Padding" Value="0" />
+                    </Style>
+                </ListView.ItemContainerStyle>
+                <ListView.ItemTemplate>
+                    <DataTemplate>
+                        <Grid Padding="5 10" BorderBrush="{ThemeResource BrushAccentColor2}" BorderThickness="0 0 0 1">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition />
+                                <ColumnDefinition Width="auto" />
+                                <ColumnDefinition Width="auto" />
+                            </Grid.ColumnDefinitions>
+
+                            <StackPanel VerticalAlignment="Center" Margin="10 0">
+                                <TextBlock Text="{Binding Name}" FontSize="16" />
+                            </StackPanel>
+
+                            <Button Grid.Column="1" Background="Transparent" VerticalAlignment="Center" IsEnabled="False">
+                                <SymbolIcon Symbol="Edit" />
+                            </Button>
+                            <Button Grid.Column="2" Background="Transparent" VerticalAlignment="Center">
+                                <SymbolIcon Symbol="Delete" />
+                            </Button>
+                        </Grid>
+                    </DataTemplate>
+                </ListView.ItemTemplate>
+            </ListView>
 
         </Grid>
 
@@ -109,5 +140,43 @@
             </Grid>
         </Border>
         
+        <Border x:Name="DiagNewProjConn" Visibility="Collapsed">
+            <Border.Background>
+                <SolidColorBrush Color="Gray" Opacity="0.6" />
+            </Border.Background>
+            <Grid x:Name="GridNewProjConn" Width="300" VerticalAlignment="Center" BorderBrush="Gray" BorderThickness="1" Padding="10" Background="{ThemeResource BrushAccentControlBackground}">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition />
+                    <ColumnDefinition />
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="auto" />
+                    <RowDefinition />
+                    <RowDefinition Height="auto" />
+                </Grid.RowDefinitions>
+
+                <TextBlock Grid.ColumnSpan="2" Text="Neue Schnittstelle" VerticalAlignment="Center" FontSize="22" Margin="5 5 0 10" />
+                <Button Grid.Column="1" HorizontalAlignment="Right" Click="ClickToggleAddProj">
+                    <SymbolIcon Symbol="Cancel" />
+                </Button>
+
+                <StackPanel Grid.ColumnSpan="2" Grid.Row="1">
+                    <TextBox x:Name="InProjName" HorizontalAlignment="Stretch" Header="Name" />
+                    <ComboBox x:Name="InProjType" Header="DatenbankTyp" HorizontalAlignment="Stretch" SelectedValuePath="Tag" SelectionChanged="InProjType_SelectionChanged">
+                        <ComboBoxItem Content="SqLite" Tag="sqlite" IsSelected="True" />
+                        <ComboBoxItem Content="MySQL" Tag="mysql"  />
+                    </ComboBox>
+                    <TextBlock x:Name="InProjPath" Margin="0 5 0 0" Text="Hier steht der SPeicherortddddddddddddddddddddddddddddddddd ae fwqefe fef" VerticalAlignment="Center" ToolTipService.ToolTip="Hier steht der SPeicherortddddddddddddddddddddddddddddddddd ae fwqefe fef" />
+                    <HyperlinkButton Padding="0" Margin="0 0 10 0" Content="Speicherort ändern" Click="ClickChangePath" IsEnabled="False"/>
+                    <TextBox Name="InProjHost" HorizontalAlignment="Stretch" Header="Host" Visibility="Collapsed" />
+                    <TextBox Name="InProjDbName" HorizontalAlignment="Stretch" Header="Datenbankname" />
+                    <TextBox Name="InProjUser" HorizontalAlignment="Stretch" Header="Benutzername" Visibility="Collapsed" />
+                    <TextBox Name="InProjPass" HorizontalAlignment="Stretch" Header="Passwort" InputScope="Password" />
+                </StackPanel>
+
+                <Button Grid.Row="2" Margin="5" Content="Testen" HorizontalAlignment="Stretch" Click="ClickTest2" Visibility="Collapsed" />
+                <Button Grid.Row="2" Grid.Column="1" Margin="5" Content="Speichern" HorizontalAlignment="Stretch" Click="ClickSaveProjConn" />
+            </Grid>
+        </Border>
     </Grid>
 </UserControl>

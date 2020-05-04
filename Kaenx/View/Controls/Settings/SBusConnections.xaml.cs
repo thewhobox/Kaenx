@@ -11,6 +11,8 @@ using System.Runtime.InteropServices.WindowsRuntime;
 using System.Threading.Tasks;
 using Windows.Foundation;
 using Windows.Foundation.Collections;
+using Windows.Storage;
+using Windows.Storage.Pickers;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Controls.Primitives;
@@ -27,22 +29,30 @@ namespace Kaenx.View.Controls.Settings
     {
         private LocalContext _context = new LocalContext();
         public ObservableCollection<LocalInterface> ListInterfaces { get; set; } = new ObservableCollection<LocalInterface>();
+        public ObservableCollection<LocalConnectionProject> ListDatabases { get; set; } = new ObservableCollection<LocalConnectionProject>();
 
         public SBusConnections()
         {
             this.InitializeComponent();
             this.DataContext = this;
 
-
             foreach(LocalInterface inter in _context.Interfaces)
-            {
                 ListInterfaces.Add(inter);
-            }
+
+            foreach (LocalConnectionProject pro in _context.ConnsProject)
+                ListDatabases.Add(pro);
         }
 
         private void ClickToggleAddInterface(object sender, RoutedEventArgs e)
         {
             DiagNewInterface.Visibility = DiagNewInterface.Visibility == Visibility.Visible ? Visibility.Collapsed : Visibility.Visible;
+        }
+
+        private void ClickToggleAddProj(object sender, RoutedEventArgs e)
+        {
+            InProjPath.Text = Windows.Storage.ApplicationData.Current.LocalFolder.Path;
+            ToolTipService.SetToolTip(InProjPath, InProjPath.Text);
+            DiagNewProjConn.Visibility = DiagNewProjConn.Visibility == Visibility.Visible ? Visibility.Collapsed : Visibility.Visible;
         }
 
         private void ClickSaveInterface(object sender, RoutedEventArgs e)
@@ -141,6 +151,60 @@ namespace Kaenx.View.Controls.Settings
             else
                 ViewHelper.Instance.ShowNotification("settings", "Schnittstelle nicht erreichbar.", 3000, ViewHelper.MessageType.Error);
             conn.Disconnect();
+        }
+
+        private void ClickTest2(object sender, RoutedEventArgs e)
+        {
+
+        }
+
+        private void ClickSaveProjConn(object sender, RoutedEventArgs e)
+        {
+            LocalConnectionProject conn = new LocalConnectionProject();
+            conn.Name = InProjName.Text;
+            conn.DbPassword = InProjPass.Text;
+
+            switch (InProjType.SelectedValue)
+            {
+                case "sqlite":
+                    conn.Type = LocalConnectionProject.DbConnectionType.SqlLite;
+                    conn.DbHostname = Path.Combine(InProjPath.Text, InProjDbName.Text + ".db");
+                    break;
+
+                case "mysql":
+                    conn.Type = LocalConnectionProject.DbConnectionType.MySQL;
+                    conn.DbHostname = InProjHost.Text;
+                    conn.DbUsername = InProjUser.Text;
+                    conn.DbName = InProjDbName.Text;
+                    break;
+            }
+
+            _context.ConnsProject.Add(conn);
+            _context.SaveChanges();
+            ListDatabases.Add(conn);
+            ClickToggleAddProj(null, null);
+        }
+
+        private async void ClickChangePath(object sender, RoutedEventArgs e)
+        {
+            Windows.Storage.Pickers.FolderPicker picker = new FolderPicker();
+            picker.FileTypeFilter.Add("*");
+            picker.SuggestedStartLocation = Windows.Storage.Pickers.PickerLocationId.DocumentsLibrary;
+            Windows.Storage.StorageFolder folder = await picker.PickSingleFolderAsync();
+            InProjPath.Text = folder.Path;
+            Windows.Storage.AccessCache.StorageApplicationPermissions.FutureAccessList.AddOrReplace("myname", folder);
+        }
+
+        private void InProjType_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (InProjHost == null) return;
+
+
+            bool isMySQL = InProjType.SelectedValue.ToString() == "mysql";
+
+
+            InProjHost.Visibility = isMySQL ? Visibility.Visible : Visibility.Collapsed;
+            InProjUser.Visibility = isMySQL ? Visibility.Visible : Visibility.Collapsed;
         }
     }
 }

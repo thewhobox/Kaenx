@@ -237,7 +237,7 @@ namespace Kaenx.Classes.Bus.Actions
             SaveConfig(adds);
         }
 
-        private async void SaveConfig(AppAdditional adds)
+        private void SaveConfig(AppAdditional adds)
         {
             TodoText = "Speichere Konfiguration...";
 

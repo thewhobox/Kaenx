@@ -119,6 +119,13 @@
     <Compile Include="App.xaml.cs">
       <DependentUpon>App.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Classes\Buildings\Area.cs" />
+    <Compile Include="Classes\Buildings\Building.cs" />
+    <Compile Include="Classes\Buildings\Floor.cs" />
+    <Compile Include="Classes\Buildings\Function.cs" />
+    <Compile Include="Classes\Buildings\FunctionGroup.cs" />
+    <Compile Include="Classes\Buildings\IBuildingStruct.cs" />
+    <Compile Include="Classes\Buildings\Room.cs" />
     <Compile Include="Classes\Bus\Actions\DeviceDeActivate.cs" />
     <Compile Include="Classes\Bus\Actions\DeviceConfig.cs" />
     <Compile Include="Classes\Bus\Actions\DeviceRestart.cs" />
@@ -172,6 +179,7 @@
     <Compile Include="Classes\TemplateSelectors\BlockSelector.cs" />
     <Compile Include="Classes\TemplateSelectors\ControlParamsSelector.cs" />
     <Compile Include="Classes\TemplateSelectors\ControlsParamTypesSelector.cs" />
+    <Compile Include="Classes\TemplateSelectors\StructureSelector.cs" />
     <Compile Include="MVVM\StoreItem.cs" />
     <Compile Include="View\Controls\Bus\BNewDevices.xaml.cs">
       <DependentUpon>BNewDevices.xaml</DependentUpon>

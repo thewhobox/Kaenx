@@ -187,8 +187,6 @@ namespace Kaenx.Views.Easy.Controls
                 try
                 {
                     IDynParameter para = Id2Param[change.ParamId].Parameters[0];
-                    para.Value = change.Value;
-                    Id2Param[change.ParamId].Value = para.Value;
                     Para_PropertyChanged(para);
                 }
                 catch { }

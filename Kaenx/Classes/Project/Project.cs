@@ -1,4 +1,5 @@
-﻿using Kaenx.DataContext.Local;
+﻿using Kaenx.Classes.Buildings;
+using Kaenx.DataContext.Local;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -15,10 +16,13 @@ namespace Kaenx.Classes.Project
         public string Name { get; set; }
         public byte[] Image { get; set; }
         public LocalConnectionProject Connection { get; set; }
+        public LocalProject Local { get; set; }
 
         private ObservableCollection<Group> _groups = new ObservableCollection<Group>();
 
         public event PropertyChangedEventHandler PropertyChanged;
+
+        public Area Area { get; set; } = new Area();
 
         public ObservableCollection<Line> Lines { get; set; } = new ObservableCollection<Line>();
         public ObservableCollection<Group> Groups

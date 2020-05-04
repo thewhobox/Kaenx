@@ -1,7 +1,9 @@
 ﻿using Kaenx.Classes;
 using Kaenx.Classes.Bus;
+using Kaenx.Classes.Helper;
 using Kaenx.Classes.Project;
 using Kaenx.DataContext.Catalog;
+using Kaenx.DataContext.Local;
 using Kaenx.Konnect;
 using Kaenx.Konnect.Addresses;
 using Kaenx.Konnect.Classes;
@@ -20,6 +22,7 @@ using System.Xml.Linq;
 using Windows.Foundation;
 using Windows.Foundation.Collections;
 using Windows.Storage;
+using Windows.UI.Composition;
 using Windows.UI.Core;
 using Windows.UI.ViewManagement;
 using Windows.UI.Xaml;
@@ -55,6 +58,7 @@ namespace Kaenx.View
 
         public ObservableCollection<ReconstructDevice> Devices { get; set; } = new ObservableCollection<ReconstructDevice>();
 
+        private Kaenx.DataContext.Project.ProjectContext _contextP;
         private Project _project;
         private BusConnection conn = new BusConnection();
         private Dictionary<string, string> manus = new Dictionary<string, string>();
@@ -113,6 +117,31 @@ namespace Kaenx.View
 
             foreach (XElement ele in master.Descendants(XName.Get("Manufacturer", master.Root.Name.NamespaceName)))
                 manus.Add(ele.Attribute("Id").Value, ele.Attribute("Name").Value);
+
+
+
+            foreach(Line linema in SaveHelper._project.Lines)
+            {
+                foreach(LineMiddle linemi in linema.Subs)
+                {
+                    foreach(LineDevice ldev in linemi.Subs)
+                    {
+                        ReconstructDevice dev = new ReconstructDevice();
+                        dev.Address = UnicastAddress.FromString(ldev.LineName);
+                        dev.Serial = ldev.SerialText;
+                        string[] names = ldev.Name.Split("_");
+                        dev.DeviceName = names[0];
+                        dev.ApplicationName = names[1];
+                        dev.ApplicationId = ldev.ApplicationId;
+                        dev.StateId = 2;
+                        dev.Status = "Gespeichert";
+                        dev.Manufacturer = manus[dev.ApplicationId.Substring(0, 6)];
+                        Devices.Add(dev);
+                    }
+                }
+            }
+            
+
 
             CanDo = true;
         }
@@ -175,12 +204,26 @@ namespace Kaenx.View
                 {
                     device.Status = "Fehler 0x01";
                     device.StateId = -1;
+                    continue;
                 }
                 catch(Exception ex)
                 {
                     device.Status = "Fehler 0x00";
                     device.StateId = -1;
                     Serilog.Log.Error(ex, "Fehler beim Auslesen von Gerät");
+                    continue;
+                }
+
+                if (device.ApplicationId == null) continue;
+
+                try
+                {
+                    await SaveDevice(device);
+                }
+                catch
+                {
+                    device.Status = "Fehler 0x04";
+                    device.StateId = -1;
                 }
             }
 
@@ -216,6 +259,7 @@ namespace Kaenx.View
             {
                 Hardware2AppModel h2a = _context.Hardware2App.First(h => h.ApplicationId.StartsWith(appId));
                 device.ApplicationName = h2a.Name;
+                device.ApplicationId = h2a.ApplicationId;
                 DeviceViewModel devm = _context.Devices.First(d => d.HardwareId == h2a.HardwareId);
                 device.DeviceName = devm.Name;
             }
@@ -230,12 +274,14 @@ namespace Kaenx.View
 
             try
             {
-                device.Serial = await dev.PropertyRead<string>(mask, "DeviceSerialNumber");
+                device.SerialBytes = await dev.PropertyRead(mask, "DeviceSerialNumber");
+                device.Serial = BitConverter.ToString(device.SerialBytes).Replace("-", "");
             }
             catch {
                 try
                 {
-                    device.Serial = await dev.PropertyRead<string>(0, 11, 6);
+                    device.SerialBytes = await dev.PropertyRead(0, 11, 6);
+                    device.Serial = BitConverter.ToString(device.SerialBytes).Replace("-", "");
                 }
                 catch
                 {
@@ -246,6 +292,45 @@ namespace Kaenx.View
 
 
             device.Status = "Infos gelesen";
+        }
+
+        private async Task SaveDevice(ReconstructDevice device)
+        {
+            Line line;
+            if (SaveHelper._project.Lines.Any(l => l.Id == device.Address.Area))
+            {
+                line = SaveHelper._project.Lines.Single(l => l.Id == device.Address.Area);
+            } else
+            {
+                line = new Line(device.Address.Area, "Neue Linie");
+                SaveHelper._project.Lines.Add(line);
+            }
+
+            LineMiddle lineM;
+            if (line.Subs.Any(l => l.Id == device.Address.Line))
+                lineM = line.Subs.Single(l => l.Id == device.Address.Line);
+            else
+            {
+                lineM = new LineMiddle(device.Address.Line, "Neue Linie", line);
+                line.Subs.Add(lineM);
+            }
+
+            LineDevice lined;
+            if (lineM.Subs.Any(d => d.Id == device.Address.DeviceAddress))
+                lined = lineM.Subs.Single(d => d.Id == device.Address.DeviceAddress);
+            else
+            {
+                lined = new LineDevice(true);
+                lineM.Subs.Add(lined);
+            }
+
+            lined.Serial = device.SerialBytes;
+            lined.ApplicationId = device.ApplicationId;
+            lined.Id = device.Address.DeviceAddress;
+            lined.Name = device.DeviceName + "_" + device.ApplicationName;
+
+            device.StateId = 2;
+            device.Status = "In Projekt";
         }
 
         private void _conn_OnTunnelRequest(Konnect.Builders.TunnelResponse response)
@@ -267,6 +352,24 @@ namespace Kaenx.View
         private void ClickReadStart(object sender, RoutedEventArgs e)
         {
 
+        }
+
+        private void ClickSave(object sender, RoutedEventArgs e)
+        {
+            SaveHelper.SaveProject();
+
+            foreach (ReconstructDevice dev in Devices.Where(d => d.StateId == 2))
+                dev.Status = "Gespeichert";
+        }
+
+        private void ClickToProject(object sender, RoutedEventArgs e)
+        {
+            SaveHelper.SaveProject();
+            SaveHelper._project.Local.IsReconstruct = false;
+            LocalContext con = new LocalContext();
+            con.Projects.Update(SaveHelper._project.Local);
+            con.SaveChanges();
+            App.Navigate(typeof(WorkdeskEasy), SaveHelper._project);
         }
     }
 }

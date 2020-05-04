@@ -3,7 +3,9 @@
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:localP="using:Kaenx.Classes.Project"
+    xmlns:localB="using:Kaenx.Classes.Buildings"
     xmlns:local="using:Kaenx.Classes"
+    xmlns:localS="using:Kaenx.Classes.TemplateSelectors"
     xmlns:toolkit="using:Microsoft.Toolkit.Uwp.UI.Controls"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
@@ -14,14 +16,117 @@
             <StackPanel>
                 <TextBlock Margin="10 10 10 0" Text="Hier steht ein mega langer text. Würde ja gerne das Lorem Ipsum kopieren, aber keine Lust lange danach zu suchen...." />
                 <StackPanel Orientation="Horizontal" Margin="10 0 10 10">
-                    <CheckBox MinWidth="10" Content="R" Margin="3 0 3 0" IsChecked="{Binding Flag_Read}" />
-                    <CheckBox MinWidth="10" Content="W" Margin="3 0 3 0" IsChecked="{Binding Flag_Write}" />
-                    <CheckBox MinWidth="10" Content="T" Margin="3 0 3 0" IsChecked="{Binding Flag_Transmit}" />
-                    <CheckBox MinWidth="10" Content="U" Margin="3 0 3 0" IsChecked="{Binding Flag_Update}" />
-                    <CheckBox MinWidth="10" Content="C" Margin="3 0 3 0" IsChecked="{Binding Flag_Communication}" />
+                    <CheckBox MinWidth="10" Content="R" Margin="3 0 3 0" IsChecked="{Binding Flag_Read}" IsEnabled="False" />
+                    <CheckBox MinWidth="10" Content="W" Margin="3 0 3 0" IsChecked="{Binding Flag_Write}" IsEnabled="False" />
+                    <CheckBox MinWidth="10" Content="T" Margin="3 0 3 0" IsChecked="{Binding Flag_Transmit}" IsEnabled="False" />
+                    <CheckBox MinWidth="10" Content="U" Margin="3 0 3 0" IsChecked="{Binding Flag_Update}" IsEnabled="False" />
+                    <CheckBox MinWidth="10" Content="C" Margin="3 0 3 0" IsChecked="{Binding Flag_Communication}" IsEnabled="False" />
                 </StackPanel>
             </StackPanel>
         </DataTemplate>
+
+        <DataTemplate x:Key="StuctBuilding" x:DataType="localB:Building">
+            <TreeViewItem CanDrag="False" ItemsSource="{Binding Floors}" IsExpanded="{Binding IsExpanded, Mode=TwoWay}" IsDoubleTapEnabled="True" DoubleTapped="ClickAB_Rename">
+                <TreeViewItem.ContextFlyout>
+                    <MenuFlyout>
+                        <MenuFlyoutItem Text="Stockwerk" Icon="Add" Click="ClickAB_AddFloor" />
+                        <MenuFlyoutSeparator />
+                        <MenuFlyoutItem x:Uid="/Groups/GlistContextRename" Icon="Rename" Click="ClickAddRename" />
+                        <MenuFlyoutItem x:Uid="/Groups/GListContextDelete" Icon="Delete" Click="ClickAddDelete" />
+                    </MenuFlyout>
+                </TreeViewItem.ContextFlyout>
+                <TreeViewItem.Content>
+                    <StackPanel Orientation="Horizontal">
+                        <FontIcon Glyph="&#xE731;" />
+                        <TextBlock Margin="5 0" Text="{Binding Name}" VerticalAlignment="Center" />
+                    </StackPanel>
+                </TreeViewItem.Content>
+            </TreeViewItem>
+        </DataTemplate>
+
+        <DataTemplate x:Key="StructFloor" x:DataType="localB:Floor">
+            <TreeViewItem CanDrag="False" ItemsSource="{Binding Rooms}" IsExpanded="{Binding IsExpanded, Mode=TwoWay}" IsDoubleTapEnabled="True" DoubleTapped="ClickAB_Rename">
+                <TreeViewItem.ContextFlyout>
+                    <MenuFlyout>
+                        <MenuFlyoutItem Text="Raum" Icon="Add" Click="ClickAB_AddRoom" />
+                        <MenuFlyoutSeparator />
+                        <MenuFlyoutItem x:Uid="/Groups/GlistContextRename" Icon="Rename" Click="ClickAddRename" />
+                        <MenuFlyoutItem x:Uid="/Groups/GListContextDelete" Icon="Delete" Click="ClickAddDelete" />
+                    </MenuFlyout>
+                </TreeViewItem.ContextFlyout>
+                <TreeViewItem.Content>
+                    <StackPanel Orientation="Horizontal">
+                        <FontIcon Glyph="&#xE809;" /> <!--F617-->
+                        <TextBlock Margin="5 0" Text="{Binding Name}" />
+                    </StackPanel>
+                </TreeViewItem.Content>
+            </TreeViewItem>
+        </DataTemplate>
+
+        <DataTemplate x:Key="StructRoom" x:DataType="localB:Room">
+            <TreeViewItem CanDrag="False" ItemsSource="{Binding Functions}" IsExpanded="{Binding IsExpanded, Mode=TwoWay}" IsDoubleTapEnabled="True" DoubleTapped="ClickAB_Rename">
+                <TreeViewItem.ContextFlyout>
+                    <MenuFlyout>
+                        <MenuFlyoutItem Text="Funktion" Icon="Add" Click="ClickAB_AddFunction" />
+                        <MenuFlyoutSeparator />
+                        <MenuFlyoutItem Text="Nach oben" Icon="Upload" IsEnabled="False" />
+                        <MenuFlyoutItem Text="Nach unten" Icon="Download" IsEnabled="False" />
+                        <MenuFlyoutSeparator />
+                        <MenuFlyoutItem x:Uid="/Groups/GlistContextRename" Icon="Rename" Click="ClickAddRename" />
+                        <MenuFlyoutItem x:Uid="/Groups/GListContextDelete" Icon="Delete" Click="ClickAddDelete" />
+                    </MenuFlyout>
+                </TreeViewItem.ContextFlyout>
+                <TreeViewItem.Content>
+                    <StackPanel Orientation="Horizontal">
+                        <FontIcon Glyph="&#xE78B;" />
+                        <TextBlock Margin="5 0" Text="{Binding Name}" />
+                    </StackPanel>
+                </TreeViewItem.Content>
+            </TreeViewItem>
+        </DataTemplate>
+
+        <DataTemplate x:Key="StructFunction" x:DataType="localB:Function">
+            <TreeViewItem CanDrag="False" ItemsSource="{Binding Subs}" IsExpanded="{Binding IsExpanded, Mode=TwoWay}" IsDoubleTapEnabled="True" DoubleTapped="ClickAB_Rename">
+                <TreeViewItem.ContextFlyout>
+                    <MenuFlyout>
+                        <MenuFlyoutItem Text="Bearbeiten" Icon="Edit" />
+                        <MenuFlyoutItem x:Uid="/Groups/GlistContextRename" Icon="Rename" Click="ClickAddRename" />
+                        <MenuFlyoutItem x:Uid="/Groups/GListContextDelete" Icon="Delete" Click="ClickAddDelete" />
+                    </MenuFlyout>
+                </TreeViewItem.ContextFlyout>
+                <TreeViewItem.Content>
+                    <StackPanel Orientation="Horizontal">
+                        <FontIcon Glyph="&#xE71D;" />
+                        <TextBlock Margin="5 0" Text="{Binding Name}" />
+                    </StackPanel>
+                </TreeViewItem.Content>
+            </TreeViewItem>
+        </DataTemplate>
+
+        <DataTemplate x:Key="StructFunctionGroup" x:DataType="localB:FunctionGroup">
+            <TreeViewItem CanDrag="False" ItemsSource="{Binding Subs}" IsExpanded="{Binding IsExpanded, Mode=TwoWay}" IsTapEnabled="True" Tapped="ClickAB_TapFunc" IsDoubleTapEnabled="True" DoubleTapped="ClickAB_Rename">
+                <TreeViewItem.ContextFlyout>
+                    <MenuFlyout>
+                        <MenuFlyoutItem Text="Bearbeiten" Icon="Edit" />
+                        <MenuFlyoutItem x:Uid="/Groups/GlistContextRename" Icon="Rename" Click="ClickAddRename" />
+                        <MenuFlyoutItem x:Uid="/Groups/GListContextDelete" Icon="Delete" Click="ClickAddDelete" />
+                    </MenuFlyout>
+                </TreeViewItem.ContextFlyout>
+                <TreeViewItem.Content>
+                    <StackPanel Orientation="Horizontal">
+                        <FontIcon Glyph="&#xE167;" />
+                        <TextBlock Margin="5 0" Text="{Binding Name}" />
+                    </StackPanel>
+                </TreeViewItem.Content>
+            </TreeViewItem>
+        </DataTemplate>
+
+        <localS:StructureSelector x:Key="SturctureSelector" 
+                                  TempBuilding="{StaticResource StuctBuilding}"
+                                  TempFloor="{StaticResource StructFloor}"
+                                  TempRoom="{StaticResource StructRoom}"
+                                  TempFunction="{StaticResource StructFunction}" 
+                                  TempFunctionGroup="{StaticResource StructFunctionGroup}" />
     </Page.Resources>
 
     <Grid>
@@ -161,12 +266,12 @@
 
         <Border Grid.Column="2" Background="{ThemeResource BrushAccentControlBackground}" BorderThickness="1 0 0 1" BorderBrush="Gray">
             <StackPanel Orientation="Horizontal">
-                <SymbolIcon Symbol="Add" Margin="10 0"  />
-                <AppBarButton x:Uid="/Groups/ToolAddMain" Icon="SelectAll" Click="ClickAddMain" />
+                <SymbolIcon Symbol="Edit" Margin="10 0" />
+                <AppBarButton Label="Gebäude" Icon="View" Click="ClickAB_Building" />
             </StackPanel>
         </Border>
 
-        <Border Grid.RowSpan="2" Background="{ThemeResource BrushAccentControlBackground}" Grid.Row="1" Grid.Column="2" BorderBrush="Gray" BorderThickness="1 0 0 0">
+        <Border Grid.RowSpan="2" Background="{ThemeResource BrushAccentControlBackground}" Grid.Row="1" Grid.Column="2" BorderBrush="Gray" BorderThickness="1 0 0 0" Visibility="Collapsed">
             <TreeView x:Name="TreeGroups" ItemsSource="{Binding Groups}" CanReorderItems="False" ItemInvoked="TreeGroups_ItemInvoked" MinWidth="250" Margin="0 0 5 0">
                 <TreeView.ItemTemplate>
                     <DataTemplate x:DataType="localP:Line">
@@ -195,6 +300,24 @@
             </TreeView>
         </Border>
 
+        <Grid Grid.RowSpan="2" Background="{ThemeResource BrushAccentControlBackground}" Grid.Row="1" Grid.Column="2" BorderBrush="Gray" BorderThickness="1 0 0 0">
+            <Grid.RowDefinitions>
+                <RowDefinition />
+                <RowDefinition Height="auto" />
+            </Grid.RowDefinitions>
+            <TreeView ItemsSource="{Binding Area.Buildings}" CanReorderItems="False" MinWidth="250" Margin="0 0 5 0" ItemTemplateSelector="{StaticResource SturctureSelector}" />
+
+            <StackPanel Grid.Row="1" BorderBrush="Gray" BorderThickness="0 1 0 0">
+                <TextBlock Margin="10 5">
+                    <Run Text="Adresse:" />
+                    <Run x:Name="OutABI_Addr" Text="Nichts ausgewählt..." />
+                </TextBlock>
+                <TextBlock Margin="10 5">
+                    <Run Text="Datentyp:" />
+                    <Run x:Name="OutABI_DPT" Text="..." />
+                </TextBlock>
+            </StackPanel>
+        </Grid>
 
     </Grid>
 </Page>

@@ -246,7 +246,7 @@
                             <DropDownButton.Flyout>
                                 <MenuFlyout Placement="BottomEdgeAlignedRight">
                                     <MenuFlyoutItem Icon="BrowsePhotos" Text="Information" Click="ReadInfo" />
-                                    <MenuFlyoutItem Icon="Find" Text="Konfiguration" Click="ReadConf" />
+                                    <!--<MenuFlyoutItem Icon="Find" Text="Konfiguration" Click="ReadConf" />-->
                                 </MenuFlyout>
                             </DropDownButton.Flyout>
                         </DropDownButton>

@@ -21,6 +21,8 @@ namespace Kaenx.Classes
             set { _status = value; Changed("Status"); }
         }
 
+        public byte[] SerialBytes;
+
         private string _serail;
         public string Serial
         {
@@ -41,6 +43,8 @@ namespace Kaenx.Classes
             get { return _devname; }
             set { _devname = value; Changed("DeviceName"); }
         }
+
+        public string ApplicationId;
 
         private string _appName;
         public string ApplicationName

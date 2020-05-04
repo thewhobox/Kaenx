@@ -161,7 +161,20 @@ namespace Kaenx.View
             LoadScreen.IsLoading = true;
             await Task.Delay(200);
 
-            Project project = SaveHelper.LoadProject(helper);
+            Project project;
+            try
+            {
+                project = SaveHelper.LoadProject(helper);
+            }
+            catch
+            {
+                Notify.Show("Es konnte keine verbindung hergestellt werden. Ist das Passwort für die Verbindung korrekt?", 4000);
+                LoadScreen.IsLoading = false;
+                return;
+            }
+
+
+            project.Local = helper.Local;
             if (project == null)
             {
                 LoadScreen.IsLoading = true;
@@ -201,7 +214,6 @@ namespace Kaenx.View
                 }
             }
 
-
             if(helper.IsReconstruct)
                 App.AppFrame.Navigate(typeof(Reconstruct), project);
             else
@@ -211,7 +223,7 @@ namespace Kaenx.View
 
         private void DeleteProject(object sender, RoutedEventArgs e)
         {
-            ProjectViewHelper proj = (ProjectViewHelper)ProjectsGrid.SelectedItem;
+            ProjectViewHelper proj = (ProjectViewHelper)(sender as Button).DataContext;
             ProjectList.Remove(proj);
             _contextL.Projects.Remove(proj.Local);
             _contextL.SaveChanges();
@@ -253,12 +265,17 @@ namespace Kaenx.View
         {
             LoadScreen.IsLoading = true;
             await Task.Delay(1000);
+            string tag = (sender as Button).Tag.ToString();
 
             Project proj = new Project(InName.Text);
             proj.Connection = (LocalConnectionProject)InConn.SelectedItem;
-            Line Backbone = new Line(1, loaderG.GetString("Area"));
-            Backbone.Subs.Add(new LineMiddle(1, loaderG.GetString("Line") + " 1", Backbone));
-            proj.Lines.Add(Backbone);
+
+            if(tag == "new")
+            {
+                Line Backbone = new Line(1, loaderG.GetString("Area"));
+                Backbone.Subs.Add(new LineMiddle(1, loaderG.GetString("Line") + " 1", Backbone));
+                proj.Lines.Add(Backbone);
+            }
 
             WriteableBitmap image;
             if (Cropper.Visibility == Visibility.Visible)
@@ -327,7 +344,6 @@ namespace Kaenx.View
 
             proj.Id = SaveHelper.SaveProject(proj).Id;
 
-            string tag = (sender as Button).Tag.ToString();
 
             LocalProject lp = new LocalProject();
             lp.ProjectId = proj.Id;
@@ -337,6 +353,8 @@ namespace Kaenx.View
             lp.IsReconstruct = tag == "rec";
             _contextL.Projects.Add(lp);
             _contextL.SaveChanges();
+
+            proj.Local = lp;
 
             ChangeHandler.Instance = new ChangeHandler(proj.Id);
 

@@ -1,8 +1,10 @@
 ﻿using Kaenx.Classes;
+using Kaenx.Classes.Buildings;
 using Kaenx.Classes.Controls;
 using Kaenx.Classes.Helper;
 using Kaenx.Classes.Project;
 using Kaenx.DataContext.Project;
+using Kaenx.Konnect.Addresses;
 using Microsoft.Toolkit.Uwp.UI.Controls;
 using System;
 using System.Collections.Generic;
@@ -427,5 +429,59 @@ namespace Kaenx.View
                     g.CurrentBrush = new SolidColorBrush(Windows.UI.Colors.Transparent);
             }
         }
+
+
+        #region Gebäudestruktur
+        private void ClickAB_Building(object sender, RoutedEventArgs e)
+        {
+            _project.Area.Buildings.Add(new Classes.Buildings.Building() { Name = "Neues Gebäude" });
+        }
+
+        private void ClickAB_AddFloor(object sender, RoutedEventArgs e)
+        {
+            Building b = (sender as MenuFlyoutItem).DataContext as Building;
+            b.Floors.Add(new Floor() { Name = "Neue Etage" });
+            b.IsExpanded = true;
+        }
+
+        private void ClickAB_AddRoom(object sender, RoutedEventArgs e)
+        {
+            Floor f = (sender as MenuFlyoutItem).DataContext as Floor;
+            f.Rooms.Add(new Room() { Name = "Neuer Raum" });
+            f.IsExpanded = true;
+        }
+
+        private void ClickAB_AddFunction(object sender, RoutedEventArgs e)
+        {
+            Room r = (sender as MenuFlyoutItem).DataContext as Room;
+            Function f = new Function() { Name = "Neue Funktion" };
+            f.Subs.Add(new FunctionGroup() { Name = "Schalten", Address = MulticastAddress.FromString("1/1/1") });
+            f.Subs.Add(new FunctionGroup() { Name = "Status", Address = MulticastAddress.FromString("1/1/2") });
+            r.Functions.Add(f);
+            r.IsExpanded = true;
+        }
+
+
+        private async void ClickAB_Rename(object sender, DoubleTappedRoutedEventArgs e)
+        {
+            IBuildingStruct struc = (sender as TreeViewItem).DataContext as IBuildingStruct;
+
+            DiagNewName diag = new DiagNewName();
+            diag.NewName = struc.Name;
+            await diag.ShowAsync();
+            if (string.IsNullOrEmpty(diag.NewName)) return;
+
+            struc.Name = diag.NewName;
+        }
+
+        private void ClickAB_TapFunc(object sender, TappedRoutedEventArgs e)
+        {
+            FunctionGroup func = (sender as TreeViewItem).DataContext as FunctionGroup;
+            if (func == null) return;
+
+            OutABI_Addr.Text = func.Address.ToString();
+        }
+
+        #endregion
     }
 }

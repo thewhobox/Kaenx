@@ -100,7 +100,7 @@ namespace Kaenx.Classes.Helper
                     linemiddlemodel.Id = linem.Id;
                     linemiddlemodel.Name = linem.Name;
                     linemiddlemodel.IsExpanded = linem.IsExpanded;
-                    linemiddlemodel.ParentId = line.Id;
+                    linemiddlemodel.ParentId = line.UId;
                     contextProject.LinesMiddle.Update(linemiddlemodel);
 
 
@@ -119,8 +119,9 @@ namespace Kaenx.Classes.Helper
                             linedev.UId = linedevmodel.UId;
                         }
                         linedevmodel.Id = linedev.Id;
-                        linedevmodel.ParentId = linem.Id;
+                        linedevmodel.ParentId = linem.UId;
                         linedevmodel.Name = linedev.Name;
+                        linedevmodel.Serial = linedev.Serial;
                         linedevmodel.ApplicationId = linedev.ApplicationId;
                         linedevmodel.DeviceId = linedev.DeviceId;
 
@@ -351,7 +352,7 @@ namespace Kaenx.Classes.Helper
 
             Dictionary<int, GroupAddress> groups = new Dictionary<int, GroupAddress>();
 
-            foreach (GroupMainModel gmain in contextProject.GroupMain.Where(g => g.ProjectId == project.Id))
+            foreach (GroupMainModel gmain in contextProject.GroupMain.Where(g => g.ProjectId == helper.ProjectId))
             {
                 Project.Group groupMain = new Project.Group(gmain);
                 project.Groups.Add(groupMain);
@@ -370,17 +371,17 @@ namespace Kaenx.Classes.Helper
                 }
             }
 
-            foreach (LineModel lmodel in contextProject.LinesMain.Where(l => l.ProjectId == helper.Id))
+            foreach (LineModel lmodel in contextProject.LinesMain.Where(l => l.ProjectId == helper.ProjectId).OrderBy(l => l.Id))
             {
                 Line line = new Line(lmodel);
                 project.Lines.Add(line);
 
-                foreach (LineMiddleModel lmm in contextProject.LinesMiddle.Where(l => l.ProjectId == helper.Id && l.ParentId == line.Id))
+                foreach (LineMiddleModel lmm in contextProject.LinesMiddle.Where(l => l.ProjectId == helper.ProjectId && l.ParentId == line.UId).OrderBy(l => l.Id))
                 {
                     LineMiddle lm = new LineMiddle(lmm, line);
                     line.Subs.Add(lm);
 
-                    foreach (LineDeviceModel ldm in contextProject.LineDevices.Where(l => l.ProjectId == helper.Id && l.ParentId == lm.Id).OrderBy(l => l.Id))
+                    foreach (LineDeviceModel ldm in contextProject.LineDevices.Where(l => l.ProjectId == helper.ProjectId && l.ParentId == lm.UId).OrderBy(l => l.Id))
                     {
                         LineDevice ld = new LineDevice(ldm, lm, true);
                         ld.DeviceId = ldm.DeviceId;

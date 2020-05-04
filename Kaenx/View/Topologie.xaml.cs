@@ -87,17 +87,6 @@ namespace Kaenx.View
             BusConnection.Instance.AddAction(action);
         }
 
-        private void ClickInfo(object sender, RoutedEventArgs e)
-        {
-            Classes.Bus.Actions.DeviceInfo action = new Classes.Bus.Actions.DeviceInfo();
-            action.Device = (LineDevice)((MenuFlyoutItem)e.OriginalSource).DataContext;
-            action.Finished += (action, obj) => { 
-                ((Classes.Bus.Data.DeviceInfoData)obj).Device = action.Device; 
-                ((Bus)App._pages["bus"]).AddReadData((Classes.Bus.Data.DeviceInfoData)obj); 
-            };
-            BusConnection.Instance.AddAction(action);
-        }
-
         private void ClickReadConfig(object sender, RoutedEventArgs e)
         {
             Classes.Bus.Actions.DeviceConfig action = new Classes.Bus.Actions.DeviceConfig();

@@ -81,6 +81,7 @@ namespace Kaenx.View
             NavView.SelectedItem = NavView.MenuItems[0];
 
             var currentView = SystemNavigationManager.GetForCurrentView();
+            currentView.AppViewBackButtonVisibility = AppViewBackButtonVisibility.Visible;
             currentView.BackRequested += CurrentView_BackRequested;
         }
 
