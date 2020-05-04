@@ -479,6 +479,25 @@ namespace Kaenx.Classes.Helper
         private static Dictionary<string, List<ParamBinding>> Ref2Bindings;
         private static List<string> updatedComs;
 
+        //Nochmal in ImportHelper
+        private static string ShortId(string id)
+        {
+            string temp = id.Substring(0, 16);
+
+
+            if (id.Contains("_R-"))
+            {
+                temp += id.Substring(id.LastIndexOf("_"));
+            }
+            else
+            {
+                temp += id.Substring(id.IndexOf("_", 16));
+            }
+
+            return temp;
+        }
+
+
         public static void GenerateDynamic(AppAdditional adds)
         {
             XDocument dynamic = XDocument.Parse(Encoding.UTF8.GetString(adds.Dynamic));
@@ -492,14 +511,13 @@ namespace Kaenx.Classes.Helper
             List<IDynChannel> Channels = new List<IDynChannel>();
             IDynChannel currentChannel = null;
 
-
             foreach(XElement ele in dynamic.Root.Descendants(XName.Get("ParameterBlock", dynamic.Root.Name.NamespaceName)))
             {
-                Id2Element.Add(ele.Attribute("Id").Value, ele);
+                Id2Element.Add(ShortId(ele.Attribute("Id").Value), ele);
             }
             foreach(XElement ele in dynamic.Root.Descendants(XName.Get("Channel", dynamic.Root.Name.NamespaceName)))
             {
-                Id2Element.Add(ele.Attribute("Id").Value, ele);
+                Id2Element.Add(ShortId(ele.Attribute("Id").Value), ele);
             }
 
             while (reader.Read())
@@ -534,7 +552,7 @@ namespace Kaenx.Classes.Helper
                         } else
                         {
                             ChannelBlock cb = new ChannelBlock();
-                            cb.Id = reader.GetAttribute("Id");
+                            cb.Id = ShortId(reader.GetAttribute("Id"));
                             cb.Name = reader.GetAttribute("Name");
                             if (reader.GetAttribute("Access") == "None")
                             {
@@ -556,18 +574,21 @@ namespace Kaenx.Classes.Helper
                                 if (m.Success)
                                 {
                                     bind.DefaultText = m.Groups[3].Value;
+                                    cb.DefaultText = m.Groups[3].Value;
                                     cb.Text = text.Replace(m.Value, "{{dyn}}");
                                     if (m.Groups[2].Value == "0")
                                     {
                                         string textId = reader.GetAttribute("TextParameterRefId");
                                         if (string.IsNullOrEmpty(textId)) bind.SourceId = "parent";
-                                        else bind.SourceId = textId;
+                                        else
+                                        {
+                                            bind.SourceId = cb.Id.Substring(0, 16) + "_R-" + textId.Substring(textId.LastIndexOf("-") + 1);
+                                        }
                                     }
                                     else
                                     {
                                         string refid = m.Groups[2].Value;
-                                        if (!Ref2Bindings.ContainsKey(refid)) Ref2Bindings.Add(refid, new List<ParamBinding>());
-                                        Ref2Bindings[refid].Add(bind);
+                                        bind.SourceId = cb.Id.Substring(0, 16) + "_R-" + m.Groups[2].Value;
                                     }
                                 }
                                 else
@@ -582,13 +603,15 @@ namespace Kaenx.Classes.Helper
                                         {
                                             string textId = reader.GetAttribute("TextParameterRefId");
                                             if (string.IsNullOrEmpty(textId)) bind.SourceId = "parent";
-                                            else bind.SourceId = textId;
+                                            else
+                                            {
+                                                bind.SourceId = cb.Id.Substring(0, 16) + "_R-" +  textId.Substring(textId.LastIndexOf("-")+1);
+                                            }
                                         }
                                         else
                                         {
                                             string refid = m.Groups[2].Value;
-                                            if (!Ref2Bindings.ContainsKey(refid)) Ref2Bindings.Add(refid, new List<ParamBinding>());
-                                            Ref2Bindings[refid].Add(bind);
+                                            bind.SourceId = cb.Id.Substring(0, 16) + "_R" + m.Groups[2].Value;
                                         }
                                     }
                                 }
@@ -608,7 +631,7 @@ namespace Kaenx.Classes.Helper
 
                     case "ParameterBlock":
                         ParameterBlock pb = new ParameterBlock();
-                        pb.Id = reader.GetAttribute("Id");
+                        pb.Id = ShortId(reader.GetAttribute("Id"));
                         if (reader.GetAttribute("Access") == "None")
                         {
                             pb.HasAccess = false;
@@ -618,7 +641,7 @@ namespace Kaenx.Classes.Helper
                         {
                             try
                             {
-                                string paramId = reader.GetAttribute("ParamRefId");
+                                string paramId = ShortId(reader.GetAttribute("ParamRefId"));
                                 AppParameter para = contextC.AppParameters.Single(p => p.Id == paramId);
                                 text = para.Text;
                                 if (para.Access == AccessType.None)
@@ -647,25 +670,20 @@ namespace Kaenx.Classes.Helper
                             if (m.Success)
                             {
                                 bind.DefaultText = m.Groups[3].Value;
+                                pb.DefaultText = m.Groups[3].Value;
                                 pb.Text = text.Replace(m.Value, "{{dyn}}");
                                 if (m.Groups[2].Value == "0")
                                 {
                                     string textId = reader.GetAttribute("TextParameterRefId");
-                                    if (string.IsNullOrEmpty(textId))
+                                    if (string.IsNullOrEmpty(textId)) bind.SourceId = "parent";
+                                    else
                                     {
-
-                                        bind.SourceId = "parent";
-                                        string refid = pb.Id.Substring(pb.Id.LastIndexOf("-") + 1);
-                                        if (!Ref2Bindings.ContainsKey(refid)) Ref2Bindings.Add(refid, new List<ParamBinding>());
-                                        Ref2Bindings[refid].Add(bind);
+                                        bind.SourceId = pb.Id.Substring(0, 16) + "_R-" + textId.Substring(textId.LastIndexOf("-") + 1);
                                     }
-                                    else bind.SourceId = textId;
                                 }
                                 else
                                 {
-                                    string refid = m.Groups[2].Value;
-                                    if (!Ref2Bindings.ContainsKey(refid)) Ref2Bindings.Add(refid, new List<ParamBinding>());
-                                    Ref2Bindings[refid].Add(bind);
+                                    bind.SourceId = pb.Id.Substring(0, 16) + "_R-" + m.Groups[2].Value;
                                 }
                             }
                             else
@@ -679,20 +697,15 @@ namespace Kaenx.Classes.Helper
                                     if (m.Groups[1].Value == "0")
                                     {
                                         string textId = reader.GetAttribute("TextParameterRefId");
-                                        if (string.IsNullOrEmpty(textId))
+                                        if (string.IsNullOrEmpty(textId)) bind.SourceId = "parent";
+                                        else
                                         {
-                                            bind.SourceId = "parent";
-                                            string refid = pb.Id.Substring(pb.Id.LastIndexOf("-") + 1);
-                                            if (!Ref2Bindings.ContainsKey(refid)) Ref2Bindings.Add(refid, new List<ParamBinding>());
-                                            Ref2Bindings[refid].Add(bind);
+                                            bind.SourceId = pb.Id.Substring(0, 16) + "_R-" + textId.Substring(textId.LastIndexOf("-") + 1);
                                         }
-                                        else bind.SourceId = textId;
                                     }
                                     else
                                     {
-                                        string refid = m.Groups[2].Value;
-                                        if (!Ref2Bindings.ContainsKey(refid)) Ref2Bindings.Add(refid, new List<ParamBinding>());
-                                        Ref2Bindings[refid].Add(bind);
+                                        bind.SourceId = pb.Id.Substring(0, 16) + "_R-" + m.Groups[1].Value;
                                     }
                                 }
                             }
@@ -748,17 +761,18 @@ namespace Kaenx.Classes.Helper
                     string textRefId = null;
                     if (elePB.Attribute("TextParameterRefId") != null)
                     {
-                        textRefId = elePB.Attribute("TextParameterRefId").Value;
+                        textRefId = ShortId(elePB.Attribute("TextParameterRefId").Value);
                     }
                     else
                     {
                         XElement temp = elePB.Parent;
-                        while (temp.Name.LocalName == "Channel" || temp.Name.LocalName == "ChannelIndepIndependentBlock")
+                        while (textRefId != null || temp.Name.LocalName == "Dynamic")
+                        {
                             temp = temp.Parent;
-
-                        textRefId = temp.Attribute("TextParameterRefId")?.Value;
+                            textRefId = temp.Attribute("TextParameterRefId")?.Value;
+                        }
                     }
-                    ParameterBlock block = Id2ParamBlock[elePB.Attribute("Id").Value];
+                    ParameterBlock block = Id2ParamBlock[ShortId(elePB.Attribute("Id").Value)];
                     GetChildItems(elePB, block, textRefId, groupText);
                 }
             }
@@ -774,22 +788,8 @@ namespace Kaenx.Classes.Helper
 
             foreach (IDynChannel ch in Channels)
             {
-                if (Hash2Bindings.ContainsKey("ID:" + ch.Id))
-                {
-                    ParamBinding bind = Hash2Bindings["ID:" + ch.Id];
-                    if (bind.SourceId != "parent") continue;
-
-                }
-
-
                 foreach (ParameterBlock block in ch.Blocks)
                 {
-                    if (Hash2Bindings.ContainsKey("ID:" + block.Id))
-                    {
-                        ParamBinding bind = Hash2Bindings["ID:" + block.Id];
-                        if (bind.SourceId != "parent") continue;
-                    }
-
                     foreach (IDynParameter para in block.Parameters)
                     {
                         if (!Id2Param.ContainsKey(para.Id))
@@ -858,10 +858,10 @@ namespace Kaenx.Classes.Helper
 
         private static void ParseComObject(XElement xele, string textRefId, string groupText)
         {
-            if (updatedComs.Contains(xele.Attribute("RefId").Value)) return;
+            if (updatedComs.Contains(ShortId(xele.Attribute("RefId").Value))) return;
 
             bool changed = false;
-            AppComObject com = ComObjects[xele.Attribute("RefId").Value];
+            AppComObject com = ComObjects[ShortId(xele.Attribute("RefId").Value)];
 
 
             if (com.BindedId == null && string.IsNullOrEmpty(textRefId) && string.IsNullOrEmpty(groupText)) return;
@@ -924,7 +924,7 @@ namespace Kaenx.Classes.Helper
             if(vers < 14)
             {
                 ParamSeperator sepe = new ParamSeperator();
-                sepe.Id = xele.Attribute("Id").Value;
+                sepe.Id = ShortId(xele.Attribute("Id").Value);
                 sepe.Text = xele.Attribute("Text").Value;
                 if(string.IsNullOrEmpty(sepe.Text))
                     sepe.Hint = "HorizontalRuler";
@@ -960,14 +960,14 @@ namespace Kaenx.Classes.Helper
 
             sep.Conditions = list.Conds;
             sep.Hash = list.Hash;
-            sep.Id = xele.Attribute("Id").Value;
+            sep.Id = ShortId(xele.Attribute("Id").Value);
             sep.Text = xele.Attribute("Text").Value;
             block.Parameters.Add(sep);
         }
 
         private static void ParseParameterRefRef(XElement xele, ParameterBlock block, string textRefId)
         {
-            AppParameter para = AppParas[xele.Attribute("RefId").Value];
+            AppParameter para = AppParas[ShortId(xele.Attribute("RefId").Value)];
             if (para.Access == AccessType.None) return;
             //TODO überprüfen
             AppParameterTypeViewModel paraType = AppParaTypes[para.ParameterTypeId];
@@ -1112,7 +1112,7 @@ namespace Kaenx.Classes.Helper
 
             foreach (XElement xcom in elements)
             {
-                AppComObject appCom = comobjects[xcom.Attribute("RefId").Value];
+                AppComObject appCom = comobjects[ShortId(xcom.Attribute("RefId").Value)];
                 if (appCom.Text == "Dummy") continue;
 
                 DeviceComObject comobject = new DeviceComObject(appCom);
@@ -1307,7 +1307,7 @@ namespace Kaenx.Classes.Helper
                                 Log.Warning("Unbekanntes when! " + attrs);
                             }
 
-                            cond.SourceId = xele.Parent.Attribute("ParamRefId").Value;
+                            cond.SourceId = ShortId(xele.Parent.Attribute("ParamRefId").Value);
                             conds.Add(cond);
 
                             ids = "|" + cond.SourceId + "." + cond.Values + "|" + ids;
@@ -1320,7 +1320,6 @@ namespace Kaenx.Classes.Helper
                             break;
 
                         case "Dynamic":
-                            //return (conds, ids);
                             return (conds, Convert.ToBase64String(Encoding.UTF8.GetBytes(ids)));
                     }
                 }

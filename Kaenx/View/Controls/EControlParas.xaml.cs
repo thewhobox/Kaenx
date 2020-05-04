@@ -143,7 +143,14 @@ namespace Kaenx.Views.Easy.Controls
                 }
             }
 
-            _ = Load();
+            try
+            {
+                _ = Load();
+            }catch(Exception ex)
+            {
+                Log.Error(ex, "Laden der Parameter fehlgeschlagen!");
+                ViewHelper.Instance.ShowNotification("main", ex.Message, 4000, ViewHelper.MessageType.Error);
+            }
         }
 
         public void StartRead()
@@ -161,11 +168,21 @@ namespace Kaenx.Views.Easy.Controls
             foreach (IDynChannel ch in Channels)
             {
                 if (ch is ChannelBlock)
-                    (ch as ChannelBlock).DisplayText = (ch as ChannelBlock).Text;
+                {
+                    ChannelBlock chb = ch as ChannelBlock;
+                    if (chb.Text.Contains("{{"))
+                        chb.DisplayText = chb.Text.Replace("{{dyn}}", chb.DefaultText);
+                    else
+                        chb.DisplayText = chb.Text;
+                }
+                    
 
                 foreach (ParameterBlock block in ch.Blocks)
                 {
-                    block.DisplayText = block.Text;
+                    if (block.Text?.Contains("{{") == true)
+                        block.DisplayText = block.Text.Replace("{{dyn}}", block.DefaultText);
+                    else
+                        block.DisplayText = block.Text;
 
                     foreach (IDynParameter para in block.Parameters)
                     {
@@ -271,7 +288,7 @@ namespace Kaenx.Views.Easy.Controls
                             if(ch2.Blocks.Any(b => b.Id == ids[1]))
                             {
                                 ParameterBlock bl = ch2.Blocks.Single(b => b.Id == ids[1]);
-                                if (string.IsNullOrEmpty(para.Value))
+                                if (string.IsNullOrEmpty(para.Value) || string.IsNullOrWhiteSpace(para.Value))
                                     bl.DisplayText = bl.Text.Replace("{{dyn}}", bind.DefaultText);
                                 else
                                     bl.DisplayText = bl.Text.Replace("{{dyn}}", para.Value);

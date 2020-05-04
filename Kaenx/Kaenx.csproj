@@ -187,6 +187,9 @@
     <Compile Include="View\Controls\Dialogs\DiagAddDevice.xaml.cs">
       <DependentUpon>DiagAddDevice.xaml</DependentUpon>
     </Compile>
+    <Compile Include="View\Controls\Dialogs\DiagAddFunction.xaml.cs">
+      <DependentUpon>DiagAddFunction.xaml</DependentUpon>
+    </Compile>
     <Compile Include="View\Controls\Dialogs\DiagAddLine.xaml.cs">
       <DependentUpon>DiagAddLine.xaml</DependentUpon>
     </Compile>
@@ -377,6 +380,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="View\Controls\Dialogs\DiagAddDevice.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="View\Controls\Dialogs\DiagAddFunction.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

@@ -553,8 +553,8 @@ namespace Kaenx.Classes.Helper
             deviceInfo.ApplicationId = hardware2ProgXml.Element(GetXName("ApplicationProgramRef")).Attribute("RefId").Value;
             deviceInfo.HardwareId = device.HardwareId;
 
-            if (!_context.Hardware2App.Any(h => h.HardwareId == device.HardwareId && h.ApplicationId == deviceInfo.ApplicationId))
-                _context.Hardware2App.Add(new Hardware2AppModel { HardwareId = device.HardwareId, ApplicationId = deviceInfo.ApplicationId });
+            if (!_context.Hardware2App.Any(h => h.HardwareId == device.HardwareId && h.ApplicationId == deviceInfo.ApplicationId.Substring(0,16)))
+                _context.Hardware2App.Add(new Hardware2AppModel { HardwareId = device.HardwareId, ApplicationId = deviceInfo.ApplicationId.Substring(0,16) });
 
             _context.SaveChanges();
         }
@@ -566,10 +566,10 @@ namespace Kaenx.Classes.Helper
             Log.Information(device.ApplicationId);
 
             ApplicationViewModel app;
-            if (_context.Applications.Any(a => a.Id == device.ApplicationId))
-                app = _context.Applications.Single(a => a.Id == device.ApplicationId);
+            if (_context.Applications.Any(a => a.Id == device.ApplicationId.Substring(0, 16)))
+                app = _context.Applications.Single(a => a.Id == device.ApplicationId.Substring(0, 16));
             else
-                app = new ApplicationViewModel() { Id = device.ApplicationId };
+                app = new ApplicationViewModel() { Id = device.ApplicationId.Substring(0,16) };
 
 
             app.Number = int.Parse(appXml.Attribute("ApplicationNumber").Value);
@@ -729,6 +729,23 @@ namespace Kaenx.Classes.Helper
             return AddedDevices;
         }
 
+        //Nochmal in SaveHelper
+        private string ShortId(string id)
+        {
+            string temp = id.Substring(0, 16);
+
+
+            if (id.Contains("_R-"))
+            {
+                temp += id.Substring(id.LastIndexOf("_"));
+            }
+            else
+            {
+                temp += id.Substring(id.IndexOf("_", 16));
+            }
+
+            return temp;
+        }
 
         private async Task ReadApplication(XElement doc, ApplicationViewModel app, int maxcount)
         {
@@ -841,14 +858,14 @@ namespace Kaenx.Classes.Helper
             tempList = doc.Descendants(GetXName("ParameterType")).ToList();
             foreach(XElement type in tempList)
             {
-                bool existed = contextIds.Contains(type.Attribute("Id").Value);
+                bool existed = contextIds.Contains(ShortId(type.Attribute("Id").Value));
                 XElement child = type.Elements().ElementAt(0);
                 AppParameterTypeViewModel paramt;
 
                 if (existed)
-                    paramt = context.AppParameterTypes.Single(p => p.Id == type.Attribute("Id").Value);
+                    paramt = context.AppParameterTypes.Single(p => p.Id == ShortId(type.Attribute("Id").Value));
                 else
-                    paramt = new AppParameterTypeViewModel() { Id = type.Attribute("Id").Value };
+                    paramt = new AppParameterTypeViewModel() { Id = ShortId(type.Attribute("Id").Value) };
 
 
                 switch (child.Name.LocalName)
@@ -960,9 +977,9 @@ namespace Kaenx.Classes.Helper
             foreach(XElement para in tempList)
             {
                 AppParameter param = new AppParameter();
-                param.Id = para.Attribute("Id").Value;
+                param.Id = ShortId(para.Attribute("Id").Value);
                 param.Text = para.Attribute("Text").Value;
-                param.ParameterTypeId = para.Attribute("ParameterType").Value;
+                param.ParameterTypeId = ShortId(para.Attribute("ParameterType").Value);
                 param.Value = para.Attribute("Value")?.Value;
                 string suffix = para.Attribute("SuffixText")?.Value;
                 if (!string.IsNullOrEmpty(suffix))
@@ -984,7 +1001,7 @@ namespace Kaenx.Classes.Helper
                 if (para.Elements(GetXName("Memory")).Count() > 0)
                 {
                     XElement mem = para.Elements(GetXName("Memory")).ElementAt(0);
-                    param.SegmentId = mem.Attribute("CodeSegment").Value;
+                    param.SegmentId = ShortId(mem.Attribute("CodeSegment").Value);
                     param.Offset = int.Parse(mem.Attribute("Offset").Value);
                     param.OffsetBit = int.Parse(mem.Attribute("BitOffset").Value);
                     param.SegmentType = SegmentTypes.Memory;
@@ -1010,7 +1027,7 @@ namespace Kaenx.Classes.Helper
                 XElement mem = union.Element(GetXName("Memory"));
                 if (mem != null)
                 {
-                    t1 = mem.Attribute("CodeSegment").Value;
+                    t1 = ShortId(mem.Attribute("CodeSegment").Value);
                     t2 = int.Parse(mem.Attribute("Offset").Value);
                     t3 = int.Parse(mem.Attribute("BitOffset").Value);
                     segType = SegmentTypes.Memory;
@@ -1038,7 +1055,7 @@ namespace Kaenx.Classes.Helper
                 mem = null;
                 foreach (XElement para in union.Elements(GetXName("Parameter")))
                 {
-                    AppParameter param = Params[para.Attribute("Id").Value];
+                    AppParameter param = Params[ShortId(para.Attribute("Id").Value)];
                     param.SegmentId = t1;
                     int off = int.Parse(para.Attribute("Offset").Value);
                     int offb = int.Parse(para.Attribute("BitOffset").Value);
@@ -1063,19 +1080,20 @@ namespace Kaenx.Classes.Helper
                 ProgressAppChanged(position);
                 if (position % iterationToWait == 0) await Task.Delay(1);
 
-                AppParameter old = Params[pref.Attribute("RefId").Value];
-                bool existed = contextIds.Contains(pref.Attribute("Id").Value);
+                string pId = ShortId(pref.Attribute("Id").Value);
+                AppParameter old = Params[ShortId(pref.Attribute("RefId").Value)];
+                bool existed = contextIds.Contains(pId);
                 AppParameter final;
                 if (existed)
                 {
-                    final = context.AppParameters.Single(p => p.Id == pref.Attribute("Id").Value);
+                    final = context.AppParameters.Single(p => p.Id == pId);
                 } else
                 {
                     final = new AppParameter();
                     final.LoadPara(old);
                 }
 
-                final.Id = pref.Attribute("Id").Value;
+                final.Id = pId;
                 final.ApplicationId = app.Id;
 
                 string text = pref.Attribute("Text")?.Value;
@@ -1115,7 +1133,7 @@ namespace Kaenx.Classes.Helper
                 if (table.Attribute("CodeSegment") != null)
                 {
                     table = doc.Descendants(GetXName("ComObjectTable")).ElementAt(0);
-                    app.Table_Object = table.Attribute("CodeSegment").Value;
+                    app.Table_Object = ShortId(table.Attribute("CodeSegment").Value);
                     int offsetObject;
                     int.TryParse(table.Attribute("Offset").Value, out offsetObject);
                     app.Table_Object_Offset = offsetObject;
@@ -1130,7 +1148,7 @@ namespace Kaenx.Classes.Helper
                 foreach (XElement com in table.Elements())
                 {
                     AppComObject cobj = new AppComObject();
-                    cobj.Id = com.Attribute("Id").Value;
+                    cobj.Id = ShortId(com.Attribute("Id").Value);
                     cobj.Text = com.Attribute("Text")?.Value;
                     cobj.FunctionText = com.Attribute("FunctionText")?.Value;
                     cobj.SetSize(com.Attribute("ObjectSize")?.Value);
@@ -1163,8 +1181,8 @@ namespace Kaenx.Classes.Helper
                 if (position % iterationToWait == 0) await Task.Delay(1);
 
                 AppComObjectRef cobjr = new AppComObjectRef();
-                cobjr.Id = cref.Attribute("Id").Value;
-                cobjr.RefId = cref.Attribute("RefId").Value;
+                cobjr.Id = ShortId(cref.Attribute("Id").Value);
+                cobjr.RefId = ShortId(cref.Attribute("RefId").Value);
 
                 cobjr.Text = cref.Attribute("Text")?.Value;
                 cobjr.FunctionText = cref.Attribute("FunctionText")?.Value;
@@ -1198,7 +1216,7 @@ namespace Kaenx.Classes.Helper
                     cobjr.Flag_Write = false;
 
                 AppComObject obj;
-                bool existed = contextIds.Contains(cref.Attribute("Id").Value);
+                bool existed = contextIds.Contains(cobjr.Id);
                 if (existed)
                     obj = context.AppComObjects.Single(c => c.Id == cobjr.Id);
                 else
@@ -1237,7 +1255,7 @@ namespace Kaenx.Classes.Helper
                         {
                             try
                             {
-                                obj.BindedId = ParamrefIds.Single(c => c.EndsWith("R-" + m.Groups[2].Value));
+                                obj.BindedId = app.Id + "_R-" + m.Groups[2].Value;
                             } catch(Exception e)
                             {
                                 throw new Exception("Kein ParameterRef zum Binden gefunden", e);
@@ -1258,7 +1276,7 @@ namespace Kaenx.Classes.Helper
                             {
                                 try
                                 {
-                                    obj.BindedId = ParamrefIds.Single(c => c.EndsWith("R-" + m.Groups[2].Value));
+                                    obj.BindedId = app.Id + "_R-" + m.Groups[2].Value;
                                 }
                                 catch (Exception e)
                                 {
@@ -1284,7 +1302,7 @@ namespace Kaenx.Classes.Helper
                 table = doc.Descendants(GetXName("AddressTable")).ElementAt(0);
                 if(table.Attribute("CodeSegment") != null)
                 {
-                    app.Table_Group = table.Attribute("CodeSegment").Value;
+                    app.Table_Group = ShortId(table.Attribute("CodeSegment").Value);
                     int offsetGroup;
                     int.TryParse(table.Attribute("Offset")?.Value, out offsetGroup);
                     app.Table_Group_Offset = offsetGroup;
@@ -1306,7 +1324,7 @@ namespace Kaenx.Classes.Helper
                 table = doc.Descendants(GetXName("AssociationTable")).ElementAt(0);
                 if (table.Attribute("CodeSegment") != null)
                 {
-                    app.Table_Assosiations = table.Attribute("CodeSegment").Value;
+                    app.Table_Assosiations = ShortId(table.Attribute("CodeSegment").Value);
                     int offsetAssoc;
                     int.TryParse(table.Attribute("Offset")?.Value, out offsetAssoc);
                     app.Table_Assosiations_Offset = offsetAssoc;
@@ -1335,12 +1353,13 @@ namespace Kaenx.Classes.Helper
                     switch (seg.Name.LocalName)
                     {
                         case "AbsoluteSegment":
-                            existed = contextIds.Contains(seg.Attribute("Id").Value);
+                            string segId = ShortId(seg.Attribute("Id").Value);
+                            existed = contextIds.Contains(segId);
 
                             if (existed)
-                                aas = context.AppSegments.Single(a => a.Id == seg.Attribute("Id").Value);
+                                aas = context.AppSegments.Single(a => a.Id == segId);
                             else
-                                aas = new AppSegmentViewModel() { Id = seg.Attribute("Id").Value };
+                                aas = new AppSegmentViewModel() { Id = segId };
                             
                             aas.ApplicationId = app.Id;
                             aas.Address = int.Parse(seg.Attribute("Address").Value);
@@ -1355,10 +1374,11 @@ namespace Kaenx.Classes.Helper
                             break;
 
                         case "RelativeSegment":
-                            existed = contextIds.Contains(seg.Attribute("Id").Value);
+                            string relId = ShortId(seg.Attribute("Id").Value);
+                            existed = contextIds.Contains(relId);
 
-                            if (existed) aas = context.AppSegments.Single(a => a.Id == seg.Attribute("Id").Value);
-                            else aas = new AppSegmentViewModel() { Id = seg.Attribute("Id").Value };
+                            if (existed) aas = context.AppSegments.Single(a => a.Id == relId);
+                            else aas = new AppSegmentViewModel() { Id = relId };
 
                             aas.ApplicationId = app.Id;
                             aas.Offset = int.Parse(seg.Attribute("Offset").Value);
@@ -1411,8 +1431,6 @@ namespace Kaenx.Classes.Helper
 
             try
             {
-                //context.ChangeTracker.AutoDetectChangesEnabled = true;
-                //context.ChangeTracker.DetectChanges();
                 context.SaveChanges();
                 ProgressAppChanged(maxcount);
             }
@@ -1450,7 +1468,7 @@ namespace Kaenx.Classes.Helper
                 Log.Information("Kein Dynamic vorhanden");
 
             Log.Information("Dynamics werden generiert");
-            ProgressChanged?.Invoke(4);
+            ProgressChanged?.Invoke(3);
             OnDeviceChanged(currentAppName + " - Generiere Dynamics");
             await Task.Delay(10);
             Stopwatch sw = new Stopwatch();
@@ -1460,7 +1478,7 @@ namespace Kaenx.Classes.Helper
             Debug.WriteLine("Generate Dyn: " + sw.Elapsed.TotalSeconds);
 
             Log.Information("Standard ComObjects werden generiert");
-            ProgressChanged?.Invoke(3);
+            ProgressChanged?.Invoke(4);
             OnDeviceChanged(currentAppName + " - Generiere ComObjects");
             await Task.Delay(10);
             sw = new Stopwatch();

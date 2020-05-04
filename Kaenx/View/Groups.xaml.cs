@@ -5,6 +5,7 @@ using Kaenx.Classes.Helper;
 using Kaenx.Classes.Project;
 using Kaenx.DataContext.Project;
 using Kaenx.Konnect.Addresses;
+using Kaenx.View.Controls.Dialogs;
 using Microsoft.Toolkit.Uwp.UI.Controls;
 using System;
 using System.Collections.Generic;
@@ -451,12 +452,23 @@ namespace Kaenx.View
             f.IsExpanded = true;
         }
 
-        private void ClickAB_AddFunction(object sender, RoutedEventArgs e)
+        private async void ClickAB_AddFunction(object sender, RoutedEventArgs e)
         {
             Room r = (sender as MenuFlyoutItem).DataContext as Room;
-            Function f = new Function() { Name = "Neue Funktion" };
-            f.Subs.Add(new FunctionGroup() { Name = "Schalten", Address = MulticastAddress.FromString("1/1/1") });
-            f.Subs.Add(new FunctionGroup() { Name = "Status", Address = MulticastAddress.FromString("1/1/2") });
+
+            DiagAddFunction diag = new DiagAddFunction();
+            await diag.ShowAsync();
+
+            if (diag.Groups.Count == 0) return;
+
+
+            Function f = new Function() { Name = diag.GetName(), ParentRoom = r };
+            foreach (FunctionGroup g in diag.Groups)
+            {
+                g.Address = GetNextFreeAddress(f);
+                f.Subs.Add(g);
+            }
+
             r.Functions.Add(f);
             r.IsExpanded = true;
         }
@@ -482,6 +494,59 @@ namespace Kaenx.View
             OutABI_Addr.Text = func.Address.ToString();
         }
 
+
+        private MulticastAddress GetNextFreeAddress(Function func, bool isCentral = false)
+        {
+            List<string> addresses = new List<string>();
+            foreach(Building b in _project.Area.Buildings)
+                foreach(Floor f in b.Floors)
+                    foreach(Room r in f.Rooms)
+                        foreach(Function fu in r.Functions)
+                            foreach (FunctionGroup fug in fu.Subs)
+                                addresses.Add(fug.Address.ToString());
+
+            foreach (FunctionGroup fug in func.Subs)
+                addresses.Add(fug.Address.ToString());
+
+
+            int main = isCentral ? 0 : 1;
+            int middle = 0;
+            int ga = 0;
+
+            while (addresses.Contains($"{main}/{middle}/{ga}"))
+            {
+                ga++;
+
+                if(ga > 255)
+                {
+                    ga = 0;
+                    middle++;
+
+                    if(middle > 15)
+                    {
+                        middle = 0;
+                        main++;
+                        if(main > 15)
+                        {
+                            ViewHelper.Instance.ShowNotification("main", "Es sind keine Gruppenadressen mehr frei!", 10000, ViewHelper.MessageType.Error);
+                        }
+                    }
+                }
+            }
+
+            return MulticastAddress.FromString($"{main}/{middle}/{ga}");
+        }
+
         #endregion
+
+        private void ClickAB_Delete(object sender, RoutedEventArgs e)
+        {
+            switch((sender as MenuFlyoutItem).DataContext)
+            {
+                case Function func:
+                    func.ParentRoom.Functions.Remove(func);
+                    break;
+            }
+        }
     }
 }

@@ -19,6 +19,7 @@ namespace Kaenx.Classes.Dynamic
 
         public string Id { get; set; }
         public string Text { get; set; }
+        public string DefaultText { get; set; }
         public bool HasAccess { get; set; } = true;
 
         private string _dtext;

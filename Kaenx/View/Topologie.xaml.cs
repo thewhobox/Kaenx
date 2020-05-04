@@ -15,6 +15,7 @@ using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.IO;
 using System.Linq;
+using System.Net.Http.Headers;
 using System.Runtime.InteropServices.WindowsRuntime;
 using System.Threading.Tasks;
 using Windows.ApplicationModel.Resources;
@@ -241,9 +242,14 @@ namespace Kaenx.View
 
         List<(UIElement ui, int id)> ParamStack = new List<(UIElement ui, int id)>();
 
-        private async void ClickOpenParas(object sender, RoutedEventArgs e)
+        private void ClickOpenParas(object sender, RoutedEventArgs e)
         {
             LineDevice device = (LineDevice)((MenuFlyoutItem)e.OriginalSource).DataContext;
+            DoOpenParas(device);
+        }
+
+        private async void DoOpenParas(LineDevice device)
+        {
             EControlParas paras;
             bool isFromCache = false;
 
@@ -260,14 +266,15 @@ namespace Kaenx.View
             if (!Window.Current.CoreWindow.GetKeyState(VirtualKey.Shift).HasFlag(CoreVirtualKeyStates.Down) && ParamStack.Any(p => p.id == device.UId))
             {
                 (UIElement ui, int id) element = ParamStack.Single(i => i.id == device.UId);
-                paras = (EControlParas) element.ui;
+                paras = (EControlParas)element.ui;
                 ParamStack.Remove(element);
                 isFromCache = true;
-            } else
+            }
+            else
             {
                 paras = new EControlParas(device);
 
-                if(ParamStack.Count >= 5) //TODO move to app settings
+                if (ParamStack.Count >= 5) //TODO move to app settings
                 {
                     ParamStack.RemoveAt(0);
                 }
@@ -276,7 +283,7 @@ namespace Kaenx.View
             ParamStack.Add((paras, device.UId));
             ParamPresenter.Content = paras;
 
-            if(ColsPara.Width.Value == 0)
+            if (ColsPara.Width.Value == 0)
                 SubNavPanel.SelectedItem = SubNavPanel.MenuItems[1];
 
             if (!isFromCache)
@@ -423,7 +430,7 @@ namespace Kaenx.View
                     mAddL.Visibility = Visibility.Collapsed;
                     mAddD.Visibility = Visibility.Collapsed;
                     mProg.Visibility = Visibility.Visible;
-                    mPara.Visibility = Visibility.Visible;
+                    mPara.Visibility = Visibility.Collapsed; //Todo show if settings says to do
                     mActions.Visibility = Visibility.Visible;
                     mProgS.Visibility = string.IsNullOrEmpty(dev.SerialText) ? Visibility.Collapsed : Visibility.Visible;
                     break;
@@ -533,6 +540,8 @@ namespace Kaenx.View
                     InNumber.Minimum = 1;
                     InNumber.Maximum = 255;
                 }
+
+                DoOpenParas(dev);
             } else if(data is LineMiddle)
             {
                 LineMiddle line = data as LineMiddle;

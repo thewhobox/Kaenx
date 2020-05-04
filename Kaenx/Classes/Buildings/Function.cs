@@ -1,4 +1,5 @@
 ﻿using Kaenx.Konnect.Addresses;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -26,6 +27,9 @@ namespace Kaenx.Classes.Buildings
             get { return _isExpanded; }
             set { _isExpanded = value; Changed("IsExpanded"); }
         }
+
+        [JsonIgnore]
+        public Room ParentRoom;
 
         public event PropertyChangedEventHandler PropertyChanged;
         public void Changed(string name)

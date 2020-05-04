@@ -91,7 +91,7 @@
                     <MenuFlyout>
                         <MenuFlyoutItem Text="Bearbeiten" Icon="Edit" />
                         <MenuFlyoutItem x:Uid="/Groups/GlistContextRename" Icon="Rename" Click="ClickAddRename" />
-                        <MenuFlyoutItem x:Uid="/Groups/GListContextDelete" Icon="Delete" Click="ClickAddDelete" />
+                        <MenuFlyoutItem x:Uid="/Groups/GListContextDelete" Icon="Delete" Click="ClickAB_Delete" />
                     </MenuFlyout>
                 </TreeViewItem.ContextFlyout>
                 <TreeViewItem.Content>
@@ -269,35 +269,6 @@
                 <SymbolIcon Symbol="Edit" Margin="10 0" />
                 <AppBarButton Label="Gebäude" Icon="View" Click="ClickAB_Building" />
             </StackPanel>
-        </Border>
-
-        <Border Grid.RowSpan="2" Background="{ThemeResource BrushAccentControlBackground}" Grid.Row="1" Grid.Column="2" BorderBrush="Gray" BorderThickness="1 0 0 0" Visibility="Collapsed">
-            <TreeView x:Name="TreeGroups" ItemsSource="{Binding Groups}" CanReorderItems="False" ItemInvoked="TreeGroups_ItemInvoked" MinWidth="250" Margin="0 0 5 0">
-                <TreeView.ItemTemplate>
-                    <DataTemplate x:DataType="localP:Line">
-                        <TreeViewItem Background="{Binding CurrentBrush}" DoubleTapped="Groups_DoubleTapped" CanDrag="False" Margin="-20 0 0 0" ItemsSource="{Binding Subs}" IsExpanded="{Binding IsExpanded, Mode=TwoWay}">
-                            <TreeViewItem.ContextFlyout>
-                                <MenuFlyout>
-                                    <MenuFlyoutItem x:Uid="/Groups/GListContextAdd" Icon="Add" Click="ClickAddSub" />
-                                    <MenuFlyoutItem x:Uid="/Groups/GlistContextRename" Icon="Rename" Click="ClickAddRename" />
-                                    <MenuFlyoutItem x:Uid="/Groups/GListContextDelete" Icon="Delete" Click="ClickAddDelete" />
-                                </MenuFlyout>
-                            </TreeViewItem.ContextFlyout>
-                            <TreeViewItem.ContentTemplate>
-                                <DataTemplate x:DataType="localP:Line">
-                                    <StackPanel Orientation="Horizontal">
-                                        <Viewbox Height="15">
-                                            <SymbolIcon Symbol="{Binding Icon}" />
-                                        </Viewbox>
-                                        <TextBlock Text="{Binding GroupName}" Margin="10 0 0 0" />
-                                        <TextBlock Text="{Binding Name}" Margin="10 0 5 0" />
-                                    </StackPanel>
-                                </DataTemplate>
-                            </TreeViewItem.ContentTemplate>
-                        </TreeViewItem>
-                    </DataTemplate>
-                </TreeView.ItemTemplate>
-            </TreeView>
         </Border>
 
         <Grid Grid.RowSpan="2" Background="{ThemeResource BrushAccentControlBackground}" Grid.Row="1" Grid.Column="2" BorderBrush="Gray" BorderThickness="1 0 0 0">
