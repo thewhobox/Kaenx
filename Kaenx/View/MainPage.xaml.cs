@@ -166,9 +166,10 @@ namespace Kaenx.View
             {
                 project = SaveHelper.LoadProject(helper);
             }
-            catch
+            catch(Exception ex)
             {
-                Notify.Show("Es konnte keine verbindung hergestellt werden. Ist das Passwort für die Verbindung korrekt?", 4000);
+                Notify.Show("Das Projekt konnte nicht geladen werden:" + Environment.NewLine + ex.Message, 4000);
+                Log.Error(ex.Message, "Verbindung fehlgeschlagen!");
                 LoadScreen.IsLoading = false;
                 return;
             }

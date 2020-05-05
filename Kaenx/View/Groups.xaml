@@ -26,7 +26,7 @@
         </DataTemplate>
 
         <DataTemplate x:Key="StuctBuilding" x:DataType="localB:Building">
-            <TreeViewItem CanDrag="False" ItemsSource="{Binding Floors}" IsExpanded="{Binding IsExpanded, Mode=TwoWay}" IsDoubleTapEnabled="True" DoubleTapped="ClickAB_Rename">
+            <TreeViewItem CanDrag="False" ItemsSource="{Binding Floors}" IsExpanded="{Binding IsExpanded, Mode=TwoWay}" IsTapEnabled="True" Tapped="ClickAB_ResetSelected" IsDoubleTapEnabled="True" DoubleTapped="ClickAB_Rename">
                 <TreeViewItem.ContextFlyout>
                     <MenuFlyout>
                         <MenuFlyoutItem Text="Stockwerk" Icon="Add" Click="ClickAB_AddFloor" />
@@ -45,7 +45,7 @@
         </DataTemplate>
 
         <DataTemplate x:Key="StructFloor" x:DataType="localB:Floor">
-            <TreeViewItem CanDrag="False" ItemsSource="{Binding Rooms}" IsExpanded="{Binding IsExpanded, Mode=TwoWay}" IsDoubleTapEnabled="True" DoubleTapped="ClickAB_Rename">
+            <TreeViewItem CanDrag="False" ItemsSource="{Binding Rooms}" IsExpanded="{Binding IsExpanded, Mode=TwoWay}" IsTapEnabled="True" Tapped="ClickAB_ResetSelected" IsDoubleTapEnabled="True" DoubleTapped="ClickAB_Rename">
                 <TreeViewItem.ContextFlyout>
                     <MenuFlyout>
                         <MenuFlyoutItem Text="Raum" Icon="Add" Click="ClickAB_AddRoom" />
@@ -64,7 +64,7 @@
         </DataTemplate>
 
         <DataTemplate x:Key="StructRoom" x:DataType="localB:Room">
-            <TreeViewItem CanDrag="False" ItemsSource="{Binding Functions}" IsExpanded="{Binding IsExpanded, Mode=TwoWay}" IsDoubleTapEnabled="True" DoubleTapped="ClickAB_Rename">
+            <TreeViewItem CanDrag="False" ItemsSource="{Binding Functions}" IsExpanded="{Binding IsExpanded, Mode=TwoWay}" IsTapEnabled="True" Tapped="ClickAB_ResetSelected" IsDoubleTapEnabled="True" DoubleTapped="ClickAB_Rename">
                 <TreeViewItem.ContextFlyout>
                     <MenuFlyout>
                         <MenuFlyoutItem Text="Funktion" Icon="Add" Click="ClickAB_AddFunction" />
@@ -82,7 +82,7 @@
         </DataTemplate>
 
         <DataTemplate x:Key="StructFunction" x:DataType="localB:Function">
-            <TreeViewItem CanDrag="False" ItemsSource="{Binding Subs}" IsExpanded="{Binding IsExpanded, Mode=TwoWay}" IsDoubleTapEnabled="True" DoubleTapped="ClickAB_Rename">
+            <TreeViewItem CanDrag="False" ItemsSource="{Binding Subs}" IsExpanded="{Binding IsExpanded, Mode=TwoWay}" IsTapEnabled="True" Tapped="ClickAB_ResetSelected" IsDoubleTapEnabled="True" DoubleTapped="ClickAB_Rename">
                 <TreeViewItem.ContextFlyout>
                     <MenuFlyout>
                         <MenuFlyoutItem Text="Bearbeiten" Icon="Edit" />
@@ -261,7 +261,7 @@
         <Border Grid.Column="2" Background="{ThemeResource BrushAccentControlBackground}" BorderThickness="1 0 0 1" BorderBrush="Gray">
             <StackPanel Orientation="Horizontal">
                 <SymbolIcon Symbol="Edit" Margin="10 0" />
-                <AppBarButton Label="Gebäude" Icon="View" Click="ClickAB_Building" />
+                <AppBarButton Label="Gebäude" Icon="Home" Click="ClickAB_Building" />
             </StackPanel>
         </Border>
 
@@ -279,7 +279,7 @@
                 </TextBlock>
                 <TextBlock Margin="10 5">
                     <Run Text="Datentyp:" />
-                    <Run x:Name="OutABI_DPT" Text="..." />
+                    <Run x:Name="OutABI_DPT" Text="{Binding SelectedGroup.DataPointType}" />
                 </TextBlock>
             </StackPanel>
         </Grid>

@@ -63,7 +63,7 @@ namespace Kaenx.Classes.Helper
 
             model.Name = _project.Name;
             model.Image = _project.Image;
-
+            model.Area = ObjectToByteArray(_project.Area);
 
             foreach (Line line in _project.Lines)
             {
@@ -175,7 +175,6 @@ namespace Kaenx.Classes.Helper
             return model;
         }
 
-
         public static void UpdateDevice(LineDevice dev)
         {
             LineDeviceModel model = contextProject.LineDevices.Single(d => d.UId == dev.UId);
@@ -190,6 +189,14 @@ namespace Kaenx.Classes.Helper
             model.Serial = dev.Serial;
 
             contextProject.LineDevices.Update(model);
+            contextProject.SaveChanges();
+        }
+
+        public static void SaveStructure()
+        {
+            ProjectModel model = contextProject.Projects.Single(p => p.Id == _project.Id);
+            model.Area = ObjectToByteArray(_project.Area);
+            contextProject.Update(model);
             contextProject.SaveChanges();
         }
 
@@ -353,7 +360,28 @@ namespace Kaenx.Classes.Helper
 
             Dictionary<string, FunctionGroup> groups = new Dictionary<string, FunctionGroup>();
 
-           //TODO add1
+            if(pm.Area != null)
+            {
+                project.Area = ByteArrayToObject<Area>(pm.Area);
+                foreach (Building b in project.Area.Buildings)
+                {
+                    foreach(Floor fl in b.Floors)
+                    {
+                        foreach(Room ro in fl.Rooms)
+                        {
+                            foreach(Function f in ro.Functions)
+                            {
+                                f.ParentRoom = ro;
+                                foreach (FunctionGroup fg in f.Subs)
+                                {
+                                    fg.ParentFunction = f;
+                                    groups.Add(fg.Address.ToString(), fg);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
 
             foreach (LineModel lmodel in contextProject.LinesMain.Where(l => l.ProjectId == helper.ProjectId).OrderBy(l => l.Id))
             {
@@ -383,7 +411,7 @@ namespace Kaenx.Classes.Helper
                                 {
                                     FunctionGroup ga = groups[id_str];
                                     dcom.Groups.Add(ga); 
-                                    //ga.ComObjects.Add(dcom); //TODO add1
+                                    ga.ComObjects.Add(dcom);
                                 }
                             }
 

@@ -12,6 +12,7 @@ namespace Kaenx.DataContext.Project
         public int Id { get; set; }
         public string Name { get; set; }
         public byte[] Image { get; set; }
+        public byte[] Area { get; set; }
 
         public ObservableCollection<LineModel> Lines = new ObservableCollection<LineModel>();
         //public ObservableCollection<Group> Groups = new ObservableCollection<Group>();

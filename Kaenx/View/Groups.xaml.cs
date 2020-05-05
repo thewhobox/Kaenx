@@ -322,9 +322,8 @@ namespace Kaenx.View
             MenuFlyoutItem tvi = sender as MenuFlyoutItem;
             DeviceComObject com = tvi.DataContext as DeviceComObject;
            
-            //TODO add1
-            //foreach(FunctionGroup addr in com.Groups)
-             //   addr.ComObjects.Remove(com);
+            foreach(FunctionGroup addr in com.Groups)
+                addr.ComObjects.Remove(com);
 
             com.Groups.Clear();
 
@@ -342,14 +341,14 @@ namespace Kaenx.View
             if (com.Groups.Contains(SelectedGroup))
             {
                 com.Groups.Remove(SelectedGroup);
-                //SelectedGroup.ComObjects.Remove(com); //TODO add1
+                SelectedGroup.ComObjects.Remove(com);
             }
             else
             {
                 if (!com.Groups.Contains(SelectedGroup))
                     com.Groups.Add(SelectedGroup);
-                //if (!_selectedGroup.ComObjects.Contains(com)) //TODO add1
-                //    _selectedGroup.ComObjects.Add(com);
+                if (!_selectedGroup.ComObjects.Contains(com))
+                    _selectedGroup.ComObjects.Add(com);
             }
 
             SaveHelper.SaveAssociations(SelectedDevice);
@@ -374,11 +373,11 @@ namespace Kaenx.View
             if (com.Groups.Contains(addr))
             {
                 com.Groups.Remove(addr);
-                //addr.ComObjects.Remove(com); //TODO add1
+                addr.ComObjects.Remove(com);
             } else
             {
                 com.Groups.Add(addr);
-                //addr.ComObjects.Add(com); //TODO add1
+                addr.ComObjects.Add(com);
             }
 
             SaveHelper.SaveAssociations(SelectedDevice);
@@ -429,6 +428,7 @@ namespace Kaenx.View
         private void ClickAB_Building(object sender, RoutedEventArgs e)
         {
             _project.Area.Buildings.Add(new Classes.Buildings.Building() { Name = "Neues Gebäude" });
+            SaveHelper.SaveStructure();
         }
 
         private void ClickAB_AddFloor(object sender, RoutedEventArgs e)
@@ -436,6 +436,7 @@ namespace Kaenx.View
             Building b = (sender as MenuFlyoutItem).DataContext as Building;
             b.Floors.Add(new Floor() { Name = "Neue Etage" });
             b.IsExpanded = true;
+            SaveHelper.SaveStructure();
         }
 
         private void ClickAB_AddRoom(object sender, RoutedEventArgs e)
@@ -443,6 +444,7 @@ namespace Kaenx.View
             Floor f = (sender as MenuFlyoutItem).DataContext as Floor;
             f.Rooms.Add(new Room() { Name = "Neuer Raum" });
             f.IsExpanded = true;
+            SaveHelper.SaveStructure();
         }
 
         private async void ClickAB_AddFunction(object sender, RoutedEventArgs e)
@@ -465,6 +467,7 @@ namespace Kaenx.View
 
             r.Functions.Add(f);
             r.IsExpanded = true;
+            SaveHelper.SaveStructure();
         }
 
 
@@ -478,6 +481,7 @@ namespace Kaenx.View
             if (string.IsNullOrEmpty(diag.NewName)) return;
 
             struc.Name = diag.NewName;
+            SaveHelper.SaveStructure();
         }
 
         private void ClickAB_TapFunc(object sender, TappedRoutedEventArgs e)
@@ -543,6 +547,11 @@ namespace Kaenx.View
                     func.ParentRoom.Functions.Remove(func);
                     break;
             }
+        }
+
+        private void ClickAB_ResetSelected(object sender, TappedRoutedEventArgs e)
+        {
+            SelectedGroup = defaultGroup;
         }
     }
 }
