@@ -1,4 +1,5 @@
-﻿using Kaenx.DataContext.Catalog;
+﻿using Kaenx.Classes.Buildings;
+using Kaenx.DataContext.Catalog;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
@@ -59,17 +60,17 @@ namespace Kaenx.Classes.Project
         public string Function { get; set; }
         public List<Dynamic.ParamCondition> Conditions { get; set; }
         [JsonIgnore]
-        public ObservableCollection<GroupAddress> Groups { get; set; } = new ObservableCollection<GroupAddress>();
+        public ObservableCollection<FunctionGroup> Groups { get; set; } = new ObservableCollection<FunctionGroup>();
         [JsonIgnore]
         public string Connections
         {
             get
             {
                 string groups = "";
-                foreach(GroupAddress group in Groups)
+                foreach(FunctionGroup group in Groups)
                 {
                     if(group != null)
-                        groups += ", " + group.GroupName;
+                        groups += ", " + group.Address.ToString();
                 }
                 return groups == "" ? "" : groups.Substring(2);
             }

@@ -32,7 +32,7 @@
                         <MenuFlyoutItem Text="Stockwerk" Icon="Add" Click="ClickAB_AddFloor" />
                         <MenuFlyoutSeparator />
                         <MenuFlyoutItem x:Uid="/Groups/GlistContextRename" Icon="Rename" Click="ClickAddRename" />
-                        <MenuFlyoutItem x:Uid="/Groups/GListContextDelete" Icon="Delete" Click="ClickAddDelete" />
+                        <MenuFlyoutItem x:Uid="/Groups/GListContextDelete" Icon="Delete" Click="ClickAB_Delete" />
                     </MenuFlyout>
                 </TreeViewItem.ContextFlyout>
                 <TreeViewItem.Content>
@@ -51,7 +51,7 @@
                         <MenuFlyoutItem Text="Raum" Icon="Add" Click="ClickAB_AddRoom" />
                         <MenuFlyoutSeparator />
                         <MenuFlyoutItem x:Uid="/Groups/GlistContextRename" Icon="Rename" Click="ClickAddRename" />
-                        <MenuFlyoutItem x:Uid="/Groups/GListContextDelete" Icon="Delete" Click="ClickAddDelete" />
+                        <MenuFlyoutItem x:Uid="/Groups/GListContextDelete" Icon="Delete" Click="ClickAB_Delete" />
                     </MenuFlyout>
                 </TreeViewItem.ContextFlyout>
                 <TreeViewItem.Content>
@@ -68,12 +68,8 @@
                 <TreeViewItem.ContextFlyout>
                     <MenuFlyout>
                         <MenuFlyoutItem Text="Funktion" Icon="Add" Click="ClickAB_AddFunction" />
-                        <MenuFlyoutSeparator />
-                        <MenuFlyoutItem Text="Nach oben" Icon="Upload" IsEnabled="False" />
-                        <MenuFlyoutItem Text="Nach unten" Icon="Download" IsEnabled="False" />
-                        <MenuFlyoutSeparator />
                         <MenuFlyoutItem x:Uid="/Groups/GlistContextRename" Icon="Rename" Click="ClickAddRename" />
-                        <MenuFlyoutItem x:Uid="/Groups/GListContextDelete" Icon="Delete" Click="ClickAddDelete" />
+                        <MenuFlyoutItem x:Uid="/Groups/GListContextDelete" Icon="Delete" Click="ClickAB_Delete" />
                     </MenuFlyout>
                 </TreeViewItem.ContextFlyout>
                 <TreeViewItem.Content>
@@ -104,7 +100,7 @@
         </DataTemplate>
 
         <DataTemplate x:Key="StructFunctionGroup" x:DataType="localB:FunctionGroup">
-            <TreeViewItem CanDrag="False" ItemsSource="{Binding Subs}" IsExpanded="{Binding IsExpanded, Mode=TwoWay}" IsTapEnabled="True" Tapped="ClickAB_TapFunc" IsDoubleTapEnabled="True" DoubleTapped="ClickAB_Rename">
+            <TreeViewItem CanDrag="False" ItemsSource="{Binding Subs}" IsExpanded="{Binding IsExpanded, Mode=TwoWay}" IsTapEnabled="True" Tapped="ClickAB_TapFunc">
                 <TreeViewItem.ContextFlyout>
                     <MenuFlyout>
                         <MenuFlyoutItem Text="Bearbeiten" Icon="Edit" />
@@ -147,18 +143,12 @@
                     <VisualState.StateTriggers>
                         <StateTrigger IsActive="{Binding ElementName=BtnToggleView, Path=IsChecked}" />
                     </VisualState.StateTriggers>
-                    <VisualState.Storyboard>
-                        <Storyboard>
-                            <FadeOutThemeAnimation Duration="0:0:0.5" Storyboard.TargetName="ListComs" />
-                            <FadeInThemeAnimation Duration="0:0:0.5" Storyboard.TargetName="ListGroupComs" />
-                        </Storyboard>
-                    </VisualState.Storyboard>
-                    <!--<VisualState.Setters>
+                    <VisualState.Setters>
                         <Setter Target="ListComs.Visibility" Value="Collapsed" />
                         <Setter Target="OutGroupName.Visibility" Value="Collapsed" />
                         <Setter Target="OutGroupName2.Visibility" Value="Visible" />
                         <Setter Target="ListGroupComs.Visibility" Value="Visible" />
-                    </VisualState.Setters>-->
+                    </VisualState.Setters>
                 </VisualState>
             </VisualStateGroup>
         </VisualStateManager.VisualStateGroups>
@@ -224,13 +214,17 @@
 
         <TextBlock x:Name="OutGroupName" Grid.Column="1" VerticalAlignment="Center" Margin="10 0 0 0" FontSize="20">
             <Run x:Uid="/Groups/ListHeaderLink" />
-            <Run Text="{Binding SelectedGroup.GroupName}" />
+            <Run Text="{Binding SelectedGroup.ParentFunction.ParentRoom.Name}" />
+            <Run Text="-" />
+            <Run Text="{Binding SelectedGroup.ParentFunction.Name}" />
             <Run Text="{Binding SelectedGroup.Name}" />
         </TextBlock>
 
         <TextBlock x:Name="OutGroupName2" Grid.Column="1" VerticalAlignment="Center" Margin="10 0 0 0" FontSize="20" Visibility="Collapsed">
             <Run x:Uid="/Groups/ListHeaderComs" />
-            <Run Text="{Binding SelectedGroup.GroupName}" />
+            <Run Text="{Binding SelectedGroup.ParentFunction.ParentRoom.Name}" />
+            <Run Text="-" />
+            <Run Text="{Binding SelectedGroup.ParentFunction.Name}" />
             <Run Text="{Binding SelectedGroup.Name}" />
         </TextBlock>
 
@@ -278,10 +272,10 @@
             </Grid.RowDefinitions>
             <TreeView ItemsSource="{Binding Area.Buildings}" CanReorderItems="False" MinWidth="250" Margin="0 0 5 0" ItemTemplateSelector="{StaticResource SturctureSelector}" />
 
-            <StackPanel Grid.Row="1" BorderBrush="Gray" BorderThickness="0 1 0 0">
+            <StackPanel x:Name="OutGroupInfo" Grid.Row="1" BorderBrush="Gray" BorderThickness="0 1 0 0">
                 <TextBlock Margin="10 5">
                     <Run Text="Adresse:" />
-                    <Run x:Name="OutABI_Addr" Text="Nichts ausgewählt..." />
+                    <Run x:Name="OutABI_Addr" Text="{Binding SelectedGroup.Address}" />
                 </TextBlock>
                 <TextBlock Margin="10 5">
                     <Run Text="Datentyp:" />

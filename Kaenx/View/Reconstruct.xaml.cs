@@ -280,7 +280,7 @@ namespace Kaenx.View
             catch {
                 try
                 {
-                    device.SerialBytes = await dev.PropertyRead(0, 11, 6);
+                    device.SerialBytes = await dev.PropertyRead(0, 11);
                     device.Serial = BitConverter.ToString(device.SerialBytes).Replace("-", "");
                 }
                 catch

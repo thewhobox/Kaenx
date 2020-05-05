@@ -196,7 +196,7 @@ namespace Kaenx.Classes.Bus.Actions
             } catch {
                 try
                 {
-                    serial = await dev.PropertyRead(0, 11, 6);
+                    serial = await dev.PropertyRead(0, 11);
                 }
                 catch { }
             }

@@ -310,6 +310,16 @@ namespace Kaenx.Views.Easy.Controls
                         break;
                 }
             }
+
+            foreach (IDynChannel ch in Channels)
+            {
+                bool vis = SaveHelper.CheckConditions(ch.Conditions, Id2Param);
+
+                if (vis)
+                {
+                    ch.Visible = ch.Blocks.Any(b => b.Visible == Visibility.Visible) ? Visibility.Visible : Visibility.Collapsed;
+                }
+            }
             #endregion
 
             if (e == null) return;

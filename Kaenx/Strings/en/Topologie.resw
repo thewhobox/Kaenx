@@ -262,9 +262,9 @@
     <value>Settings</value>
   </data>
   <data name="MenReadConf.Text" xml:space="preserve">
-    <value>Read Configuration</value>
+    <value>Configuration</value>
   </data>
-  <data name="MenReadMem.Text" xml:space="preserve">
-    <value>Read Memory</value>
+  <data name="MenTopic.Text" xml:space="preserve">
+    <value>Read:</value>
   </data>
 </root>

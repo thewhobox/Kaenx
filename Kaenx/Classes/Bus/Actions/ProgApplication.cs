@@ -1,4 +1,5 @@
-﻿using Kaenx.Classes.Dynamic;
+﻿using Kaenx.Classes.Buildings;
+using Kaenx.Classes.Dynamic;
 using Kaenx.Classes.Helper;
 using Kaenx.Classes.Project;
 using Kaenx.DataContext.Catalog;
@@ -152,7 +153,7 @@ namespace Kaenx.Classes.Bus.Actions
                     case "LdCtrlCompareProp":
                         int obj = int.Parse(ctrl.Attribute("ObjIdx").Value);
                         int pid = int.Parse(ctrl.Attribute("PropId").Value);
-                        byte[] prop = await dev.PropertyRead(Convert.ToByte(obj), Convert.ToByte(pid), 0);
+                        byte[] prop = await dev.PropertyRead(Convert.ToByte(obj), Convert.ToByte(pid));
                         string dataCP = ctrl.Attribute("InlineData").Value;
 
                         if(!dataCP.StartsWith(BitConverter.ToString(prop).Replace("-", "")))
@@ -505,9 +506,9 @@ namespace Kaenx.Classes.Bus.Actions
             //Alle verbundenen GAs finden und sortieren
             addedGroups = new List<string> { "" };
             foreach (DeviceComObject com in Device.ComObjects)
-                foreach (GroupAddress group in com.Groups)
-                    if (!addedGroups.Contains(group.GroupName))
-                        addedGroups.Add(group.GroupName);
+                foreach (FunctionGroup group in com.Groups)
+                    if (!addedGroups.Contains(group.Address.ToString()))
+                        addedGroups.Add(group.Address.ToString());
             addedGroups.Sort();
 
             //länge der Tabelle erstmal auf 1 setzen
@@ -550,9 +551,9 @@ namespace Kaenx.Classes.Bus.Actions
 
             foreach (DeviceComObject com in Device.ComObjects)
             {
-                foreach (GroupAddress group in com.Groups)
+                foreach (FunctionGroup group in com.Groups)
                 {
-                    int indexG = addedGroups.IndexOf(group.GroupName);
+                    int indexG = addedGroups.IndexOf(group.Address.ToString());
                     int indexC = com.Number;
 
                     byte bIndexG = BitConverter.GetBytes(indexG)[0];

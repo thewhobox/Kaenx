@@ -82,7 +82,7 @@ namespace Kaenx.View.Controls.Bus
             dev.Connect();
             await Task.Delay(100);
 
-            _ = dev.PropertyRead<string>(0, 11, 6);
+            _ = dev.PropertyRead<string>(0, 11);
 
             await Task.Delay(2000);
             dev.Disconnect();

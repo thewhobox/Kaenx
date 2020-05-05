@@ -116,7 +116,19 @@
                                     <MenuFlyoutSubItem x:Name="MFI_Actions" x:Uid="/Topologie/MenActions" Icon="Share">
                                         <MenuFlyoutItem x:Uid="/Topologie/MenRestart" Icon="Refresh" Click="ClickRestart" />
                                         <MenuFlyoutItem x:Name="MFI_Toggle" x:Uid="/Topologie/MenToggle" Icon="DisconnectDrive" Click="ClickToggle" />
+                                        <MenuFlyoutSeparator />
+                                        <MenuFlyoutItem x:Uid="/Topologie/MenTopic" IsEnabled="False" />
+                                        <MenuFlyoutItem x:Name="MFI_Serial" Text="Seriennummer" Click="ClickReadSerial">
+                                            <MenuFlyoutItem.Icon>
+                                                <FontIcon Glyph="&#xE74C;" />
+                                            </MenuFlyoutItem.Icon>
+                                        </MenuFlyoutItem>
                                         <MenuFlyoutItem x:Uid="/Topologie/MenReadConf" Icon="Find" Click="ClickReadConfig" />
+                                        <MenuFlyoutItem x:Name="MFI_Addr" Text="Physikalische Adresse (in arbeit)" IsEnabled="False">
+                                            <MenuFlyoutItem.Icon>
+                                                <FontIcon Glyph="&#xE7B7;" />
+                                            </MenuFlyoutItem.Icon>
+                                        </MenuFlyoutItem>
                                     </MenuFlyoutSubItem>
                                     <MenuFlyoutItem x:Name="MFI_Para" x:Uid="/Topologie/MenOpenPara" Icon="Bookmarks" Click="ClickOpenParas" />
                                     <MenuFlyoutItem x:Name="MFI_Rename" x:Uid="/Topologie/MenRename" Icon="Rename" Click="ClickRename" />

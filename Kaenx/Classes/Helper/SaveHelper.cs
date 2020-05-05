@@ -1,4 +1,5 @@
-﻿using Kaenx.Classes.Dynamic;
+﻿using Kaenx.Classes.Buildings;
+using Kaenx.Classes.Dynamic;
 using Kaenx.Classes.Project;
 using Kaenx.DataContext.Catalog;
 using Kaenx.DataContext.Local;
@@ -129,10 +130,10 @@ namespace Kaenx.Classes.Helper
                         contextProject.ComObjects.RemoveRange(removeComs);
                         foreach (DeviceComObject comObj in linedev.ComObjects)
                         {
-                            List<int> groupIds = new List<int>();
+                            List<string> groupIds = new List<string>();
 
-                            foreach (GroupAddress ga in comObj.Groups)
-                                groupIds.Add(ga.UId);
+                            foreach (FunctionGroup ga in comObj.Groups)
+                                groupIds.Add(ga.Address.ToString());
 
                             ComObject com;
                             if (contextProject.ComObjects.Any(co => co.ComId == comObj.Id && co.DeviceId == linedev.UId))
@@ -275,10 +276,10 @@ namespace Kaenx.Classes.Helper
 
             foreach (DeviceComObject comObj in linedev.ComObjects)
             {
-                List<int> groupIds = new List<int>();
+                List<string> groupIds = new List<string>();
 
-                foreach (GroupAddress ga in comObj.Groups)
-                    groupIds.Add(ga.UId);
+                foreach (FunctionGroup ga in comObj.Groups)
+                    groupIds.Add(ga.Address.ToString());
 
                 ComObject com;
                 if (contextProject.ComObjects.Any(co => co.ComId == comObj.Id && co.DeviceId == linedev.UId))
@@ -350,26 +351,9 @@ namespace Kaenx.Classes.Helper
             project.Id = pm.Id;
             project.Image = pm.Image;
 
-            Dictionary<int, GroupAddress> groups = new Dictionary<int, GroupAddress>();
+            Dictionary<string, FunctionGroup> groups = new Dictionary<string, FunctionGroup>();
 
-            foreach (GroupMainModel gmain in contextProject.GroupMain.Where(g => g.ProjectId == helper.ProjectId))
-            {
-                Project.Group groupMain = new Project.Group(gmain);
-                project.Groups.Add(groupMain);
-
-                foreach (GroupMiddleModel gmiddle in contextProject.GroupMiddle.Where(g => g.ParentId == groupMain.UId))
-                {
-                    GroupMiddle groupMiddle = new GroupMiddle(gmiddle, groupMain);
-                    groupMain.Subs.Add(groupMiddle);
-
-                    foreach (GroupAddressModel gaddress in contextProject.GroupAddress.Where(g => g.ParentId == groupMiddle.UId))
-                    {
-                        GroupAddress groupAddress = new GroupAddress(gaddress, groupMiddle);
-                        groupMiddle.Subs.Add(groupAddress);
-                        groups.Add(groupAddress.UId, groupAddress);
-                    }
-                }
-            }
+           //TODO add1
 
             foreach (LineModel lmodel in contextProject.LinesMain.Where(l => l.ProjectId == helper.ProjectId).OrderBy(l => l.Id))
             {
@@ -397,10 +381,9 @@ namespace Kaenx.Classes.Helper
                                 string[] ids = com.Groups.Split(",");
                                 foreach (string id_str in ids)
                                 {
-                                    int id = int.Parse(id_str);
-                                    GroupAddress ga = groups[id];
-                                    dcom.Groups.Add(ga);
-                                    ga.ComObjects.Add(dcom);
+                                    FunctionGroup ga = groups[id_str];
+                                    dcom.Groups.Add(ga); 
+                                    //ga.ComObjects.Add(dcom); //TODO add1
                                 }
                             }
 

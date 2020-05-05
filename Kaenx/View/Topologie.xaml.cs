@@ -8,30 +8,17 @@ using Kaenx.DataContext.Catalog;
 using Kaenx.DataContext.Project;
 using Kaenx.View.Controls;
 using Kaenx.Views.Easy.Controls;
-using Microsoft.Toolkit.Uwp.UI.Controls;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.ComponentModel;
-using System.IO;
 using System.Linq;
-using System.Net.Http.Headers;
-using System.Runtime.InteropServices.WindowsRuntime;
 using System.Threading.Tasks;
 using Windows.ApplicationModel.Resources;
-using Windows.Foundation;
-using Windows.Foundation.Collections;
-using Windows.Storage;
 using Windows.System;
 using Windows.UI.Core;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
-using Windows.UI.Xaml.Controls.Primitives;
-using Windows.UI.Xaml.Data;
 using Windows.UI.Xaml.Input;
-using Windows.UI.Xaml.Media;
-using Windows.UI.Xaml.Media.Animation;
-using Windows.UI.Xaml.Navigation;
 
 // Die Elementvorlage "Leere Seite" wird unter https://go.microsoft.com/fwlink/?LinkId=234238 dokumentiert.
 
@@ -80,9 +67,9 @@ namespace Kaenx.View
             IBusAction action;
 
             if (item.Tag.ToString() == "serial")
-                action = new Classes.Bus.Actions.ProgPhysicalAddressSerial();
+                action = new ProgPhysicalAddressSerial();
             else
-                action = new Classes.Bus.Actions.ProgPhysicalAddress();
+                action = new ProgPhysicalAddress();
 
             action.Device = (LineDevice)item.DataContext;
             BusConnection.Instance.AddAction(action);
@@ -90,12 +77,20 @@ namespace Kaenx.View
 
         private void ClickReadConfig(object sender, RoutedEventArgs e)
         {
-            Classes.Bus.Actions.DeviceConfig action = new Classes.Bus.Actions.DeviceConfig();
+            DeviceConfig action = new DeviceConfig();
             action.Device = (LineDevice)((MenuFlyoutItem)e.OriginalSource).DataContext;
-            action.Finished += (action, obj) => {
+            action.Finished += (action, obj) =>
+            {
                 ((Classes.Bus.Data.DeviceConfigData)obj).Device = action.Device;
                 ((Bus)App._pages["bus"]).AddReadData((Classes.Bus.Data.DeviceConfigData)obj);
             };
+            BusConnection.Instance.AddAction(action);
+        }
+
+        private void ClickReadSerial(object sender, RoutedEventArgs e)
+        {
+            DeviceSerial action = new DeviceSerial();
+            action.Device = (LineDevice)((MenuFlyoutItem)e.OriginalSource).DataContext;
             BusConnection.Instance.AddAction(action);
         }
 
@@ -114,7 +109,7 @@ namespace Kaenx.View
         {
             DiagAddLine diag = new DiagAddLine();
 
-            
+
 
             if (sender is MenuFlyoutItem)
             {
@@ -144,16 +139,17 @@ namespace Kaenx.View
 
             await diag.ShowAsync();
 
-            foreach(TopologieBase tbase in diag.AddedLines)
+            foreach (TopologieBase tbase in diag.AddedLines)
             {
-                if(tbase is Line)
+                if (tbase is Line)
                 {
                     Line line = tbase as Line;
                     if (line.Id == 0) continue;
 
                     SaveHelper.SaveLine(line);
                     SaveHelper._project.Lines.Add(line);
-                } else if(tbase is LineMiddle)
+                }
+                else if (tbase is LineMiddle)
                 {
                     LineMiddle line = tbase as LineMiddle;
                     Line parent = SaveHelper._project.Lines.Single(l => l == line.Parent);
@@ -161,7 +157,7 @@ namespace Kaenx.View
                     SaveHelper.SaveLine(line);
                 }
             }
-            
+
             CalcCounts();
         }
 
@@ -169,11 +165,12 @@ namespace Kaenx.View
         {
             DiagAddDevice diag = new DiagAddDevice();
 
-            if(sender is MenuFlyoutItem)
+            if (sender is MenuFlyoutItem)
             {
                 TopologieBase line = (sender as MenuFlyoutItem).DataContext as TopologieBase;
                 diag.SelectedLine = line;
-            } else
+            }
+            else
             {
 
             }
@@ -184,13 +181,14 @@ namespace Kaenx.View
 
             LineMiddle lineToAdd = null;
 
-            if(diag.SelectedLine is LineMiddle)
+            if (diag.SelectedLine is LineMiddle)
             {
                 lineToAdd = diag.SelectedLine as LineMiddle;
-            } else if(diag.SelectedLine is Line)
+            }
+            else if (diag.SelectedLine is Line)
             {
                 Line line = diag.SelectedLine as Line;
-                if(line.Subs.Any(l => l.Id == 0))
+                if (line.Subs.Any(l => l.Id == 0))
                 {
                     lineToAdd = line.Subs.Single(l => l.Id == 0);
                 }
@@ -202,7 +200,7 @@ namespace Kaenx.View
                 }
             }
 
-            for(int i = 0; i < diag.Count; i++)
+            for (int i = 0; i < diag.Count; i++)
             {
                 await AddDeviceToLine(diag.SelectedDevice, lineToAdd);
             }
@@ -417,6 +415,7 @@ namespace Kaenx.View
             MenuFlyoutItemBase mPara = menu.Items.Single(i => i.Name == "MFI_Para");
             MenuFlyoutSubItem mActions = (MenuFlyoutSubItem)menu.Items.Single(i => i.Name == "MFI_Actions");
             MenuFlyoutItemBase mToggle = mActions.Items.Single(i => i.Name == "MFI_Toggle");
+            MenuFlyoutItemBase mAddr = mActions.Items.Single(i => i.Name == "MFI_Addr");
             MenuFlyoutItem mProgS = (MenuFlyoutItem)(mProg as MenuFlyoutSubItem).Items.Single(i => i.Name == "MFI_ProgS");
 
             switch (line.Type)
@@ -432,7 +431,8 @@ namespace Kaenx.View
                     mProg.Visibility = Visibility.Visible;
                     mPara.Visibility = Visibility.Collapsed; //Todo show if settings says to do
                     mActions.Visibility = Visibility.Visible;
-                    mProgS.Visibility = string.IsNullOrEmpty(dev.SerialText) ? Visibility.Collapsed : Visibility.Visible;
+                    mAddr.Visibility = (string.IsNullOrEmpty(dev.SerialText) || dev.SerialText == "000000000000") ? Visibility.Collapsed : Visibility.Visible;
+                    mProgS.Visibility = mAddr.Visibility;
                     break;
 
                 case TopologieType.LineMiddle:
@@ -462,13 +462,13 @@ namespace Kaenx.View
 
             ObservableCollection<Line> Lines = (ObservableCollection<Line>)this.DataContext;
 
-            foreach(Line line in Lines)
+            foreach (Line line in Lines)
             {
                 cAreas++;
-                foreach(LineMiddle middle in line.Subs)
+                foreach (LineMiddle middle in line.Subs)
                 {
                     cLines++;
-                    foreach(LineDevice device in middle.Subs)
+                    foreach (LineDevice device in middle.Subs)
                     {
                         cDevices++;
                     }
@@ -526,23 +526,26 @@ namespace Kaenx.View
                 {
                     ApplicationViewModel app = _context.Applications.Single(a => a.Id == dev.ApplicationId);
                     InfoAppName.Text = app.Name + " " + app.VersionString + Environment.NewLine + dev.ApplicationId;
-                } catch
+                }
+                catch
                 {
                     InfoAppName.Text = loader.GetString("ErrMsgNoApp");
                 }
                 InNumber.IsEnabled = dev.Id > 0;
-                if(dev.Id == 0)
+                if (dev.Id == 0)
                 {
                     InNumber.Minimum = 0;
                     InNumber.Maximum = 0;
-                } else
+                }
+                else
                 {
                     InNumber.Minimum = 1;
                     InNumber.Maximum = 255;
                 }
 
                 DoOpenParas(dev);
-            } else if(data is LineMiddle)
+            }
+            else if (data is LineMiddle)
             {
                 LineMiddle line = data as LineMiddle;
                 InfosLineMiddle.Visibility = Visibility.Visible;
@@ -550,7 +553,8 @@ namespace Kaenx.View
                 InfoLmCurrent.Text = SaveHelper.CalculateLineCurrentUsed(line).ToString();
                 InNumber.Minimum = 0;
                 InNumber.Maximum = 15;
-            } else if(data is Line)
+            }
+            else if (data is Line)
             {
                 InNumber.Minimum = 0;
                 InNumber.Maximum = 15;
@@ -568,10 +572,12 @@ namespace Kaenx.View
             else if (e.OriginalSource is Grid)
             {
                 item = (TopologieBase)((Grid)e.OriginalSource).DataContext;
-            } else { 
-            
             }
-            
+            else
+            {
+
+            }
+
 
             DiagNewName diag = new DiagNewName();
             diag.NewName = item.Name;
@@ -588,11 +594,11 @@ namespace Kaenx.View
             ObservableCollection<Line> Lines = (ObservableCollection<Line>)this.DataContext;
             TopologieBase tbase = PanelSettings.DataContext as TopologieBase;
 
-            if(tbase is LineDevice)
+            if (tbase is LineDevice)
             {
-                foreach(Line line in Lines)
+                foreach (Line line in Lines)
                 {
-                    foreach(LineMiddle middle in line.Subs)
+                    foreach (LineMiddle middle in line.Subs)
                     {
                         if (middle.Subs.Contains(tbase) && middle.Subs.Any(m => m.Id == Value))
                         {
@@ -602,7 +608,8 @@ namespace Kaenx.View
                         }
                     }
                 }
-            }else if(tbase is Line)
+            }
+            else if (tbase is Line)
             {
                 if (Lines.Any(m => m.Id == Value))
                 {
@@ -610,11 +617,12 @@ namespace Kaenx.View
                     if (line != tbase)
                         return loader.GetString("ErrMsgExistArea");
                 }
-            } else if(tbase is LineMiddle)
+            }
+            else if (tbase is LineMiddle)
             {
                 foreach (Line line in Lines)
                 {
-                    
+
                     if (line.Subs.Contains(tbase) && line.Subs.Any(m => m.Id == Value))
                     {
                         LineMiddle lineM = line.Subs.Single(m => m.Id == Value);
@@ -631,7 +639,7 @@ namespace Kaenx.View
         {
             string selected = ((NavigationViewItem)args.SelectedItem).Tag.ToString();
 
-            switch(selected)
+            switch (selected)
             {
                 case "topo":
                     ColsTree.Width = new GridLength(1, GridUnitType.Star);

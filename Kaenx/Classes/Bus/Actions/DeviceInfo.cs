@@ -62,11 +62,16 @@ namespace Kaenx.Classes.Bus.Actions
 
                 await Task.Delay(100);
 
+
+
+
+
                 _data.MaskVersion = "MV-" + await dev.DeviceDescriptorRead();
 
                 ProgressValue = 10;
                 TodoText = "Lese Seriennummer...";
                 await Task.Delay(500);
+
                 try
                 {
                     _data.SerialNumber = await dev.PropertyRead<string>(_data.MaskVersion, "DeviceSerialNumber");
@@ -82,7 +87,7 @@ namespace Kaenx.Classes.Bus.Actions
                 await Task.Delay(500);
                 string appId = await dev.PropertyRead<string>(_data.MaskVersion, "ApplicationId");
                 if (appId.Length == 8) appId = "00" + appId;
-                appId = "M-" + appId.Substring(0, 4) + "_A-" + appId.Substring(4, 4) + "-" + appId.Substring(8, 2) + "-";
+                appId = "M-" + appId.Substring(0, 4) + "_A-" + appId.Substring(4, 4) + "-" + appId.Substring(8, 2);
 
                 CatalogContext context = new CatalogContext();
 
@@ -92,7 +97,7 @@ namespace Kaenx.Classes.Bus.Actions
 
                 try
                 {
-                    Hardware2AppModel h2a = context.Hardware2App.First(h => h.ApplicationId.StartsWith(appId));
+                    Hardware2AppModel h2a = context.Hardware2App.First(h => h.ApplicationId == appId);
                     DeviceViewModel dvm = context.Devices.First(d => d.HardwareId == h2a.HardwareId);
                     _data.DeviceName = dvm.Name;
                     _data.ApplicationName = h2a.Name + " " + h2a.VersionString;
@@ -108,7 +113,7 @@ namespace Kaenx.Classes.Bus.Actions
                     _data.Additional = "Warnung! Applikations Id im Gerät stimmt nicht mit dem im Projekt überein!";
                 }
 
-                _data.ApplicationId = appId + "XXXX";
+                _data.ApplicationId = appId;
 
 
                 ProgressValue = 30;
@@ -118,11 +123,11 @@ namespace Kaenx.Classes.Bus.Actions
 
                 ApplicationViewModel appModel = null;
 
-                if (context.Applications.Any(a => a.Id.StartsWith(appId)))
+                if (context.Applications.Any(a => a.Id == appId))
                 {
-                    appModel = context.Applications.Single(a => a.Id.StartsWith(appId)); //TODO check if now complete appid is returned
+                    appModel = context.Applications.Single(a => a.Id == appId); //TODO check if now complete appid is returned
 
-                    if (appModel.Table_Group != "" || appModel.Table_Group != null)
+                    if (!string.IsNullOrEmpty(appModel.Table_Group))
                     {
                         AppSegmentViewModel segmentModel = context.AppSegments.Single(s => s.Id == appModel.Table_Group);
                         grpAddr = segmentModel.Address;
@@ -131,13 +136,7 @@ namespace Kaenx.Classes.Bus.Actions
 
                 if (grpAddr == -1)
                 {
-                    try
-                    {
-                        grpAddr = await dev.PropertyRead<int>(_data.MaskVersion, "GroupAddressTable");
-                    }
-                    catch
-                    {
-                    }
+                    grpAddr = await dev.PropertyRead<int>(1, 7);
                 }
 
 
@@ -168,11 +167,22 @@ namespace Kaenx.Classes.Bus.Actions
 
                 if (appModel != null)
                 {
-                    if (appModel.Table_Assosiations != "" || appModel.Table_Assosiations != null)
+                    int assoAddr = -1;
+
+                    if (!string.IsNullOrEmpty(appModel.Table_Assosiations))
                     {
                         AppSegmentViewModel segmentModel = context.AppSegments.Single(s => s.Id == appModel.Table_Assosiations);
-                        int assoAddr = segmentModel.Address;
+                        assoAddr = segmentModel.Address;
+                    }
 
+                    if(assoAddr == -1)
+                    {
+                        assoAddr = await dev.PropertyRead<int>(2, 7);
+                    }
+
+
+                    if(assoAddr != -1)
+                    {
                         byte[] datax = await dev.MemoryRead(assoAddr, 1);
                         if (datax.Length > 0)
                         {
@@ -207,18 +217,16 @@ namespace Kaenx.Classes.Bus.Actions
 
                             _data.AssociationTable = table;
                         }
-
                     }
 
-
                 }
-            } catch(OperationCanceledException e)
+            } catch(OperationCanceledException)
             {
                 Finish("Gerät antwortet nicht");
                 return;
             }catch(Exception e)
             {
-                Finish(e.Message);
+                Finish(e.Message +  Environment.NewLine + e.StackTrace);
                 return;
             }
 

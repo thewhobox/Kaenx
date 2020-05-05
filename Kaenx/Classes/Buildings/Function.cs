@@ -29,7 +29,7 @@ namespace Kaenx.Classes.Buildings
         }
 
         [JsonIgnore]
-        public Room ParentRoom;
+        public Room ParentRoom { get; set; }
 
         public event PropertyChangedEventHandler PropertyChanged;
         public void Changed(string name)

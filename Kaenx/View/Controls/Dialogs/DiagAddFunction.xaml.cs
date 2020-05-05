@@ -46,16 +46,16 @@ namespace Kaenx.View.Controls.Dialogs
 
                 List<Function> functions = new List<Function>();
                 Function f = new Function() { Name = "Schalten" };
-                f.Subs.Add(new FunctionGroup() { Name = "Schalten" });
-                f.Subs.Add(new FunctionGroup() { Name = "Status" });
+                f.Subs.Add(new FunctionGroup(f) { Name = "Schalten" });
+                f.Subs.Add(new FunctionGroup(f) { Name = "Status" });
                 functions.Add(f);
 
                 f = new Function() { Name = "Dimmen" };
-                f.Subs.Add(new FunctionGroup() { Name = "Schalten" });
-                f.Subs.Add(new FunctionGroup() { Name = "Schalten Status" });
-                f.Subs.Add(new FunctionGroup() { Name = "Dimmen Relativ" });
-                f.Subs.Add(new FunctionGroup() { Name = "Dimmen Absolut" });
-                f.Subs.Add(new FunctionGroup() { Name = "Dimmen Wert" });
+                f.Subs.Add(new FunctionGroup(f) { Name = "Schalten" });
+                f.Subs.Add(new FunctionGroup(f) { Name = "Schalten Status" });
+                f.Subs.Add(new FunctionGroup(f) { Name = "Dimmen Relativ" });
+                f.Subs.Add(new FunctionGroup(f) { Name = "Dimmen Absolut" });
+                f.Subs.Add(new FunctionGroup(f) { Name = "Dimmen Wert" });
                 functions.Add(f);
 
                 string jsonList = Newtonsoft.Json.JsonConvert.SerializeObject(functions);
@@ -64,8 +64,7 @@ namespace Kaenx.View.Controls.Dialogs
 
             string json = await FileIO.ReadTextAsync(file);
 
-            InFunc.ItemsSource = Newtonsoft.Json.JsonConvert.DeserializeObject<List<Function>>(json);
-
+            InFunc.ItemsSource = Newtonsoft.Json.JsonConvert.DeserializeObject<List<Function>>(json); ;
         }
 
         public string GetName()

@@ -11,6 +11,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices.WindowsRuntime;
@@ -38,12 +39,12 @@ namespace Kaenx.View
         private ProjectContext context = SaveHelper.contextProject;
 
         private ResourceLoader loader = ResourceLoader.GetForCurrentView("Groups");
-        private GroupAddress _selectedGroup;
+        private FunctionGroup _selectedGroup;
         private LineDevice _selectedDevice;
         private Project _project;
 
         private LineDevice defaultDevice = new LineDevice(true);
-        private GroupAddress defaultGroup = new GroupAddress() { Id = -1 };
+        private FunctionGroup defaultGroup = new FunctionGroup(new Function());
 
         public LineDevice SelectedDevice
         {
@@ -51,7 +52,7 @@ namespace Kaenx.View
             set { _selectedDevice = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("SelectedDevice")); }
         }
 
-        public GroupAddress SelectedGroup
+        public FunctionGroup SelectedGroup
         {
             get { return _selectedGroup == null ? defaultGroup : _selectedGroup; }
             set { _selectedGroup = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("SelectedGroup")); }
@@ -64,6 +65,8 @@ namespace Kaenx.View
             ListComs.DataContext = this;
             ListGroupComs.DataContext = this;
             OutGroupName.DataContext = this;
+            OutGroupName2.DataContext = this;
+            OutGroupInfo.DataContext = this;
             GroupsInfo.DataContext = this;
 
             defaultDevice.Name = loader.GetString("MsgSelectDevice");
@@ -232,17 +235,6 @@ namespace Kaenx.View
             return -1;
         }
 
-        private void TreeGroups_ItemInvoked(TreeView sender, TreeViewItemInvokedEventArgs args)
-        {
-            if(args.InvokedItem is GroupAddress)
-            {
-                SelectedGroup = args.InvokedItem as GroupAddress;
-            } else
-            {
-                SelectedGroup = null;
-            }
-        }
-
         private void TreeTopologie_ItemInvoked(TreeView sender, TreeViewItemInvokedEventArgs args)
         {
             if (args.InvokedItem is LineDevice == false)
@@ -271,7 +263,7 @@ namespace Kaenx.View
             DeviceComObject com = (mf.Target as DataGridRow).DataContext as DeviceComObject;
 
 
-            if(SelectedGroup.Id == -1)
+            if(SelectedGroup.Address == null)
             {
                 mf.Items[0].Visibility = Visibility.Collapsed;
                 mf.Items[1].Visibility = Visibility.Collapsed;
@@ -283,8 +275,8 @@ namespace Kaenx.View
                 mf.Items[1].Visibility = isExisting ? Visibility.Visible : Visibility.Collapsed;
             }
 
-            mf.Items[0].IsEnabled = SelectedGroup.Id != -1;
-            mf.Items[1].IsEnabled = SelectedGroup.Id != -1;
+            mf.Items[0].IsEnabled = SelectedGroup.Address != null;
+            mf.Items[1].IsEnabled = SelectedGroup.Address != null;
 
             mf.Items[2].IsEnabled = com.Groups.Count > 0;
         }
@@ -313,7 +305,7 @@ namespace Kaenx.View
             TreeViewItem tvi = sender as TreeViewItem;
             if(tvi.DataContext is GroupAddress)
             {
-                GroupAddress addr = tvi.DataContext as GroupAddress;
+                FunctionGroup addr = tvi.DataContext as FunctionGroup;
                 LinkGroupAddress(addr);
             }
         }
@@ -330,8 +322,9 @@ namespace Kaenx.View
             MenuFlyoutItem tvi = sender as MenuFlyoutItem;
             DeviceComObject com = tvi.DataContext as DeviceComObject;
            
-            foreach(GroupAddress addr in com.Groups)
-                addr.ComObjects.Remove(com);
+            //TODO add1
+            //foreach(FunctionGroup addr in com.Groups)
+             //   addr.ComObjects.Remove(com);
 
             com.Groups.Clear();
 
@@ -340,7 +333,7 @@ namespace Kaenx.View
 
         private void LinkComObject(DeviceComObject com)
         {
-            if(SelectedGroup.Id == -1)
+            if(SelectedGroup.Address == null)
             {
                 ViewHelper.Instance.ShowNotification("main", "Bitte wählen Sie erst eine Gruppe aus.", 3000, ViewHelper.MessageType.Error);
                 return;
@@ -349,20 +342,20 @@ namespace Kaenx.View
             if (com.Groups.Contains(SelectedGroup))
             {
                 com.Groups.Remove(SelectedGroup);
-                SelectedGroup.ComObjects.Remove(com);
+                //SelectedGroup.ComObjects.Remove(com); //TODO add1
             }
             else
             {
                 if (!com.Groups.Contains(SelectedGroup))
                     com.Groups.Add(SelectedGroup);
-                if (!_selectedGroup.ComObjects.Contains(com))
-                    _selectedGroup.ComObjects.Add(com);
+                //if (!_selectedGroup.ComObjects.Contains(com)) //TODO add1
+                //    _selectedGroup.ComObjects.Add(com);
             }
 
             SaveHelper.SaveAssociations(SelectedDevice);
         }
 
-        private void LinkGroupAddress(GroupAddress addr)
+        private void LinkGroupAddress(FunctionGroup addr)
         {
             if(BtnToggleView.IsChecked == true)
             {
@@ -381,11 +374,11 @@ namespace Kaenx.View
             if (com.Groups.Contains(addr))
             {
                 com.Groups.Remove(addr);
-                addr.ComObjects.Remove(com);
+                //addr.ComObjects.Remove(com); //TODO add1
             } else
             {
                 com.Groups.Add(addr);
-                addr.ComObjects.Add(com);
+                //addr.ComObjects.Add(com); //TODO add1
             }
 
             SaveHelper.SaveAssociations(SelectedDevice);
@@ -466,6 +459,7 @@ namespace Kaenx.View
             foreach (FunctionGroup g in diag.Groups)
             {
                 g.Address = GetNextFreeAddress(f);
+                g.ParentFunction = f;
                 f.Subs.Add(g);
             }
 
@@ -491,7 +485,7 @@ namespace Kaenx.View
             FunctionGroup func = (sender as TreeViewItem).DataContext as FunctionGroup;
             if (func == null) return;
 
-            OutABI_Addr.Text = func.Address.ToString();
+            SelectedGroup = func;
         }
 
 
@@ -541,6 +535,8 @@ namespace Kaenx.View
 
         private void ClickAB_Delete(object sender, RoutedEventArgs e)
         {
+            Debug.WriteLine(sender);
+
             switch((sender as MenuFlyoutItem).DataContext)
             {
                 case Function func:

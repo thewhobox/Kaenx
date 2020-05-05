@@ -265,9 +265,9 @@
     <value>Einstellungen</value>
   </data>
   <data name="MenReadConf.Text" xml:space="preserve">
-    <value>Konfiguration auslesen</value>
+    <value>Konfiguration</value>
   </data>
-  <data name="MenReadMem.Text" xml:space="preserve">
-    <value>Speicher auslesen</value>
+  <data name="MenTopic.Text" xml:space="preserve">
+    <value>Auslesen:</value>
   </data>
 </root>

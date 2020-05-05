@@ -257,7 +257,8 @@ namespace Kaenx.Classes.Bus
                 History.Insert(0, CurrentAction);
                 try
                 {
-                    CurrentAction.Finished -= CurrentAction_Finished;
+                    if(CurrentAction != null)
+                        CurrentAction.Finished -= CurrentAction_Finished;
                 } catch { }
                 CurrentAction = null;
                 Changed("CurrentAction");

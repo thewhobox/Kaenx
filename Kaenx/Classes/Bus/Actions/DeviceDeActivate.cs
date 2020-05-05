@@ -1,4 +1,5 @@
-﻿using Kaenx.Classes.Project;
+﻿using Kaenx.Classes.Buildings;
+using Kaenx.Classes.Project;
 using Kaenx.DataContext.Catalog;
 using Kaenx.Konnect;
 using Kaenx.Konnect.Classes;
@@ -62,9 +63,9 @@ namespace Kaenx.Classes.Bus.Actions
                 //Alle verbundenen GAs finden und sortieren
                 List<string> addedGroups = new List<string> { "" };
                 foreach (DeviceComObject com in Device.ComObjects)
-                    foreach (GroupAddress group in com.Groups)
-                        if (!addedGroups.Contains(group.GroupName))
-                            addedGroups.Add(group.GroupName);
+                    foreach (FunctionGroup group in com.Groups)
+                        if (!addedGroups.Contains(group.Address.ToString()))
+                            addedGroups.Add(group.Address.ToString());
 
                 addedGroups.Sort();
 

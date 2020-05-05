@@ -128,6 +128,7 @@
     <Compile Include="Classes\Buildings\Room.cs" />
     <Compile Include="Classes\Bus\Actions\DeviceDeActivate.cs" />
     <Compile Include="Classes\Bus\Actions\DeviceConfig.cs" />
+    <Compile Include="Classes\Bus\Actions\DeviceSerial.cs" />
     <Compile Include="Classes\Bus\Actions\DeviceRestart.cs" />
     <Compile Include="Classes\Bus\Actions\IBusAction.cs" />
     <Compile Include="Classes\Bus\Actions\DeviceInfo.cs" />

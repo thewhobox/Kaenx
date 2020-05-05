@@ -65,7 +65,13 @@ namespace Kaenx.Classes.Project
         }
         public bool IsExpanded { get { return false; } }
         public List<string> Subs { get; }
-        public byte[] Serial { get; set; }
+
+        private byte[] _serial;
+        public byte[] Serial
+        {
+            get { return _serial; }
+            set { _serial = value; Changed("Serial"); Changed("SerialText"); }
+        }
         public string SerialText { get { return Serial == null ? "" : BitConverter.ToString(Serial).Replace("-", ""); } }
 
         //TODO speichern ändern! Nicht immer das ganze Projekt!
