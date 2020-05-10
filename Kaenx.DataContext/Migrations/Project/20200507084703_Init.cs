@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace Kaenx.DataContext.Migrations.Project
@@ -39,53 +40,6 @@ namespace Kaenx.DataContext.Migrations.Project
                 });
 
             migrationBuilder.CreateTable(
-                name: "GroupAddress",
-                columns: table => new
-                {
-                    UId = table.Column<int>(nullable: false)
-                        .Annotation("Sqlite:Autoincrement", true),
-                    Id = table.Column<int>(nullable: false),
-                    ProjectId = table.Column<int>(nullable: false),
-                    ParentId = table.Column<int>(nullable: false),
-                    Name = table.Column<string>(nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_GroupAddress", x => x.UId);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "GroupMain",
-                columns: table => new
-                {
-                    UId = table.Column<int>(nullable: false)
-                        .Annotation("Sqlite:Autoincrement", true),
-                    ProjectId = table.Column<int>(nullable: false),
-                    Id = table.Column<int>(nullable: false),
-                    Name = table.Column<string>(nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_GroupMain", x => x.UId);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "GroupMiddle",
-                columns: table => new
-                {
-                    UId = table.Column<int>(nullable: false)
-                        .Annotation("Sqlite:Autoincrement", true),
-                    Id = table.Column<int>(nullable: false),
-                    ProjectId = table.Column<int>(nullable: false),
-                    ParentId = table.Column<int>(nullable: false),
-                    Name = table.Column<string>(nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_GroupMiddle", x => x.UId);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "LineDevices",
                 columns: table => new
                 {
@@ -96,7 +50,11 @@ namespace Kaenx.DataContext.Migrations.Project
                     ProjectId = table.Column<int>(nullable: false),
                     Name = table.Column<string>(nullable: true),
                     DeviceId = table.Column<string>(nullable: true),
-                    ApplicationId = table.Column<string>(nullable: true)
+                    ApplicationId = table.Column<string>(nullable: true),
+                    LoadedGA = table.Column<bool>(nullable: false),
+                    LoadedApp = table.Column<bool>(nullable: false),
+                    LoadedPA = table.Column<bool>(nullable: false),
+                    Serial = table.Column<byte[]>(nullable: true)
                 },
                 constraints: table =>
                 {
@@ -144,6 +102,7 @@ namespace Kaenx.DataContext.Migrations.Project
                         .Annotation("Sqlite:Autoincrement", true),
                     Name = table.Column<string>(nullable: true),
                     Image = table.Column<byte[]>(nullable: true),
+                    Area = table.Column<byte[]>(nullable: true)
                 },
                 constraints: table =>
                 {
@@ -164,6 +123,19 @@ namespace Kaenx.DataContext.Migrations.Project
                 {
                     table.PrimaryKey("PK_States", x => x.Id);
                 });
+
+
+            if(migrationBuilder.ActiveProvider == "Pomelo.EntityFrameworkCore.MySql")
+            {
+                migrationBuilder.Sql("ALTER TABLE ChangesParam MODIFY Id INT(11) AUTO_INCREMENT;");
+                migrationBuilder.Sql("ALTER TABLE ComObjects MODIFY Id INT(11) AUTO_INCREMENT;");
+                migrationBuilder.Sql("ALTER TABLE LineDevices MODIFY UId INT(11) AUTO_INCREMENT;");
+                migrationBuilder.Sql("ALTER TABLE LinesMain MODIFY UId INT(11) AUTO_INCREMENT;");
+                migrationBuilder.Sql("ALTER TABLE LinesMiddle MODIFY UId INT(11) AUTO_INCREMENT;");
+                migrationBuilder.Sql("ALTER TABLE Projects MODIFY Id INT(11) AUTO_INCREMENT;");
+                migrationBuilder.Sql("ALTER TABLE States MODIFY Id INT(11) AUTO_INCREMENT;");
+            }
+            Debug.WriteLine(migrationBuilder.ActiveProvider);
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
@@ -173,15 +145,6 @@ namespace Kaenx.DataContext.Migrations.Project
 
             migrationBuilder.DropTable(
                 name: "ComObjects");
-
-            migrationBuilder.DropTable(
-                name: "GroupAddress");
-
-            migrationBuilder.DropTable(
-                name: "GroupMain");
-
-            migrationBuilder.DropTable(
-                name: "GroupMiddle");
 
             migrationBuilder.DropTable(
                 name: "LineDevices");

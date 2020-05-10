@@ -18,18 +18,11 @@ namespace Kaenx.Classes.Project
         public LocalConnectionProject Connection { get; set; }
         public LocalProject Local { get; set; }
 
-        private ObservableCollection<Group> _groups = new ObservableCollection<Group>();
-
         public event PropertyChangedEventHandler PropertyChanged;
 
         public Area Area { get; set; } = new Area();
 
         public ObservableCollection<Line> Lines { get; set; } = new ObservableCollection<Line>();
-        public ObservableCollection<Group> Groups
-        {
-            get { return _groups; }
-            set { _groups = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Groups")); }
-        }
 
         public Project() { }
 

@@ -51,58 +51,6 @@ namespace Kaenx.DataContext.Migrations.Project
                     b.ToTable("ComObjects");
                 });
 
-            modelBuilder.Entity("Kaenx.DataContext.Project.GroupAddressModel", b =>
-                {
-                    b.Property<int>("UId")
-                        .ValueGeneratedOnAdd();
-
-                    b.Property<int>("Id");
-
-                    b.Property<string>("Name");
-
-                    b.Property<int>("ParentId");
-
-                    b.Property<int>("ProjectId");
-
-                    b.HasKey("UId");
-
-                    b.ToTable("GroupAddress");
-                });
-
-            modelBuilder.Entity("Kaenx.DataContext.Project.GroupMainModel", b =>
-                {
-                    b.Property<int>("UId")
-                        .ValueGeneratedOnAdd();
-
-                    b.Property<int>("Id");
-
-                    b.Property<string>("Name");
-
-                    b.Property<int>("ProjectId");
-
-                    b.HasKey("UId");
-
-                    b.ToTable("GroupMain");
-                });
-
-            modelBuilder.Entity("Kaenx.DataContext.Project.GroupMiddleModel", b =>
-                {
-                    b.Property<int>("UId")
-                        .ValueGeneratedOnAdd();
-
-                    b.Property<int>("Id");
-
-                    b.Property<string>("Name");
-
-                    b.Property<int>("ParentId");
-
-                    b.Property<int>("ProjectId");
-
-                    b.HasKey("UId");
-
-                    b.ToTable("GroupMiddle");
-                });
-
             modelBuilder.Entity("Kaenx.DataContext.Project.LineDeviceModel", b =>
                 {
                     b.Property<int>("UId")

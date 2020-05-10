@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
@@ -25,6 +26,9 @@ namespace Kaenx.Classes.Buildings
             get { return _isExpanded; }
             set { _isExpanded = value; Changed("IsExpanded"); }
         }
+
+        [JsonIgnore]
+        public Building ParentBuilding { get; set; }
 
         public event PropertyChangedEventHandler PropertyChanged;
         public void Changed(string name)

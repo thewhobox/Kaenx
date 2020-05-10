@@ -9,6 +9,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Windows.UI.Xaml;
+using Windows.UI.Xaml.Media;
 
 namespace Kaenx.Classes.Project
 {
@@ -46,10 +47,19 @@ namespace Kaenx.Classes.Project
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Connections"));
         }
 
+        private SolidColorBrush _backgroundBrush;
+        public SolidColorBrush BackgroundBrush
+        {
+            get { return _backgroundBrush; }
+            set { _backgroundBrush = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("BackgroundBrush")); }
+        }
+
+
         private string _name;
         private string _dname;
 
         public string Id { get; set; }
+        public LineDevice ParentDevice { get; set; }
         public string BindedId { get; set; }
         public int Datapoint { get; set; }
         public int DatapointSub { get; set; }

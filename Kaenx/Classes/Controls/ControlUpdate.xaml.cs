@@ -86,12 +86,12 @@ namespace Kaenx.Classes.Controls
         private void UpdateDevice(DeviceUpdate update)
         {
             Devices.Remove(update);
-            LineDeviceModel device = SaveHelper.contextProject.LineDevices.Single(d => d.UId == update.DeviceUid);
-            device.ApplicationId = update.NewApplicationId;
-            SaveHelper.contextProject.LineDevices.Update(device);
-            SaveHelper.contextProject.SaveChanges();
-            update.Device.ApplicationId = update.NewApplicationId;
-            UpdateManager.Instance.CountUpdates();
+            //LineDeviceModel device = SaveHelper.contextProject.LineDevices.Single(d => d.UId == update.DeviceUid);
+            //device.ApplicationId = update.NewApplicationId;
+            //SaveHelper.contextProject.LineDevices.Update(device);
+            //SaveHelper.contextProject.SaveChanges();
+            //update.Device.ApplicationId = update.NewApplicationId;
+            //UpdateManager.Instance.CountUpdates();
         }
 
 

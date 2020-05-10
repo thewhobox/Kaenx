@@ -192,13 +192,8 @@ namespace Kaenx.Classes.Bus.Actions
             byte[] serial = null;
             try
             {
-                serial = await dev.PropertyRead("MV-" + mask, "DeviceSerialNumber");
+                serial = await dev.PropertyRead(0,11);
             } catch {
-                try
-                {
-                    serial = await dev.PropertyRead(0, 11);
-                }
-                catch { }
             }
 
             if(serial != null)

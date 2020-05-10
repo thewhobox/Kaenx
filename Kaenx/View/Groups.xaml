@@ -101,13 +101,6 @@
 
         <DataTemplate x:Key="StructFunctionGroup" x:DataType="localB:FunctionGroup">
             <TreeViewItem CanDrag="False" ItemsSource="{Binding Subs}" IsExpanded="{Binding IsExpanded, Mode=TwoWay}" IsTapEnabled="True" Tapped="ClickAB_TapFunc">
-                <TreeViewItem.ContextFlyout>
-                    <MenuFlyout>
-                        <MenuFlyoutItem Text="Bearbeiten" Icon="Edit" />
-                        <MenuFlyoutItem x:Uid="/Groups/GlistContextRename" Icon="Rename" Click="ClickAddRename" />
-                        <MenuFlyoutItem x:Uid="/Groups/GListContextDelete" Icon="Delete" Click="ClickAddDelete" />
-                    </MenuFlyout>
-                </TreeViewItem.ContextFlyout>
                 <TreeViewItem.Content>
                     <StackPanel Orientation="Horizontal">
                         <FontIcon Glyph="&#xE167;" />
@@ -190,11 +183,16 @@
                           BorderBrush="LightGray" Background="{ThemeResource BrushAccentControlBackground}" >
             <toolkit:DataGrid.RowStyle>
                 <Style TargetType="toolkit:DataGridRow">
+                    <Setter Property="Background">
+                        <Setter.Value>
+                            <Binding Path="BackgroundBrush" />
+                        </Setter.Value>
+                    </Setter>
                     <Setter Property="toolkit:DataGridRow.ContextFlyout">
                         <Setter.Value>
                             <MenuFlyout Opening="MenuFlyout_Opening">
-                                <MenuFlyoutItem x:Uid="/Groups/CListContextLink" Click="ClickLink" Icon="Link" />
-                                <MenuFlyoutItem x:Uid="/Groups/CListContextUnlink" Click="ClickLink" Icon="Delete" />
+                                <MenuFlyoutItem Click="ClickLink" Icon="Link" />
+                                <MenuFlyoutItem Click="ClickLink" Icon="Delete" />
                                 <MenuFlyoutItem x:Uid="/Groups/CListContextUnlinkAll" Click="ClickLinkAll" Icon="Delete" />
                             </MenuFlyout>
                         </Setter.Value>
@@ -202,7 +200,15 @@
                 </Style>
             </toolkit:DataGrid.RowStyle>
             <toolkit:DataGrid.Columns>
-                <toolkit:DataGridTextColumn x:Uid="/Groups/LComsNumb" Tag="number" Width="SizeToCells" Binding="{Binding Number}" />
+                <toolkit:DataGridTemplateColumn x:Uid="/Groups/LComsNumb" CanUserSort="False" Tag="number" Width="SizeToCells">
+                    <toolkit:DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <Border Background="{Binding BackgroundBrush}">
+                                <TextBlock Text="{Binding Number}" VerticalAlignment="Center" HorizontalAlignment="Center" Margin="5 0" />
+                            </Border>
+                        </DataTemplate>
+                    </toolkit:DataGridTemplateColumn.CellTemplate>
+                </toolkit:DataGridTemplateColumn>
                 <toolkit:DataGridTextColumn x:Uid="/Groups/LComsName" MinWidth="160" Tag="name" Width="SizeToCells" Binding="{Binding DisplayName}" />
                 <toolkit:DataGridTextColumn x:Uid="/Groups/LComsFunc" MinWidth="160" Tag="func" Width="SizeToCells" Binding="{Binding Function}" />
                 <toolkit:DataGridTextColumn x:Uid="/Groups/LComsConn" MinWidth="100" Tag="connections" Width="SizeToCells" Binding="{Binding Connections}" />

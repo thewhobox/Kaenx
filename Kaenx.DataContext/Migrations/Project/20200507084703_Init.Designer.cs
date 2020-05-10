@@ -9,8 +9,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Kaenx.DataContext.Migrations.Project
 {
     [DbContext(typeof(ProjectContext))]
-    [Migration("20200414083156_Serial")]
-    partial class Serial
+    [Migration("20200507084703_Init")]
+    partial class Init
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -21,7 +21,8 @@ namespace Kaenx.DataContext.Migrations.Project
             modelBuilder.Entity("Kaenx.DataContext.Project.ChangeParamModel", b =>
                 {
                     b.Property<int>("Id")
-                        .ValueGeneratedOnAdd();
+                        .ValueGeneratedOnAdd()
+                        .HasComputedColumnSql("Id");
 
                     b.Property<int>("DeviceId");
 
@@ -50,58 +51,6 @@ namespace Kaenx.DataContext.Migrations.Project
                     b.HasKey("Id");
 
                     b.ToTable("ComObjects");
-                });
-
-            modelBuilder.Entity("Kaenx.DataContext.Project.GroupAddressModel", b =>
-                {
-                    b.Property<int>("UId")
-                        .ValueGeneratedOnAdd();
-
-                    b.Property<int>("Id");
-
-                    b.Property<string>("Name");
-
-                    b.Property<int>("ParentId");
-
-                    b.Property<int>("ProjectId");
-
-                    b.HasKey("UId");
-
-                    b.ToTable("GroupAddress");
-                });
-
-            modelBuilder.Entity("Kaenx.DataContext.Project.GroupMainModel", b =>
-                {
-                    b.Property<int>("UId")
-                        .ValueGeneratedOnAdd();
-
-                    b.Property<int>("Id");
-
-                    b.Property<string>("Name");
-
-                    b.Property<int>("ProjectId");
-
-                    b.HasKey("UId");
-
-                    b.ToTable("GroupMain");
-                });
-
-            modelBuilder.Entity("Kaenx.DataContext.Project.GroupMiddleModel", b =>
-                {
-                    b.Property<int>("UId")
-                        .ValueGeneratedOnAdd();
-
-                    b.Property<int>("Id");
-
-                    b.Property<string>("Name");
-
-                    b.Property<int>("ParentId");
-
-                    b.Property<int>("ProjectId");
-
-                    b.HasKey("UId");
-
-                    b.ToTable("GroupMiddle");
                 });
 
             modelBuilder.Entity("Kaenx.DataContext.Project.LineDeviceModel", b =>
@@ -176,6 +125,8 @@ namespace Kaenx.DataContext.Migrations.Project
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd();
+
+                    b.Property<byte[]>("Area");
 
                     b.Property<byte[]>("Image");
 

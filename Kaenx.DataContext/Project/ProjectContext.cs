@@ -16,16 +16,13 @@ namespace Kaenx.DataContext.Project
         public DbSet<LineMiddleModel> LinesMiddle { get; set; }
         public DbSet<LineDeviceModel> LineDevices { get; set; }
         public DbSet<ComObject> ComObjects { get; set; }
-        public DbSet<GroupMainModel> GroupMain { get; set; }
-        public DbSet<GroupMiddleModel> GroupMiddle { get; set; }
-        public DbSet<GroupAddressModel> GroupAddress { get; set; }
 
 
         private LocalConnectionProject _conn;
 
         public ProjectContext()
         {
-            _conn = new LocalConnectionProject() { DbHostname = "Projects.sb", Type = LocalConnectionProject.DbConnectionType.SqlLite };
+            _conn = new LocalConnectionProject() { DbHostname = "Projects.db", Type = LocalConnectionProject.DbConnectionType.SqlLite };
         }
         public ProjectContext(LocalConnectionProject conn) => _conn = conn;
 
@@ -39,7 +36,7 @@ namespace Kaenx.DataContext.Project
                         optionsBuilder.UseSqlite("Data Source=" + _conn.DbHostname);
                     } else
                     {
-                        var conn = new System.Data.SQLite.SQLiteConnection(@"Data Source=C:\Users\mikeg\AppData\Local\Packages\55505Exe-Creation.KAENX_zkfs9vqf4wsm0\LocalState\Projetcs.db;");
+                        var conn = new System.Data.SQLite.SQLiteConnection(@"Data Source=" + _conn.DbHostname + "; ");
                         conn.Open();
 
                         var command = conn.CreateCommand();
@@ -54,13 +51,6 @@ namespace Kaenx.DataContext.Project
                     optionsBuilder.UseMySql($"Server={_conn.DbHostname};Database={_conn.DbName};Uid={_conn.DbUsername};Pwd={_conn.DbPassword};");
                     break;
             }
-        }
-
-        protected override void OnModelCreating(ModelBuilder modelBuilder)
-        {
-            base.OnModelCreating(modelBuilder);
-
-            modelBuilder.Entity<ChangeParamModel>().Property(p => p.Id).HasComputedColumnSql("Id");
         }
     }
 }

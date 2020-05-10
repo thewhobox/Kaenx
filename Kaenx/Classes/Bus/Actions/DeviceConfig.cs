@@ -85,21 +85,13 @@ namespace Kaenx.Classes.Bus.Actions
                 byte[] serial = new byte[0];
                 try
                 {
-                    serial = await dev.PropertyRead(_data.MaskVersion, "DeviceSerialNumber");
+                    serial = await dev.PropertyRead(0, 11);
                     _data.SerialNumber = BitConverter.ToString(serial).Replace("-", "");
                 }
-                catch
+                catch (Exception e)
                 {
-                    try
-                    {
-                        serial = await dev.PropertyRead(0, 11);
-                        _data.SerialNumber = BitConverter.ToString(serial).Replace("-", "");
-                    }
-                    catch (Exception e)
-                    {
-                        _data.SerialNumber = e.Message;
-                        Log.Error(e, "Fehler beim holen der Seirennummer");
-                    }
+                    _data.SerialNumber = e.Message;
+                    Log.Error(e, "Fehler beim holen der Seirennummer");
                 }
 
                 if (serial.Length > 0)
@@ -118,7 +110,7 @@ namespace Kaenx.Classes.Bus.Actions
             await Task.Delay(500);
             string appId = await dev.PropertyRead<string>(_data.MaskVersion, "ApplicationId");
             if (appId.Length == 8) appId = "00" + appId;
-            appId = "M-" + appId.Substring(0, 4) + "_A-" + appId.Substring(4, 4) + "-" + appId.Substring(8, 2) + "-";
+            appId = "M-" + appId.Substring(0, 4) + "_A-" + appId.Substring(4, 4) + "-" + appId.Substring(8, 2);
 
             CatalogContext context = new CatalogContext();
 
@@ -129,7 +121,7 @@ namespace Kaenx.Classes.Bus.Actions
 
             try
             {
-                h2a = context.Hardware2App.First(h => h.ApplicationId.StartsWith(appId));
+                h2a = context.Hardware2App.First(h => h.ApplicationId == appId);
                 DeviceViewModel dvm = context.Devices.First(d => d.HardwareId == h2a.HardwareId);
                 _data.ApplicationName = h2a.Name + " " + h2a.VersionString;
                 _data.ApplicationId = h2a.ApplicationId;
@@ -160,9 +152,9 @@ namespace Kaenx.Classes.Bus.Actions
 
             ApplicationViewModel appModel = null;
 
-            if (context.Applications.Any(a => a.Id.StartsWith(appId)))
+            if (context.Applications.Any(a => a.Id == appId))
             {
-                appModel = context.Applications.Single(a => a.Id.StartsWith(appId));
+                appModel = context.Applications.Single(a => a.Id == appId);
             }
 
             if(appModel != null)
@@ -220,7 +212,7 @@ namespace Kaenx.Classes.Bus.Actions
                 switch (para.SegmentType)
                 {
                     case SegmentTypes.None:
-                        await HandleParamGhost(para, paraT, adds);
+                        HandleParamGhost(para, paraT, adds);
                         break;
 
                     case SegmentTypes.Memory:
@@ -245,7 +237,7 @@ namespace Kaenx.Classes.Bus.Actions
             Dictionary<string, ViewParamModel> Id2Param = new Dictionary<string, ViewParamModel>();
             Dictionary<string, ViewParamModel> VisibleParams = new Dictionary<string, ViewParamModel>();
             List<IDynChannel> Channels = SaveHelper.ByteArrayToObject<List<IDynChannel>>(adds.ParamsHelper, true);
-            ProjectContext _c = SaveHelper.contextProject;
+            ProjectContext _c = new ProjectContext(SaveHelper.connProject);
 
             if (_c.ChangesParam.Any(c => c.DeviceId == Device.UId))
             {
@@ -332,12 +324,12 @@ namespace Kaenx.Classes.Bus.Actions
             Finish();
         }
 
-        private async Task HandleParamGhost(AppParameter para, AppParameterTypeViewModel paraT, AppAdditional adds)
+        private void HandleParamGhost(AppParameter para, AppParameterTypeViewModel paraT, AppAdditional adds)
         {
             XDocument dynamic = XDocument.Parse(Encoding.UTF8.GetString(adds.Dynamic));
 
             string ns = dynamic.Root.Name.NamespaceName;
-            IEnumerable<XElement> chooses = dynamic.Descendants(XName.Get("choose", ns)).Where(c => c.Attribute("ParamRefId")?.Value == para.Id);
+            IEnumerable<XElement> chooses = dynamic.Descendants(XName.Get("choose", ns)).Where(c => c.Attribute("ParamRefId") != null && SaveHelper.ShortId(c.Attribute("ParamRefId").Value) == para.Id);
 
             foreach(XElement choose in chooses)
             {
@@ -355,7 +347,7 @@ namespace Kaenx.Classes.Bus.Actions
                     IEnumerable<XElement> tlist = when.Descendants(XName.Get("ComObjectRefRef", ns));
                     foreach (XElement comx in tlist)
                     {
-                        string id = comx.Attribute("RefId").Value;
+                        string id = SaveHelper.ShortId(comx.Attribute("RefId").Value);
                         AppComObject com = _context.AppComObjects.Single(c => c.Id == id);
 
                         if (!value2Coms[val].Contains(com.Number))
@@ -513,6 +505,12 @@ namespace Kaenx.Classes.Bus.Actions
             if (string.IsNullOrEmpty(errmsg))
             {
                 TodoText = "Erfolgreich";
+
+                Device.LoadedPA = true;
+                Device.LoadedGroup = true;
+                Device.LoadedApplication = true;
+                _ = App._dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Normal, () => SaveHelper.UpdateDevice(Device));
+
                 Finished?.Invoke(this, _data);
             }
             else

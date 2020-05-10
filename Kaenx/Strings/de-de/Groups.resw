@@ -120,11 +120,11 @@
   <data name="CListConn.Header" xml:space="preserve">
     <value>Verbindungen</value>
   </data>
-  <data name="CListContextLink.Text" xml:space="preserve">
-    <value>Verbinden</value>
+  <data name="CListContextLink2" xml:space="preserve">
+    <value>Verbinden mit: {0}</value>
   </data>
-  <data name="CListContextUnlink.Text" xml:space="preserve">
-    <value>Trennen</value>
+  <data name="CListContextUnlink2" xml:space="preserve">
+    <value>Trennen von: {0}</value>
   </data>
   <data name="CListContextUnlinkAll.Text" xml:space="preserve">
     <value>Alle trennen</value>

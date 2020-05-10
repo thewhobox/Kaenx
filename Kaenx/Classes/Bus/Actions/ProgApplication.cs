@@ -37,6 +37,11 @@ namespace Kaenx.Classes.Bus.Actions
         private List<string> addedGroups;
         private CatalogContext _context = new CatalogContext();
 
+
+        private List<byte> dataGroupTable = new List<byte>();
+        private List<byte> dataAssoTable = new List<byte>();
+        private List<byte> dataMemory = new List<byte>();
+
         public string Type { get; } = "Applikation";
         public LineDevice Device { get; set; }
         public int ProgressValue { get { return _progress; } set { _progress = value; Changed("ProgressValue"); } }
@@ -180,7 +185,7 @@ namespace Kaenx.Classes.Bus.Actions
                         break;
 
                     case "LdCtrlRelSegment":
-
+                        // 03_05_02 - Seite 116
                         break;
 
                     case "LdCtrlWriteProp":
@@ -252,16 +257,19 @@ namespace Kaenx.Classes.Bus.Actions
         private async Task WriteApplication(AppAdditional adds)
         {
             TodoText = "Berechne Speicher...";
-            List<AppParameter> paras = GetVisibleParams(adds);
+            Dictionary<string, AppParameter> paras = new Dictionary<string, AppParameter>();
             Dictionary<string, byte[]> memsData = new Dictionary<string, byte[]>();
             Dictionary<string, AppSegmentViewModel> mems = new Dictionary<string, AppSegmentViewModel>();
             Dictionary<string, AppParameterTypeViewModel> types = new Dictionary<string, AppParameterTypeViewModel>();
             List<int> changed = new List<int>();
 
+            foreach (AppParameter para in GetVisibleParams(adds))
+                paras.Add(para.Id, para);
+
             foreach (AppParameterTypeViewModel type in _context.AppParameterTypes)
                 types.Add(type.Id, type);
 
-            foreach(AppParameter para in paras)
+            foreach(AppParameter para in paras.Values)
             {
                 if (para.SegmentId == null) continue;
                 if (!mems.ContainsKey(para.SegmentId))
@@ -305,6 +313,62 @@ namespace Kaenx.Classes.Bus.Actions
                 }
             }
 
+            int unionId = 1;
+            while (true)
+            {
+                if (!_context.AppParameters.Any(p => p.ApplicationId == adds.Id && p.UnionId == unionId)) break;
+
+                bool flag = false;
+                foreach(AppParameter para in _context.AppParameters.Where(p => p.ApplicationId == adds.Id && p.UnionId == unionId))
+                {
+                    if (paras.ContainsKey(para.Id))
+                    {
+                        flag = true;
+                        break;
+                    }
+                }
+
+                if (!flag)
+                {
+                    AppParameter defPara = _context.AppParameters.First(p => p.ApplicationId == adds.Id && p.UnionId == unionId && p.UnionDefault);
+
+                    AppParameterTypeViewModel type = types[defPara.ParameterTypeId];
+
+                    byte[] paraData = type.Size >= 8 ? new byte[type.Size / 8] : new byte[1];
+
+                    switch (type.Type)
+                    {
+                        case ParamTypes.Enum:
+                        case ParamTypes.NumberUInt:
+                            paraData = BitConverter.GetBytes(Convert.ToUInt32(defPara.Value)).Take(type.Size / 8).ToArray();
+                            Array.Reverse(paraData);
+                            break;
+                        case ParamTypes.NumberInt:
+                            paraData = BitConverter.GetBytes(Convert.ToInt32(defPara.Value)).Take(type.Size / 8).ToArray();
+                            Array.Reverse(paraData);
+                            break;
+
+                        case ParamTypes.Text:
+                            paraData = Encoding.UTF8.GetBytes(defPara.Value);
+                            break;
+                    }
+
+
+
+                    if (type.Size >= 8)
+                    {
+                        byte[] memory = memsData[defPara.SegmentId];
+                        for (int i = 0; i < type.Size / 8; i++)
+                        {
+                            memory[defPara.Offset + i] = paraData[i];
+                            changed.Add(defPara.Offset + i);
+                        }
+                    }
+                }
+
+                unionId++;
+            }
+
 
             TodoText = "Schreibe Speicher...";
 
@@ -313,6 +377,8 @@ namespace Kaenx.Classes.Bus.Actions
                 case ProgAppType.Komplett:
                     foreach (AppSegmentViewModel seg in mems.Values)
                     {
+                        //byte[] data = Convert.FromBase64String("QAcAB0BPAAdI1wAHUNsAB1jbAAdg2wAHRE8AB0zXAAdUTwAHXNsAB2HbAAdi2wAHZNsAB2bbAAdj2wAHZdsAB2fbAAdo2wAHadsAB2rbAAdr2wAHbNsAB23bAAdu2wAHb9sAB3DbAAdx2wAHctsAB3PbAAd02wAHddsAB3bbAAd32wAHeNsAB3nbAAd62wAHe9sAB3zbAAd92wAHftsAB3/bAAeA2wAHgdsAB4LbAAeD2wAHhNsAB4XbAAeG2wAHh9sAB4jbAAeJ2wAHitsAB4vbAAeM2wAHjdsAB47bAAeP2wAHkNsAB5HbAAeS2wAHk9sAB5TbAAeV2wAHltsAB5fbAAAAMgGQAAAAAwAAAAABAAAAAQAAAAEAAAAAAAAAAAAAAAAAAAcAAAEAAQAAAAAAAAAAAAEAAAcAAAAAAQAAAAEAAAABAAAAAgAAAAAAAAAAAAAHAAABAAEAAAAAAAAAAAABAf8AAAAAAAAAAP8AAAAAAAAAAAAAAQABAAAAAwEAAQICAAABAA==");
+                        //await dev.MemoryWriteSync(seg.Address, data);
                         await dev.MemoryWriteSync(seg.Address, memsData[seg.Id]);
                     }
                     break;
@@ -337,7 +403,7 @@ namespace Kaenx.Classes.Bus.Actions
             foreach (AppParameter para in _context.AppParameters.Where(p => p.ApplicationId == Device.ApplicationId))
                 AppParas.Add(para.Id, para);
 
-            ProjectContext _c = SaveHelper.contextProject;
+            ProjectContext _c = new ProjectContext(SaveHelper.connProject);
 
             if (_c.ChangesParam.Any(c => c.DeviceId == Device.UId))
             {
@@ -396,40 +462,13 @@ namespace Kaenx.Classes.Bus.Actions
                                 }
                             }
                         }
-                        
                     }
                 }
-
-                
             }
 
 
             return paras;
         }
-
-
-
-        private bool CheckConditions(Dictionary<string, AppParameter> paras, List<Dynamic.ParamCondition> conds)
-        {
-            bool isVisible = true;
-
-            foreach (Dynamic.ParamCondition cond in conds)
-            {
-                if (!isVisible) break;
-
-                AppParameter para = paras[cond.SourceId];
-                switch (cond.Operation)
-                {
-                    case Dynamic.ConditionOperation.IsInValue:
-                        if (!cond.Values.Split(",").Contains(para.Value))
-                            isVisible = false;
-                        break;
-                }
-            }
-
-            return isVisible;
-        }
-
 
 
         private async Task AllocSegment(XElement ctrl, int segType, int counter = 0)
@@ -503,25 +542,14 @@ namespace Kaenx.Classes.Bus.Actions
         {
             TodoText = "Schreibe Gruppentabelle...";
 
-            //Alle verbundenen GAs finden und sortieren
-            addedGroups = new List<string> { "" };
-            foreach (DeviceComObject com in Device.ComObjects)
-                foreach (FunctionGroup group in com.Groups)
-                    if (!addedGroups.Contains(group.Address.ToString()))
-                        addedGroups.Add(group.Address.ToString());
-            addedGroups.Sort();
-
             //länge der Tabelle erstmal auf 1 setzen
             Debug.WriteLine("Tabelle auf 1");
             await dev.MemoryWriteSync(addr, new byte[] { 0x01 });
 
-            await Task.Delay(100);
             //Gruppenadressen in Tabelle eintragen
-            List<byte> data = new List<byte>();
-            foreach (string group in addedGroups) //Liste zum Datenpaket hinzufügen
-                if (group != "") data.AddRange(MulticastAddress.FromString(group).GetBytes());
+            GenerateGroupTable();
             Debug.WriteLine("Tabelle schreiben");
-            await dev.MemoryWriteSync(addr + 3, data.ToArray());
+            await dev.MemoryWriteSync(addr + 3, dataGroupTable.ToArray());
 
             await Task.Delay(100);
 
@@ -542,31 +570,15 @@ namespace Kaenx.Classes.Bus.Actions
         {
             TodoText = "Schreibe Assozationstabelle...";
 
+            //Setze länge der Tabelle auf 0
             await dev.MemoryWriteSync(addr, new byte[] { 0x00 });
 
+            //Schreibe Assoziationstabelle in Speicher
+            GenerateAssoTable();
+            await dev.MemoryWriteSync(addr + 1, dataAssoTable.ToArray());
 
-            //Erstelle Assoziationstabelle
-            List<byte> data = new List<byte>();
-            int sizeCounter = 0;
-
-            foreach (DeviceComObject com in Device.ComObjects)
-            {
-                foreach (FunctionGroup group in com.Groups)
-                {
-                    int indexG = addedGroups.IndexOf(group.Address.ToString());
-                    int indexC = com.Number;
-
-                    byte bIndexG = BitConverter.GetBytes(indexG)[0];
-                    byte bIndexC = BitConverter.GetBytes(indexC)[0];
-                    data.Add(bIndexG);
-                    data.Add(bIndexC);
-                    sizeCounter++;
-                }
-            }
-
-            await dev.MemoryWriteSync(addr + 1, data.ToArray());
-
-            await dev.MemoryWriteSync(addr, new byte[] { Convert.ToByte(sizeCounter) });
+            //Setze Länge der Tabelle
+            await dev.MemoryWriteSync(addr, new byte[] { Convert.ToByte(dataAssoTable.Count / 2) });
 
             _ = App._dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Low, () =>
             {
@@ -609,6 +621,55 @@ namespace Kaenx.Classes.Bus.Actions
         }
 
 
+        private void GenerateGroupTable()
+        {
+            addedGroups = new List<string> { "" };
+            foreach (DeviceComObject com in Device.ComObjects)
+                foreach (FunctionGroup group in com.Groups)
+                    if (!addedGroups.Contains(group.Address.ToString()))
+                        addedGroups.Add(group.Address.ToString());
+            addedGroups.Sort();
+
+            dataGroupTable = new List<byte>();
+            foreach (string group in addedGroups) //Liste zum Datenpaket hinzufügen
+                if (group != "") dataGroupTable.AddRange(MulticastAddress.FromString(group).GetBytes());
+        }
+
+
+        private void GenerateAssoTable()
+        {
+            //Erstelle Assoziationstabelle
+            dataAssoTable = new List<byte>();
+
+            Dictionary<byte, List<byte>> Table = new Dictionary<byte, List<byte>>();
+
+            foreach (DeviceComObject com in Device.ComObjects)
+            {
+                foreach (FunctionGroup group in com.Groups)
+                {
+                    int indexG = addedGroups.IndexOf(group.Address.ToString());
+                    int indexC = com.Number;
+
+                    byte bIndexG = BitConverter.GetBytes(indexG)[0];
+                    byte bIndexC = BitConverter.GetBytes(indexC)[0];
+
+                    if (!Table.ContainsKey(bIndexG))
+                        Table.Add(bIndexG, new List<byte>());
+
+                    Table[bIndexG].Add(bIndexC);
+                }
+            }
+
+            foreach(KeyValuePair<byte, List<byte>> val in Table.OrderBy(kpv => kpv.Key))
+            {
+                val.Value.Sort();
+                foreach (byte index in val.Value)
+                {
+                    dataAssoTable.Add(val.Key);
+                    dataAssoTable.Add(index);
+                }
+            }
+        }
 
 
         private void Finish()

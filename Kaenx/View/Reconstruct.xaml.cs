@@ -253,11 +253,11 @@ namespace Kaenx.View
             else
                 device.Manufacturer = manus["M-" + appId.Substring(0, 4)];
 
-            appId = $"M-{appId.Substring(0, 4)}_A-{appId.Substring(4, 4)}-{appId.Substring(8, 2)}-";
+            appId = $"M-{appId.Substring(0, 4)}_A-{appId.Substring(4, 4)}-{appId.Substring(8, 2)}";
 
             try
             {
-                Hardware2AppModel h2a = _context.Hardware2App.First(h => h.ApplicationId.StartsWith(appId));
+                Hardware2AppModel h2a = _context.Hardware2App.First(h => h.ApplicationId == appId);
                 device.ApplicationName = h2a.Name;
                 device.ApplicationId = h2a.ApplicationId;
                 DeviceViewModel devm = _context.Devices.First(d => d.HardwareId == h2a.HardwareId);
@@ -274,20 +274,11 @@ namespace Kaenx.View
 
             try
             {
-                device.SerialBytes = await dev.PropertyRead(mask, "DeviceSerialNumber");
+                device.SerialBytes = await dev.PropertyRead(0,11);
                 device.Serial = BitConverter.ToString(device.SerialBytes).Replace("-", "");
             }
             catch {
-                try
-                {
-                    device.SerialBytes = await dev.PropertyRead(0, 11);
-                    device.Serial = BitConverter.ToString(device.SerialBytes).Replace("-", "");
-                }
-                catch
-                {
-
-                    device.Serial = "Fehler 0x02";
-                }
+                device.Serial = "Fehler 0x02";
             }
 
 

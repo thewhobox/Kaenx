@@ -19,6 +19,7 @@
             <RowDefinition Height="auto" />
             <RowDefinition Height="auto" />
             <RowDefinition />
+            <RowDefinition Height="auto" />
         </Grid.RowDefinitions>
 
         <TextBox x:Name="InName" PlaceholderText="Name der Funktion" />
@@ -46,5 +47,11 @@
                 </DataTemplate>
             </ListView.ItemTemplate>
         </ListView>
+
+        <TextBlock Grid.Row="3" TextWrapping="WrapWholeWords">
+            <Run Text="Anmerkung:" FontSize="15" />
+            <LineBreak />
+            <Run Text="Zum Testen gibt es erstmal nur die zwei Funktionen, die nicht bearbeitet werden können." />
+        </TextBlock>
     </Grid>
 </ContentDialog>

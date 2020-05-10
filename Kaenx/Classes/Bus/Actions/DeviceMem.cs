@@ -1,32 +1,43 @@
-﻿using Kaenx.Classes.Helper;
+﻿using Kaenx.Classes.Bus.Data;
+using Kaenx.Classes.Dynamic;
+using Kaenx.Classes.Helper;
 using Kaenx.Classes.Project;
+using Kaenx.DataContext.Catalog;
+using Kaenx.DataContext.Project;
 using Kaenx.Konnect;
 using Kaenx.Konnect.Addresses;
 using Kaenx.Konnect.Builders;
 using Kaenx.Konnect.Classes;
 using Microsoft.AppCenter.Analytics;
+using Serilog;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using static Kaenx.Classes.Bus.Actions.IBusAction;
+using System.Xml.Linq;
+using Windows.Storage;
 
 namespace Kaenx.Classes.Bus.Actions
 {
-    public class ProgPhysicalAddressSerial : IBusAction, INotifyPropertyChanged
+    public class DeviceMem : IBusAction, INotifyPropertyChanged
     {
         private int _progress;
         private bool _progressIsIndeterminate;
         private string _todoText;
-        private List<string> progDevices = new List<string>();
+        private DeviceConfigData _data = new DeviceConfigData();
+        private Dictionary<string, byte[]> mems = new Dictionary<string, byte[]>();
         private CancellationToken _token;
-        private BusCommon bus;
+        private CatalogContext _context = new CatalogContext();
+        private BusDevice dev;
+        private List<int> connectedCOs = new List<int>();
+        private Dictionary<string, string> defParas = new Dictionary<string, string>();
 
-        public string Type { get; } = "Physikalische Adresse";
+        public string Type { get; } = "Geräte Speicher";
         public LineDevice Device { get; set; }
         public int ProgressValue { get { return _progress; } set { _progress = value; Changed("ProgressValue"); } }
         public bool ProgressIsIndeterminate { get { return _progressIsIndeterminate; } set { _progressIsIndeterminate = value; Changed("ProgressIsIndeterminate"); } }
@@ -34,65 +45,55 @@ namespace Kaenx.Classes.Bus.Actions
 
         public Connection Connection { get; set; }
 
-        public event ActionFinishedHandler Finished;
+        public event IBusAction.ActionFinishedHandler Finished;
         public event PropertyChangedEventHandler PropertyChanged;
 
-        public ProgPhysicalAddressSerial()
-        {
+        public DeviceMem()
+        { 
         }
 
         public void Run(CancellationToken token)
         {
-            _token = token;
-            bus = new BusCommon(Connection);
-
-            TodoText = "Neue Ph. Adresse wird geschrieben...";
+            _token = token; // TODO implement cancellation
+            TodoText = "Verbinden...";
 
             Start();
         }
 
         private async void Start()
         {
-
-            await Task.Delay(100);
-
-            bus.IndividualAddressWrite(UnicastAddress.FromString(Device.LineName), Device.Serial);
-
-            await Task.Delay(100);
-            await RestartCommands();
-
-            await Task.Delay(2000);
-            BusDevice dev = new BusDevice(Device.LineName, Connection);
+            dev = new BusDevice(Device.LineName, Connection);
             dev.Connect();
+
             await Task.Delay(100);
-            byte[] serial = await dev.PropertyRead(0, 11);
 
-            if(Device.SerialText != BitConverter.ToString(serial).Replace("-", ""))
-            {
-                TodoText = "Fehlgeschlagen";
-            } else
-            {
-                TodoText = "Erfolgreich abgeschlossen";
+            CatalogContext context = new CatalogContext();
+            ApplicationViewModel appModel = null;
 
-                _ = App._dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Low, () =>
-                {
-                    Device.LoadedPA = true;
-                });
+            if (context.Applications.Any(a => a.Id == Device.ApplicationId))
+            {
+                appModel = context.Applications.Single(a => a.Id == Device.ApplicationId);
             }
 
-            Analytics.TrackEvent("Prog Addr Serial");
-            Finished?.Invoke(this, null);
+            if(appModel != null)
+            {
+                if (!string.IsNullOrEmpty(appModel.Table_Assosiations))
+                {
+                    AppSegmentViewModel segmentModel = context.AppSegments.Single(s => s.Id == "M-0083_A-0023-15_AS-4400");
+                    byte[] datax = await dev.MemoryRead(segmentModel.Address, segmentModel.Size);
+                }
+            }
+
+
+
+            Finish();
         }
 
-        private async Task RestartCommands()
+
+        private void Finish(string errmsg = null)
         {
-            TodoText = "Gerät wird neu gestartet";
-            BusDevice dev = new BusDevice(Device.LineName, Connection);
-            dev.Connect();
-            await Task.Delay(100);
-            dev.Restart();
-            await Task.Delay(1000);
             ProgressValue = 100;
+            Finished?.Invoke(this, _data);
         }
 
         private void Changed(string name)

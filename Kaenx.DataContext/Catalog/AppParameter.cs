@@ -24,6 +24,8 @@ namespace Kaenx.DataContext.Catalog
         [MaxLength(100)]
         public string SegmentId { get; set; }
         public SegmentTypes SegmentType { get; set; }
+        public int UnionId { get; set; }
+        public bool UnionDefault { get; set; }
         public int Offset { get; set; }
         public int OffsetBit { get; set; }
         public AccessType Access { get; set; }
@@ -37,6 +39,8 @@ namespace Kaenx.DataContext.Catalog
             SuffixText = para.SuffixText;
             SegmentType = para.SegmentType;
             SegmentId = para.SegmentId;
+            UnionId = para.UnionId;
+            UnionDefault = para.UnionDefault;
             Offset = para.Offset;
             OffsetBit = para.OffsetBit;
             Access = para.Access;

@@ -12,7 +12,6 @@ namespace Kaenx.Classes.Buildings
     public class FunctionGroup
     {
         public MulticastAddress Address { get; set; }
-        public GroupAddress GroupAddress { get; set; }
         public string Name { get; set; }
         [Newtonsoft.Json.JsonIgnore]
         public Function ParentFunction { get; set; }

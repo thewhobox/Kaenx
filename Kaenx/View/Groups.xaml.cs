@@ -19,6 +19,7 @@ using System.Threading.Tasks;
 using Windows.ApplicationModel.Resources;
 using Windows.Foundation;
 using Windows.Foundation.Collections;
+using Windows.UI;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Controls.Primitives;
@@ -36,7 +37,7 @@ namespace Kaenx.View
     /// </summary>
     public sealed partial class Groups : Page, INotifyPropertyChanged
     {
-        private ProjectContext context = SaveHelper.contextProject;
+        private ProjectContext context = new ProjectContext(SaveHelper.connProject);
 
         private ResourceLoader loader = ResourceLoader.GetForCurrentView("Groups");
         private FunctionGroup _selectedGroup;
@@ -83,158 +84,6 @@ namespace Kaenx.View
 
         public event PropertyChangedEventHandler PropertyChanged;
 
-        private void ClickAddMain(object sender, RoutedEventArgs e)
-        {
-            Group group = new Group(getFirstFreeIdMain(), loader.GetString("NewGroupMain"));
-            _project.Groups.Add(group);
-
-            GroupMainModel model = new GroupMainModel();
-            model.Name = group.Name;
-            model.Id = group.Id;
-            model.ProjectId = _project.Id;
-            context.GroupMain.Add(model);
-            context.SaveChanges();
-            group.UId = model.UId;
-
-            //SaveHelper.SaveGroups();
-        }
-
-        private void ClickAddSub(object sender, RoutedEventArgs e)
-        {
-            object dc = ((MenuFlyoutItem)e.OriginalSource).DataContext;
-
-            if(dc is Group)
-            {
-                Group item = dc as Group;
-                GroupMiddle Group = new GroupMiddle(getFirstFreeIdSub(item), loader.GetString("NewGroupMiddle"), item);
-                
-                GroupMiddleModel model = new GroupMiddleModel();
-                model.Name = Group.Name;
-                model.Id = Group.Id;
-                model.ProjectId = _project.Id;
-                model.ParentId = item.UId;
-                context.GroupMiddle.Add(model);
-                context.SaveChanges();
-                Group.UId = model.UId;
-
-                item.Subs.Add(Group);
-                item.IsExpanded = true;
-                //SaveHelper.SaveGroups();
-            }
-            if(dc is GroupMiddle)
-            {
-                GroupMiddle item = dc as GroupMiddle;
-                GroupAddress Group = new GroupAddress(getFirstFreeIdSub(item), loader.GetString("NewGroupAddr"), item);
-                
-                GroupAddressModel model = new GroupAddressModel();
-                model.Name = Group.Name;
-                model.Id = Group.Id;
-                model.ProjectId = _project.Id;
-                model.ParentId = item.UId;
-                context.GroupAddress.Add(model);
-                context.SaveChanges();
-                Group.UId = model.UId;
-
-                item.Subs.Add(Group);
-                item.IsExpanded = true;
-                //SaveHelper.SaveGroups();
-            }
-        }
-
-        private void ClickAddDelete(object sender, RoutedEventArgs e)
-        {
-            object dc = ((MenuFlyoutItem)e.OriginalSource).DataContext;
-
-            if (dc is Group)
-            {
-                _project.Groups.Remove(dc as Group);
-                GroupMainModel model = context.GroupMain.Single(g => g.UId == (dc as Group).UId);
-                context.GroupMain.Remove(model);
-                context.SaveChanges();
-            }
-            if (dc is GroupMiddle)
-            {
-                GroupMiddle group = dc as GroupMiddle;
-                group.Parent.Subs.Remove(group);
-                GroupMiddleModel model = context.GroupMiddle.Single(g => g.UId == group.UId);
-                context.GroupMiddle.Remove(model);
-                context.SaveChanges();
-            }
-            if(dc is GroupAddress)
-            {
-                GroupAddress group = dc as GroupAddress;
-                group.Parent.Subs.Remove(group);
-                GroupAddressModel model = context.GroupAddress.Single(g => g.UId == group.UId);
-                context.GroupAddress.Remove(model);
-                context.SaveChanges();
-            }
-
-            SaveHelper.SaveGroups();
-        }
-
-        private async void ClickAddRename(object sender, RoutedEventArgs e)
-        {
-            object dc = ((MenuFlyoutItem)e.OriginalSource).DataContext;
-            Group g = null;
-            GroupMiddle gm = null;
-            GroupAddress ga = null;
-            string oldName = "";
-            if (dc is Group) {
-                g = dc as Group;
-                oldName = g.Name;
-            }
-            if (dc is GroupMiddle) {
-                gm = dc as GroupMiddle;
-                oldName = gm.Name;
-            }
-            if (dc is GroupAddress) {
-                ga = dc as GroupAddress;
-                oldName = ga.Name;
-            }
-
-            DiagNewName diag = new DiagNewName();
-            diag.NewName = oldName;
-            await diag.ShowAsync();
-            if (diag.NewName != null)
-            {
-                if (dc is Group) g.Name = diag.NewName;
-                if (dc is GroupMiddle) gm.Name = diag.NewName;
-                if (dc is GroupAddress) ga.Name = diag.NewName;
-            }
-            SaveHelper.SaveGroups();
-        }
-
-        private int getFirstFreeIdMain()
-        {
-            if (_project == null) _project = (Project)this.DataContext;
-            for (int i = 1; i < 256; i++)
-            {
-                if (!_project.Groups.Any(l => l.Id == i))
-                    return i;
-            }
-            return -1;
-        }
-
-        private int getFirstFreeIdSub(Group group)
-        {
-            for (int i = 1; i < 256; i++)
-            {
-                if (!group.Subs.Any(l => l.Id == i))
-                    return i;
-            }
-            return -1;
-        }
-
-        private int getFirstFreeIdSub(GroupMiddle group)
-        {
-            for (int i = 1; i < 256; i++)
-            {
-                if (!group.Subs.Any(l => l.Id == i))
-                    return i;
-            }
-            return -1;
-        }
-
         private void TreeTopologie_ItemInvoked(TreeView sender, TreeViewItemInvokedEventArgs args)
         {
             if (args.InvokedItem is LineDevice == false)
@@ -244,7 +93,7 @@ namespace Kaenx.View
             }
 
             SelectedDevice = (LineDevice)args.InvokedItem;
-            ShowAssociatedGroups(null);
+            ShowAssociatedComs();
         }
 
         private void ToggleExpert(object sender, RoutedEventArgs e)
@@ -262,17 +111,21 @@ namespace Kaenx.View
             MenuFlyout mf = sender as MenuFlyout;
             DeviceComObject com = (mf.Target as DataGridRow).DataContext as DeviceComObject;
 
-
             if(SelectedGroup.Address == null)
             {
                 mf.Items[0].Visibility = Visibility.Collapsed;
                 mf.Items[1].Visibility = Visibility.Collapsed;
+                string funcName = com.Groups[0].ParentFunction.ParentRoom.Name + " - " + com.Groups[0].ParentFunction.Name + " " + com.Groups[0].Name;
+                (mf.Items[1] as MenuFlyoutItem).Text = string.Format(loader.GetString("CListContextUnlink2"), com);
             } else
             {
                 bool isExisting = com.Groups.Contains(SelectedGroup);
 
                 mf.Items[0].Visibility = isExisting ? Visibility.Collapsed : Visibility.Visible;
                 mf.Items[1].Visibility = isExisting ? Visibility.Visible : Visibility.Collapsed;
+                string funcName = SelectedGroup.ParentFunction.ParentRoom.Name + " - " + SelectedGroup.ParentFunction.Name + " " + SelectedGroup.Name;
+                (mf.Items[0] as MenuFlyoutItem).Text = string.Format(loader.GetString("CListContextLink2"), funcName);
+                (mf.Items[1] as MenuFlyoutItem).Text = string.Format(loader.GetString("CListContextUnlink2"), funcName);
             }
 
             mf.Items[0].IsEnabled = SelectedGroup.Address != null;
@@ -283,7 +136,6 @@ namespace Kaenx.View
 
         private void ListComs_LoadingRow(object sender, DataGridRowEventArgs e)
         {
-            e.Row.PointerPressed += Row_PointerPressed;
             e.Row.DoubleTapped += Row_DoubleTapped;
         }
 
@@ -292,22 +144,6 @@ namespace Kaenx.View
             DataGridRow row = sender as DataGridRow;
             DeviceComObject com = row.DataContext as DeviceComObject;
             LinkComObject(com);
-        }
-
-        private async void Row_PointerPressed(object sender, PointerRoutedEventArgs e)
-        {
-            await Task.Delay(400);
-            ShowAssociatedGroups(ListComs.SelectedItem as DeviceComObject);
-        }
-
-        private void Groups_DoubleTapped(object sender, DoubleTappedRoutedEventArgs e)
-        {
-            TreeViewItem tvi = sender as TreeViewItem;
-            if(tvi.DataContext is GroupAddress)
-            {
-                FunctionGroup addr = tvi.DataContext as FunctionGroup;
-                LinkGroupAddress(addr);
-            }
         }
 
         private void ClickLink(object sender, RoutedEventArgs e)
@@ -321,13 +157,28 @@ namespace Kaenx.View
         {
             MenuFlyoutItem tvi = sender as MenuFlyoutItem;
             DeviceComObject com = tvi.DataContext as DeviceComObject;
-           
-            foreach(FunctionGroup addr in com.Groups)
-                addr.ComObjects.Remove(com);
 
-            com.Groups.Clear();
+
+            if (ListComs.SelectedItems.Contains(com))
+            {
+                foreach (DeviceComObject com2 in ListComs.SelectedItems)
+                {
+                    foreach (FunctionGroup addr in com2.Groups)
+                        addr.ComObjects.Remove(com2);
+                    com2.Groups.Clear();
+                }
+            } else
+            {
+                foreach (FunctionGroup addr in com.Groups)
+                    addr.ComObjects.Remove(com);
+
+                com.Groups.Clear();
+            }
+           
 
             SaveHelper.SaveAssociations(SelectedDevice);
+            SelectedDevice.LoadedGroup = false;
+            //SaveHelper.UpdateDevice(SelectedDevice);
         }
 
         private void LinkComObject(DeviceComObject com)
@@ -352,79 +203,26 @@ namespace Kaenx.View
             }
 
             SaveHelper.SaveAssociations(SelectedDevice);
+            ShowAssociatedComs();
+
+            SelectedDevice.LoadedGroup = false;
+            //SaveHelper.UpdateDevice(SelectedDevice);
         }
 
-        private void LinkGroupAddress(FunctionGroup addr)
+        private void ShowAssociatedComs()
         {
-            if(BtnToggleView.IsChecked == true)
+            foreach (DeviceComObject dev in SelectedDevice.ComObjects)
+                dev.BackgroundBrush = null;
+
+            foreach (DeviceComObject com in SelectedGroup.ComObjects)
             {
-                ViewHelper.Instance.ShowNotification("main", "Das Verbinden ist in dieser Ansicht nicht verfügbar.", 3000, ViewHelper.MessageType.Warning);
-                return;
-            }
-
-            if(ListComs.SelectedItem == null)
-            {
-                ViewHelper.Instance.ShowNotification("main", "Bitte wähle erst ein KO aus.", 3000, ViewHelper.MessageType.Error);
-                return;
-            }
-
-            DeviceComObject com = ListComs.SelectedItem as DeviceComObject;
-
-            if (com.Groups.Contains(addr))
-            {
-                com.Groups.Remove(addr);
-                addr.ComObjects.Remove(com);
-            } else
-            {
-                com.Groups.Add(addr);
-                addr.ComObjects.Add(com);
-            }
-
-            SaveHelper.SaveAssociations(SelectedDevice);
-            ShowAssociatedGroups(com);
-        }
-
-        private void ShowAssociatedGroups(DeviceComObject com)
-        {
-            foreach(Group g in SaveHelper._project.Groups)
-            {
-                bool flagG = false;
-
-                foreach(GroupMiddle gm in g.Subs)
-                {
-                    bool flagGM = false;
-
-                    foreach(GroupAddress ga in gm.Subs)
-                    {
-                        if (ga.ComObjects.Contains(com))
-                        {
-                            ga.CurrentBrush = new SolidColorBrush(Windows.UI.Colors.Green) { Opacity = 0.5 };
-                            flagGM = true;
-                        }
-                        else
-                            ga.CurrentBrush = new SolidColorBrush(Windows.UI.Colors.Transparent);
-                    }
-
-                    if (flagGM)
-                    {
-                        gm.CurrentBrush = new SolidColorBrush(Windows.UI.Colors.Green) { Opacity = 0.4 };
-                        flagG = true;
-                    }
-                    else
-                        gm.CurrentBrush = new SolidColorBrush(Windows.UI.Colors.Transparent);
-                }
-
-                if (flagG)
-                {
-                    g.CurrentBrush = new SolidColorBrush(Windows.UI.Colors.Green) { Opacity = 0.3 };
-                }
-                else
-                    g.CurrentBrush = new SolidColorBrush(Windows.UI.Colors.Transparent);
+                com.BackgroundBrush = new SolidColorBrush(Colors.Orange) { Opacity = 0.5 };
             }
         }
 
 
         #region Gebäudestruktur
+
         private void ClickAB_Building(object sender, RoutedEventArgs e)
         {
             _project.Area.Buildings.Add(new Classes.Buildings.Building() { Name = "Neues Gebäude" });
@@ -487,11 +285,9 @@ namespace Kaenx.View
         private void ClickAB_TapFunc(object sender, TappedRoutedEventArgs e)
         {
             FunctionGroup func = (sender as TreeViewItem).DataContext as FunctionGroup;
-            if (func == null) return;
-
             SelectedGroup = func;
+            ShowAssociatedComs();
         }
-
 
         private MulticastAddress GetNextFreeAddress(Function func, bool isCentral = false)
         {
@@ -535,23 +331,79 @@ namespace Kaenx.View
             return MulticastAddress.FromString($"{main}/{middle}/{ga}");
         }
 
-        #endregion
-
         private void ClickAB_Delete(object sender, RoutedEventArgs e)
         {
-            Debug.WriteLine(sender);
+            List<LineDevice> changedDevices = new List<LineDevice>();
 
             switch((sender as MenuFlyoutItem).DataContext)
             {
+                case Building building:
+                    foreach(Floor f in building.Floors)
+                        foreach (Room r in f.Rooms)
+                            foreach (Function fc in r.Functions)
+                                RemoveGroupsFromDevice(fc, changedDevices);
+                    building.ParentArea.Buildings.Remove(building);
+                    break;
+
+                case Floor floor:
+                    foreach(Room r in floor.Rooms)
+                        foreach (Function fc in r.Functions)
+                            RemoveGroupsFromDevice(fc, changedDevices);
+                    floor.ParentBuilding.Floors.Remove(floor);
+                    break;
+
+                case Room room:
+                    foreach(Function fc in room.Functions)
+                        RemoveGroupsFromDevice(fc, changedDevices);
+                    room.ParentFloor.Rooms.Remove(room);
+                    break;
+
                 case Function func:
+                    RemoveGroupsFromDevice(func, changedDevices);
                     func.ParentRoom.Functions.Remove(func);
                     break;
             }
+
+            foreach(LineDevice dev in changedDevices)
+            {
+                dev.LoadedGroup = false;
+                SaveHelper.SaveAssociations(dev);
+                //SaveHelper.UpdateDevice(dev);
+            }
+
+            SaveHelper.SaveStructure();
+        }
+
+        private void RemoveGroupsFromDevice(Function func, List<LineDevice> changedDevices)
+        {
+            foreach (FunctionGroup fg in func.Subs)
+                foreach (DeviceComObject com in fg.ComObjects)
+                {
+                    com.Groups.Remove(fg);
+                    if (!changedDevices.Contains(com.ParentDevice))
+                        changedDevices.Add(com.ParentDevice);
+                }
         }
 
         private void ClickAB_ResetSelected(object sender, TappedRoutedEventArgs e)
         {
             SelectedGroup = defaultGroup;
+
+            foreach (DeviceComObject dev in SelectedDevice.ComObjects)
+                dev.BackgroundBrush = null;
+
         }
+
+        private void ClickAddRename(object sender, RoutedEventArgs e)
+        {
+
+        }
+
+        private void ClickAddDelete(object sender, RoutedEventArgs e)
+        {
+
+        }
+
+        #endregion
     }
 }

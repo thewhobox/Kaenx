@@ -1017,8 +1017,11 @@ namespace Kaenx.Classes.Helper
             OnDeviceChanged?.Invoke(currentAppName + " ParameterUnions");
             Log.Information("Unions werden eingelesen");
             tempList = doc.Descendants(GetXName("Union")).ToList();
+            int unionId = 0;
             foreach (XElement union in tempList)
             {
+                unionId++;
+
                 //TODO also check for property for parameter
                 string t1 = null;
                 int t2 = 0;
@@ -1062,6 +1065,8 @@ namespace Kaenx.Classes.Helper
                     param.Offset = t2 + off;
                     param.OffsetBit = t3 + offb;
                     param.SegmentType = segType;
+                    param.UnionId = unionId;
+                    param.UnionDefault = para.Attribute("DefaultUnionParameter")?.Value.ToLower() == "true";
                 }
                 position++;
                 ProgressAppChanged(position);

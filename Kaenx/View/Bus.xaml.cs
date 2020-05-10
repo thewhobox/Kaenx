@@ -214,5 +214,16 @@ namespace Kaenx.View
         {
             TelegramList.Clear();
         }
+
+        private void ReadMem(object sender, RoutedEventArgs e)
+        {
+            DeviceMem action = new DeviceMem();
+
+            action.Device = GetDevice();
+            if (action.Device == null) return;
+
+            action.Finished += Action_Finished;
+            BusConnection.Instance.AddAction(action);
+        }
     }
 }

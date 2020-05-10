@@ -1,6 +1,7 @@
 ﻿using Kaenx.Classes;
 using Kaenx.Classes.Bus;
 using Kaenx.Classes.Bus.Actions;
+using Kaenx.Classes.Bus.Data;
 using Kaenx.Classes.Controls;
 using Kaenx.Classes.Helper;
 using Kaenx.Classes.Project;
@@ -81,8 +82,14 @@ namespace Kaenx.View
             action.Device = (LineDevice)((MenuFlyoutItem)e.OriginalSource).DataContext;
             action.Finished += (action, obj) =>
             {
-                ((Classes.Bus.Data.DeviceConfigData)obj).Device = action.Device;
-                ((Bus)App._pages["bus"]).AddReadData((Classes.Bus.Data.DeviceConfigData)obj);
+                if(obj is Kaenx.Classes.Bus.Data.ErrorData)
+                {
+                    ViewHelper.Instance.ShowNotification("main", "Konfig auslesen Fehler: " + Environment.NewLine + (obj as ErrorData).Message, 5000, ViewHelper.MessageType.Error);
+                }
+                else
+                {
+                    ViewHelper.Instance.ShowNotification("main", "Konfig auslesen Erfolgreich", 3000, ViewHelper.MessageType.Success);
+                }
             };
             BusConnection.Instance.AddAction(action);
         }
@@ -219,14 +226,32 @@ namespace Kaenx.View
                 case Line line:
                     ObservableCollection<Line> coll = (ObservableCollection<Line>)this.DataContext;
                     coll.Remove(line);
+
+                    foreach(LineMiddle linem2 in line.Subs)
+                        foreach (LineDevice ldev in linem2.Subs)
+                            foreach (DeviceComObject com in ldev.ComObjects)
+                                foreach (Kaenx.Classes.Buildings.FunctionGroup fg in com.Groups)
+                                    fg.ComObjects.Remove(com);
+
                     break;
 
                 case LineMiddle linem:
                     linem.Parent.Subs.Remove(linem);
+
+                    foreach(LineDevice ldev in linem.Subs)
+                        foreach (DeviceComObject com in ldev.ComObjects)
+                            foreach (Kaenx.Classes.Buildings.FunctionGroup fg in com.Groups)
+                                fg.ComObjects.Remove(com);
+
                     break;
 
                 case LineDevice dev:
                     dev.Parent.Subs.Remove(dev);
+
+                    foreach(DeviceComObject com in dev.ComObjects)
+                        foreach(Kaenx.Classes.Buildings.FunctionGroup fg in com.Groups)
+                            fg.ComObjects.Remove(com);
+
                     SaveHelper.CalculateLineCurrent(dev.Parent);
                     break;
             }
@@ -350,7 +375,7 @@ namespace Kaenx.View
                 }
             }
 
-            ProjectContext _contextP = SaveHelper.contextProject;
+            ProjectContext _contextP = new ProjectContext(SaveHelper.connProject);
 
             LineDeviceModel linedevmodel = new LineDeviceModel();
             linedevmodel.Id = device.Id;

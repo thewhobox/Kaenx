@@ -72,7 +72,7 @@ namespace Kaenx.Views.Easy.Controls
 
         public LineDevice device { get; }
         private CatalogContext _context = new CatalogContext();
-        private ProjectContext _contextP = Classes.Helper.SaveHelper.contextProject;
+        private ProjectContext _contextP = new ProjectContext(SaveHelper.connProject);
 
         private Dictionary<string, ChangeParamModel> ParaChanges = new Dictionary<string, ChangeParamModel>();
         private Dictionary<string, AppParameterTypeViewModel> AppParaTypess = new Dictionary<string, AppParameterTypeViewModel>();

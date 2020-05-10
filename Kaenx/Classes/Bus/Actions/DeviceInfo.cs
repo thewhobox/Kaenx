@@ -1,4 +1,5 @@
 ﻿using Kaenx.Classes.Bus.Data;
+using Kaenx.Classes.Helper;
 using Kaenx.Classes.Project;
 using Kaenx.DataContext.Catalog;
 using Kaenx.Konnect;
@@ -74,7 +75,7 @@ namespace Kaenx.Classes.Bus.Actions
 
                 try
                 {
-                    _data.SerialNumber = await dev.PropertyRead<string>(_data.MaskVersion, "DeviceSerialNumber");
+                    _data.SerialNumber = await dev.PropertyRead<string>(0,11);
                 }
                 catch (Exception e)
                 {
@@ -123,6 +124,8 @@ namespace Kaenx.Classes.Bus.Actions
 
                 ApplicationViewModel appModel = null;
 
+                List<byte[]> datas = new List<byte[]>();
+
                 if (context.Applications.Any(a => a.Id == appId))
                 {
                     appModel = context.Applications.Single(a => a.Id == appId); //TODO check if now complete appid is returned
@@ -148,6 +151,7 @@ namespace Kaenx.Classes.Bus.Actions
                     {
                         int length = Convert.ToInt16(datax[0]) - 1;
                         datax = await dev.MemoryRead(grpAddr + 3, length * 2);
+                        datas.Add(datax);
 
                         List<MulticastAddress> addresses = new List<MulticastAddress>();
                         for (int i = 0; i < (datax.Length / 2); i++)
@@ -189,6 +193,8 @@ namespace Kaenx.Classes.Bus.Actions
                             int length = Convert.ToInt16(datax[0]);
 
                             datax = await dev.MemoryRead(assoAddr + 1, length * 2);
+                            datas.Add(datax);
+
                             List<AssociationHelper> table = new List<AssociationHelper>();
                             for (int i = 0; i < length; i++)
                             {
@@ -229,6 +235,11 @@ namespace Kaenx.Classes.Bus.Actions
                 Finish(e.Message +  Environment.NewLine + e.StackTrace);
                 return;
             }
+
+
+            Device.LoadedPA = true;
+            _ = App._dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Normal, () => SaveHelper.UpdateDevice(Device));
+
 
             Finish();
         }

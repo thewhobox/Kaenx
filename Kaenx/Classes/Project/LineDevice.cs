@@ -79,7 +79,7 @@ namespace Kaenx.Classes.Project
         [XmlIgnore]
         public SolidColorBrush CurrentBrush { get; set; } = new SolidColorBrush(Windows.UI.Colors.White);
         [XmlIgnore]
-        public SolidColorBrush CurrentBackBrush { get { if (_isDeactivated) return new SolidColorBrush(Windows.UI.Colors.LightYellow); else return new SolidColorBrush(Windows.UI.Colors.Transparent); } }
+        public SolidColorBrush CurrentBackBrush { get { if (_isDeactivated) return new SolidColorBrush(Windows.UI.Colors.DarkGray); else return new SolidColorBrush(Windows.UI.Colors.Transparent); } }
         public int Id
         {
             get { return _id; }

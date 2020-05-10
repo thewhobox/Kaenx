@@ -28,7 +28,8 @@ namespace Kaenx.Classes.Helper
     public class SaveHelper 
     {
         public static Project.Project _project;
-        public static ProjectContext contextProject;
+        private static ProjectContext contextProject;
+        public static LocalConnectionProject connProject;
         private static CatalogContext contextC = new CatalogContext(new LocalConnectionCatalog() { DbHostname = "Catalog.db", Type = LocalConnectionCatalog.DbConnectionType.SqlLite });
 
         private static Dictionary<string, AppParameter> AppParas;
@@ -41,6 +42,7 @@ namespace Kaenx.Classes.Helper
             {
                 _project = _pro;
 
+                connProject = _project.Connection;
                 contextProject = new ProjectContext(_project.Connection);
                 contextProject.Database.Migrate();
             }
@@ -243,39 +245,6 @@ namespace Kaenx.Classes.Helper
             contextProject.SaveChanges();
         }
 
-        public static void SaveGroups()
-        {
-            contextProject.SaveChanges();
-
-            foreach (Project.Group g in _project.Groups)
-            {
-                GroupMainModel gmain = contextProject.GroupMain.Single(gm => gm.UId == g.UId);
-                gmain.Name = g.Name;
-                gmain.Id = g.Id;
-                contextProject.GroupMain.Update(gmain);
-
-                foreach (GroupMiddle gm in g.Subs)
-                {
-                    GroupMiddleModel gmiddle = contextProject.GroupMiddle.Single(gm2 => gm2.UId == gm.UId);
-                    gmiddle.Name = gm.Name;
-                    gmiddle.Id = gm.Id;
-                    gmiddle.ParentId = gmain.UId;
-                    contextProject.GroupMiddle.Update(gmiddle);
-
-                    foreach (GroupAddress ga in gm.Subs)
-                    {
-                        GroupAddressModel gaddress = contextProject.GroupAddress.Single(g => g.UId == ga.UId);
-                        gaddress.Name = ga.Name;
-                        gaddress.Id = ga.Id;
-                        gaddress.ParentId = gmiddle.UId;
-                        contextProject.GroupAddress.Update(gaddress);
-                    }
-                }
-            }
-
-            contextProject.SaveChanges();
-        }
-
         public static void SaveAssociations(LineDevice linedev)
         {
             IEnumerable<ComObject> removeComs = contextProject.ComObjects.Where(co => co.DeviceId == linedev.UId).ToList();
@@ -343,9 +312,11 @@ namespace Kaenx.Classes.Helper
                     ViewHelper.Instance.ShowNotification("all", "Die Verbindung wo das Projekt gespeichert sein soll konnt enicht gefunden werden.", 3000, ViewHelper.MessageType.Error);
                     return null;
                 }
+                connProject = lconn;
                 contextProject = new ProjectContext(lconn);
                 contextProject.Database.Migrate();
                 project.Connection = lconn;
+                connProject = lconn;
             }
 
             //Catalog mit in das Project machen!
@@ -365,10 +336,13 @@ namespace Kaenx.Classes.Helper
                 project.Area = ByteArrayToObject<Area>(pm.Area);
                 foreach (Building b in project.Area.Buildings)
                 {
+                    b.ParentArea = project.Area;
                     foreach(Floor fl in b.Floors)
                     {
+                        fl.ParentBuilding = b;
                         foreach(Room ro in fl.Rooms)
                         {
+                            ro.ParentFloor = fl;
                             foreach(Function f in ro.Functions)
                             {
                                 f.ParentRoom = ro;
@@ -403,6 +377,7 @@ namespace Kaenx.Classes.Helper
                         {
                             AppComObject comObj = contextC.AppComObjects.Single(c => c.Id == com.ComId);
                             DeviceComObject dcom = new DeviceComObject(comObj);
+                            dcom.ParentDevice = ld;
 
                             if (!string.IsNullOrEmpty(com.Groups))
                             {
@@ -491,7 +466,7 @@ namespace Kaenx.Classes.Helper
         private static List<string> updatedComs;
 
         //Nochmal in ImportHelper
-        private static string ShortId(string id)
+        public static string ShortId(string id)
         {
             string temp = id.Substring(0, 16);
 
@@ -979,7 +954,6 @@ namespace Kaenx.Classes.Helper
         private static void ParseParameterRefRef(XElement xele, ParameterBlock block, string textRefId)
         {
             AppParameter para = AppParas[ShortId(xele.Attribute("RefId").Value)];
-            if (para.Access == AccessType.None) return;
             //TODO überprüfen
             AppParameterTypeViewModel paraType = AppParaTypes[para.ParameterTypeId];
             var conds = GetConditions(xele, true);

@@ -13,7 +13,7 @@ namespace Kaenx.Classes.Project
 {
     public class ChangeHandler : INotifyPropertyChanged
     {
-        private ProjectContext _context = Helper.SaveHelper.contextProject;
+        private ProjectContext _context = new ProjectContext(Helper.SaveHelper.connProject);
         private CatalogContext _contextC = new CatalogContext();
         private int _currentStateId = 0;
         private int _projectId;
