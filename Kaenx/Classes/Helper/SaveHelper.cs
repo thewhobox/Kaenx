@@ -1053,7 +1053,7 @@ namespace Kaenx.Classes.Helper
                         pent.Option2 = options[1];
                         pent.Conditions = conds.paramList;
                         pent.Hash = conds.hash;
-                        pent.HasAccess = pent.HasAccess;
+                        pent.HasAccess = hasAccess;
                         pent.IsEnabled = IsCtlEnabled;
                         block.Parameters.Add(pent);
                     }

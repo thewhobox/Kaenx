@@ -109,6 +109,10 @@ namespace Kaenx
 
 
             this.UnhandledException += App_UnhandledException;
+
+
+
+
         }
 
 

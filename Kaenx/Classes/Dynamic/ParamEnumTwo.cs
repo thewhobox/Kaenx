@@ -21,7 +21,7 @@ namespace Kaenx.Classes.Dynamic
         public string Value
         {
             get { return _value; }
-            set { 
+            set {
                 if (string.IsNullOrEmpty(value)) return; 
                 _value = value;
                 _selected1 = _value == Option1?.Value;
@@ -63,6 +63,11 @@ namespace Kaenx.Classes.Dynamic
                 if (_selected2) Value = Option2.Value;
                 PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Selected2")); 
             }
+        }
+
+        public Windows.UI.Xaml.Controls.Orientation Orientation
+        {
+            get { return Option1.Text.Length + Option2.Text.Length > 16 ? Windows.UI.Xaml.Controls.Orientation.Vertical : Windows.UI.Xaml.Controls.Orientation.Horizontal; }
         }
 
         private ParamEnumOption _opt1;

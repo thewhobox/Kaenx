@@ -1,21 +1,13 @@
 ﻿using Kaenx.Classes.Helper;
+using Serilog;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.IO;
-using System.Linq;
-using System.Runtime.InteropServices.WindowsRuntime;
 using Windows.ApplicationModel.Resources;
-using Windows.Foundation;
-using Windows.Foundation.Collections;
 using Windows.UI.Core;
 using Windows.UI.ViewManagement;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
-using Windows.UI.Xaml.Controls.Primitives;
-using Windows.UI.Xaml.Data;
-using Windows.UI.Xaml.Input;
-using Windows.UI.Xaml.Media;
 using Windows.UI.Xaml.Navigation;
 
 // Die Elementvorlage "Leere Seite" wird unter https://go.microsoft.com/fwlink/?LinkId=234238 dokumentiert.
@@ -49,40 +41,66 @@ namespace Kaenx.View
 
         public WorkdeskEasy()
         {
+            Log.Information("WorkdeskEasy wird initialisiert");
             this.InitializeComponent();
             ContentFrame.Navigated += ContentFrame_Navigated;
 
             InfoUpdate.DataContext = Classes.Project.UpdateManager.Instance;
             InfoChange.DataContext = Classes.Project.ChangeHandler.Instance;
+            Log.Information("WorkdeskEasy initialisierung abgeschlossen");
         }
 
         protected override void OnNavigatedTo(NavigationEventArgs e)
         {
-            base.OnNavigatedTo(e);
-            CurrentProject = (Kaenx.Classes.Project.Project)e.Parameter;
-            ApplicationView.GetForCurrentView().Title = CurrentProject.Name;
+            Log.Information("WorkdeskEasy OnNavigatedTo");
+            try
+            {
+                base.OnNavigatedTo(e);
+                Log.Information("WorkdeskEasy Base");
+                CurrentProject = (Kaenx.Classes.Project.Project)e.Parameter;
+                Log.Information("WorkdeskEasy CurrentProject");
+                ApplicationView.GetForCurrentView().Title = CurrentProject.Name;
+                Log.Information("WorkdeskEasy SetTitle");
 
-            ViewHelper.Instance.OnShowNotification += Instance_OnShowNotification;
+                ViewHelper.Instance.OnShowNotification += Instance_OnShowNotification;
+                Log.Information("WorkdeskEasy Subscribe Notification");
 
-            Classes.Project.UpdateManager.Instance.SetProject(CurrentProject);
-            Classes.Project.UpdateManager.Instance.CountUpdates();
+                Classes.Project.UpdateManager.Instance.SetProject(CurrentProject);
+                Log.Information("WorkdeskEasy Setproject");
+                Classes.Project.UpdateManager.Instance.CountUpdates();
+                Log.Information("WorkdeskEasy CountUpdates");
 
-            _pages.Add("home", new Home() { DataContext = CurrentProject });
-            _pages.Add("catalog", new Catalog());
-            _pages.Add("topologie", new Topologie() { DataContext = CurrentProject.Lines, _project = CurrentProject });
-            _pages.Add("groups", new Groups() { DataContext = CurrentProject });
-            _pages.Add("bus", new Bus() { DataContext = Classes.Bus.BusConnection.Instance });
-            _pages.Add("settings", new Settings());
-            App._pages = _pages;
+                _pages.Add("home", new Home() { DataContext = CurrentProject });
+                Log.Information("WorkdeskEasy Init home");
+                _pages.Add("catalog", new Catalog());
+                Log.Information("WorkdeskEasy Init catalog");
+                _pages.Add("topologie", new Topologie() { DataContext = CurrentProject.Lines, _project = CurrentProject });
+                Log.Information("WorkdeskEasy Init topologie");
+                _pages.Add("groups", new Groups() { DataContext = CurrentProject });
+                Log.Information("WorkdeskEasy Init groups");
+                _pages.Add("bus", new Bus() { DataContext = Classes.Bus.BusConnection.Instance });
+                Log.Information("WorkdeskEasy Init bus");
+                _pages.Add("settings", new Settings());
+                Log.Information("WorkdeskEasy Init settings");
+                App._pages = _pages;
 
-            InfoInterfaces.DataContext = Classes.Bus.BusConnection.Instance;
-            InfoBus.DataContext = Classes.Bus.BusConnection.Instance;
+                InfoInterfaces.DataContext = Classes.Bus.BusConnection.Instance;
+                InfoBus.DataContext = Classes.Bus.BusConnection.Instance;
+                Log.Information("WorkdeskEasy DataContext");
 
-            NavView.SelectedItem = NavView.MenuItems[0];
+                Log.Information("WorkdeskEasy " + NavView.MenuItems.Count);
+                NavView.SelectedItem = NavView.MenuItems[0];
+                Log.Information("WorkdeskEasy Set Startpage");
 
-            var currentView = SystemNavigationManager.GetForCurrentView();
-            currentView.AppViewBackButtonVisibility = AppViewBackButtonVisibility.Visible;
-            currentView.BackRequested += CurrentView_BackRequested;
+                var currentView = SystemNavigationManager.GetForCurrentView();
+                currentView.AppViewBackButtonVisibility = AppViewBackButtonVisibility.Visible;
+                currentView.BackRequested += CurrentView_BackRequested;
+                Log.Information("WorkdeskEasy Set BackButton");
+            } catch(Exception ex)
+            {
+                Log.Error(ex, "Fehler bei Onnavigated to");
+                throw ex;
+            }
         }
 
         protected override void OnNavigatedFrom(NavigationEventArgs e)
@@ -125,13 +143,20 @@ namespace Kaenx.View
 
         private void ItemChanged(NavigationView sender, NavigationViewSelectionChangedEventArgs args)
         {
-            ContentFrame.BackStack.Clear();
-            string tag = ((NavigationViewItem)args.SelectedItem).Tag?.ToString();
+            try
+            {
+                ContentFrame.BackStack.Clear();
+                string tag = ((NavigationViewItem)args.SelectedItem).Tag?.ToString();
 
-            if (args.IsSettingsSelected)
-                tag = "settings";
+                if (args.IsSettingsSelected)
+                    tag = "settings";
 
-            ContentFrame.Content = _pages[tag];
+                ContentFrame.Content = _pages[tag];
+            } catch(Exception e)
+            {
+                Log.Error(e, "Fehler beim SelectionChanged");
+                throw e;
+            }
         }
 
         private void InfoBus_Click(object sender, RoutedEventArgs e)

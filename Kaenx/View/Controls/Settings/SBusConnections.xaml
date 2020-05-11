@@ -72,6 +72,9 @@
                 <Button Click="ClickToggleAddProj">
                     <SymbolIcon Symbol="Add" />
                 </Button>
+                <Button Click="ClickToggleAddFile">
+                    <SymbolIcon Symbol="Import" />
+                </Button>
                 <TextBlock Text="Datenbanken" VerticalAlignment="Center" FontSize="22" Margin="10 0 0 0" />
             </StackPanel>
 
@@ -176,6 +179,37 @@
 
                 <Button Grid.Row="2" Margin="5" Content="Testen" HorizontalAlignment="Stretch" Click="ClickTest2" Visibility="Collapsed" />
                 <Button Grid.Row="2" Grid.Column="1" Margin="5" Content="Speichern" HorizontalAlignment="Stretch" Click="ClickSaveProjConn" />
+            </Grid>
+        </Border>
+
+        <Border x:Name="DiagNewFileConn" Visibility="Collapsed">
+            <Border.Background>
+                <SolidColorBrush Color="Gray" Opacity="0.6" />
+            </Border.Background>
+            <Grid x:Name="GridNewFileConn" Width="300" VerticalAlignment="Center" BorderBrush="Gray" BorderThickness="1" Padding="10" Background="{ThemeResource BrushAccentControlBackground}">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition />
+                    <ColumnDefinition />
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="auto" />
+                    <RowDefinition />
+                    <RowDefinition Height="auto" />
+                </Grid.RowDefinitions>
+
+                <TextBlock Grid.ColumnSpan="2" Text="Neue Schnittstelle" VerticalAlignment="Center" FontSize="22" Margin="5 5 0 10" />
+                <Button Grid.Column="1" HorizontalAlignment="Right" Click="ClickToggleAddFile">
+                    <SymbolIcon Symbol="Cancel" />
+                </Button>
+
+                <StackPanel Grid.ColumnSpan="2" Grid.Row="1">
+                    <TextBox x:Name="InFileName" HorizontalAlignment="Stretch" Header="Name" />
+                    <TextBlock x:Name="InFilePath" Margin="0 5 0 0" Text="Hier steht der SPeicherortddddddddddddddddddddddddddddddddd ae fwqefe fef" VerticalAlignment="Center" ToolTipService.ToolTip="Hier steht der SPeicherortddddddddddddddddddddddddddddddddd ae fwqefe fef" />
+                    <HyperlinkButton Padding="0" Margin="0 0 10 0" Content="Speicherort ändern" Click="ClickChangeFile" />
+                    <TextBox Name="InFilePass" HorizontalAlignment="Stretch" Header="Passwort" InputScope="Password" />
+                </StackPanel>
+
+                <Button Grid.Row="2" Grid.Column="1" Margin="5" Content="Speichern" HorizontalAlignment="Stretch" Click="ClickSaveFileConn" />
             </Grid>
         </Border>
     </Grid>

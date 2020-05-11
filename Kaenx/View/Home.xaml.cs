@@ -1,4 +1,5 @@
 ﻿using Kaenx.Classes.Project;
+using Serilog;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -33,18 +34,24 @@ namespace Kaenx.View
 
         private async void LazyLoad()
         {
-            await Task.Delay(10);
-
-            Project project = (Project)this.DataContext;
-
-            if(project.Image != null)
+            try
             {
-                var wb = new WriteableBitmap(512,512);
-                using (Stream stream = wb.PixelBuffer.AsStream())
+                await Task.Delay(10);
+
+                Project project = (Project)this.DataContext;
+
+                if (project.Image != null)
                 {
-                    await stream.WriteAsync(project.Image, 0, project.Image.Length);
+                    var wb = new WriteableBitmap(512, 512);
+                    using (Stream stream = wb.PixelBuffer.AsStream())
+                    {
+                        await stream.WriteAsync(project.Image, 0, project.Image.Length);
+                    }
+                    ProjectImage.Source = wb;
                 }
-                ProjectImage.Source = wb;
+            } catch(Exception ex)
+            {
+                Log.Error(ex, "Failed loading Image");
             }
         }
     }

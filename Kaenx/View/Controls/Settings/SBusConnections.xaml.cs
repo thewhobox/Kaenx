@@ -55,6 +55,11 @@ namespace Kaenx.View.Controls.Settings
             DiagNewProjConn.Visibility = DiagNewProjConn.Visibility == Visibility.Visible ? Visibility.Collapsed : Visibility.Visible;
         }
 
+        private void ClickToggleAddFile(object sender, RoutedEventArgs e)
+        {
+            DiagNewFileConn.Visibility = DiagNewInterface.Visibility == Visibility.Visible ? Visibility.Collapsed : Visibility.Visible;
+        }
+
         private void ClickSaveInterface(object sender, RoutedEventArgs e)
         {
             if (!CheckInputs()) return;
@@ -195,6 +200,16 @@ namespace Kaenx.View.Controls.Settings
             Windows.Storage.AccessCache.StorageApplicationPermissions.FutureAccessList.AddOrReplace("myname", folder);
         }
 
+        private async void ClickChangeFile(object sender, RoutedEventArgs e)
+        {
+            FileOpenPicker picker = new FileOpenPicker();
+            picker.FileTypeFilter.Add(".db");
+            picker.SuggestedStartLocation = Windows.Storage.Pickers.PickerLocationId.DocumentsLibrary;
+            StorageFile file = await picker.PickSingleFileAsync();
+            InFilePath.Text = file.Path;
+            Windows.Storage.AccessCache.StorageApplicationPermissions.FutureAccessList.AddOrReplace("ImportDb", file);
+        }
+
         private void InProjType_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             if (InProjHost == null) return;
@@ -205,6 +220,24 @@ namespace Kaenx.View.Controls.Settings
 
             InProjHost.Visibility = isMySQL ? Visibility.Visible : Visibility.Collapsed;
             InProjUser.Visibility = isMySQL ? Visibility.Visible : Visibility.Collapsed;
+        }
+
+        private async void ClickSaveFileConn(object sender, RoutedEventArgs e)
+        {
+            StorageFile file = await Windows.Storage.AccessCache.StorageApplicationPermissions.FutureAccessList.GetFileAsync("ImportDb");
+            await file.MoveAsync(ApplicationData.Current.LocalFolder);
+            await file.RenameAsync(InFileName.Text + ".db");
+
+            LocalConnectionProject conn = new LocalConnectionProject();
+            conn.Name = InProjName.Text;
+            conn.DbPassword = InProjPass.Text;
+            conn.Type = LocalConnectionProject.DbConnectionType.SqlLite;
+            conn.DbHostname = InFileName.Text + ".db";
+
+            _context.ConnsProject.Add(conn);
+            _context.SaveChanges();
+            ListDatabases.Add(conn);
+            ClickToggleAddFile(null, null);
         }
     }
 }
