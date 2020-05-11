@@ -236,14 +236,19 @@ namespace Kaenx.View
             if(device == null || !device.HasApplicationProgram)
             {
                 DevInfoApp.Text = "";
-                BarDelete.IsEnabled = false;
+                BarDelete.IsEnabled = device != null;
                 return;
             }
             BarDelete.IsEnabled = true;
 
-            List<ApplicationViewModel> apps = new List<ApplicationViewModel>();
-            Hardware2AppModel model = _context.Hardware2App.Where(h => h.HardwareId == device.HardwareId).OrderByDescending(h => h.Version).First();
-            DevInfoApp.Text = model.VersionString;
+            List<string> apps = new List<string>();
+            IEnumerable<Hardware2AppModel> models = _context.Hardware2App.Where(h => h.HardwareId == device.HardwareId).OrderByDescending(h => h.Version);
+
+            foreach(Hardware2AppModel model in models)
+            {
+                apps.Add($"{model.Name} {model.VersionString}");
+            }
+            DevInfoApp.Text = string.Join(Environment.NewLine, apps);
         }
 
         private DataGridColumn previousSortedColumn;

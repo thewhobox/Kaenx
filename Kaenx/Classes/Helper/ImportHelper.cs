@@ -118,7 +118,8 @@ namespace Kaenx.Classes.Helper
                 //ViewDevicesList.SelectedItem = device;
                 ProgressChanged?.Invoke(0);
 
-                device.Icon = Symbol.Sync;
+                _= App._dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Normal, () => device.Icon = Symbol.Sync);
+                
 
                 OnDeviceChanged?.Invoke(resourceLoader.GetString("StateHard"));
                 Log.Information("---- Hardware wird importiert");
@@ -224,7 +225,7 @@ namespace Kaenx.Classes.Helper
                 await Task.Delay(10);
                 ProgressChanged?.Invoke(6);
 
-                device.Icon = Symbol.Like;
+                _ = App._dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Normal, () => device.Icon = Symbol.Like);
                 await Task.Delay(10);
 
             }
@@ -535,7 +536,7 @@ namespace Kaenx.Classes.Helper
             device.Name = deviceInfo.Name;
             device.VisibleDescription = deviceInfo.Description;
             device.OrderNumber = productXml.Attribute("OrderNumber").Value;
-            device.BusCurrent = ConvertBusCurrent(hardwareXml.Attribute("BusCurrent")?.Value);
+            device.BusCurrent = SaveHelper.StringToInt(hardwareXml.Attribute("BusCurrent")?.Value);
             device.IsRailMounted = GetAttributeAsBool(productXml, "IsRailMounted");
             device.IsPowerSupply = GetAttributeAsBool(hardwareXml, "IsPowerSupply");
             device.IsCoupler = GetAttributeAsBool(hardwareXml, "IsCoupler");
@@ -966,7 +967,7 @@ namespace Kaenx.Classes.Helper
                     context.AppParameterTypes.Add(paramt);
                 position++;
                 ProgressAppChanged(position);
-                if (position % iterationToWait == 0) await Task.Delay(1);
+                //del if (position % iterationToWait == 0) await Task.Delay(1);
             }
 
 
@@ -1009,7 +1010,7 @@ namespace Kaenx.Classes.Helper
                 Params.Add(param.Id, param);
                 position++;
                 ProgressAppChanged(position);
-                if (position % iterationToWait == 0) await Task.Delay(1);
+                //del if (position % iterationToWait == 0) await Task.Delay(1);
             }
 
 
@@ -1070,7 +1071,7 @@ namespace Kaenx.Classes.Helper
                 }
                 position++;
                 ProgressAppChanged(position);
-                if (position % iterationToWait == 0) await Task.Delay(1);
+                //del if (position % iterationToWait == 0) await Task.Delay(1);
             }
 
 
@@ -1083,7 +1084,7 @@ namespace Kaenx.Classes.Helper
             {
                 position++;
                 ProgressAppChanged(position);
-                if (position % iterationToWait == 0) await Task.Delay(1);
+                //del if (position % iterationToWait == 0) await Task.Delay(1);
 
                 string pId = ShortId(pref.Attribute("Id").Value);
                 AppParameter old = Params[ShortId(pref.Attribute("RefId").Value)];
@@ -1170,7 +1171,7 @@ namespace Kaenx.Classes.Helper
                     ComObjects.Add(cobj.Id, cobj);
                     position++;
                     ProgressAppChanged(position);
-                    if (position % iterationToWait == 0) await Task.Delay(1);
+                    //del if (position % iterationToWait == 0) await Task.Delay(1);
                 }
             }
 
@@ -1183,7 +1184,7 @@ namespace Kaenx.Classes.Helper
             {
                 position++;
                 ProgressAppChanged(position);
-                if (position % iterationToWait == 0) await Task.Delay(1);
+                //del if (position % iterationToWait == 0) await Task.Delay(1);
 
                 AppComObjectRef cobjr = new AppComObjectRef();
                 cobjr.Id = ShortId(cref.Attribute("Id").Value);
@@ -1506,30 +1507,6 @@ namespace Kaenx.Classes.Helper
             return (val == "1" || val == "true") ? true : false;
         }
 
-        private int ConvertBusCurrent(string input)
-        {
-            if (input == null) return 10;
-
-            if (input.ToLower().Contains("e+"))
-            {
-                float numb = float.Parse(input.Substring(0, 5).Replace('.', ','));
-                int expo = int.Parse(input.Substring(input.IndexOf('+') + 1));
-                if (expo == 0)
-                    return int.Parse(numb.ToString());
-                float res = numb * (10 * expo);
-                return int.Parse(res.ToString());
-            }
-
-            try
-            {
-                return int.Parse(input);
-            }
-            catch
-            {
-                return 10;
-            }
-        }
-
         public bool CheckApplication(XmlReader reader, List<string> errs)
         {
             bool flag = true;
@@ -1541,6 +1518,15 @@ namespace Kaenx.Classes.Helper
 
                 switch (reader.Name)
                 {
+                    case "ApplicationProgram":
+                        if(reader.GetAttribute("IsSecureEnabled") == "true")
+                        {
+                            errs.Add("SecureEnabled");
+                            flag = false;
+                            Log.Warning("Applikation benötigt KNX Secure!");
+                        }
+
+                        break;
                     case "Extension":
                         string plugdown = reader.GetAttribute("EtsDownloadPlugin");
                         string plugrequ = reader.GetAttribute("RequiresExternalSoftware");

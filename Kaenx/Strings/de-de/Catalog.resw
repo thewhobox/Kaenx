@@ -136,7 +136,7 @@
     <value>Ph. Adresse:</value>
   </data>
   <data name="DeviceInfoApp.Text" xml:space="preserve">
-    <value>Aktuellste Version:</value>
+    <value>Verfügbare Version:</value>
   </data>
   <data name="DeviceInfoCoupler.Text" xml:space="preserve">
     <value>Koppler:</value>

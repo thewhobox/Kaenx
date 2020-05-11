@@ -109,8 +109,8 @@ namespace Kaenx
 
 
             this.UnhandledException += App_UnhandledException;
-
         }
+
 
         private void App_UnhandledException(object sender, Windows.UI.Xaml.UnhandledExceptionEventArgs e)
         {
@@ -251,6 +251,7 @@ namespace Kaenx
         /// <param name="e">Details about the navigation failure</param>
         void OnNavigationFailed(object sender, NavigationFailedEventArgs e)
         {
+            Log.Error(e.Exception, "Navigation failed!");
             throw new Exception("Failed to load Page " + e.SourcePageType.FullName);
         }
 

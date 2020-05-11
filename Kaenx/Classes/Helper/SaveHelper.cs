@@ -985,8 +985,8 @@ namespace Kaenx.Classes.Helper
                     pnu.SuffixText = para.SuffixText;
                     try
                     {
-                        pnu.Minimum = int.Parse(paraType.Tag1);
-                        pnu.Maximum = int.Parse(paraType.Tag2);
+                        pnu.Minimum = StringToInt(paraType.Tag1);
+                        pnu.Maximum = StringToInt(paraType.Tag2);
                     }
                     catch
                     {
@@ -1433,6 +1433,35 @@ namespace Kaenx.Classes.Helper
                 return Newtonsoft.Json.JsonConvert.DeserializeObject<T>(text);
             }
 
+        }
+
+        public static int StringToInt(string input, int def = 0)
+        {
+            return (int)StringToFloat(input, (float)def);
+        }
+
+        public static float StringToFloat(string input, float def = 0)
+        {
+            if (input == null) return def;
+
+            if (input.ToLower().Contains("e+"))
+            {
+                float numb = float.Parse(input.Substring(0, 5).Replace('.', ','));
+                int expo = int.Parse(input.Substring(input.IndexOf('+') + 1));
+                if (expo == 0)
+                    return int.Parse(numb.ToString());
+                float res = numb * (10 * expo);
+                return res;
+            }
+
+            try
+            {
+                return float.Parse(input);
+            }
+            catch
+            {
+                return def;
+            }
         }
 
     }

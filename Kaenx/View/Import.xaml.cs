@@ -97,36 +97,45 @@ namespace Kaenx.View
 
         private void Helper_ProgressChanged(int count)
         {
-            ProgressMain.IsIndeterminate = false;
-            ProgressMain.Value = count;
+            _= App._dispatcher.RunAsync(CoreDispatcherPriority.Normal, () =>
+            {
+                ProgressMain.IsIndeterminate = false;
+                ProgressMain.Value = count;
+            });
         }
 
         private void Helper_ProgressMaxChanged(int count)
         {
-            ProgressMain.IsIndeterminate = false;
-            ProgressMain.Maximum = count;
+            _ = App._dispatcher.RunAsync(CoreDispatcherPriority.Normal, () =>
+            {
+                ProgressMain.IsIndeterminate = false;
+                ProgressMain.Maximum = count;
+            });
         }
 
         #region Helper Events
         private void Helper_OnDeviceChanged(string value)
         {
-            ImportDevice = value;
+            _ = App._dispatcher.RunAsync(CoreDispatcherPriority.Normal, () => ImportDevice = value);
         }
 
         private void Helper_OnStateChanged(string value)
         {
-            ImportState = value;
+            _ = App._dispatcher.RunAsync(CoreDispatcherPriority.Normal, () => ImportState = value);
         }
 
         private void Helper_ProgressAppMaxChanged(int count)
         {
-            ProgressApp.Maximum = count;
-            ProgressApp.Value = 0;
+            _ = App._dispatcher.RunAsync(CoreDispatcherPriority.Normal, () =>
+            {
+                ProgressApp.Maximum = count;
+                ProgressApp.Value = 0;
+            });
         }
 
         private void Helper_ProgressAppChanged(int count)
         {
-            ProgressApp.Value = count;
+            _ = App._dispatcher.RunAsync(CoreDispatcherPriority.Normal, () => ProgressApp.Value = count);
         }
 
         private void Helper_OnError(string Error)
@@ -139,8 +148,8 @@ namespace Kaenx.View
             base.OnNavigatedTo(e);
             Imports = (ImportDevices)e.Parameter;
 
-            Task.Run(() => StartImport());
-            
+            StartImport();
+
             var currentView = SystemNavigationManager.GetForCurrentView();
             currentView.BackRequested += CurrentView_BackRequested;
         }
@@ -179,9 +188,12 @@ namespace Kaenx.View
 
 
             //Vom Internet holen: https://update.knx.org/data/XML/project-11/knx_master.xml
-            await Helper.StartImport(DevicesList);
 
-
+            bool fin = false;
+            await Task.Run(async () =>
+            {
+                await Helper.StartImport(DevicesList);
+            });
 
             BtnBack.IsEnabled = true;
             ViewDevicesList.SelectedItem = null;
@@ -228,10 +240,10 @@ namespace Kaenx.View
         public event PropertyChangedEventHandler PropertyChanged;
         private void Update(string name)
         {
-            _= App._dispatcher.RunAsync(CoreDispatcherPriority.Normal, () =>
-            {
-                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
-            });
+            _ = App._dispatcher.RunAsync(CoreDispatcherPriority.Normal, () =>
+             {
+                 PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
+             });
         }
 
         private void ClickBack(object sender, RoutedEventArgs e)

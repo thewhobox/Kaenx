@@ -29,8 +29,8 @@
         </StackPanel>
 
 
-        <ProgressBar Grid.Row="1" x:Name="ProgressMain" Maximum="6" Height="30" Foreground="Green" />
-        <ProgressBar Grid.Row="2" x:Name="ProgressApp" Maximum="1" Value="1" Height="10" Foreground="SandyBrown" />
+        <ProgressBar Grid.Row="1" x:Name="ProgressMain" Maximum="6" Height="30" Foreground="Green" CornerRadius="0" />
+        <ProgressBar Grid.Row="2" x:Name="ProgressApp" Maximum="1" Value="1" Height="10" Foreground="SandyBrown" CornerRadius="0" />
 
 
 

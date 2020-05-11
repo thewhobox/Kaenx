@@ -169,6 +169,8 @@ namespace Kaenx.View
             Connection _conn = new Connection(conn.SelectedInterface.Endpoint);
             _conn.Connect();
 
+            await Task.Delay(100);
+
             Action = "Scanne Linie: 1.1.x";
 
             _conn.OnTunnelRequest += _conn_OnTunnelRequest;

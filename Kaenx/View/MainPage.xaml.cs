@@ -119,8 +119,8 @@ namespace Kaenx.View
             if(didCrash)
             {
                 ErrorReport report = await Crashes.GetLastSessionCrashReportAsync();
-                Log.Error("App ist in letzter Sitzung abgestürzt!", report.StackTrace);
-                Notify.Show(loader.GetString("AppCrashed"));
+                Log.Error("App ist in letzter Sitzung abgestürzt!" + Environment.NewLine + report.StackTrace.Substring(0, report.StackTrace.IndexOf(Environment.NewLine))));
+                Notify.Show(loader.GetString("AppCrashed") + Environment.NewLine + report.StackTrace.Substring(0, report.StackTrace.IndexOf(Environment.NewLine)));
             }
         }
 
@@ -149,7 +149,7 @@ namespace Kaenx.View
         }
 
 
-        private async void OpenProject(object sender, RoutedEventArgs e)
+        private void OpenProject(object sender, RoutedEventArgs e)
         {
             ProjectViewHelper helper = (ProjectViewHelper)ProjectsGrid.SelectedItem;
             DoOpenProject(helper);
