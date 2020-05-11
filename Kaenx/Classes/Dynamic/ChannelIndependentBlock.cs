@@ -10,7 +10,7 @@ namespace Kaenx.Classes.Dynamic
     public class ChannelIndependentBlock : IDynChannel
     {
         public string Id { get; set; }
-        public bool HasAccess { get; set; } = false;
+        public bool HasAccess { get; set; } = true;
         public List<ParameterBlock> Blocks { get; set; } = new List<ParameterBlock>();
         public Visibility Visible { get; set; }
 

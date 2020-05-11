@@ -78,6 +78,7 @@ namespace Kaenx.Classes.Dynamic
             set { _opt2 = value; if (_opt2.Value == Value) Selected2 = true; }
         }
 
+        public bool HasAccess { get; set; }
         public bool IsEnabled { get; set; } = true;
         public List<ParamCondition> Conditions { get; set; }
         public event PropertyChangedEventHandler PropertyChanged;

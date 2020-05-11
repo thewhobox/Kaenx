@@ -971,7 +971,7 @@ namespace Kaenx.Classes.Helper
                 }
             }
 
-
+            bool hasAccess = para.Access == AccessType.None ? false : true;
             bool IsCtlEnabled = para.Access == AccessType.Read ? false : true;
 
             switch (paraType.Type)
@@ -996,6 +996,7 @@ namespace Kaenx.Classes.Helper
                     pnu.Default = para.Value;
                     pnu.Conditions = conds.paramList;
                     pnu.Hash = conds.hash;
+                    pnu.HasAccess = hasAccess;
                     pnu.IsEnabled = IsCtlEnabled;
                     block.Parameters.Add(pnu);
                     break;
@@ -1013,6 +1014,7 @@ namespace Kaenx.Classes.Helper
                     pte.Value = para.Value;
                     pte.Conditions = conds.paramList;
                     pte.Hash = conds.hash;
+                    pte.HasAccess = hasAccess;
                     pte.IsEnabled = IsCtlEnabled;
                     block.Parameters.Add(pte);
                     break;
@@ -1036,6 +1038,7 @@ namespace Kaenx.Classes.Helper
                         pen.Options = options;
                         pen.Conditions = conds.paramList;
                         pen.Hash = conds.hash;
+                        pen.HasAccess = hasAccess;
                         pen.IsEnabled = IsCtlEnabled;
                         block.Parameters.Add(pen);
                     } else
@@ -1050,6 +1053,7 @@ namespace Kaenx.Classes.Helper
                         pent.Option2 = options[1];
                         pent.Conditions = conds.paramList;
                         pent.Hash = conds.hash;
+                        pent.HasAccess = pent.HasAccess;
                         pent.IsEnabled = IsCtlEnabled;
                         block.Parameters.Add(pent);
                     }
@@ -1064,6 +1068,7 @@ namespace Kaenx.Classes.Helper
                     pch.Value = para.Value;
                     pch.Conditions = conds.paramList;
                     pch.Hash = conds.hash;
+                    pch.HasAccess = hasAccess;
                     pch.IsEnabled = IsCtlEnabled;
                     block.Parameters.Add(pch);
                     break;
@@ -1077,6 +1082,7 @@ namespace Kaenx.Classes.Helper
                     pco.Value = para.Value;
                     pco.Conditions = conds.paramList;
                     pco.Hash = conds.hash;
+                    pco.HasAccess = hasAccess;
                     pco.IsEnabled = IsCtlEnabled;
                     block.Parameters.Add(pco);
                     break;

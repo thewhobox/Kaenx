@@ -30,6 +30,7 @@ namespace Kaenx.Classes.Dynamic
         [JsonIgnore]
         public Visibility IsLineVisible { get { return Hint == "HorizontalRuler" ? Visibility.Visible : Visibility.Collapsed; } }
 
+        public bool HasAccess { get; set; } = true;
         public List<ParamCondition> Conditions { get; set; }
         public bool IsEnabled { get; set; }
 

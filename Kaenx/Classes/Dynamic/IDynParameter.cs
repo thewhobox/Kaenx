@@ -18,6 +18,7 @@ namespace Kaenx.Classes.Dynamic
 
         public string Default { get; set; }
 
+        public bool HasAccess { get; set; }
         public bool IsEnabled { get; set; }
         public Visibility Visible { get; set; }
         public List<ParamCondition> Conditions { get; set; }

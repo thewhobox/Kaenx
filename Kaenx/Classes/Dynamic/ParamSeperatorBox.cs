@@ -32,6 +32,7 @@ namespace Kaenx.Classes.Dynamic
 
         public Visibility SuffixIsVisible { get { return Visibility.Collapsed; } }
 
+        public bool HasAccess { get; set; } = true;
         public List<ParamCondition> Conditions { get; set; }
         public bool IsEnabled { get; set; }
         public event PropertyChangedEventHandler PropertyChanged;

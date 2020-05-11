@@ -138,7 +138,9 @@ namespace Kaenx.View
         {
             base.OnNavigatedTo(e);
             Imports = (ImportDevices)e.Parameter;
-            StartImport();
+
+            Task.Run(() => StartImport());
+            
             var currentView = SystemNavigationManager.GetForCurrentView();
             currentView.BackRequested += CurrentView_BackRequested;
         }
@@ -226,7 +228,10 @@ namespace Kaenx.View
         public event PropertyChangedEventHandler PropertyChanged;
         private void Update(string name)
         {
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
+            _= App._dispatcher.RunAsync(CoreDispatcherPriority.Normal, () =>
+            {
+                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
+            });
         }
 
         private void ClickBack(object sender, RoutedEventArgs e)

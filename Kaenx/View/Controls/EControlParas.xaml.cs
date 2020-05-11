@@ -167,6 +167,12 @@ namespace Kaenx.Views.Easy.Controls
 
             foreach (IDynChannel ch in Channels)
             {
+                if (!ch.HasAccess)
+                {
+                    ch.Visible = Visibility.Collapsed;
+                    continue;
+                }
+
                 if (ch is ChannelBlock)
                 {
                     ChannelBlock chb = ch as ChannelBlock;
@@ -175,10 +181,17 @@ namespace Kaenx.Views.Easy.Controls
                     else
                         chb.DisplayText = chb.Text;
                 }
-                    
+
 
                 foreach (ParameterBlock block in ch.Blocks)
                 {
+                    if (!block.HasAccess)
+                    {
+                        block.Visible = Visibility.Collapsed;
+                        continue;
+                    }
+
+
                     if (block.Text?.Contains("{{") == true)
                         block.DisplayText = block.Text.Replace("{{dyn}}", block.DefaultText);
                     else
@@ -186,6 +199,12 @@ namespace Kaenx.Views.Easy.Controls
 
                     foreach (IDynParameter para in block.Parameters)
                     {
+                        if (!para.HasAccess)
+                        {
+                            para.Visible = Visibility.Collapsed;
+                            continue;
+                        }
+
                         if (ParaChanges.ContainsKey(para.Id))
                             para.Value = ParaChanges[para.Id].Value;
 

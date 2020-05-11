@@ -34,6 +34,7 @@ namespace Kaenx.Classes.Dynamic
         public int Minimum { get; set; }
         public int Maximum { get; set; }
 
+        public bool HasAccess { get; set; }
         public bool IsEnabled { get; set; } = true;
         public List<ParamCondition> Conditions { get; set; }
         public event PropertyChangedEventHandler PropertyChanged;

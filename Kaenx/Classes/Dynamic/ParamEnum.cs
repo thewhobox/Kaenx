@@ -30,6 +30,7 @@ namespace Kaenx.Classes.Dynamic
             set { _visible = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Visible")); }
         }
 
+        public bool HasAccess { get; set; }
         public List<ParamEnumOption> Options { get; set; }
         public bool IsEnabled { get; set; } = true;
         public List<ParamCondition> Conditions { get; set; }
