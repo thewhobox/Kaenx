@@ -19,6 +19,7 @@ namespace Kaenx.DataContext.Catalog
         [MaxLength(7)]
         public string Mask { get; set; }
         public int Manufacturer { get; set; }
+        public bool IsRelativeSegment { get; set; }
 
         [MaxLength(40)]
         public string Table_Object { get; set; }

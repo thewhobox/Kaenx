@@ -57,7 +57,7 @@ namespace Kaenx.View.Controls.Settings
 
         private void ClickToggleAddFile(object sender, RoutedEventArgs e)
         {
-            DiagNewFileConn.Visibility = DiagNewInterface.Visibility == Visibility.Visible ? Visibility.Collapsed : Visibility.Visible;
+            DiagNewFileConn.Visibility = DiagNewFileConn.Visibility == Visibility.Visible ? Visibility.Collapsed : Visibility.Visible;
         }
 
         private void ClickSaveInterface(object sender, RoutedEventArgs e)
@@ -206,6 +206,7 @@ namespace Kaenx.View.Controls.Settings
             picker.FileTypeFilter.Add(".db");
             picker.SuggestedStartLocation = Windows.Storage.Pickers.PickerLocationId.DocumentsLibrary;
             StorageFile file = await picker.PickSingleFileAsync();
+            if (file == null) return;
             InFilePath.Text = file.Path;
             Windows.Storage.AccessCache.StorageApplicationPermissions.FutureAccessList.AddOrReplace("ImportDb", file);
         }
@@ -224,13 +225,24 @@ namespace Kaenx.View.Controls.Settings
 
         private async void ClickSaveFileConn(object sender, RoutedEventArgs e)
         {
+            if (string.IsNullOrEmpty(InFileName.Text))
+            {
+                ViewHelper.Instance.ShowNotification("settings", "Bitte gib einen Namen ein.", 3000, ViewHelper.MessageType.Success);
+                return;
+            }
+            if (!InFilePath.Text.Contains(".db"))
+            {
+                ViewHelper.Instance.ShowNotification("settings", "Bitte wähle die Datenbank aus.", 3000, ViewHelper.MessageType.Success);
+                return;
+            }
+
             StorageFile file = await Windows.Storage.AccessCache.StorageApplicationPermissions.FutureAccessList.GetFileAsync("ImportDb");
-            await file.MoveAsync(ApplicationData.Current.LocalFolder);
             await file.RenameAsync(InFileName.Text + ".db");
+            await file.MoveAsync(ApplicationData.Current.LocalFolder);
 
             LocalConnectionProject conn = new LocalConnectionProject();
-            conn.Name = InProjName.Text;
-            conn.DbPassword = InProjPass.Text;
+            conn.Name = InFileName.Text;
+            conn.DbPassword = InFilePass.Text;
             conn.Type = LocalConnectionProject.DbConnectionType.SqlLite;
             conn.DbHostname = InFileName.Text + ".db";
 

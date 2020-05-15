@@ -7,6 +7,7 @@ using Kaenx.DataContext.Project;
 using Kaenx.Konnect.Addresses;
 using Kaenx.View.Controls.Dialogs;
 using Microsoft.Toolkit.Uwp.UI.Controls;
+using Serilog;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -62,9 +63,11 @@ namespace Kaenx.View
 
         public Groups()
         {
+            Log.Information("Starte nun initialisierung");
             this.InitializeComponent();
+            Log.Information("Starte nun DataContext zuweisung");
             ListComs.DataContext = this;
-            ListGroupComs.DataContext = this;
+            //ListGroupComs.DataContext = this;
             OutGroupName.DataContext = this;
             OutGroupName2.DataContext = this;
             OutGroupInfo.DataContext = this;
@@ -167,14 +170,15 @@ namespace Kaenx.View
                         addr.ComObjects.Remove(com2);
                     com2.Groups.Clear();
                 }
-            } else
+            }
+            else
             {
                 foreach (FunctionGroup addr in com.Groups)
                     addr.ComObjects.Remove(com);
 
                 com.Groups.Clear();
             }
-           
+
 
             SaveHelper.SaveAssociations(SelectedDevice);
             SelectedDevice.LoadedGroup = false;

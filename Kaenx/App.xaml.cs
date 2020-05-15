@@ -30,6 +30,7 @@ using Microsoft.AppCenter.Push;
 using Windows.UI.StartScreen;
 using Kaenx.DataContext.Local;
 using Windows.UI.Xaml.Media.Animation;
+using System.Diagnostics;
 
 namespace Kaenx
 {
@@ -107,6 +108,12 @@ namespace Kaenx
                    typeof(Analytics), typeof(Crashes), typeof(Push));
 #endif
 
+            Log.Information($"" +
+                $"{System.Environment.OSVersion.Version.Major}." +
+                $"{System.Environment.OSVersion.Version.Minor}." +
+                $"{System.Environment.OSVersion.Version.Build}" +
+                $"");
+
 
             this.UnhandledException += App_UnhandledException;
 
@@ -121,6 +128,8 @@ namespace Kaenx
             Log.Error(e.Exception, "UnhandledException!");
             if (e.Exception.InnerException != null)
                 Log.Error(e.Exception.InnerException, "InnerException!");
+
+            if (e.Exception.HResult == -2147024809) return;
 
             throw e.Exception;
         }
@@ -241,7 +250,6 @@ namespace Kaenx
                 // Ensure the current window is active
                 Window.Current.Activate();
             }
-
 
             //TODO implement change theme
             //(Application.Current.Resources["BrushAccentColor2"] as SolidColorBrush).Color = Windows.UI.Colors.Red;

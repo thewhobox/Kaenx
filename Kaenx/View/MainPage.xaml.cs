@@ -7,6 +7,7 @@ using Kaenx.DataContext.Project;
 using Kaenx.Konnect;
 using Kaenx.Konnect.Builders;
 using Kaenx.View.Controls;
+using Kaenx.View.Controls.Dialogs;
 using Microsoft.AppCenter.Analytics;
 using Microsoft.AppCenter.Crashes;
 using Newtonsoft.Json.Linq;
@@ -394,6 +395,48 @@ namespace Kaenx.View
         private void GridItemTapped(object sender, TappedRoutedEventArgs e)
         {
 
+        }
+
+        private async void OpenProj(object sender, RoutedEventArgs e)
+        {
+            DiagOpenProj diag = new DiagOpenProj();
+            await diag.ShowAsync();
+            if (diag.SelectedProj == null) return;
+
+            LocalProject lp = new LocalProject();
+            lp.ProjectId = diag.SelectedProj.Id;
+            lp.Name = diag.SelectedProj.Name;
+            lp.Thumbnail = diag.SelectedProj.Image;
+            lp.ConnectionId = diag.SelectedConn.Id;
+            lp.IsReconstruct = false;
+            _contextL.Projects.Add(lp);
+            _contextL.SaveChanges();
+
+
+
+            ProjectViewHelper helper = new ProjectViewHelper();
+            helper.Id = lp.Id;
+            helper.Name = lp.Name;
+            helper.Local = lp;
+            helper.IsReconstruct = lp.IsReconstruct;
+            helper.ProjectId = lp.ProjectId;
+
+            if (lp.Thumbnail != null)
+            {
+                var wb = new WriteableBitmap(512, 512);
+                using (Stream stream = wb.PixelBuffer.AsStream())
+                {
+                    await stream.WriteAsync(lp.Thumbnail, 0, lp.Thumbnail.Length);
+                }
+
+                helper.Image = wb;
+            }
+            else
+            {
+                helper.Image = new BitmapImage() { UriSource = new Uri("ms-appx:///Assets/FileLogo.png") };
+            }
+
+            DoOpenProject(helper);
         }
     }
 }

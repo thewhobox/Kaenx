@@ -236,9 +236,11 @@ namespace Kaenx.Classes.Bus.Actions
                 return;
             }
 
-
-            Device.LoadedPA = true;
-            _ = App._dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Normal, () => SaveHelper.UpdateDevice(Device));
+            if(!string.IsNullOrEmpty(Device.ApplicationId))
+            {
+                Device.LoadedPA = true;
+                _ = App._dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Normal, () => SaveHelper.UpdateDevice(Device));
+            }
 
 
             Finish();

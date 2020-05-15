@@ -1359,6 +1359,7 @@ namespace Kaenx.Classes.Helper
                     switch (seg.Name.LocalName)
                     {
                         case "AbsoluteSegment":
+                            app.IsRelativeSegment = false;
                             string segId = ShortId(seg.Attribute("Id").Value);
                             existed = contextIds.Contains(segId);
 
@@ -1380,6 +1381,7 @@ namespace Kaenx.Classes.Helper
                             break;
 
                         case "RelativeSegment":
+                            app.IsRelativeSegment = true;
                             string relId = ShortId(seg.Attribute("Id").Value);
                             existed = contextIds.Contains(relId);
 

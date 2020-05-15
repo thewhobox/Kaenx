@@ -1,4 +1,6 @@
 ﻿using Kaenx.Classes.Helper;
+using Microsoft.AppCenter;
+using Microsoft.AppCenter.Crashes;
 using Serilog;
 using System;
 using System.Collections.Generic;
@@ -76,8 +78,19 @@ namespace Kaenx.View
                 Log.Information("WorkdeskEasy Init catalog");
                 _pages.Add("topologie", new Topologie() { DataContext = CurrentProject.Lines, _project = CurrentProject });
                 Log.Information("WorkdeskEasy Init topologie");
-                _pages.Add("groups", new Groups() { DataContext = CurrentProject });
-                Log.Information("WorkdeskEasy Init groups");
+                try
+                {
+                    _pages.Add("groups", new Groups() { DataContext = CurrentProject });
+                    Log.Information("WorkdeskEasy Init groups");
+                }catch(Exception ex)
+                {
+                    Log.Warning("Fehler beim Laden hier mehr INfos:");
+                    Log.Information(ex.Message);
+                    Log.Information(ex.StackTrace);
+                    Log.Error(ex, "Fehler beim Laden fon Gruppen");
+                    if(ex.InnerException != null)
+                        Log.Error(ex.InnerException, "Inner Exception");
+                }
                 _pages.Add("bus", new Bus() { DataContext = Classes.Bus.BusConnection.Instance });
                 Log.Information("WorkdeskEasy Init bus");
                 _pages.Add("settings", new Settings());

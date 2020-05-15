@@ -157,10 +157,10 @@
         <Border Grid.RowSpan="2" Background="{ThemeResource BrushAccentColor2}" Grid.Row="1">
             <TreeView x:Name="TreeTopologie" MinWidth="100" MaxWidth="350" CanReorderItems="False" ItemsSource="{Binding Lines}" CanDragItems="False" ItemInvoked="TreeTopologie_ItemInvoked" VerticalAlignment="Stretch" Background="LightGray">
                 <TreeView.ItemTemplate>
-                    <DataTemplate x:DataType="localP:Line">
+                    <DataTemplate>
                         <TreeViewItem Margin="-20 0 0 0" Background="Transparent" GlyphBrush="White" ToolTipService.ToolTip="{Binding Name}" BorderThickness="0" Content="{Binding}" ItemsSource="{Binding Subs}" IsExpanded="{Binding IsExpanded, Mode=TwoWay}">
                             <TreeViewItem.ContentTemplate>
-                                <DataTemplate x:DataType="local:TopologieBase">
+                                <DataTemplate>
                                     <StackPanel Orientation="Horizontal">
                                         <Viewbox Height="15">
                                             <SymbolIcon Symbol="{Binding Icon}" Foreground="{Binding CurrentBrush}" />
@@ -234,7 +234,7 @@
             <Run Text="{Binding SelectedGroup.Name}" />
         </TextBlock>
 
-        <toolkit:DataGrid x:Name="ListGroupComs" Visibility="Collapsed" Grid.Column="1" Grid.Row="1" Margin="5 0" AutoGenerateColumns="False" Background="{ThemeResource BrushAccentControlBackground}" 
+        <!--<toolkit:DataGrid x:Name="ListGroupComs" Visibility="Collapsed" Grid.Column="1" Grid.Row="1" Margin="5 0" AutoGenerateColumns="False" Background="{ThemeResource BrushAccentControlBackground}" 
                           ItemsSource="{Binding SelectedGroup.ComObjects}" BorderThickness="1" BorderBrush="LightGray" IsReadOnly="True">
             <toolkit:DataGrid.RowStyle>
                 <Style TargetType="toolkit:DataGridRow">
@@ -253,7 +253,7 @@
                 <toolkit:DataGridTextColumn x:Uid="/Groups/CListFunc" MinWidth="160" Tag="func" Width="SizeToCells" Binding="{Binding Function}" />
                 <toolkit:DataGridTextColumn x:Uid="/Groups/ClistConn" MinWidth="100" Tag="connections" Width="SizeToCells" Binding="{Binding Connections}" />
             </toolkit:DataGrid.Columns>
-        </toolkit:DataGrid>
+        </toolkit:DataGrid>-->
 
         <StackPanel x:Name="GroupsInfo" Grid.Column="1" Grid.Row="2">
             <TextBlock Margin="5 2">
@@ -285,7 +285,7 @@
                 </TextBlock>
                 <TextBlock Margin="10 5">
                     <Run Text="Datentyp:" />
-                    <Run x:Name="OutABI_DPT" Text="{Binding SelectedGroup.DataPointType}" />
+                    <Run x:Name="OutABI_DPT" Text="..." />
                 </TextBlock>
             </StackPanel>
         </Grid>

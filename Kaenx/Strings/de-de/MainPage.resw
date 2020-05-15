@@ -174,4 +174,7 @@
   <data name="OpenedRecently.Text" xml:space="preserve">
     <value>Zuletzt geöffnet:</value>
   </data>
+  <data name="BtnOpen.Text" xml:space="preserve">
+    <value>Öffnen</value>
+  </data>
 </root>

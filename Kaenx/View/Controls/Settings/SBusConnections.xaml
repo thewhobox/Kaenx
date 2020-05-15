@@ -197,7 +197,7 @@
                     <RowDefinition Height="auto" />
                 </Grid.RowDefinitions>
 
-                <TextBlock Grid.ColumnSpan="2" Text="Neue Schnittstelle" VerticalAlignment="Center" FontSize="22" Margin="5 5 0 10" />
+                <TextBlock Grid.ColumnSpan="2" Text="Datenbank importieren" VerticalAlignment="Center" FontSize="22" Margin="5 5 0 10" />
                 <Button Grid.Column="1" HorizontalAlignment="Right" Click="ClickToggleAddFile">
                     <SymbolIcon Symbol="Cancel" />
                 </Button>

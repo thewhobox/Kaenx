@@ -49,6 +49,7 @@ namespace Kaenx.Classes.Bus.Actions
         public string TodoText { get => _todoText; set { _todoText = value; Changed("TodoText"); } }
 
         public Connection Connection { get; set; }
+        private ApplicationViewModel app;
 
         private BusDevice dev;
         public event ActionFinishedHandler Finished;
@@ -76,7 +77,7 @@ namespace Kaenx.Classes.Bus.Actions
 
             CatalogContext _context = new CatalogContext();
             AppAdditional adds = _context.AppAdditionals.Single(a => a.Id == Device.ApplicationId);
-            ApplicationViewModel app = _context.Applications.Single(a => a.Id == Device.ApplicationId);
+            app = _context.Applications.Single(a => a.Id == Device.ApplicationId);
 
             XElement temp;
             XElement procedure = null;
@@ -606,9 +607,17 @@ namespace Kaenx.Classes.Bus.Actions
             }
             int endU = (lsmIdx << 4) | state;
             data[0] = Convert.ToByte(endU);
-            await dev.MemoryWriteSync(260, data);
-            await Task.Delay(50);
-            data = await dev.MemoryRead(46825 + lsmIdx, 1);
+
+
+            if (app.IsRelativeSegment)
+            {
+                await dev.PropertyWrite(BitConverter.GetBytes(lsmIdx)[0], 5, data);
+            } else
+            {
+                await dev.MemoryWriteSync(260, data);
+                await Task.Delay(50);
+                data = await dev.MemoryRead(46825 + lsmIdx, 1);
+            }
 
             Dictionary<int, byte> map = new Dictionary<int, byte>() { { 4, 0x00 }, { 3, 0x02 }, { 2, 0x01 }, { 1, 0x02 } };
             if(data[0] != map[(int)state]){
