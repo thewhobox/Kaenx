@@ -6,11 +6,13 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:bus="using:Kaenx.View.Controls.Bus"
+    xmlns:convert="using:Microsoft.Toolkit.Uwp.UI.Converters"
     xmlns:toolkit="using:Microsoft.Toolkit.Uwp.UI.Controls"
     xmlns:extensions="using:Microsoft.Toolkit.Uwp.UI.Extensions"
     mc:Ignorable="d"
     Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
     <Page.Resources>
+        <convert:BoolToVisibilityConverter x:Key="ConvBoolToVis" />
         <DataTemplate x:Key="RowDetailsInfoTemplate">
             <Grid>
                 <Grid.RowDefinitions>
@@ -42,7 +44,10 @@
                     </toolkit:HeaderedContentControl>
                 </StackPanel>
 
-                <TextBlock Grid.Row="1" Grid.ColumnSpan="3" Padding="10 0 10 10" Text="{Binding Additional}" Visibility="{Binding ShowAdditional}" />
+                <StackPanel Grid.Row="1" Grid.ColumnSpan="3" Padding="10 0 10 10">
+                    <TextBlock Margin="0 0 0 10" Text="Gerät unterstützt Extended Frames" Visibility="{Binding SupportsEF, Converter={StaticResource ConvBoolToVis}}" />
+                    <TextBlock Text="{Binding Additional}" Visibility="{Binding ShowAdditional}" />
+                </StackPanel>
 
 
                 <toolkit:DataGrid Grid.Column="3" Grid.RowSpan="2" MaxWidth="450" ItemsSource="{Binding AssociationTable}" AutoGenerateColumns="False" IsReadOnly="True">

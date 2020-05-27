@@ -63,8 +63,7 @@ namespace Kaenx.Classes.Bus.Actions
 
             await Task.Delay(2000);
             BusDevice dev = new BusDevice(Device.LineName, Connection);
-            dev.Connect();
-            await Task.Delay(100);
+            await dev.Connect(true);
             byte[] serial = await dev.PropertyRead(0, 11);
 
             if(Device.SerialText != BitConverter.ToString(serial).Replace("-", ""))
@@ -88,8 +87,7 @@ namespace Kaenx.Classes.Bus.Actions
         {
             TodoText = "Gerät wird neu gestartet";
             BusDevice dev = new BusDevice(Device.LineName, Connection);
-            dev.Connect();
-            await Task.Delay(100);
+            await dev.Connect(true);
             dev.Restart();
             await Task.Delay(1000);
             ProgressValue = 100;

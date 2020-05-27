@@ -57,15 +57,14 @@ namespace Kaenx.Classes.Bus.Actions
             try
             {
                 BusDevice dev = new BusDevice(Device.LineName, Connection);
-                dev.Connect();
-
-                await Task.Delay(100);
+                await dev.Connect(true);
 
                 byte[] number = await dev.PropertyRead(0, 11);
 
                 _= App._dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Normal, () =>
                 {
                     Device.Serial = number;
+                    Device.LoadedPA = true;
                     SaveHelper.UpdateDevice(Device);
                 });
             } catch(OperationCanceledException)

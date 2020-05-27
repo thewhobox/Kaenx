@@ -44,7 +44,7 @@
                         <Setter Target="ColsSett.Width" Value="auto" />
                         <Setter Target="SubNavPanel.Visibility" Value="Collapsed" />
                         <Setter Target="TreeV.MaxWidth" Value="400" />
-                        <Setter Target="SettExpander.IsExpanded" Value="False" />
+                        <Setter Target="SettExpander.IsExpanded" Value="True" />
                         <Setter Target="PanelSettings.Width" Value="300" />
                     </VisualState.Setters>
                 </VisualState>
@@ -71,7 +71,7 @@
             <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
 
-        <NavigationView x:Name="SubNavPanel" Grid.ColumnSpan="3" Margin="0 1" SelectionChanged="SubNavPanel_SelectionChanged" PaneDisplayMode="Top" IsSettingsVisible="False" IsBackButtonVisible="Collapsed">
+        <NavigationView x:Name="SubNavPanel" Grid.ColumnSpan="3" Margin="0 0 0 1" SelectionChanged="SubNavPanel_SelectionChanged" PaneDisplayMode="Top" IsSettingsVisible="False" IsBackButtonVisible="Collapsed">
             <NavigationView.MenuItems>
                 <NavigationViewItem Tag="topo" IsSelected="true">
                     <TextBlock x:Uid="/Topologie/MenuDevices" Foreground="White" />

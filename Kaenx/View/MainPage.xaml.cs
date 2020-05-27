@@ -16,6 +16,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Net;
@@ -24,6 +25,8 @@ using System.Threading.Tasks;
 using System.Xml.Serialization;
 using Windows.ApplicationModel;
 using Windows.ApplicationModel.Resources;
+using Windows.Devices.Enumeration;
+using Windows.Devices.HumanInterfaceDevice;
 using Windows.Foundation;
 using Windows.Foundation.Collections;
 using Windows.Graphics.Imaging;
@@ -437,6 +440,38 @@ namespace Kaenx.View
             }
 
             DoOpenProject(helper);
+        }
+
+        private async void TestUSB(object sender, RoutedEventArgs e)
+        {
+            var selector = HidDevice.GetDeviceSelector(0xFFA0, 0x0001);
+            var devices = await DeviceInformation.FindAllAsync(selector);
+
+            HidDevice dev = await HidDevice.FromIdAsync(devices[0].Id, FileAccessMode.ReadWrite);
+            dev.InputReportReceived += Dev_InputReportReceived;
+
+
+            var rep = dev.CreateOutputReport();
+
+            DataWriter dw = new DataWriter();
+            dw.WriteBytes(new byte[] { 0x00, 0x08,
+                0x00, 0x01, 0x0f, 0x01, 0x00, 0x00, 0x01, 0x00,
+                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+                0x00, 0x00
+            });
+            rep.Data = dw.DetachBuffer();
+
+            await dev.SendOutputReportAsync(rep);
+        }
+
+        private void Dev_InputReportReceived(HidDevice sender, HidInputReportReceivedEventArgs args)
+        {
+            Debug.WriteLine("Input Report " + args.Report.Id + ": " + args.Report.Data.ToString());
         }
     }
 }

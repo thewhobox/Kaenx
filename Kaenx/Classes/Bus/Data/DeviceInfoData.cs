@@ -19,6 +19,7 @@ namespace Kaenx.Classes.Bus.Data
         public string Manufacturer { get; set; }
         public string DeviceName { get; set; }
         public string Additional { get; set; }
+        public bool SupportsEF { get; set; }
         public LineDevice Device { get; set; }
 
         public Visibility ShowAdditional { get { return string.IsNullOrEmpty(Additional) ? Visibility.Collapsed : Visibility.Visible; } }

@@ -49,8 +49,7 @@ namespace Kaenx.Classes.Bus.Actions
         private async void Start()
         {
             BusDevice dev = new BusDevice(Device.LineName, Connection);
-            dev.Connect();
-            await Task.Delay(50);
+            await dev.Connect();
 
 
             CatalogContext context = new CatalogContext();

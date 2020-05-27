@@ -26,7 +26,7 @@
             <Setter Property="Padding" Value="10 5" />
             <Setter Property="BorderThickness" Value="0" />
         </Style>
-        <SolidColorBrush  x:Key="NavigationViewTopPaneBackground" Color="{Binding Source={ThemeResource BrushAccentColor1}, Path=Color}" />
+        <!--<SolidColorBrush  x:Key="NavigationViewTopPaneBackground" Color="{Binding Source={ThemeResource BrushAccentColor1}, Path=Color}" />-->
     </Page.Resources>
 
     <Grid>
@@ -37,14 +37,14 @@
         </Grid.RowDefinitions>
         
         <NavigationView x:Name="NavView" PaneDisplayMode="Top" SelectionChanged="ItemChanged" IsBackButtonVisible="Collapsed">
-            <NavigationView.Resources>
+            <!--<NavigationView.Resources>
                 <Style TargetType="SymbolIcon">
                     <Setter Property="Foreground" Value="White" />
                 </Style>
                 <Style TargetType="TextBlock">
                     <Setter Property="Foreground" Value="White" />
                 </Style>
-            </NavigationView.Resources>
+            </NavigationView.Resources>-->
             <NavigationView.MenuItems>
                 <NavigationViewItem Tag="home" Icon="Home" IsSelected="True">
                     <TextBlock  x:Uid="/WorkDeskEasy/MenuHome" Text="Test" />
@@ -65,8 +65,7 @@
             </NavigationView.MenuItems>
         </NavigationView>
 
-
-        <Frame Grid.Row="1" x:Name="ContentFrame" IsTabStop="True"  />
+        <Frame Grid.Row="1" x:Name="ContentFrame" IsTabStop="True"  BorderBrush="{ThemeResource BrushAccentColor1}" BorderThickness="0 5 0 0" />
 
         <Grid Grid.Row="2" Background="Green">
             <Grid.ColumnDefinitions>

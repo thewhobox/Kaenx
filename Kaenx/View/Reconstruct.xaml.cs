@@ -178,8 +178,7 @@ namespace Kaenx.View
             for(int i = 0; i < 256; i++)
             {
                 BusDevice dev = new BusDevice(UnicastAddress.FromString("1.1." + i), _conn);
-                dev.Connect();
-                await Task.Delay(50);
+                await dev.Connect(true);
             }
 
             Action = "Warten auf Geräte...";
@@ -239,8 +238,7 @@ namespace Kaenx.View
             device.StateId = 1;
             device.Status = "Lese Info...";
             BusDevice dev = new BusDevice(device.Address, _conn);
-            dev.Connect();
-            await Task.Delay(100);
+            await dev.Connect(true);
 
             string mask = await dev.DeviceDescriptorRead();
             mask = "MV-" + mask;

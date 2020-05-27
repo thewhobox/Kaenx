@@ -116,6 +116,15 @@
                         <TextBlock x:Uid="/MainPage/BtnSettings" />
                     </StackPanel>
                 </Button>
+
+                <Button Grid.Column="6" Click="TestUSB">
+                    <StackPanel>
+                        <Viewbox x:Name="VB6" Height="70">
+                            <SymbolIcon Symbol="ContactInfo" />
+                        </Viewbox>
+                        <TextBlock Text="USB" />
+                    </StackPanel>
+                </Button>
             </Grid>
 
             <Border Grid.Row="3" Background="{ThemeResource BrushAccentColor2}">

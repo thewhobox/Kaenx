@@ -1090,7 +1090,6 @@ namespace Kaenx.Classes.Helper
         }
 
 
-
         public static void GenerateDefaultComs(AppAdditional adds)
         {
             List<DeviceComObject> comObjects = new List<DeviceComObject>();

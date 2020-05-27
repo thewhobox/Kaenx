@@ -11,6 +11,7 @@ using Kaenx.Konnect.Classes;
 using Microsoft.AppCenter.Analytics;
 using Serilog;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
@@ -36,6 +37,7 @@ namespace Kaenx.Classes.Bus.Actions
         private BusDevice dev;
         private List<int> connectedCOs = new List<int>();
         private Dictionary<string, string> defParas = new Dictionary<string, string>();
+        private Dictionary<int, List<string>> CO2GA = new Dictionary<int, List<string>>();
 
         public string Type { get; } = "Geräte Konfiguration";
         public LineDevice Device { get; set; }
@@ -63,13 +65,10 @@ namespace Kaenx.Classes.Bus.Actions
         private async void Start()
         {
             dev = new BusDevice(Device.LineName, Connection);
-            dev.Connect();
-
-            await Task.Delay(100);
+            await dev.Connect();
 
             #region Grundinfo
             TodoText = "Lese Maskenversion...";
-            dev.Connect();
 
             await Task.Delay(100);
 
@@ -159,6 +158,23 @@ namespace Kaenx.Classes.Bus.Actions
 
             if(appModel != null)
             {
+                List<string> addresses = new List<string>();
+                if (!string.IsNullOrEmpty(appModel.Table_Group))
+                {
+                    AppSegmentViewModel segmentModel = context.AppSegments.Single(s => s.Id == appModel.Table_Group);
+                    int groupAddr = segmentModel.Address;
+                    byte[] datax = await dev.MemoryRead(groupAddr, 1);
+
+                    int length = Convert.ToInt16(datax[0]) - 1;
+                    datax = await dev.MemoryRead(groupAddr + 3, length * 2);
+
+                    for (int i = 0; i < (datax.Length / 2); i++)
+                    {
+                        int offset = i * 2;
+                        addresses.Add(MulticastAddress.FromByteArray(new byte[] { datax[offset], datax[offset + 1] }).ToString());
+                    }
+                }
+                
                 if (!string.IsNullOrEmpty(appModel.Table_Assosiations))
                 {
                     AppSegmentViewModel segmentModel = context.AppSegments.Single(s => s.Id == appModel.Table_Assosiations);
@@ -174,7 +190,15 @@ namespace Kaenx.Classes.Bus.Actions
                         for (int i = 0; i < length; i++)
                         {
                             int offset = i * 2;
+                            int grpIndex = datax[offset];
                             int COnr = datax[offset + 1];
+                            string grp = addresses[grpIndex-1];
+
+                            if (!CO2GA.ContainsKey(COnr))
+                                CO2GA.Add(COnr, new List<string>());
+
+                            if (!CO2GA[COnr].Contains(grp))
+                                CO2GA[COnr].Add(grp);
 
                             if (!connectedCOs.Contains(COnr))
                                 connectedCOs.Add(COnr);
@@ -195,6 +219,7 @@ namespace Kaenx.Classes.Bus.Actions
         private async void GetConfig(Hardware2AppModel h2a)
         {
             Dictionary<string, AppParameter> paras = new Dictionary<string, AppParameter>();
+            Dictionary<string, AppParameterTypeViewModel> types = new Dictionary<string, AppParameterTypeViewModel>();
 
             foreach (AppParameter param in _context.AppParameters.Where(p => p.ApplicationId == h2a.ApplicationId))
             {
@@ -206,21 +231,28 @@ namespace Kaenx.Classes.Bus.Actions
 
             foreach(AppParameter para in paras.Values)
             {
-                AppParameterTypeViewModel paraT = _context.AppParameterTypes.Single(t => t.Id == para.ParameterTypeId);
+                AppParameterTypeViewModel paraT;
+                if (types.ContainsKey(para.ParameterTypeId))
+                    paraT = types[para.ParameterTypeId];
+                else
+                {
+                    paraT = _context.AppParameterTypes.Single(t => t.Id == para.ParameterTypeId);
+                    types.Add(paraT.Id, paraT);
+                }
                 if (paraT.Size == 0) continue;
 
                 switch (para.SegmentType)
                 {
                     case SegmentTypes.None:
-                        HandleParamGhost(para, paraT, adds);
+                        await HandleParamGhost(para, types[para.ParameterTypeId], adds);
                         break;
 
                     case SegmentTypes.Memory:
-                        await HandleParamMem(para, paraT);
+                        para.Value = await GetValueFromMem(para, paraT);
                         break;
 
                     case SegmentTypes.Property:
-
+                        //TODO implement also Properties
                         break;
                 }
             }
@@ -233,8 +265,8 @@ namespace Kaenx.Classes.Bus.Actions
         {
             TodoText = "Speichere Konfiguration...";
 
-            Dictionary<string, ChangeParamModel> ParaChanges = new Dictionary<string, ChangeParamModel>();
             Dictionary<string, ViewParamModel> Id2Param = new Dictionary<string, ViewParamModel>();
+            Dictionary<string, ChangeParamModel> ParaChanges = new Dictionary<string, ChangeParamModel>();
             Dictionary<string, ViewParamModel> VisibleParams = new Dictionary<string, ViewParamModel>();
             List<IDynChannel> Channels = SaveHelper.ByteArrayToObject<List<IDynChannel>>(adds.ParamsHelper, true);
             ProjectContext _c = new ProjectContext(SaveHelper.connProject);
@@ -249,7 +281,7 @@ namespace Kaenx.Classes.Bus.Actions
                 }
             }
 
-
+            Dictionary<string, List<List<ParamCondition>>> para2Conds = new Dictionary<string, List<List<ParamCondition>>>();
             foreach (IDynChannel ch in Channels)
             {
                 foreach (ParameterBlock block in ch.Blocks)
@@ -263,10 +295,14 @@ namespace Kaenx.Classes.Bus.Actions
                             Id2Param.Add(para.Id, new ViewParamModel(para.Value));
 
                         Id2Param[para.Id].Parameters.Add(para);
+
+                        if (!para2Conds.ContainsKey(para.Id))
+                            para2Conds.Add(para.Id, new List<List<ParamCondition>>());
+
+                        para2Conds[para.Id].Add(para.Conditions);
                     }
                 }
             }
-
 
             foreach (IDynChannel ch in Channels)
             {
@@ -321,10 +357,14 @@ namespace Kaenx.Classes.Bus.Actions
                 }
             }
 
+            TodoText = "Generiere KOs";
+
+            GenerateComs(Id2Param);
+
             Finish();
         }
 
-        private void HandleParamGhost(AppParameter para, AppParameterTypeViewModel paraT, AppAdditional adds)
+        private async Task HandleParamGhost(AppParameter para, AppParameterTypeViewModel paraT, AppAdditional adds)
         {
             XDocument dynamic = XDocument.Parse(Encoding.UTF8.GetString(adds.Dynamic));
 
@@ -404,16 +444,97 @@ namespace Kaenx.Classes.Bus.Actions
                     KeyValuePair<string, bool> success = val2success.Single(y => y.Value == true);
                     para.Value = success.Key;
                 }
+                else
+                {
+                    await HandleParamGhost2(para, paraT, adds, choose);
+                }
                 
             }
         }
 
-
-        private async Task HandleParamMem(AppParameter para, AppParameterTypeViewModel paraT)
+        private async Task HandleParamGhost2(AppParameter para, AppParameterTypeViewModel paraT, AppAdditional adds, XElement choose)
         {
-            if (para.SegmentId == null) return;
+            string ns = choose.Name.NamespaceName;
+            Dictionary<string, List<string>> value2Paras = new Dictionary<string, List<string>>();
+            Dictionary<string, string> test = new Dictionary<string, string>();
 
-            if(!mems.ContainsKey(para.SegmentId))
+            #region Get ParaIds and remove duplicates
+            foreach (XElement when in choose.Elements())
+            {
+                if (when.Attribute("default")?.Value == "true" || when.Attribute("default")?.Value == para.Value) continue;
+                string val = when.Attribute("test").Value;
+
+                if (val.Contains(">") || val.Contains("<") || val.Contains("=") || val.Contains(" ")) continue;
+                if (!value2Paras.ContainsKey(val)) value2Paras[val] = new List<string>();
+
+                IEnumerable<XElement> tlist = when.Descendants(XName.Get("ParameterRefRef", ns));
+                foreach (XElement comx in tlist)
+                {
+                    string id = SaveHelper.ShortId(comx.Attribute("RefId").Value);
+                    AppParameter par = _context.AppParameters.Single(c => c.Id == id);
+                    if (par.Access != AccessType.Full || par.SegmentId == null) continue;
+
+
+
+                    string oldVal = defParas[par.Id];
+
+                    AppParameterTypeViewModel partype = _context.AppParameterTypes.Single(pt => pt.Id == par.ParameterTypeId);
+                    string newVal = await GetValueFromMem(par, partype);
+
+                    if (oldVal != newVal && !value2Paras[val].Contains(id))
+                    {
+                        test.Add(par.Id, newVal);
+                        value2Paras[val].Add(id);
+                    }
+                }
+            }
+
+            List<string> toDelete = new List<string>();
+            foreach (string keyval in value2Paras.Keys)
+            {
+                List<string> xids = value2Paras[keyval];
+
+
+                foreach (string xid in xids)
+                {
+                    bool flag = false;
+
+                    foreach (KeyValuePair<string, List<string>> otherids in value2Paras.Where(x => x.Key != keyval))
+                        if (otherids.Value.Contains(xid))
+                            flag = true;
+
+                    if (flag) toDelete.Add(xid);
+                }
+            }
+
+
+            foreach (string xid in toDelete)
+            {
+                foreach (KeyValuePair<string, List<string>> otherids in value2Paras)
+                    otherids.Value.Remove(xid);
+            }
+            #endregion
+
+
+            Dictionary<string, bool> val2success = new Dictionary<string, bool>();
+
+            foreach (KeyValuePair<string, List<string>> coms in value2Paras)
+            {
+                val2success[coms.Key] = coms.Value.Count > 0;
+            }
+
+
+            if (val2success.Count(y => y.Value == true) == 1)
+            {
+                KeyValuePair<string, bool> success = val2success.Single(y => y.Value == true);
+                para.Value = success.Key;
+            }
+        }
+
+        private async Task<string> GetValueFromMem(AppParameter para, AppParameterTypeViewModel paraT)
+        {
+            if (para.SegmentId == null) return "";
+            if (!mems.ContainsKey(para.SegmentId))
             {
                 AppSegmentViewModel seg = _context.AppSegments.Single(s => s.Id == para.SegmentId);
                 byte[] temp = await dev.MemoryRead(seg.Address, seg.Size);
@@ -438,21 +559,15 @@ namespace Kaenx.Classes.Bus.Actions
                 sizeB = 1;
                 bdata = new byte[sizeB];
                 byte temp = mems[para.SegmentId][para.Offset];
-                Dictionary<int, int> sizeMap = new Dictionary<int, int>() {
-                            { 8, 0b11111111 },
-                            { 7, 0b01111111 },
-                            { 6, 0b00111111 },
-                            { 5, 0b00011111 },
-                            { 4, 0b00001111 },
-                            { 3, 0b00000111 },
-                            { 2, 0b00000011 },
-                            { 1, 0b00000001 },
-                        };
 
-                int x = temp >> (8 - (para.OffsetBit + paraT.Size));
-                int mask = sizeMap[paraT.Size];
-                x = x & mask;
-                bdata[0] = Convert.ToByte(x);
+                var y = new BitArray(new byte[] { temp });
+                var z = new BitArray(8);
+
+                for(int i = 0; i < paraT.Size; i++)
+                {
+                    z.Set(i, y.Get(i + para.OffsetBit));
+                }
+                z.CopyTo(bdata, 0);
             }
 
 
@@ -484,18 +599,82 @@ namespace Kaenx.Classes.Bus.Actions
                             break;
                     }
 
-                    para.Value = x.ToString();
-                    break;
+                    return x.ToString();
 
                 case ParamTypes.Text:
-                    para.Value = Encoding.UTF8.GetString(bdata);
-                    break;
+                    return Encoding.UTF8.GetString(bdata);
             }
+            return "";
         }
 
 
+        private async void GenerateComs(Dictionary<string, ViewParamModel> Id2Param)
+        {
+            AppAdditional adds = _context.AppAdditionals.Single(a => a.Id == Device.ApplicationId);
+            List<DeviceComObject> comObjects = SaveHelper.ByteArrayToObject<List<DeviceComObject>>(adds.ComsAll);
+            List<ParamBinding> Bindings = SaveHelper.ByteArrayToObject<List<ParamBinding>>(adds.Bindings);
+            ProjectContext _contextP = new ProjectContext(SaveHelper.connProject);
+
+            List<DeviceComObject> newObjs = new List<DeviceComObject>();
+            foreach (DeviceComObject obj in comObjects)
+            {
+                if (obj.Conditions.Count == 0)
+                {
+                    newObjs.Add(obj);
+                    continue;
+                }
+
+                bool flag = SaveHelper.CheckConditions(obj.Conditions, Id2Param);
+                if (flag)
+                    newObjs.Add(obj);
+            }
 
 
+            List<DeviceComObject> toAdd = new List<DeviceComObject>();
+            foreach (DeviceComObject cobj in newObjs)
+            {
+                if (!Device.ComObjects.Any(co => co.Id == cobj.Id))
+                    toAdd.Add(cobj);
+            }
+
+            Dictionary<string, ComObject> coms = new Dictionary<string, ComObject>();
+            foreach (ComObject com in _contextP.ComObjects)
+                if (!coms.ContainsKey(com.ComId))
+                    coms.Add(com.ComId, com);
+
+            foreach (DeviceComObject dcom in toAdd)
+            {
+                if (dcom.Name.Contains("{{"))
+                {
+                    ParamBinding bind = Bindings.Single(b => b.Hash == "CO:" + dcom.Id);
+                    string value = Id2Param[dcom.BindedId].Value;
+                    if (string.IsNullOrEmpty(value))
+                        dcom.DisplayName = dcom.Name.Replace("{{dyn}}", bind.DefaultText);
+                    else
+                        dcom.DisplayName = dcom.Name.Replace("{{dyn}}", value);
+                }
+                else
+                {
+                    dcom.DisplayName = dcom.Name;
+                }
+
+                await App._dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Normal, () =>
+                {
+                    Device.ComObjects.Add(dcom);
+                });
+
+                ComObject com = new ComObject();
+                com.ComId = dcom.Id;
+                com.DeviceId = Device.UId;
+                _contextP.ComObjects.Add(com);
+            }
+
+            await App._dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Normal, () =>
+            {
+                Device.ComObjects.Sort(s => s.Number);
+            });
+            _contextP.SaveChanges();
+        }
 
 
         private void Finish(string errmsg = null)

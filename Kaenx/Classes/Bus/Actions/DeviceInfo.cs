@@ -59,14 +59,9 @@ namespace Kaenx.Classes.Bus.Actions
             {
                 BusDevice dev = new BusDevice(Device.LineName, Connection);
                 TodoText = "Lese Maskenversion...";
-                dev.Connect();
+                await dev.Connect();
 
-                await Task.Delay(100);
-
-
-
-
-
+                _data.SupportsEF = dev.SupportsExtendedFrames;
                 _data.MaskVersion = "MV-" + await dev.DeviceDescriptorRead();
 
                 ProgressValue = 10;
@@ -129,6 +124,12 @@ namespace Kaenx.Classes.Bus.Actions
                 if (context.Applications.Any(a => a.Id == appId))
                 {
                     appModel = context.Applications.Single(a => a.Id == appId); //TODO check if now complete appid is returned
+
+                    if (appModel.IsRelativeSegment)
+                    {
+                        Finish("Geräte mit Relativem Segment werden noch nicht unterstützt...");
+                        return;
+                    }
 
                     if (!string.IsNullOrEmpty(appModel.Table_Group))
                     {

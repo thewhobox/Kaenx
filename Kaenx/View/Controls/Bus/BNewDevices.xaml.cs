@@ -79,8 +79,7 @@ namespace Kaenx.View.Controls.Bus
 
             //BusCommon comm = new BusCommon(conn);
             BusDevice dev = new BusDevice(UnicastAddress.FromString("15.15.255"), conn);
-            dev.Connect();
-            await Task.Delay(100);
+            await dev.Connect(true);
 
             _ = dev.PropertyRead<string>(0, 11);
 
@@ -124,10 +123,7 @@ namespace Kaenx.View.Controls.Bus
                 await Task.Delay(100);
 
                 BusDevice dev = new BusDevice(UnicastAddress.FromString("15.15.254"), conn2);
-                dev.Connect();
-
-                await Task.Delay(100);
-
+                await dev.Connect(true);
 
                 string mask = "MV-" + await dev.DeviceDescriptorRead();
 

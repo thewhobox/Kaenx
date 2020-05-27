@@ -252,6 +252,8 @@ namespace Kaenx.View
                         foreach(Kaenx.Classes.Buildings.FunctionGroup fg in com.Groups)
                             fg.ComObjects.Remove(com);
 
+                    //TODO delete coms in database and changesParam!
+
                     SaveHelper.CalculateLineCurrent(dev.Parent);
                     break;
             }
@@ -290,12 +292,20 @@ namespace Kaenx.View
             {
                 (UIElement ui, int id) element = ParamStack.Single(i => i.id == device.UId);
                 paras = (EControlParas)element.ui;
-                ParamStack.Remove(element);
                 isFromCache = true;
             }
             else
             {
                 paras = new EControlParas(device);
+
+                if (ParamStack.Any(p => p.id == device.UId))
+                {
+                    var ele = ParamStack.Single(i => i.id == device.UId);
+                    ele.ui = paras;
+                } else
+                {
+                    ParamStack.Add((paras, device.UId));
+                }
 
                 if (ParamStack.Count >= 5) //TODO move to app settings
                 {
@@ -303,7 +313,6 @@ namespace Kaenx.View
                 }
             }
 
-            ParamStack.Add((paras, device.UId));
             ParamPresenter.Content = paras;
 
             if (ColsPara.Width.Value == 0)

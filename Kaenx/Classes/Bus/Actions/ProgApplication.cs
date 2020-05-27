@@ -15,6 +15,7 @@ using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -40,7 +41,8 @@ namespace Kaenx.Classes.Bus.Actions
 
         private List<byte> dataGroupTable = new List<byte>();
         private List<byte> dataAssoTable = new List<byte>();
-        private List<byte> dataMemory = new List<byte>();
+        private Dictionary<string, AppSegmentViewModel> dataSegs = new Dictionary<string, AppSegmentViewModel>();
+        private Dictionary<string, byte[]> dataMems = new Dictionary<string, byte[]>();
 
         public string Type { get; } = "Applikation";
         public LineDevice Device { get; set; }
@@ -132,86 +134,96 @@ namespace Kaenx.Classes.Bus.Actions
             double currentProg = 0;
             Debug.WriteLine("StepSize: " + stepSize + " - " + procedure.Elements().Count());
 
-            foreach(XElement ctrl in procedure.Elements())
+
+            try
             {
-                if (_token.IsCancellationRequested) 
-                    return;
 
-                currentProg += stepSize;
-                ProgressValue = (int)currentProg;
-
-                Debug.WriteLine(ctrl.Name.LocalName);
-                switch (ctrl.Name.LocalName)
+                foreach (XElement ctrl in procedure.Elements())
                 {
-                    case "LdCtrlConnect":
-                        dev.Connect();
-                        await Task.Delay(100);
-                        break;
+                    if (_token.IsCancellationRequested)
+                        return;
 
-                    case "LdCtrlDisconnect":
-                        dev.Disconnect();
-                        break;
+                    currentProg += stepSize;
+                    ProgressValue = (int)currentProg;
 
-                    case "LdCtrlRestart":
-                        dev.Restart();
-                        break;
+                    Debug.WriteLine(ctrl.Name.LocalName);
+                    switch (ctrl.Name.LocalName)
+                    {
+                        case "LdCtrlConnect":
+                            await dev.Connect();
+                            break;
 
-                    case "LdCtrlCompareProp":
-                        int obj = int.Parse(ctrl.Attribute("ObjIdx").Value);
-                        int pid = int.Parse(ctrl.Attribute("PropId").Value);
-                        byte[] prop = await dev.PropertyRead(Convert.ToByte(obj), Convert.ToByte(pid));
-                        string dataCP = ctrl.Attribute("InlineData").Value;
-
-                        if(!dataCP.StartsWith(BitConverter.ToString(prop).Replace("-", "")))
-                        {
-                            TodoText = "Fehler beim schreiben! PAx01";
+                        case "LdCtrlDisconnect":
                             dev.Disconnect();
-                            Finished?.Invoke(this, null);
-                            return;
-                        }
-                        break;
+                            break;
 
-                    case "LdCtrlUnload":
-                    case "LdCtrlLoad":
-                    case "LdCtrlLoadCompleted":
-                        await LsmState(ctrl);
-                        break;
+                        case "LdCtrlRestart":
+                            dev.Restart();
+                            break;
 
-                    case "LdCtrlTaskSegment":
-                        await AllocSegment(ctrl, 2);
-                        break;
+                        case "LdCtrlCompareProp":
+                            int obj = int.Parse(ctrl.Attribute("ObjIdx").Value);
+                            int pid = int.Parse(ctrl.Attribute("PropId").Value);
+                            byte[] prop = await dev.PropertyRead(Convert.ToByte(obj), Convert.ToByte(pid));
+                            string dataCP = ctrl.Attribute("InlineData").Value;
 
-                    case "LdCtrlAbsSegment":
-                        await WriteAbsSegment(ctrl, adds);
-                        break;
+                            if (!dataCP.StartsWith(BitConverter.ToString(prop).Replace("-", "")))
+                            {
+                                TodoText = "Fehler beim schreiben! PAx01";
+                                dev.Disconnect();
+                                Finished?.Invoke(this, null);
+                                return;
+                            }
+                            break;
 
-                    case "LdCtrlRelSegment":
-                        // 03_05_02 - Seite 116
-                        break;
+                        case "LdCtrlUnload":
+                        case "LdCtrlLoad":
+                        case "LdCtrlLoadCompleted":
+                            await LsmState(ctrl);
+                            break;
 
-                    case "LdCtrlWriteProp":
-                        //nicht ausgereift
-                        byte[] data = new byte[2];
-                        uint num = uint.Parse(ctrl.Attribute("InlineData").Value, System.Globalization.NumberStyles.AllowHexSpecifier);
-                        byte[] floatVals = BitConverter.GetBytes(num);
-                        await dev.PropertyWrite(Convert.ToByte(ctrl.Attribute("ObjIdx").Value), Convert.ToByte(ctrl.Attribute("PropId").Value), data);
-                        break;
+                        case "LdCtrlTaskSegment":
+                            await AllocSegment(ctrl, 2);
+                            break;
 
-                    case "LdCtrlWriteRelMem":
+                        case "LdCtrlAbsSegment":
+                            await WriteAbsSegment(ctrl, adds);
+                            break;
 
-                        break;
+                        case "LdCtrlRelSegment":
+                            await AllocRelSegment(adds, ctrl);
+                            // 03_05_02 - Seite 116
+                            break;
 
-                    case "LdCtrlDelay":
-                        int ms = int.Parse(ctrl.Attribute("MilliSeconds").Value);
-                        await Task.Delay(ms);
-                        break;
+                        case "LdCtrlWriteProp":
+                            //nicht ausgereift
+                            byte[] data = new byte[2];
+                            uint num = uint.Parse(ctrl.Attribute("InlineData").Value, System.Globalization.NumberStyles.AllowHexSpecifier);
+                            byte[] floatVals = BitConverter.GetBytes(num);
+                            await dev.PropertyWrite(Convert.ToByte(ctrl.Attribute("ObjIdx").Value), Convert.ToByte(ctrl.Attribute("PropId").Value), data);
+                            break;
 
-                    default:
-                        Debug.WriteLine("Unbekanntes Element: " + ctrl.Name.LocalName);
-                        break;
+                        case "LdCtrlWriteRelMem":
+                            break;
+
+                        case "LdCtrlDelay":
+                            int ms = int.Parse(ctrl.Attribute("MilliSeconds").Value);
+                            await Task.Delay(ms);
+                            break;
+
+                        default:
+                            Debug.WriteLine("Unbekanntes Element: " + ctrl.Name.LocalName);
+                            break;
+                    }
                 }
+            }catch(OperationCanceledException ex)
+            {
+                TodoText = "Gerät antwortet nicht";
+                ProgressValue = 100;
+                Finished?.Invoke(this, null);
             }
 
+            if (ProgressValue == 100) return;
             TodoText = "Abgeschlossen";
             ProgressValue = 100;
 
@@ -258,129 +270,19 @@ namespace Kaenx.Classes.Bus.Actions
         private async Task WriteApplication(AppAdditional adds)
         {
             TodoText = "Berechne Speicher...";
-            Dictionary<string, AppParameter> paras = new Dictionary<string, AppParameter>();
-            Dictionary<string, byte[]> memsData = new Dictionary<string, byte[]>();
-            Dictionary<string, AppSegmentViewModel> mems = new Dictionary<string, AppSegmentViewModel>();
-            Dictionary<string, AppParameterTypeViewModel> types = new Dictionary<string, AppParameterTypeViewModel>();
-            List<int> changed = new List<int>();
 
-            foreach (AppParameter para in GetVisibleParams(adds))
-                paras.Add(para.Id, para);
-
-            foreach (AppParameterTypeViewModel type in _context.AppParameterTypes)
-                types.Add(type.Id, type);
-
-            foreach(AppParameter para in paras.Values)
-            {
-                if (para.SegmentId == null) continue;
-                if (!mems.ContainsKey(para.SegmentId))
-                {
-                    AppSegmentViewModel seg = _context.AppSegments.Single(a => a.Id == para.SegmentId);
-                    memsData[para.SegmentId] = Convert.FromBase64String(seg.Data);
-                    mems[para.SegmentId] = seg;
-                }
-
-                AppParameterTypeViewModel type = types[para.ParameterTypeId];
-
-                byte[] paraData = type.Size >= 8 ? new byte[type.Size / 8] : new byte[1];
-
-                switch (type.Type)
-                {
-                    case ParamTypes.Enum:
-                    case ParamTypes.NumberUInt:
-                        paraData = BitConverter.GetBytes(Convert.ToUInt32(para.Value)).Take(type.Size / 8).ToArray();
-                        Array.Reverse(paraData);
-                        break;
-                    case ParamTypes.NumberInt:
-                        paraData = BitConverter.GetBytes(Convert.ToInt32(para.Value)).Take(type.Size / 8).ToArray();
-                        Array.Reverse(paraData);
-                        break;
-
-                    case ParamTypes.Text:
-                        paraData = Encoding.UTF8.GetBytes(para.Value);
-                        break;
-                }
-
-
-
-                if(type.Size >= 8)
-                {
-                    byte[] memory = memsData[para.SegmentId];
-                    for (int i = 0; i < type.Size / 8; i++)
-                    {
-                        memory[para.Offset + i] = paraData[i];
-                        changed.Add(para.Offset + i);
-                    }
-                }
-            }
-
-            int unionId = 1;
-            while (true)
-            {
-                if (!_context.AppParameters.Any(p => p.ApplicationId == adds.Id && p.UnionId == unionId)) break;
-
-                bool flag = false;
-                foreach(AppParameter para in _context.AppParameters.Where(p => p.ApplicationId == adds.Id && p.UnionId == unionId))
-                {
-                    if (paras.ContainsKey(para.Id))
-                    {
-                        flag = true;
-                        break;
-                    }
-                }
-
-                if (!flag)
-                {
-                    AppParameter defPara = _context.AppParameters.First(p => p.ApplicationId == adds.Id && p.UnionId == unionId && p.UnionDefault);
-
-                    AppParameterTypeViewModel type = types[defPara.ParameterTypeId];
-
-                    byte[] paraData = type.Size >= 8 ? new byte[type.Size / 8] : new byte[1];
-
-                    switch (type.Type)
-                    {
-                        case ParamTypes.Enum:
-                        case ParamTypes.NumberUInt:
-                            paraData = BitConverter.GetBytes(Convert.ToUInt32(defPara.Value)).Take(type.Size / 8).ToArray();
-                            Array.Reverse(paraData);
-                            break;
-                        case ParamTypes.NumberInt:
-                            paraData = BitConverter.GetBytes(Convert.ToInt32(defPara.Value)).Take(type.Size / 8).ToArray();
-                            Array.Reverse(paraData);
-                            break;
-
-                        case ParamTypes.Text:
-                            paraData = Encoding.UTF8.GetBytes(defPara.Value);
-                            break;
-                    }
-
-
-
-                    if (type.Size >= 8)
-                    {
-                        byte[] memory = memsData[defPara.SegmentId];
-                        for (int i = 0; i < type.Size / 8; i++)
-                        {
-                            memory[defPara.Offset + i] = paraData[i];
-                            changed.Add(defPara.Offset + i);
-                        }
-                    }
-                }
-
-                unionId++;
-            }
-
+            GenerateApplication(adds);
 
             TodoText = "Schreibe Speicher...";
 
             switch (_type)
             {
                 case ProgAppType.Komplett:
-                    foreach (AppSegmentViewModel seg in mems.Values)
+                    foreach (AppSegmentViewModel seg in dataSegs.Values)
                     {
                         //byte[] data = Convert.FromBase64String("QAcAB0BPAAdI1wAHUNsAB1jbAAdg2wAHRE8AB0zXAAdUTwAHXNsAB2HbAAdi2wAHZNsAB2bbAAdj2wAHZdsAB2fbAAdo2wAHadsAB2rbAAdr2wAHbNsAB23bAAdu2wAHb9sAB3DbAAdx2wAHctsAB3PbAAd02wAHddsAB3bbAAd32wAHeNsAB3nbAAd62wAHe9sAB3zbAAd92wAHftsAB3/bAAeA2wAHgdsAB4LbAAeD2wAHhNsAB4XbAAeG2wAHh9sAB4jbAAeJ2wAHitsAB4vbAAeM2wAHjdsAB47bAAeP2wAHkNsAB5HbAAeS2wAHk9sAB5TbAAeV2wAHltsAB5fbAAAAMgGQAAAAAwAAAAABAAAAAQAAAAEAAAAAAAAAAAAAAAAAAAcAAAEAAQAAAAAAAAAAAAEAAAcAAAAAAQAAAAEAAAABAAAAAgAAAAAAAAAAAAAHAAABAAEAAAAAAAAAAAABAf8AAAAAAAAAAP8AAAAAAAAAAAAAAQABAAAAAwEAAQICAAABAA==");
                         //await dev.MemoryWriteSync(seg.Address, data);
-                        await dev.MemoryWriteSync(seg.Address, memsData[seg.Id]);
+                        await dev.MemoryWriteSync(seg.Address, dataMems[seg.Id]);
                     }
                     break;
 
@@ -439,29 +341,33 @@ namespace Kaenx.Classes.Bus.Actions
 
             foreach (IDynChannel ch in Channels)
             {
-                bool visible = SaveHelper.CheckConditions(ch.Conditions, Id2Param);
+                bool vis1 = SaveHelper.CheckConditions(ch.Conditions, Id2Param);
 
-                if (visible)
+                foreach (ParameterBlock block in ch.Blocks)
                 {
-                    foreach (ParameterBlock block in ch.Blocks)
-                    {
-                        bool vis2 = SaveHelper.CheckConditions(block.Conditions, Id2Param);
+                    bool vis2 = SaveHelper.CheckConditions(block.Conditions, Id2Param);
 
-                        if (vis2)
+                    foreach (IDynParameter para in block.Parameters)
+                    {
+                        if (!para.Id.Contains("_R-")) continue;
+                        bool vis3 = SaveHelper.CheckConditions(para.Conditions, Id2Param);
+                        AppParameter xpara = AppParas[para.Id];
+                        if (vis1 && vis2 && vis3)
                         {
-                            foreach (IDynParameter para in block.Parameters)
+                            if (!paras.Contains(xpara)) // && xpara.Access == AccessType.Full) //IDEE wenn man alle enzeigt hier ebenfalls mitbedenken
                             {
-                                bool vis3 = SaveHelper.CheckConditions(para.Conditions, Id2Param);
-                                if (vis3)
-                                {
-                                    AppParameter xpara = AppParas[para.Id];
-                                    if (!paras.Contains(xpara))
-                                    {
-                                        xpara.Value = para.Value;
-                                        paras.Add(xpara);
-                                    }
-                                }
+                                xpara.Value = para.Value;
+                                paras.Add(xpara);
                             }
+                        }
+                        else if (AppParas.Values.Where(p => p.Offset == xpara.Offset).Count() < 2)
+                        {
+                            //xpara.Value = para.Value;
+                            paras.Add(xpara);
+                        }
+                        else if(AppParas.Values.Where(p => p.Offset == xpara.Offset && p.Value != xpara.Value).Count() == 0)
+                        {
+                            paras.Add(xpara);
                         }
                     }
                 }
@@ -471,6 +377,37 @@ namespace Kaenx.Classes.Bus.Actions
             return paras;
         }
 
+        private async Task AllocRelSegment(AppAdditional adds, XElement ctrl)
+        {
+            int length = 1;
+            string LsmId = ctrl.Attribute("LsmIdx").Value;
+            switch (LsmId)
+            {
+                case "1":
+                    GenerateGroupTable();
+                    length = dataGroupTable.Count;
+                    break;
+                case "2":
+                    GenerateAssoTable();
+                    length = dataAssoTable.Count;
+                    break;
+                case "3":
+                    GenerateApplication(adds);
+                    length = dataMems.Values.ElementAt(0).Length;
+                    break;
+            }
+
+
+            byte[] tempBytes;
+            List<byte> data = new List<byte>() { 0x03, 0x0b };
+
+            tempBytes = BitConverter.GetBytes(Convert.ToUInt32(length));
+
+            data.AddRange(tempBytes.Reverse()); // Length
+            data.AddRange(new byte[] { 0x00, 0x00, 0x00, 0x00 });
+
+            await dev.PropertyWrite(Convert.ToByte(LsmId), 5, data.ToArray(), true);
+        }
 
         private async Task AllocSegment(XElement ctrl, int segType, int counter = 0)
         {
@@ -538,7 +475,6 @@ namespace Kaenx.Classes.Bus.Actions
             }
         }
 
-
         private async Task WriteTableGroup(int addr)
         {
             TodoText = "Schreibe Gruppentabelle...";
@@ -566,7 +502,6 @@ namespace Kaenx.Classes.Bus.Actions
             });
         }
 
-
         private async Task WriteAssociationTable(int addr)
         {
             TodoText = "Schreibe Assozationstabelle...";
@@ -587,10 +522,9 @@ namespace Kaenx.Classes.Bus.Actions
             });
         }
 
-
         private async Task LsmState(XElement ctrl, int counter = 0)
         {
-            byte[] data = new byte[11];
+            byte[] data = new byte[app.IsRelativeSegment ? 10 : 11];
             int lsmIdx = int.Parse(ctrl.Attribute("LsmIdx").Value);
             int state = 1;
             switch (ctrl.Name.LocalName)
@@ -605,30 +539,31 @@ namespace Kaenx.Classes.Bus.Actions
                     state = (int)LoadStateMachineState.Loaded;
                     break;
             }
-            int endU = (lsmIdx << 4) | state;
-            data[0] = Convert.ToByte(endU);
 
 
             if (app.IsRelativeSegment)
             {
+                data[0] = Convert.ToByte(state);
                 await dev.PropertyWrite(BitConverter.GetBytes(lsmIdx)[0], 5, data);
+                data = null;
             } else
             {
+                int endU = (lsmIdx << 4) | state;
+                data[0] = Convert.ToByte(endU);
                 await dev.MemoryWriteSync(260, data);
                 await Task.Delay(50);
                 data = await dev.MemoryRead(46825 + lsmIdx, 1);
             }
 
             Dictionary<int, byte> map = new Dictionary<int, byte>() { { 4, 0x00 }, { 3, 0x02 }, { 2, 0x01 }, { 1, 0x02 } };
-            if(data[0] != map[(int)state]){
-                if(counter > 3)
+            if(data != null && data[0] != map[(int)state]){
+                if(counter > 2)
                 {
                     Debug.WriteLine("Fehlgeschlagen!");
                 } else
                     await LsmState(ctrl, counter + 1);
             }
         }
-
 
         private void GenerateGroupTable()
         {
@@ -677,6 +612,128 @@ namespace Kaenx.Classes.Bus.Actions
                     dataAssoTable.Add(val.Key);
                     dataAssoTable.Add(index);
                 }
+            }
+        }
+
+
+        private void GenerateApplication(AppAdditional adds)
+        {
+            Dictionary<string, AppParameter> paras = new Dictionary<string, AppParameter>();
+            Dictionary<string, AppParameterTypeViewModel> types = new Dictionary<string, AppParameterTypeViewModel>();
+            List<int> changed = new List<int>();
+
+            foreach (AppParameter para in GetVisibleParams(adds))
+                paras.Add(para.Id, para);
+
+            foreach (AppParameterTypeViewModel type in _context.AppParameterTypes)
+                types.Add(type.Id, type);
+
+            foreach (AppParameter para in paras.Values)
+            {
+                if (para.SegmentId == null) continue;
+                if (!dataSegs.ContainsKey(para.SegmentId))
+                {
+                    AppSegmentViewModel seg = _context.AppSegments.Single(a => a.Id == para.SegmentId);
+                    if(seg.Data == null)
+                    {
+                        dataMems[para.SegmentId] = new byte[seg.Size];
+                    }
+                    else
+                    {
+                        dataMems[para.SegmentId] = Convert.FromBase64String(seg.Data);
+                    }
+                    
+                    dataSegs[para.SegmentId] = seg;
+                }
+
+                AppParameterTypeViewModel type = types[para.ParameterTypeId];
+
+                byte[] paraData = type.Size >= 8 ? new byte[type.Size / 8] : new byte[1];
+
+                switch (type.Type)
+                {
+                    case ParamTypes.Enum:
+                    case ParamTypes.NumberUInt:
+                        paraData = BitConverter.GetBytes(Convert.ToUInt32(para.Value)).Take(type.Size / 8).ToArray();
+                        Array.Reverse(paraData);
+                        break;
+                    case ParamTypes.NumberInt:
+                        paraData = BitConverter.GetBytes(Convert.ToInt32(para.Value)).Take(type.Size / 8).ToArray();
+                        Array.Reverse(paraData);
+                        break;
+
+                    case ParamTypes.Text:
+                        Encoding.UTF8.GetBytes(para.Value).CopyTo(paraData, 0);
+                        break;
+                }
+
+
+
+                if (type.Size >= 8)
+                {
+                    byte[] memory = dataMems[para.SegmentId];
+                    for (int i = 0; i < type.Size / 8; i++)
+                    {
+                        memory[para.Offset + i] = paraData[i];
+                        changed.Add(para.Offset + i);
+                    }
+                }
+            }
+
+            int unionId = 1;
+            while (true)
+            {
+                if (!_context.AppParameters.Any(p => p.ApplicationId == adds.Id && p.UnionId == unionId)) break;
+
+                bool flag = false;
+                foreach (AppParameter para in _context.AppParameters.Where(p => p.ApplicationId == adds.Id && p.UnionId == unionId))
+                {
+                    if (paras.ContainsKey(para.Id))
+                    {
+                        flag = true;
+                        break;
+                    }
+                }
+
+                if (!flag && _context.AppParameters.Any(p => p.ApplicationId == adds.Id && p.UnionId == unionId && p.UnionDefault))
+                {
+                    AppParameter defPara = _context.AppParameters.First(p => p.ApplicationId == adds.Id && p.UnionId == unionId && p.UnionDefault);
+
+                    AppParameterTypeViewModel type = types[defPara.ParameterTypeId];
+
+                    byte[] paraData = type.Size >= 8 ? new byte[type.Size / 8] : new byte[1];
+
+                    switch (type.Type)
+                    {
+                        case ParamTypes.Enum:
+                        case ParamTypes.NumberUInt:
+                            paraData = BitConverter.GetBytes(Convert.ToUInt32(defPara.Value)).Take(type.Size / 8).ToArray();
+                            Array.Reverse(paraData);
+                            break;
+                        case ParamTypes.NumberInt:
+                            paraData = BitConverter.GetBytes(Convert.ToInt32(defPara.Value)).Take(type.Size / 8).ToArray();
+                            Array.Reverse(paraData);
+                            break;
+
+                        case ParamTypes.Text:
+                            paraData = Encoding.UTF8.GetBytes(defPara.Value);
+                            break;
+                    }
+
+
+
+                    if (type.Size >= 8)
+                    {
+                        byte[] memory = dataMems[defPara.SegmentId];
+                        for (int i = 0; i < type.Size / 8; i++)
+                        {
+                            memory[defPara.Offset + i] = paraData[i];
+                            changed.Add(defPara.Offset + i);
+                        }
+                    }
+                }
+
+                unionId++;
             }
         }
 

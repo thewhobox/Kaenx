@@ -185,8 +185,7 @@ namespace Kaenx.Classes.Bus.Actions
         {
             TodoText = "Gerät wird neu gestartet";
             BusDevice dev = new BusDevice(Device.LineName, Connection);
-            dev.Connect();
-            await Task.Delay(100);
+            await dev.Connect(true);
             string mask = await dev.DeviceDescriptorRead();
 
             byte[] serial = null;

@@ -1540,6 +1540,10 @@ namespace Kaenx.Classes.Helper
                         if (plugrequ != null && (plugrequ == "1" || plugrequ == "true") && !errs.Contains("RequiresExternalSoftware")) errs.Add("RequiresExternalSoftware");
                         Log.Warning("Applikation enthält Extension: " + reader.Name, reader.ReadOuterXml());
                         break;
+                    case "RelativeSegment":
+                        if(!errs.Contains("RelativeSegment")) 
+                            errs.Add("RelativeSegment");
+                        break;
                     case "ParameterCalculations":
                         if (!errs.Contains("ParameterCalculations"))
                         {

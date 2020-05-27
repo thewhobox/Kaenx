@@ -46,8 +46,7 @@ namespace Kaenx.Classes.Bus.Actions
         private async void Start()
         {
             BusDevice dev = new BusDevice(Device.LineName, Connection);
-            dev.Connect();
-            await Task.Delay(50);
+            await dev.Connect(true);
             dev.Restart();
             await Task.Delay(2000);
             Analytics.TrackEvent("Gerät neu gestartet");

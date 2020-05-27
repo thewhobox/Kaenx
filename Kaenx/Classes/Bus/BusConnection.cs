@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.Linq;
 using System.Net;
 using System.Text;
@@ -44,10 +45,16 @@ namespace Kaenx.Classes.Bus
         public BusInterface SelectedInterface
         {
             get { return _selectedInterface; }
-            set { _selectedInterface = value; Changed("SelectedInterface"); }
+            set { 
+                _selectedInterface = value; 
+                Changed("SelectedInterface");
+                if (_selectedInterface == null) return;
+                Windows.Storage.ApplicationDataContainer container = Windows.Storage.ApplicationData.Current.LocalSettings;
+                container.Values["lastUsedInterface"] = _selectedInterface.Hash;
+            }
         }
         private Connection searchConn = new Connection(new IPEndPoint(IPAddress.Parse("224.0.23.12"), 3671));
-        private DispatcherTimer searchTimer = new DispatcherTimer() { Interval = TimeSpan.FromSeconds(10) };
+        private DispatcherTimer searchTimer = new DispatcherTimer() { Interval = TimeSpan.FromSeconds(30) };
 
 
 
@@ -75,9 +82,10 @@ namespace Kaenx.Classes.Bus
 
             searchConn.OnSearchResponse += SearchConn_OnSearchResponse;
             searchTimer.Tick += (a, b) => SearchForDevices();
+            searchTimer.Start();
             SearchForDevices();
 
-            //InterfaceList.CollectionChanged += (a,b) => InterfaceList.Sort(i => i.Name);
+            InterfaceList.CollectionChanged += InterfaceList_CollectionChanged;
 
             LocalContext _context = new LocalContext();
             foreach(LocalInterface inter in _context.Interfaces)
@@ -88,6 +96,19 @@ namespace Kaenx.Classes.Bus
                 binter.Hash = inter.Id.ToString();
                 InterfaceList.Add(binter);
             }
+        }
+
+        private void InterfaceList_CollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
+        {
+            Windows.Storage.ApplicationDataContainer container = Windows.Storage.ApplicationData.Current.LocalSettings;
+            string hash = container.Values["lastUsedInterface"]?.ToString();
+
+
+            if (hash == null || _selectedInterface != null || !InterfaceList.Any(i => i.Hash == hash)) return;
+
+
+            BusInterface inter = InterfaceList.Single(i => i.Hash == hash);
+            SelectedInterface = inter;
         }
 
         private void SearchConn_OnSearchResponse(Konnect.Responses.SearchResponse response)
@@ -112,10 +133,14 @@ namespace Kaenx.Classes.Bus
 
         private void SearchForDevices()
         {
+            Windows.Storage.ApplicationDataContainer container = Windows.Storage.ApplicationData.Current.LocalSettings;
+            string hash = container.Values["lastUsedInterface"]?.ToString();
+            Debug.WriteLine("Last Interface: " + hash);
+
             List<BusInterface> toDelete = new List<BusInterface>();
             foreach(BusInterface inter in InterfaceList)
             {
-                if (inter.LastFound == null) continue;
+                if (inter.LastFound.Year == 1) continue;
                 if ((DateTime.Now - TimeSpan.FromMinutes(1)) > inter.LastFound)
                     toDelete.Add(inter);
             }
