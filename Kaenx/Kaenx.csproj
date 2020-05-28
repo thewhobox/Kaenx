@@ -145,6 +145,7 @@
     <Compile Include="Classes\Bus\Data\IBusData.cs" />
     <Compile Include="Classes\Bus\Data\NewDeviceData.cs" />
     <Compile Include="Classes\Converter\ValueCheckBoxConverter.cs" />
+    <Compile Include="Classes\DataPointSubType.cs" />
     <Compile Include="Classes\Device.cs" />
     <Compile Include="Classes\ComboItemSimple.cs" />
     <Compile Include="Classes\Controls\ControlUpdate.xaml.cs">
@@ -353,6 +354,7 @@
     <Content Include="Assets\Wide310x150Logo.scale-125.png" />
     <Content Include="Assets\Wide310x150Logo.scale-150.png" />
     <Content Include="Assets\Wide310x150Logo.scale-400.png" />
+    <Content Include="Data\knx_dps.xml" />
     <Content Include="Data\knx_master.xml" />
     <Content Include="Data\Logos\full.svg">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>

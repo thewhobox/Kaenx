@@ -140,6 +140,13 @@ namespace Kaenx.View
         private void ListComs_LoadingRow(object sender, DataGridRowEventArgs e)
         {
             e.Row.DoubleTapped += Row_DoubleTapped;
+
+            DeviceComObject com = e.Row.DataContext as DeviceComObject;
+            e.Row.Background = new SolidColorBrush(com.IsSelected ? Colors.Orange : Colors.Transparent) { Opacity = 0.5 };
+            e.Row.IsEnabled = com.IsEnabled;
+
+            if(!com.IsOk || !com.IsEnabled)
+                e.Row.Foreground = new SolidColorBrush(Colors.Gray);
         }
 
         private void Row_DoubleTapped(object sender, DoubleTappedRoutedEventArgs e)
@@ -160,7 +167,6 @@ namespace Kaenx.View
         {
             MenuFlyoutItem tvi = sender as MenuFlyoutItem;
             DeviceComObject com = tvi.DataContext as DeviceComObject;
-
 
             if (ListComs.SelectedItems.Contains(com))
             {
@@ -216,12 +222,33 @@ namespace Kaenx.View
         private void ShowAssociatedComs()
         {
             foreach (DeviceComObject dev in SelectedDevice.ComObjects)
-                dev.BackgroundBrush = null;
+                dev.IsSelected = false;
 
-            foreach (DeviceComObject com in SelectedGroup.ComObjects)
+
+            foreach (DeviceComObject com in SelectedDevice.ComObjects)
             {
-                com.BackgroundBrush = new SolidColorBrush(Colors.Orange) { Opacity = 0.5 };
+                com.IsSelected = SelectedGroup.ComObjects.Contains(com);
+
+                if(com.DataPointSubType.Number == "..." || SelectedGroup.DataPointSubType.Number == "..." || com.DataPointSubType.TypeNumbers != SelectedGroup.DataPointSubType.TypeNumbers)
+                {
+                    if(com.DataPointSubType.SizeInBit == SelectedGroup.DataPointSubType.SizeInBit)
+                    {
+                        com.IsOk = false;
+                        com.IsEnabled = true;
+                    } else
+                    {
+                        com.IsOk = false;
+                        com.IsEnabled = false;
+                    }
+                } else
+                {
+                    com.IsOk = true;
+                    com.IsEnabled = true;
+                }
             }
+
+            ListComs.ItemsSource = null;
+            ListComs.ItemsSource = SelectedDevice.ComObjects;
         }
 
 
@@ -394,7 +421,7 @@ namespace Kaenx.View
             SelectedGroup = defaultGroup;
 
             foreach (DeviceComObject dev in SelectedDevice.ComObjects)
-                dev.BackgroundBrush = null;
+                dev.IsSelected = false;
 
         }
 
@@ -409,5 +436,13 @@ namespace Kaenx.View
         }
 
         #endregion
+
+        private void Click_ToggleColumn(object sender, RoutedEventArgs e)
+        {
+            ToggleMenuFlyoutItem item = sender as ToggleMenuFlyoutItem;
+
+            DataGridColumn column = ListComs.Columns.Single(c => c.Tag.ToString() == item.Tag.ToString());
+            column.Visibility = item.IsChecked ? Visibility.Visible : Visibility.Collapsed;
+        }
     }
 }

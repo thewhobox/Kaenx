@@ -6,6 +6,7 @@ using Kaenx.DataContext.Local;
 using Kaenx.DataContext.Project;
 using Kaenx.Views.Easy.Controls;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Toolkit.Uwp.Helpers;
 using Microsoft.Toolkit.Uwp.UI.Extensions;
 using Serilog;
 using System;
@@ -295,7 +296,7 @@ namespace Kaenx.Classes.Helper
         //    }
         //}
 
-        public static Project.Project LoadProject(ProjectViewHelper helper)
+        public static async Task<Project.Project> LoadProject(ProjectViewHelper helper)
         {
             Project.Project project = new Project.Project();
 
@@ -357,6 +358,12 @@ namespace Kaenx.Classes.Helper
                 }
             }
 
+
+
+            //Hier DPS laden
+            Dictionary<string, Dictionary<string, DataPointSubType>> DPSTs = await SaveHelper.GenerateDatapoints();
+
+
             foreach (LineModel lmodel in contextProject.LinesMain.Where(l => l.ProjectId == helper.ProjectId).OrderBy(l => l.Id))
             {
                 Line line = new Line(lmodel);
@@ -409,6 +416,13 @@ namespace Kaenx.Classes.Helper
                                 dcom.DisplayName = dcom.Name;
                             }
 
+                            if(comObj.DatapointSub == -1)
+                            {
+                                dcom.DataPointSubType = DPSTs[comObj.Datapoint.ToString()]["xxx"];
+                            } else
+                            {
+                                dcom.DataPointSubType = DPSTs[comObj.Datapoint.ToString()][comObj.DatapointSub.ToString()];
+                            }
 
                             ld.ComObjects.Add(dcom);
                         }
@@ -460,6 +474,80 @@ namespace Kaenx.Classes.Helper
 
             contextProject.SaveChanges();
         }
+
+
+        public static async Task<Dictionary<string, Dictionary<string, DataPointSubType>>> GenerateDatapoints()
+        {
+            Dictionary<string, Dictionary<string, DataPointSubType>> DPSTs = new Dictionary<string, Dictionary<string, DataPointSubType>>();
+
+            if (await ApplicationData.Current.LocalFolder.FileExistsAsync("DataPoints.json"))
+            {
+                string json2 = await FileIO.ReadTextAsync(await ApplicationData.Current.LocalFolder.GetFileAsync("DataPoints.json"));
+                DPSTs = Newtonsoft.Json.JsonConvert.DeserializeObject<Dictionary<string, Dictionary<string, DataPointSubType>>>(json2);
+                return DPSTs;
+            }
+            else
+            {
+                DPSTs = new Dictionary<string, Dictionary<string, DataPointSubType>>();
+            }
+
+            StorageFile defaultFile = await StorageFile.GetFileFromApplicationUriAsync(new Uri("ms-appx:///Data/knx_dps.xml"));
+            XElement xml = XDocument.Parse(await FileIO.ReadTextAsync(defaultFile)).Root;
+
+
+            string current = System.Globalization.CultureInfo.CurrentCulture.Name;
+
+            List<string> langs = new List<string>();
+            IEnumerable<XElement> langsEle = xml.Descendants(XName.Get("Language", xml.Name.NamespaceName));
+            foreach (XElement lang in langsEle)
+                langs.Add(lang.Attribute("Identifier").Value);
+
+            if (langs.Contains(current))
+            {
+                ImportHelper.TranslateXml(xml, current);
+            }
+            else
+            {
+                current = current.Split("-")[0] + "-";
+                if (langs.Any(l => l.StartsWith(current)))
+                {
+                    string x = langs.Single(l => l.StartsWith(current));
+                    ImportHelper.TranslateXml(xml, x);
+                }
+            }
+
+            IEnumerable<XElement> dpts = xml.Descendants(XName.Get("DatapointType", xml.Name.NamespaceName));
+            foreach (XElement dpt in dpts)
+            {
+                DataPointSubType dpstd = new DataPointSubType();
+                dpstd.Name = "";
+                dpstd.Number = "xxx";
+                dpstd.SizeInBit = int.Parse(dpt.Attribute("SizeInBit").Value);
+                string numb = dpt.Attribute("Number").Value;
+                dpstd.MainNumber = numb;
+                DPSTs.Add(numb, new Dictionary<string, DataPointSubType>());
+                DPSTs[numb].Add(dpstd.Number, dpstd);
+
+                foreach (XElement dpstE in dpt.Element(XName.Get("DatapointSubtypes", xml.Name.NamespaceName)).Elements())
+                {
+                    DataPointSubType dpst = new DataPointSubType();
+                    dpst.Name = dpstE.Attribute("Text").Value;
+                    dpst.Number = dpstE.Attribute("Number").Value;
+                    dpst.MainNumber = numb;
+                    dpst.Default = dpstE.Attribute("Default")?.Value == "true";
+                    dpst.SizeInBit = int.Parse(dpt.Attribute("SizeInBit").Value);
+
+                    DPSTs[numb].Add(dpst.Number, dpst);
+                }
+            }
+
+            StorageFile file2 = await ApplicationData.Current.LocalFolder.CreateFileAsync("DataPoints.json");
+            string json3 = Newtonsoft.Json.JsonConvert.SerializeObject(DPSTs);
+            await FileIO.WriteTextAsync(file2, json3);
+
+            return DPSTs;
+        }
+
 
         private static Dictionary<string, ParamBinding> Hash2Bindings;
         private static Dictionary<string, List<ParamBinding>> Ref2Bindings;

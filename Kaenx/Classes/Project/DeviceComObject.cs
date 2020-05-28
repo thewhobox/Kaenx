@@ -27,9 +27,6 @@ namespace Kaenx.Classes.Project
             Number = comObj.Number;
             Name = comObj.Text;
             Function = comObj.FunctionText;
-
-            Datapoint = comObj.Datapoint;
-            DatapointSub = comObj.DatapointSub;
             Groups.CollectionChanged += Groups_CollectionChanged;
 
             Flag_Read = comObj.Flag_Read;
@@ -47,13 +44,10 @@ namespace Kaenx.Classes.Project
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Connections"));
         }
 
-        private SolidColorBrush _backgroundBrush;
-        public SolidColorBrush BackgroundBrush
-        {
-            get { return _backgroundBrush; }
-            set { _backgroundBrush = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("BackgroundBrush")); }
-        }
-
+        public DataPointSubType DataPointSubType { get; set; }
+        public bool IsSelected { get; set; } = false;
+        public bool IsEnabled { get; set; } = true;
+        public bool IsOk { get; set; } = true;
 
         private string _name;
         private string _dname;
@@ -61,9 +55,6 @@ namespace Kaenx.Classes.Project
         public string Id { get; set; }
         public LineDevice ParentDevice { get; set; }
         public string BindedId { get; set; }
-        public int Datapoint { get; set; }
-        public int DatapointSub { get; set; }
-        public string DP_Full { get { if (Datapoint == -1) return "-"; else { if (DatapointSub == -1) return Datapoint + ".0"; else return Datapoint + "." + DatapointSub; } } }
         public int Number { get; set; }
         public string Name { get { return _name; } set { _name = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Name")); } }
         public string DisplayName { get { return _dname; } set { _dname = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("DisplayName")); } }

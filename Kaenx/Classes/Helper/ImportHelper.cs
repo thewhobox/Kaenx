@@ -1241,6 +1241,25 @@ namespace Kaenx.Classes.Helper
                 if (cobjr.DatapointSub != -1) obj.DatapointSub = cobjr.DatapointSub;
                 if (cobjr.Size != -1) obj.Size = cobjr.Size;
 
+
+                if(obj.Datapoint == -1)
+                {
+                    Dictionary<string, Dictionary<string, DataPointSubType>> DPSTs = await SaveHelper.GenerateDatapoints();
+                    foreach(Dictionary<string, DataPointSubType> numb in DPSTs.Values)
+                    {
+                        if (numb["xxx"].SizeInBit != obj.Size) continue;
+
+                        bool x = numb.Values.Any(d => d.Default);
+                        if (x)
+                        {
+                            DataPointSubType type = numb.Values.Single(d => d.SizeInBit == obj.Size && d.Default);
+                            obj.Datapoint = int.Parse(type.MainNumber);
+                            break;
+                        }
+                    }
+                }
+
+
                 if (cobjr.Flag_Communicate != null) obj.Flag_Communicate = (bool)cobjr.Flag_Communicate;
                 if (cobjr.Flag_Read != null) obj.Flag_Read = (bool)cobjr.Flag_Read;
                 if (cobjr.Flag_ReadOnInit != null) obj.Flag_ReadOnInit = (bool)cobjr.Flag_ReadOnInit;

@@ -192,4 +192,7 @@
   <data name="ListHeaderComs.Text" xml:space="preserve">
     <value>Alle KOs in der Gruppe:</value>
   </data>
+  <data name="LComsDpst.Header" xml:space="preserve">
+    <value>Datentyp</value>
+  </data>
 </root>

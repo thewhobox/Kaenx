@@ -83,7 +83,11 @@ namespace Kaenx.Classes.Bus
             searchConn.OnSearchResponse += SearchConn_OnSearchResponse;
             searchTimer.Tick += (a, b) => SearchForDevices();
             searchTimer.Start();
-            SearchForDevices();
+            Task.Run(async () =>
+            {
+                await Task.Delay(3000);
+                SearchForDevices();
+            });
 
             InterfaceList.CollectionChanged += InterfaceList_CollectionChanged;
 

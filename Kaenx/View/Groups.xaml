@@ -183,11 +183,7 @@
                           BorderBrush="LightGray" Background="{ThemeResource BrushAccentControlBackground}" >
             <toolkit:DataGrid.RowStyle>
                 <Style TargetType="toolkit:DataGridRow">
-                    <Setter Property="Background">
-                        <Setter.Value>
-                            <Binding Path="BackgroundBrush" />
-                        </Setter.Value>
-                    </Setter>
+                    <Setter Property="MinHeight" Value="0" />
                     <Setter Property="toolkit:DataGridRow.ContextFlyout">
                         <Setter.Value>
                             <MenuFlyout Opening="MenuFlyout_Opening">
@@ -199,20 +195,22 @@
                     </Setter>
                 </Style>
             </toolkit:DataGrid.RowStyle>
+            <toolkit:DataGrid.ContextFlyout>
+                <MenuFlyout>
+                    <MenuFlyoutItem Text="Spalten anzeigen:" IsEnabled="False" />
+                    <ToggleMenuFlyoutItem Text="Nummer" IsChecked="True" Click="Click_ToggleColumn" Tag="numb" />
+                    <ToggleMenuFlyoutItem Text="Name" IsChecked="True" Click="Click_ToggleColumn" Tag="name" />
+                    <ToggleMenuFlyoutItem Text="Funktion" IsChecked="True" Click="Click_ToggleColumn" Tag="func" />
+                    <ToggleMenuFlyoutItem Text="Datentyp" IsChecked="True" Click="Click_ToggleColumn" Tag="dpst" />
+                    <ToggleMenuFlyoutItem Text="Verbindungen" IsChecked="True" Click="Click_ToggleColumn" Tag="connections" />
+                </MenuFlyout>
+            </toolkit:DataGrid.ContextFlyout>
             <toolkit:DataGrid.Columns>
-                <toolkit:DataGridTemplateColumn x:Uid="/Groups/LComsNumb" CanUserSort="False" Tag="number" Width="SizeToCells">
-                    <toolkit:DataGridTemplateColumn.CellTemplate>
-                        <DataTemplate>
-                            <Border Background="{Binding BackgroundBrush}">
-                                <TextBlock Text="{Binding Number}" VerticalAlignment="Center" HorizontalAlignment="Center" Margin="5 0" />
-                            </Border>
-                        </DataTemplate>
-                    </toolkit:DataGridTemplateColumn.CellTemplate>
-                </toolkit:DataGridTemplateColumn>
-                <toolkit:DataGridTextColumn x:Uid="/Groups/LComsName" MinWidth="160" Tag="name" Width="SizeToCells" Binding="{Binding DisplayName}" />
-                <toolkit:DataGridTextColumn x:Uid="/Groups/LComsFunc" MinWidth="160" Tag="func" Width="SizeToCells" Binding="{Binding Function}" />
-                <toolkit:DataGridTextColumn x:Uid="/Groups/LComsConn" MinWidth="100" Tag="connections" Width="SizeToCells" Binding="{Binding Connections}" />
-                <toolkit:DataGridTextColumn x:Uid="/Groups/ClistDPT" Tag="dpt" Width="SizeToCells" Binding="{Binding DP_Full}" />
+                <toolkit:DataGridTextColumn x:Uid="/Groups/LComsNumb" FontSize="13" Tag="numb" Width="SizeToCells" Binding="{Binding Number}" />
+                <toolkit:DataGridTextColumn x:Uid="/Groups/LComsName" FontSize="13" MinWidth="160" Tag="name" Width="SizeToCells" Binding="{Binding DisplayName}" />
+                <toolkit:DataGridTextColumn x:Uid="/Groups/LComsFunc" FontSize="13" MinWidth="160" Tag="func" Width="SizeToCells" Binding="{Binding Function}" />
+                <toolkit:DataGridTextColumn x:Uid="/Groups/LComsDpst" FontSize="13" MinWidth="160" Tag="dpst" Width="SizeToCells" Binding="{Binding DataPointSubType.Name}" />
+                <toolkit:DataGridTextColumn x:Uid="/Groups/LComsConn" FontSize="13" MinWidth="100" Tag="connections" Width="SizeToCells" Binding="{Binding Connections}" />
             </toolkit:DataGrid.Columns>
         </toolkit:DataGrid>
 
@@ -285,7 +283,8 @@
                 </TextBlock>
                 <TextBlock Margin="10 5">
                     <Run Text="Datentyp:" />
-                    <Run x:Name="OutABI_DPT" Text="..." />
+                    <Run Text="{Binding SelectedGroup.DataPointSubType.TypeNumbers}" />
+                    <Run Text="{Binding SelectedGroup.DataPointSubType.Name}" />
                 </TextBlock>
             </StackPanel>
         </Grid>

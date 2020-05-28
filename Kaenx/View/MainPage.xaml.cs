@@ -168,7 +168,7 @@ namespace Kaenx.View
             Project project;
             try
             {
-                project = SaveHelper.LoadProject(helper);
+                project = await SaveHelper.LoadProject(helper);
             }
             catch(Exception ex)
             {

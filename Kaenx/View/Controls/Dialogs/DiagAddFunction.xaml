@@ -42,7 +42,11 @@
                 <DataTemplate x:DataType="localB:FunctionGroup">
                     <StackPanel>
                         <TextBlock Text="{Binding Name}" FontSize="14" />
-                        <TextBlock Text="hier kommt der Datentyp hin" FontSize="10" Foreground="Gray" />
+                        <TextBlock FontSize="10" Foreground="Gray">
+                            <Run Text="DataPoint:" />
+                            <Run Text="{Binding DPST.TypeNumbers}" />
+                            <Run Text="{Binding DPST.Name}" />
+                        </TextBlock>
                     </StackPanel>
                 </DataTemplate>
             </ListView.ItemTemplate>

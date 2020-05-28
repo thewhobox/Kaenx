@@ -1,4 +1,6 @@
-﻿using Kaenx.Classes.Buildings;
+﻿using Kaenx.Classes;
+using Kaenx.Classes.Buildings;
+using Kaenx.Classes.Helper;
 using Microsoft.Toolkit.Uwp.Helpers;
 using System;
 using System.Collections.Generic;
@@ -6,6 +8,8 @@ using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices.WindowsRuntime;
+using System.Threading.Tasks;
+using System.Xml.Linq;
 using Windows.Foundation;
 using Windows.Foundation.Collections;
 using Windows.Storage;
@@ -34,6 +38,7 @@ namespace Kaenx.View.Controls.Dialogs
 
         private async void Load()
         {
+            Dictionary<string, Dictionary<string, DataPointSubType>> DPSTs = await SaveHelper.GenerateDatapoints();
             StorageFile file;
 
             if (await ApplicationData.Current.RoamingFolder.FileExistsAsync("Functions.json"))
@@ -46,16 +51,16 @@ namespace Kaenx.View.Controls.Dialogs
 
                 List<Function> functions = new List<Function>();
                 Function f = new Function() { Name = "Schalten" };
-                f.Subs.Add(new FunctionGroup(f) { Name = "Schalten" });
-                f.Subs.Add(new FunctionGroup(f) { Name = "Status" });
+                f.Subs.Add(new FunctionGroup(f) { Name = "Schalten", DPST = DPSTs["1"]["1"] });
+                f.Subs.Add(new FunctionGroup(f) { Name = "Status", DPST = DPSTs["1"]["1"] });
                 functions.Add(f);
 
                 f = new Function() { Name = "Dimmen" };
-                f.Subs.Add(new FunctionGroup(f) { Name = "Schalten" });
-                f.Subs.Add(new FunctionGroup(f) { Name = "Schalten Status" });
-                f.Subs.Add(new FunctionGroup(f) { Name = "Dimmen Relativ" });
-                f.Subs.Add(new FunctionGroup(f) { Name = "Dimmen Absolut" });
-                f.Subs.Add(new FunctionGroup(f) { Name = "Dimmen Wert" });
+                f.Subs.Add(new FunctionGroup(f) { Name = "Schalten", DPST = DPSTs["1"]["1"] });
+                f.Subs.Add(new FunctionGroup(f) { Name = "Schalten Status", DPST = DPSTs["1"]["1"] });
+                f.Subs.Add(new FunctionGroup(f) { Name = "Dimmen Relativ", DPST = DPSTs["3"]["7"] });
+                f.Subs.Add(new FunctionGroup(f) { Name = "Dimmen Absolut", DPST = DPSTs["5"]["1"] });
+                f.Subs.Add(new FunctionGroup(f) { Name = "Dimmen Wert", DPST = DPSTs["5"]["1"] });
                 functions.Add(f);
 
                 string jsonList = Newtonsoft.Json.JsonConvert.SerializeObject(functions);
