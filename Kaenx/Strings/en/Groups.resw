@@ -174,9 +174,6 @@
   <data name="NewGroupMiddle" xml:space="preserve">
     <value>New Middle Group</value>
   </data>
-  <data name="ToolAddMain.Label" xml:space="preserve">
-    <value>GA</value>
-  </data>
   <data name="ToolView.Label" xml:space="preserve">
     <value>View</value>
   </data>
@@ -194,5 +191,26 @@
   </data>
   <data name="LComsDpst.Header" xml:space="preserve">
     <value>DataPointType</value>
+  </data>
+  <data name="GListContextEdit.Text" xml:space="preserve">
+    <value>Edit</value>
+  </data>
+  <data name="GListContextFloor.Text" xml:space="preserve">
+    <value>Floor</value>
+  </data>
+  <data name="GListContextFunction.Text" xml:space="preserve">
+    <value>Function</value>
+  </data>
+  <data name="GListContextRoom.Text" xml:space="preserve">
+    <value>Room</value>
+  </data>
+  <data name="InfoAddr.Text" xml:space="preserve">
+    <value>Address:</value>
+  </data>
+  <data name="InfoDpt.Text" xml:space="preserve">
+    <value>DataPointType:</value>
+  </data>
+  <data name="ToolAddB.Label" xml:space="preserve">
+    <value>Building</value>
   </data>
 </root>

@@ -169,7 +169,7 @@
     <value>Order Number</value>
   </data>
   <data name="DListManu.Header" xml:space="preserve">
-    <value>Hersteller</value>
+    <value>Manufacturer</value>
   </data>
   <data name="ImportAll.Content" xml:space="preserve">
     <value>All</value>

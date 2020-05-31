@@ -71,7 +71,6 @@ namespace Kaenx.View
             OutGroupName.DataContext = this;
             OutGroupName2.DataContext = this;
             OutGroupInfo.DataContext = this;
-            GroupsInfo.DataContext = this;
 
             defaultDevice.Name = loader.GetString("MsgSelectDevice");
             defaultGroup.Name = loader.GetString("MsgSelectGroup");
@@ -221,15 +220,21 @@ namespace Kaenx.View
 
         private void ShowAssociatedComs()
         {
-            foreach (DeviceComObject dev in SelectedDevice.ComObjects)
-                dev.IsSelected = false;
+            if (SelectedDevice.DeviceId == null) return;
 
+            foreach (DeviceComObject dev in SelectedDevice.ComObjects)
+            {
+                dev.IsSelected = false;
+                dev.IsEnabled = true;
+                dev.IsOk = true;
+            }
 
             foreach (DeviceComObject com in SelectedDevice.ComObjects)
             {
                 com.IsSelected = SelectedGroup.ComObjects.Contains(com);
+                if (!BtnToggleFilter.IsOn) continue;
 
-                if(com.DataPointSubType.Number == "..." || SelectedGroup.DataPointSubType.Number == "..." || com.DataPointSubType.TypeNumbers != SelectedGroup.DataPointSubType.TypeNumbers)
+                if (com.DataPointSubType.Number == "..." || SelectedGroup.DataPointSubType.Number == "..." || com.DataPointSubType.TypeNumbers != SelectedGroup.DataPointSubType.TypeNumbers)
                 {
                     if(com.DataPointSubType.SizeInBit == SelectedGroup.DataPointSubType.SizeInBit)
                     {
@@ -443,6 +448,11 @@ namespace Kaenx.View
 
             DataGridColumn column = ListComs.Columns.Single(c => c.Tag.ToString() == item.Tag.ToString());
             column.Visibility = item.IsChecked ? Visibility.Visible : Visibility.Collapsed;
+        }
+
+        private void ToggleFilter(object sender, RoutedEventArgs e)
+        {
+            ShowAssociatedComs();
         }
     }
 }

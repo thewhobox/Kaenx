@@ -162,7 +162,7 @@
                 </ListView>
             </toolkit:TabViewItem>
 
-            <toolkit:TabViewItem x:Name="TabConns" Header="Schnittstelle" IsSelected="{Binding ConnIsSelected, Mode=TwoWay}">
+            <toolkit:TabViewItem x:Name="TabConns" Header="Schnittstelle">
                 <Grid Margin="10 20">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="auto" />
