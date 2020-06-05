@@ -96,6 +96,13 @@ namespace Kaenx.View
 
             SelectedDevice = (LineDevice)args.InvokedItem;
             ShowAssociatedComs();
+            SelectedDevice.ComObjects.CollectionChanged += ComObjects_CollectionChanged;
+        }
+
+        private void ComObjects_CollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
+        {
+            ShowAssociatedComs();
+            Debug.WriteLine("Neu Berechnen");
         }
 
         private void ToggleExpert(object sender, RoutedEventArgs e)

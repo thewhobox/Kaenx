@@ -177,4 +177,7 @@
   <data name="BtnOpen.Text" xml:space="preserve">
     <value>Öffnen</value>
   </data>
+  <data name="NewCombo.Text" xml:space="preserve">
+    <value>Aus Standard-Icons:</value>
+  </data>
 </root>

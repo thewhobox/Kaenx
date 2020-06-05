@@ -5,7 +5,7 @@
   xmlns:desktop4="http://schemas.microsoft.com/appx/manifest/desktop/windows10/4"
   xmlns:iot2="http://schemas.microsoft.com/appx/manifest/iot/windows10/2"   
   IgnorableNamespaces="uap mp">
-  <Identity Name="55505Exe-Creation.KAENX" Publisher="CN=92410570-9637-4D05-BB82-BCB990CF0C1C" Version="0.0.36.0" />
+  <Identity Name="55505Exe-Creation.KAENX" Publisher="CN=92410570-9637-4D05-BB82-BCB990CF0C1C" Version="0.0.35.0" />
   <mp:PhoneIdentity PhoneProductId="d5ad105d-c5a0-4668-a9e1-ffdd84ab2e9f" PhonePublisherId="00000000-0000-0000-0000-000000000000" />
   <Properties>
     <DisplayName>KAENX</DisplayName>

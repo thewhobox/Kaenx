@@ -306,7 +306,7 @@ namespace Kaenx.Classes.Bus
         {
             try
             {
-                PropertyChanged.Invoke(this, new PropertyChangedEventArgs(propName));
+                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propName));
             } catch
             {
                 _ = App._dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Low, () =>

@@ -1510,7 +1510,7 @@ namespace Kaenx.Classes.Helper
             await Task.Delay(10);
             sw = new Stopwatch();
             sw.Start();
-            SaveHelper.GenerateDefaultComs(adds);
+            await SaveHelper.GenerateDefaultComs(adds);
             sw.Stop();
             Debug.WriteLine("Generate Coms: " + sw.Elapsed.TotalSeconds);
 

@@ -1,4 +1,5 @@
-﻿using Kaenx.Classes.Bus.Data;
+﻿using Kaenx.Classes.Buildings;
+using Kaenx.Classes.Bus.Data;
 using Kaenx.Classes.Dynamic;
 using Kaenx.Classes.Helper;
 using Kaenx.Classes.Project;
@@ -8,6 +9,7 @@ using Kaenx.Konnect;
 using Kaenx.Konnect.Addresses;
 using Kaenx.Konnect.Builders;
 using Kaenx.Konnect.Classes;
+using Kaenx.View;
 using Microsoft.AppCenter.Analytics;
 using Serilog;
 using System;
@@ -18,6 +20,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Xml.Linq;
@@ -642,8 +645,25 @@ namespace Kaenx.Classes.Bus.Actions
                 if (!coms.ContainsKey(com.ComId))
                     coms.Add(com.ComId, com);
 
+            Dictionary<string, FunctionGroup> groupsMap = new Dictionary<string, FunctionGroup>();
+
+            foreach (Building building in SaveHelper._project.Area.Buildings)
+                foreach (Floor floor in building.Floors)
+                    foreach (Room room in floor.Rooms)
+                        foreach (Function func in room.Functions)
+                            foreach (FunctionGroup funcG in func.Subs)
+                                if (!groupsMap.ContainsKey(funcG.Address.ToString()))
+                                    groupsMap.Add(funcG.Address.ToString(), funcG);
+
+            bool flag = false;
+
             foreach (DeviceComObject dcom in toAdd)
             {
+                List<string> groupIds = new List<string>();
+
+                if (CO2GA.ContainsKey(dcom.Number))
+                    groupIds = CO2GA[dcom.Number];
+
                 if (dcom.Name.Contains("{{"))
                 {
                     ParamBinding bind = Bindings.Single(b => b.Hash == "CO:" + dcom.Id);
@@ -666,12 +686,30 @@ namespace Kaenx.Classes.Bus.Actions
                 ComObject com = new ComObject();
                 com.ComId = dcom.Id;
                 com.DeviceId = Device.UId;
+
+                if (groupIds.Count > 0) com.Groups = string.Join(",", groupIds);
+                foreach(string groupId in groupIds)
+                {
+                    if (groupsMap.ContainsKey(groupId))
+                    {
+                        dcom.Groups.Add(groupsMap[groupId]);
+                        groupsMap[groupId].ComObjects.Add(dcom);
+                    } else
+                    {
+                        flag = true;
+                    }
+                }
+
                 _contextP.ComObjects.Add(com);
             }
+
 
             await App._dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Normal, () =>
             {
                 Device.ComObjects.Sort(s => s.Number);
+
+                if (flag)
+                    ViewHelper.Instance.ShowNotification("main", "Es konnten einige Gruppenadressen nicht zugeordnet werden, da diese nicht im Projekt existieren.", 4000, ViewHelper.MessageType.Warning);
             });
             _contextP.SaveChanges();
         }

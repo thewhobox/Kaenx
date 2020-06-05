@@ -27,7 +27,24 @@
                         <Setter Target="VB2.Height" Value="100" />
                         <Setter Target="VB3.Height" Value="100" />
                         <Setter Target="VB4.Height" Value="100" />
-                        <Setter Target="DiagGrid.Height" Value="600" />
+                        <Setter Target="VB5.Height" Value="100" />
+                        <Setter Target="VB6.Height" Value="100" />
+                        <Setter Target="DiagGrid.Margin" Value="30" />
+                    </VisualState.Setters>
+                </VisualState>
+                <VisualState>
+                    <VisualState.StateTriggers>
+                        <AdaptiveTrigger MinWindowWidth="1000" />
+                    </VisualState.StateTriggers>
+                    <VisualState.Setters>
+                        <Setter Target="LogoImage.Height" Value="270" />
+                        <Setter Target="VB1.Height" Value="100" />
+                        <Setter Target="VB2.Height" Value="100" />
+                        <Setter Target="VB3.Height" Value="100" />
+                        <Setter Target="VB4.Height" Value="100" />
+                        <Setter Target="VB5.Height" Value="100" />
+                        <Setter Target="VB6.Height" Value="100" />
+                        <Setter Target="DiagGrid.Height" Value="800" />
                         <Setter Target="DiagGrid.Width" Value="700" />
                     </VisualState.Setters>
                 </VisualState>
@@ -64,6 +81,7 @@
                 </Grid.Resources>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition />
+                    <ColumnDefinition Width="auto" />
                     <ColumnDefinition Width="auto" />
                     <ColumnDefinition Width="auto" />
                     <ColumnDefinition Width="auto" />
@@ -145,7 +163,7 @@
                 </GridView.ItemsPanel>
                 <GridView.ItemTemplate>
                     <DataTemplate>
-                        <Grid x:Name="GridTemplate" RightTapped="GridTemplate_RightTapped" DoubleTapped="GridTemplate_DoubleTapped" IsDoubleTapEnabled="True" IsTapEnabled="True" Height="240" Width="240" BorderBrush="LightGray" BorderThickness="1">
+                        <Grid x:Name="GridTemplate" RightTapped="GridTemplate_RightTapped" DoubleTapped="GridTemplate_DoubleTapped" IsDoubleTapEnabled="True" IsTapEnabled="True" Height="150" Width="150" BorderBrush="LightGray" BorderThickness="1">
                             <Grid.RowDefinitions>
                                 <RowDefinition />
                                 <RowDefinition Height="auto" />
@@ -220,20 +238,21 @@
                 <TextBox x:Uid="/MainPage/NewNameIn" Grid.Row="1" Grid.Column="1" x:Name="InName" />
 
                 <TextBlock x:Uid="/MainPage/NewPath" Grid.Row="2" />
-                <ComboBox  Grid.Row="2" Grid.Column="1" x:Name="InConn" Margin="0 5" ItemsSource="{Binding ConnectionsList}" DisplayMemberPath="Name" />
+                <ComboBox  Grid.Row="2" Grid.Column="1" x:Name="InConn" Margin="0 5" ItemsSource="{Binding ConnectionsList}" DisplayMemberPath="Name" HorizontalAlignment="Stretch" />
 
                 <TextBlock x:Uid="/MainPage/NewImage" Grid.Row="3" />
                 <StackPanel Grid.Row="3" Grid.Column="1" Orientation="Horizontal">
                     <Button x:Uid="/MainPage/NewImageFile" Click="ClickChangePicFile" Margin="0 0 10 0" />
-                    <Button x:Uid="/MainPage/NewImageStandard" Click="ClickChangePicStandard" Margin="0 0 10 0" />
-                    <ComboBox x:Name="DiagStandard">
+                    <!--<Button x:Uid="/MainPage/NewImageStandard" Click="ClickChangePicStandard" Margin="0 0 10 0" />-->
+                    <TextBlock x:Uid="/MainPage/NewCombo" Margin="20 0 10 0" />
+                    <ComboBox x:Name="DiagStandard" SelectionChanged="DiagStandard_SelectionChanged">
                         <ComboBoxItem x:Uid="/MainPage/NewImageHouse" Tag="home" IsSelected="True" />
                         <ComboBoxItem x:Uid="/MainPage/NewImageSkyline" Tag="skyline" />
                         <ComboBoxItem x:Uid="/MainPage/NewImageChurch" Tag="church" />
                     </ComboBox>
                 </StackPanel>
 
-                <toolkit:ImageCropper x:Name="Cropper" Grid.Row="4" Grid.ColumnSpan="2" Margin="0 20" AspectRatio="1" Visibility="Collapsed" />
+                <toolkit:ImageCropper x:Name="Cropper" Grid.Row="4" Grid.ColumnSpan="2" AspectRatio="1" Margin="0 20" Visibility="Collapsed" />
                 <Image x:Name="CropperStandard" Grid.Row="4" Grid.ColumnSpan="2" Source="/Assets/ProjectImgs/home.png" MaxHeight="300" />
 
                 <Grid Grid.Row="5" Grid.ColumnSpan="2" VerticalAlignment="Bottom">

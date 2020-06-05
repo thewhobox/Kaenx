@@ -22,7 +22,7 @@
     <GenerateAppInstallerFile>False</GenerateAppInstallerFile>
     <AppxAutoIncrementPackageRevision>False</AppxAutoIncrementPackageRevision>
     <AppxBundle>Always</AppxBundle>
-    <AppxBundlePlatforms>x64</AppxBundlePlatforms>
+    <AppxBundlePlatforms>x86|x64|arm</AppxBundlePlatforms>
     <AppInstallerUpdateFrequency>0</AppInstallerUpdateFrequency>
     <AppInstallerCheckForUpdateFrequency>OnApplicationRun</AppInstallerCheckForUpdateFrequency>
     <PackageCertificateThumbprint>C554126408FAF38E210787F6EC62EC5E77D59B00</PackageCertificateThumbprint>
@@ -526,10 +526,6 @@
     <ProjectReference Include="..\..\Kaenx.Konnect\Kaenx.Konnect.csproj">
       <Project>{dc75fe5e-7c97-4422-8348-dcfb0c3af35f}</Project>
       <Name>Kaenx.Konnect</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\Kaenx.DataContext\Kaenx.DataContext.csproj">
-      <Project>{b5a8a078-65e2-4621-9d3c-1c7ce248926d}</Project>
-      <Name>Kaenx.DataContext</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup />

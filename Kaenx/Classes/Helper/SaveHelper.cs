@@ -1178,13 +1178,14 @@ namespace Kaenx.Classes.Helper
         }
 
 
-        public static void GenerateDefaultComs(AppAdditional adds)
+        public static async Task GenerateDefaultComs(AppAdditional adds)
         {
             List<DeviceComObject> comObjects = new List<DeviceComObject>();
             XDocument dynamic = XDocument.Parse(System.Text.Encoding.UTF8.GetString(adds.Dynamic));
             IEnumerable<XElement> elements = dynamic.Root.Descendants(XName.Get("ComObjectRefRef", dynamic.Root.Name.NamespaceName));
             Dictionary<string, AppComObject> comobjects = new Dictionary<string, AppComObject>();
-            
+            Dictionary<string, Dictionary<string, DataPointSubType>> DPST = await SaveHelper.GenerateDatapoints();
+
             foreach (AppComObject com in contextC.AppComObjects)
                 comobjects.Add(com.Id, com);
 
@@ -1194,6 +1195,16 @@ namespace Kaenx.Classes.Helper
                 if (appCom.Text == "Dummy") continue;
 
                 DeviceComObject comobject = new DeviceComObject(appCom);
+
+                if(appCom.DatapointSub == -1)
+                {
+                    comobject.DataPointSubType = DPST[appCom.Datapoint.ToString()]["xxx"];
+                }
+                else
+                {
+                    comobject.DataPointSubType = DPST[appCom.Datapoint.ToString()][appCom.DatapointSub.ToString()];
+                }
+
                 comobject.Conditions = GetConditions(xcom);
                 comObjects.Add(comobject);
             }

@@ -58,36 +58,24 @@ namespace Kaenx.View
             try
             {
                 base.OnNavigatedTo(e);
-                Log.Information("WorkdeskEasy Base");
                 CurrentProject = (Kaenx.Classes.Project.Project)e.Parameter;
-                Log.Information("WorkdeskEasy CurrentProject");
                 ApplicationView.GetForCurrentView().Title = CurrentProject.Name;
-                Log.Information("WorkdeskEasy SetTitle");
 
                 ViewHelper.Instance.OnShowNotification += Instance_OnShowNotification;
-                Log.Information("WorkdeskEasy Subscribe Notification");
 
                 Classes.Project.UpdateManager.Instance.SetProject(CurrentProject);
-                Log.Information("WorkdeskEasy Setproject");
                 Classes.Project.UpdateManager.Instance.CountUpdates();
-                Log.Information("WorkdeskEasy CountUpdates");
 
                 _pages.Add("home", new Home() { DataContext = CurrentProject });
-                Log.Information("WorkdeskEasy Init home");
                 _pages.Add("catalog", new Catalog());
-                Log.Information("WorkdeskEasy Init catalog");
                 _pages.Add("topologie", new Topologie() { DataContext = CurrentProject.Lines, _project = CurrentProject });
-                Log.Information("WorkdeskEasy Init topologie");
                 try
                 {
                     _pages.Add("groups", new Groups() { DataContext = CurrentProject });
-                    Log.Information("WorkdeskEasy Init groups");
                 }catch(Exception ex)
                 {
-                    Log.Warning("Fehler beim Laden hier mehr INfos:");
                     Log.Information(ex.Message);
                     Log.Information(ex.StackTrace);
-                    Log.Error(ex, "Fehler beim Laden fon Gruppen");
                     if(ex.InnerException != null)
                         Log.Error(ex.InnerException, "Inner Exception");
                 }
@@ -97,7 +85,7 @@ namespace Kaenx.View
                 Log.Information("WorkdeskEasy Init settings");
                 App._pages = _pages;
 
-                InfoInterfaces.DataContext = Classes.Bus.BusConnection.Instance;
+                //InfoInterfaces.DataContext = Classes.Bus.BusConnection.Instance;
                 InfoBus.DataContext = Classes.Bus.BusConnection.Instance;
                 Log.Information("WorkdeskEasy DataContext");
 

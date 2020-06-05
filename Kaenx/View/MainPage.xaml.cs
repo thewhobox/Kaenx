@@ -5,7 +5,9 @@ using Kaenx.Classes.Project;
 using Kaenx.DataContext.Local;
 using Kaenx.DataContext.Project;
 using Kaenx.Konnect;
+using Kaenx.Konnect.Addresses;
 using Kaenx.Konnect.Builders;
+using Kaenx.Konnect.Classes;
 using Kaenx.View.Controls;
 using Kaenx.View.Controls.Dialogs;
 using Microsoft.AppCenter.Analytics;
@@ -245,6 +247,7 @@ namespace Kaenx.View
             picker.FileTypeFilter.Add(".jpg");
             picker.FileTypeFilter.Add(".png");
             StorageFile file = await picker.PickSingleFileAsync();
+            if (file == null) return;
             _ = Cropper.LoadImageFromFile(file);
             Cropper.Visibility = Visibility.Visible;
             CropperStandard.Visibility = Visibility.Collapsed;
@@ -472,6 +475,18 @@ namespace Kaenx.View
         private void Dev_InputReportReceived(HidDevice sender, HidInputReportReceivedEventArgs args)
         {
             Debug.WriteLine("Input Report " + args.Report.Id + ": " + args.Report.Data.ToString());
+        }
+
+        private void DiagStandard_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (CropperStandard == null) return;
+
+            string id = ((ComboBoxItem)DiagStandard.SelectedItem).Tag.ToString();
+            BitmapImage image = new BitmapImage() { UriSource = new Uri("ms-appx:///Assets/ProjectImgs/" + id + ".png") };
+            CropperStandard.Source = image;
+
+            Cropper.Visibility = Visibility.Collapsed;
+            CropperStandard.Visibility = Visibility.Visible;
         }
     }
 }
