@@ -256,6 +256,8 @@
         </Grid.ColumnDefinitions>
 
         <StackPanel Grid.ColumnSpan="2">
+            <TextBox x:Name="InTestName" />
+            <Button Content="Ausgeben" Click="Button_Click" />
             <ToggleSwitch x:Name="ShowComsToggler" Grid.ColumnSpan="2" HorizontalAlignment="Center" OnContent="Ansicht Kommunikationsobjekte" OffContent="Ansicht Kommunikationsobjekte"  />
         </StackPanel>
 

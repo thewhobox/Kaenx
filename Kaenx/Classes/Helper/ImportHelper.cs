@@ -1500,7 +1500,7 @@ namespace Kaenx.Classes.Helper
             await Task.Delay(10);
             Stopwatch sw = new Stopwatch();
             sw.Start();
-            SaveHelper.GenerateDynamic(adds);
+            Dictionary<string, Dynamic.ViewParamModel> Id2Param = SaveHelper.GenerateDynamic(adds);
             sw.Stop();
             Debug.WriteLine("Generate Dyn: " + sw.Elapsed.TotalSeconds);
 
@@ -1510,7 +1510,7 @@ namespace Kaenx.Classes.Helper
             await Task.Delay(10);
             sw = new Stopwatch();
             sw.Start();
-            await SaveHelper.GenerateDefaultComs(adds);
+            await SaveHelper.GenerateDefaultComs(adds, Id2Param);
             sw.Stop();
             Debug.WriteLine("Generate Coms: " + sw.Elapsed.TotalSeconds);
 

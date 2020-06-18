@@ -572,7 +572,7 @@ namespace Kaenx.Classes.Helper
         }
 
 
-        public static void GenerateDynamic(AppAdditional adds)
+        public static Dictionary<string, ViewParamModel> GenerateDynamic(AppAdditional adds)
         {
             XDocument dynamic = XDocument.Parse(Encoding.UTF8.GetString(adds.Dynamic));
             XmlReader reader = dynamic.CreateReader();
@@ -905,6 +905,8 @@ namespace Kaenx.Classes.Helper
             Ref2Bindings = null;
             updatedComs.Clear();
             updatedComs = null;
+
+            return Id2Param;
         }
 
         private static void GetChildItems(XElement parent, ParameterBlock block, string textRefId, string groupText)
@@ -1178,7 +1180,7 @@ namespace Kaenx.Classes.Helper
         }
 
 
-        public static async Task GenerateDefaultComs(AppAdditional adds)
+        public static async Task GenerateDefaultComs(AppAdditional adds, Dictionary<string, Dynamic.ViewParamModel> Id2Param)
         {
             List<DeviceComObject> comObjects = new List<DeviceComObject>();
             XDocument dynamic = XDocument.Parse(System.Text.Encoding.UTF8.GetString(adds.Dynamic));
@@ -1210,11 +1212,11 @@ namespace Kaenx.Classes.Helper
             }
 
             adds.ComsAll = ObjectToByteArray(comObjects);
-            adds.ComsDefault = ObjectToByteArray(GetDefaultComs(comObjects));
+            adds.ComsDefault = ObjectToByteArray(GetDefaultComs(comObjects, Id2Param));
         }
 
-
-        public static bool CheckConditions(List<ParamCondition> conds, Dictionary<string, ViewParamModel> Id2Param = null)
+        //TODO Id2Param notwendig machen!
+        public static bool CheckConditions(List<ParamCondition> conds, Dictionary<string, ViewParamModel> Id2Param)
         {
             Dictionary<string, string> tempValues = new Dictionary<string, string>();
             bool flag = true;
@@ -1226,6 +1228,13 @@ namespace Kaenx.Classes.Helper
                 if (Id2Param != null && Id2Param.ContainsKey(cond.SourceId))
                 {
                     paraValue = Id2Param[cond.SourceId].Value;
+
+                    ViewParamModel model = Id2Param[cond.SourceId];
+                    if (!model.Parameters.Any(p => p.Visible == Visibility.Visible))
+                    {
+                        flag = false;
+                        continue;
+                    }
                 }
                 else
                 {
@@ -1247,10 +1256,40 @@ namespace Kaenx.Classes.Helper
                         break;
 
                     case ConditionOperation.Default:
-                        //if(!checkDefault)
-                        //{
+                        string[] defConds = cond.Values.Split(",");
+                        int paraValInt = int.Parse(paraValue);
 
-                        //}
+                        foreach(string defCond in defConds)
+                        {
+                            if (!flag) break;
+
+                            if (defCond.StartsWith("<="))
+                            {
+                                int def = int.Parse(defCond.Substring(2));
+                                if (paraValInt <= def) flag = false;
+                            }
+                            else if (defCond.StartsWith("<"))
+                            {
+                                int def = int.Parse(defCond.Substring(1));
+                                if (paraValInt < def) flag = false;
+                            }
+                            else if (defCond.StartsWith(">="))
+                            {
+                                int def = int.Parse(defCond.Substring(2));
+                                if (paraValInt >= def) flag = false;
+                            }
+                            else if (defCond.StartsWith(">"))
+                            {
+                                int def = int.Parse(defCond.Substring(1));
+                                if (paraValInt > def) flag = false;
+                            }
+                            else
+                            {
+                                int def = int.Parse(defCond);
+                                if (paraValInt == def) flag = false;
+                            }
+
+                        }
                         break;
 
                     case ConditionOperation.NotEqual:
@@ -1420,7 +1459,7 @@ namespace Kaenx.Classes.Helper
             return (conds, "");
         }
 
-        private static List<DeviceComObject> GetDefaultComs(List<DeviceComObject> comObjects)
+        private static List<DeviceComObject> GetDefaultComs(List<DeviceComObject> comObjects, Dictionary<string, ViewParamModel>  Id2Param)
         {
             Dictionary<string, string> tempValues = new Dictionary<string, string>();
             ObservableCollection<DeviceComObject> defObjs = new ObservableCollection<DeviceComObject>();
@@ -1433,7 +1472,7 @@ namespace Kaenx.Classes.Helper
                     continue;
                 }
 
-                if (CheckConditions(obj.Conditions))
+                if (CheckConditions(obj.Conditions, Id2Param)) //TODO ID2Param iwie generieren
                     defObjs.Add(obj);
             }
             defObjs.Sort(s => s.Number);

@@ -523,6 +523,10 @@
     <WCFMetadata Include="Connected Services\" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\Kaenx.DataContext\Kaenx.DataContext.csproj">
+      <Project>{976D8A24-ECA9-483F-9481-2F12BC425E28}</Project>
+      <Name>Kaenx.DataContext</Name>
+    </ProjectReference>
     <ProjectReference Include="..\..\Kaenx.Konnect\Kaenx.Konnect.csproj">
       <Project>{dc75fe5e-7c97-4422-8348-dcfb0c3af35f}</Project>
       <Name>Kaenx.Konnect</Name>

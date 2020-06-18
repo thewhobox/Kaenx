@@ -655,7 +655,7 @@ namespace Kaenx.Classes.Bus.Actions
                                 if (!groupsMap.ContainsKey(funcG.Address.ToString()))
                                     groupsMap.Add(funcG.Address.ToString(), funcG);
 
-            bool flag = false;
+            bool flagGroups = false;
 
             foreach (DeviceComObject dcom in toAdd)
             {
@@ -696,7 +696,7 @@ namespace Kaenx.Classes.Bus.Actions
                         groupsMap[groupId].ComObjects.Add(dcom);
                     } else
                     {
-                        flag = true;
+                        flagGroups = true;
                     }
                 }
 
@@ -708,7 +708,7 @@ namespace Kaenx.Classes.Bus.Actions
             {
                 Device.ComObjects.Sort(s => s.Number);
 
-                if (flag)
+                if (flagGroups)
                     ViewHelper.Instance.ShowNotification("main", "Es konnten einige Gruppenadressen nicht zugeordnet werden, da diese nicht im Projekt existieren.", 4000, ViewHelper.MessageType.Warning);
             });
             _contextP.SaveChanges();

@@ -7,6 +7,7 @@ using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices.WindowsRuntime;
+using System.Threading.Tasks;
 using Windows.Foundation;
 using Windows.Foundation.Collections;
 using Windows.UI.Xaml;
@@ -50,8 +51,9 @@ namespace Kaenx.View.Controls.Dialogs
             SelectedProj = null;
         }
 
-        private void ComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        private async void ComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
+            await Task.Delay(1);
             LocalConnectionProject conn = (sender as ComboBox).SelectedItem as LocalConnectionProject;
             ProjectContext contextP = new ProjectContext(conn);
 

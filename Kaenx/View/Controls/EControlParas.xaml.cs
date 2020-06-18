@@ -461,5 +461,11 @@ namespace Kaenx.Views.Easy.Controls
             await Task.Delay(1);
         }
 
+        private void Button_Click(object sender, RoutedEventArgs e)
+        {
+            string paraId = SaveHelper.ShortId(InTestName.Text);
+            ViewParamModel model = Id2Param[paraId];
+            ViewHelper.Instance.ShowNotification("main", $"Val: {model.Value} - Text: {model.Parameters[0].Text}", 6000);
+        }
     }
 }
