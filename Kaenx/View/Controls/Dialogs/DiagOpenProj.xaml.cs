@@ -58,6 +58,7 @@ namespace Kaenx.View.Controls.Dialogs
             ProjectContext contextP = new ProjectContext(conn);
 
             SelectedConn = conn;
+            Projects.Clear();
 
             foreach (ProjectModel proj in contextP.Projects)
                 Projects.Add(proj);

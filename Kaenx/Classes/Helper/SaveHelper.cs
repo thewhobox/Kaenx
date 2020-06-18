@@ -1227,9 +1227,9 @@ namespace Kaenx.Classes.Helper
                 string paraValue = "";
                 if (Id2Param != null && Id2Param.ContainsKey(cond.SourceId))
                 {
-                    paraValue = Id2Param[cond.SourceId].Value;
-
                     ViewParamModel model = Id2Param[cond.SourceId];
+                    paraValue = model.Value;
+
                     if (!model.Parameters.Any(p => p.Visible == Visibility.Visible))
                     {
                         flag = false;
@@ -1288,7 +1288,6 @@ namespace Kaenx.Classes.Helper
                                 int def = int.Parse(defCond);
                                 if (paraValInt == def) flag = false;
                             }
-
                         }
                         break;
 

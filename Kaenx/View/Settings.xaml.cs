@@ -76,6 +76,7 @@ namespace Kaenx.View
 
         private void CurrentView_BackRequested(object sender, BackRequestedEventArgs e)
         {
+            e.Handled = true;
             App.Navigate(typeof(MainPage));
         }
     }
