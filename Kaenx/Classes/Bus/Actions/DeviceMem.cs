@@ -30,12 +30,8 @@ namespace Kaenx.Classes.Bus.Actions
         private bool _progressIsIndeterminate;
         private string _todoText;
         private DeviceConfigData _data = new DeviceConfigData();
-        private Dictionary<string, byte[]> mems = new Dictionary<string, byte[]>();
         private CancellationToken _token;
-        private CatalogContext _context = new CatalogContext();
         private BusDevice dev;
-        private List<int> connectedCOs = new List<int>();
-        private Dictionary<string, string> defParas = new Dictionary<string, string>();
 
         public string Type { get; } = "Geräte Speicher";
         public LineDevice Device { get; set; }

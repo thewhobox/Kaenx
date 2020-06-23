@@ -70,7 +70,7 @@ namespace Kaenx.Views.Easy.Controls
 
 
 
-        public LineDevice device { get; }
+        public LineDevice Device { get; }
         private CatalogContext _context = new CatalogContext();
         private ProjectContext _contextP = new ProjectContext(SaveHelper.connProject);
 
@@ -95,15 +95,16 @@ namespace Kaenx.Views.Easy.Controls
         Dictionary<string, ViewParamModel> Id2Param = new Dictionary<string, ViewParamModel>();
         Dictionary<string, IDynParameter> Hash2Param = new Dictionary<string, IDynParameter>();
         List<ParamBinding> Bindings;
+        List<AssignParameter> Assignments;
 
 
         public EControlParas(LineDevice dev)
         {
             this.InitializeComponent();
-            device = dev;
+            Device = dev;
             this.DataContext = this;
 
-            if (!_context.Applications.Any(a => a.Id == device.ApplicationId))
+            if (!_context.Applications.Any(a => a.Id == Device.ApplicationId))
             {
                 LoadRing.Visibility = Visibility.Collapsed;
                 ViewHelper.Instance.ShowNotification("main", "Achtung!!! Applikation konnte nicht gefunden werden. Bitte importieren Sie das Produkt erneut.", 4000, ViewHelper.MessageType.Error);
@@ -116,10 +117,10 @@ namespace Kaenx.Views.Easy.Controls
         public EControlParas(Classes.Bus.Data.DeviceConfigData data)
         {
             this.InitializeComponent();
-            device = data.Device;
+            Device = data.Device;
             this.DataContext = this;
 
-            device.ApplicationId = data.ApplicationId;
+            Device.ApplicationId = data.ApplicationId;
 
             this.SizeChanged += EControlParas2_SizeChanged;
         }
@@ -133,9 +134,9 @@ namespace Kaenx.Views.Easy.Controls
         {
             watch.Start();
 
-            if (_contextP.ChangesParam.Any(c => c.DeviceId == device.UId))
+            if (_contextP.ChangesParam.Any(c => c.DeviceId == Device.UId))
             {
-                var changes = _contextP.ChangesParam.Where(c => c.DeviceId == device.UId).OrderByDescending(c => c.StateId);
+                var changes = _contextP.ChangesParam.Where(c => c.DeviceId == Device.UId).OrderByDescending(c => c.StateId);
                 foreach (ChangeParamModel model in changes)
                 {
                     if (ParaChanges.ContainsKey(model.ParamId)) continue;
@@ -160,10 +161,11 @@ namespace Kaenx.Views.Easy.Controls
 
         private async Task Load()
         {
-            AppAdditional adds = _context.AppAdditionals.Single(a => a.Id == device.ApplicationId);
+            AppAdditional adds = _context.AppAdditionals.Single(a => a.Id == Device.ApplicationId);
             comObjects = SaveHelper.ByteArrayToObject<List<DeviceComObject>>(adds.ComsAll);
             Channels = SaveHelper.ByteArrayToObject<List<IDynChannel>>(adds.ParamsHelper, true);
             Bindings = SaveHelper.ByteArrayToObject<List<ParamBinding>>(adds.Bindings);
+            Assignments = SaveHelper.ByteArrayToObject<List<AssignParameter>>(adds.Assignments);
 
             foreach (IDynChannel ch in Channels)
             {
@@ -318,7 +320,7 @@ namespace Kaenx.Views.Easy.Controls
                     case "CO":
                         try
                         {
-                            DeviceComObject com = device.ComObjects.Single(c => c.Id == ids[1]);
+                            DeviceComObject com = Device.ComObjects.Single(c => c.Id == ids[1]);
                             if (string.IsNullOrEmpty(para.Value))
                                 com.DisplayName = com.Name.Replace("{{dyn}}", bind.DefaultText);
                             else
@@ -347,12 +349,12 @@ namespace Kaenx.Views.Easy.Controls
 
             ChangeParamModel change = new ChangeParamModel
             {
-                DeviceId = device.UId,
+                DeviceId = Device.UId,
                 ParamId = para.Id,
                 Value = para.Value
             };
 
-            device.LoadedApplication = false;
+            Device.LoadedApplication = false;
             ChangeHandler.Instance.ChangedParam(change);
         }
 
@@ -375,7 +377,7 @@ namespace Kaenx.Views.Easy.Controls
             }
 
             List<DeviceComObject> toDelete = new List<DeviceComObject>();
-            foreach (DeviceComObject cobj in device.ComObjects)
+            foreach (DeviceComObject cobj in Device.ComObjects)
                 if (!newObjs.Any(co => co.Id == cobj.Id) && cobj.Groups.Count != 0)
                     toDelete.Add(cobj);
 
@@ -407,12 +409,12 @@ namespace Kaenx.Views.Easy.Controls
             List<DeviceComObject> toAdd = new List<DeviceComObject>();
             foreach (DeviceComObject cobj in newObjs)
             {
-                if (!device.ComObjects.Any(co => co.Id == cobj.Id))
+                if (!Device.ComObjects.Any(co => co.Id == cobj.Id))
                     toAdd.Add(cobj);
             }
 
             List<DeviceComObject> toDelete = new List<DeviceComObject>();
-            foreach (DeviceComObject cobj in device.ComObjects)
+            foreach (DeviceComObject cobj in Device.ComObjects)
             {
                 if (!newObjs.Any(co => co.Id == cobj.Id))
                     toDelete.Add(cobj);
@@ -427,7 +429,7 @@ namespace Kaenx.Views.Easy.Controls
             {
                 ComObject com = coms[cobj.Id];
                 _contextP.ComObjects.Remove(com);
-                device.ComObjects.Remove(cobj);
+                Device.ComObjects.Remove(cobj);
             }
 
 
@@ -446,16 +448,18 @@ namespace Kaenx.Views.Easy.Controls
                 {
                     dcom.DisplayName = dcom.Name;
                 }
-                device.ComObjects.Add(dcom);
+                Device.ComObjects.Add(dcom);
 
 
-                ComObject com = new ComObject();
-                com.ComId = dcom.Id;
-                com.DeviceId = device.UId;
+                ComObject com = new ComObject
+                {
+                    ComId = dcom.Id,
+                    DeviceId = Device.UId
+                };
                 _contextP.ComObjects.Add(com);
             }
 
-            device.ComObjects.Sort(s => s.Number);
+            Device.ComObjects.Sort(s => s.Number);
             _contextP.SaveChanges();
 
             await Task.Delay(1);

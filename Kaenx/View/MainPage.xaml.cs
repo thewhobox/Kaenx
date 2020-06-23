@@ -62,7 +62,6 @@ namespace Kaenx.View
 
         private ResourceLoader loader = ResourceLoader.GetForCurrentView("MainPage");
         private ResourceLoader loaderG = ResourceLoader.GetForCurrentView("Global");
-        private ResourceLoader loaderD = ResourceLoader.GetForCurrentView("Dialogs");
 
         private bool _projectSelected = false;
         private LocalContext _contextL = new LocalContext();
@@ -96,14 +95,16 @@ namespace Kaenx.View
             LocalContext context = new LocalContext();
             foreach(LocalProject model in context.Projects.ToList())
             {
-                ProjectViewHelper helper = new ProjectViewHelper();
-                helper.Id = model.Id;
-                helper.Name = model.Name;
-                helper.Local = model;
-                helper.IsReconstruct = model.IsReconstruct;
-                helper.ProjectId = model.ProjectId;
+                ProjectViewHelper helper = new ProjectViewHelper
+                {
+                    Id = model.Id,
+                    Name = model.Name,
+                    Local = model,
+                    IsReconstruct = model.IsReconstruct,
+                    ProjectId = model.ProjectId
+                };
 
-                if(model.Thumbnail != null)
+                if (model.Thumbnail != null)
                 {
                     var wb = new WriteableBitmap(512,512);
                     using (Stream stream = wb.PixelBuffer.AsStream())
@@ -253,17 +254,6 @@ namespace Kaenx.View
             CropperStandard.Visibility = Visibility.Collapsed;
         }
 
-        private void ClickChangePicStandard(object sender, RoutedEventArgs e)
-        {
-            string id = ((ComboBoxItem)DiagStandard.SelectedItem).Tag.ToString();
-
-            BitmapImage image = new BitmapImage() { UriSource = new Uri("ms-appx:///Assets/ProjectImgs/" + id + ".png") };
-            CropperStandard.Source = image;
-
-            Cropper.Visibility = Visibility.Collapsed;
-            CropperStandard.Visibility = Visibility.Visible;
-        }
-
         private void CickDiagCancel(object sender, RoutedEventArgs e)
         {
             DiagNew.Visibility = Visibility.Collapsed;
@@ -275,10 +265,12 @@ namespace Kaenx.View
             await Task.Delay(1000);
             string tag = (sender as Button).Tag.ToString();
 
-            Project proj = new Project(InName.Text);
-            proj.Connection = (LocalConnectionProject)InConn.SelectedItem;
+            Project proj = new Project(InName.Text)
+            {
+                Connection = (LocalConnectionProject)InConn.SelectedItem
+            };
 
-            if(tag == "new")
+            if (tag == "new")
             {
                 Line Backbone = new Line(1, loaderG.GetString("Area"));
                 Backbone.Subs.Add(new LineMiddle(1, loaderG.GetString("Line") + " 1", Backbone));
@@ -318,10 +310,8 @@ namespace Kaenx.View
                     );
                     var sourcePixels = pixelData.DetachPixelData();
 
-                    using (var stream = newImage.PixelBuffer.AsStream())
-                    {
-                        await stream.WriteAsync(sourcePixels, 0, sourcePixels.Length);
-                    }
+                    using var stream = newImage.PixelBuffer.AsStream();
+                    await stream.WriteAsync(sourcePixels, 0, sourcePixels.Length);
                 }
 
                 image = newImage;
@@ -332,11 +322,9 @@ namespace Kaenx.View
             {
                 BitmapImage bmp = (BitmapImage)CropperStandard.Source;
                 RandomAccessStreamReference random = RandomAccessStreamReference.CreateFromUri(bmp.UriSour‌​ce);
-                using (IRandomAccessStream stream = await random.OpenReadAsync())
-                {
-                    image = new WriteableBitmap((int)bmp.PixelWidth, (int)bmp.PixelHeight);
-                    await image.SetSourceAsync(stream);
-                }
+                using IRandomAccessStream stream = await random.OpenReadAsync();
+                image = new WriteableBitmap((int)bmp.PixelWidth, (int)bmp.PixelHeight);
+                await image.SetSourceAsync(stream);
 
             }
             
@@ -353,12 +341,14 @@ namespace Kaenx.View
             proj.Id = SaveHelper.SaveProject(proj).Id;
 
 
-            LocalProject lp = new LocalProject();
-            lp.ProjectId = proj.Id;
-            lp.Name = proj.Name;
-            lp.Thumbnail = proj.Image;
-            lp.ConnectionId = proj.Connection.Id;
-            lp.IsReconstruct = tag == "rec";
+            LocalProject lp = new LocalProject
+            {
+                ProjectId = proj.Id,
+                Name = proj.Name,
+                Thumbnail = proj.Image,
+                ConnectionId = proj.Connection.Id,
+                IsReconstruct = tag == "rec"
+            };
             _contextL.Projects.Add(lp);
             _contextL.SaveChanges();
 
@@ -398,10 +388,10 @@ namespace Kaenx.View
             _currentFlyout.ShowAt((FrameworkElement)sender);
         }
 
-        private void GridItemTapped(object sender, TappedRoutedEventArgs e)
-        {
+        //private void GridItemTapped(object sender, TappedRoutedEventArgs e)
+        //{
 
-        }
+        //}
 
         private async void OpenProj(object sender, RoutedEventArgs e)
         {
@@ -409,23 +399,27 @@ namespace Kaenx.View
             await diag.ShowAsync();
             if (diag.SelectedProj == null) return;
 
-            LocalProject lp = new LocalProject();
-            lp.ProjectId = diag.SelectedProj.Id;
-            lp.Name = diag.SelectedProj.Name;
-            lp.Thumbnail = diag.SelectedProj.Image;
-            lp.ConnectionId = diag.SelectedConn.Id;
-            lp.IsReconstruct = false;
+            LocalProject lp = new LocalProject
+            {
+                ProjectId = diag.SelectedProj.Id,
+                Name = diag.SelectedProj.Name,
+                Thumbnail = diag.SelectedProj.Image,
+                ConnectionId = diag.SelectedConn.Id,
+                IsReconstruct = false
+            };
             _contextL.Projects.Add(lp);
             _contextL.SaveChanges();
 
 
 
-            ProjectViewHelper helper = new ProjectViewHelper();
-            helper.Id = lp.Id;
-            helper.Name = lp.Name;
-            helper.Local = lp;
-            helper.IsReconstruct = lp.IsReconstruct;
-            helper.ProjectId = lp.ProjectId;
+            ProjectViewHelper helper = new ProjectViewHelper
+            {
+                Id = lp.Id,
+                Name = lp.Name,
+                Local = lp,
+                IsReconstruct = lp.IsReconstruct,
+                ProjectId = lp.ProjectId
+            };
 
             if (lp.Thumbnail != null)
             {

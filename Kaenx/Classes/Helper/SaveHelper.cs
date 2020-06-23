@@ -147,10 +147,12 @@ namespace Kaenx.Classes.Helper
                             }
                             else
                             {
-                                com = new ComObject();
-                                com.ComId = comObj.Id;
-                                com.DeviceId = linedev.UId;
-                                com.Groups = string.Join(",", groupIds);
+                                com = new ComObject
+                                {
+                                    ComId = comObj.Id,
+                                    DeviceId = linedev.UId,
+                                    Groups = string.Join(",", groupIds)
+                                };
                                 contextProject.ComObjects.Add(com);
                             }
                         }
@@ -267,10 +269,12 @@ namespace Kaenx.Classes.Helper
                 }
                 else
                 {
-                    com = new ComObject();
-                    com.ComId = comObj.Id;
-                    com.DeviceId = linedev.UId;
-                    com.Groups = string.Join(",", groupIds);
+                    com = new ComObject
+                    {
+                        ComId = comObj.Id,
+                        DeviceId = linedev.UId,
+                        Groups = string.Join(",", groupIds)
+                    };
                     contextProject.ComObjects.Add(com);
                 }
             }
@@ -376,15 +380,13 @@ namespace Kaenx.Classes.Helper
 
                     foreach (LineDeviceModel ldm in contextProject.LineDevices.Where(l => l.ProjectId == helper.ProjectId && l.ParentId == lm.UId).OrderBy(l => l.Id))
                     {
-                        LineDevice ld = new LineDevice(ldm, lm, true);
-                        ld.DeviceId = ldm.DeviceId;
+                        LineDevice ld = new LineDevice(ldm, lm, true) { DeviceId = ldm.DeviceId };
 
 
                         foreach (ComObject com in contextProject.ComObjects.Where(co => co.DeviceId == ld.UId))
                         {
                             AppComObject comObj = contextC.AppComObjects.Single(c => c.Id == com.ComId);
-                            DeviceComObject dcom = new DeviceComObject(comObj);
-                            dcom.ParentDevice = ld;
+                            DeviceComObject dcom = new DeviceComObject(comObj) { ParentDevice = ld };
 
                             if (!string.IsNullOrEmpty(com.Groups))
                             {
@@ -519,23 +521,27 @@ namespace Kaenx.Classes.Helper
             IEnumerable<XElement> dpts = xml.Descendants(XName.Get("DatapointType", xml.Name.NamespaceName));
             foreach (XElement dpt in dpts)
             {
-                DataPointSubType dpstd = new DataPointSubType();
-                dpstd.Name = "";
-                dpstd.Number = "xxx";
-                dpstd.SizeInBit = int.Parse(dpt.Attribute("SizeInBit").Value);
                 string numb = dpt.Attribute("Number").Value;
-                dpstd.MainNumber = numb;
+                DataPointSubType dpstd = new DataPointSubType
+                {
+                    Name = "",
+                    Number = "xxx",
+                    SizeInBit = int.Parse(dpt.Attribute("SizeInBit").Value),
+                    MainNumber = numb
+                };
                 DPSTs.Add(numb, new Dictionary<string, DataPointSubType>());
                 DPSTs[numb].Add(dpstd.Number, dpstd);
 
                 foreach (XElement dpstE in dpt.Element(XName.Get("DatapointSubtypes", xml.Name.NamespaceName)).Elements())
                 {
-                    DataPointSubType dpst = new DataPointSubType();
-                    dpst.Name = dpstE.Attribute("Text").Value;
-                    dpst.Number = dpstE.Attribute("Number").Value;
-                    dpst.MainNumber = numb;
-                    dpst.Default = dpstE.Attribute("Default")?.Value == "true";
-                    dpst.SizeInBit = int.Parse(dpt.Attribute("SizeInBit").Value);
+                    DataPointSubType dpst = new DataPointSubType
+                    {
+                        Name = dpstE.Attribute("Text").Value,
+                        Number = dpstE.Attribute("Number").Value,
+                        MainNumber = numb,
+                        Default = dpstE.Attribute("Default")?.Value == "true",
+                        SizeInBit = int.Parse(dpt.Attribute("SizeInBit").Value)
+                    };
 
                     DPSTs[numb].Add(dpst.Number, dpst);
                 }
@@ -552,6 +558,7 @@ namespace Kaenx.Classes.Helper
         private static Dictionary<string, ParamBinding> Hash2Bindings;
         private static Dictionary<string, List<ParamBinding>> Ref2Bindings;
         private static List<string> updatedComs;
+        private static List<AssignParameter> Assignments;
 
         //Nochmal in ImportHelper
         public static string ShortId(string id)
@@ -580,6 +587,7 @@ namespace Kaenx.Classes.Helper
             updatedComs = new List<string>();
             Hash2Bindings = new Dictionary<string, ParamBinding>();
             Ref2Bindings = new Dictionary<string, List<ParamBinding>>();
+            Assignments = new List<AssignParameter>();
             Dictionary<string, XElement> Id2Element = new Dictionary<string, XElement>();
             Dictionary<string, ParameterBlock> Id2ParamBlock = new Dictionary<string, ParameterBlock>();
             List<IDynChannel> Channels = new List<IDynChannel>();
@@ -625,9 +633,11 @@ namespace Kaenx.Classes.Helper
                             Channels.Add(cib2);
                         } else
                         {
-                            ChannelBlock cb = new ChannelBlock();
-                            cb.Id = ShortId(reader.GetAttribute("Id"));
-                            cb.Name = reader.GetAttribute("Name");
+                            ChannelBlock cb = new ChannelBlock
+                            {
+                                Id = ShortId(reader.GetAttribute("Id")),
+                                Name = reader.GetAttribute("Name")
+                            };
                             if (reader.GetAttribute("Access") == "None")
                             {
                                 cb.HasAccess = false;
@@ -695,7 +705,6 @@ namespace Kaenx.Classes.Helper
                             else
                                 cb.Text = text;
 
-
                             cb.Conditions = GetConditions(Id2Element[cb.Id]);
                             Channels.Add(cb);
                             currentChannel = cb;
@@ -704,8 +713,7 @@ namespace Kaenx.Classes.Helper
 
 
                     case "ParameterBlock":
-                        ParameterBlock pb = new ParameterBlock();
-                        pb.Id = ShortId(reader.GetAttribute("Id"));
+                        ParameterBlock pb = new ParameterBlock { Id = ShortId(reader.GetAttribute("Id")) };
                         if (reader.GetAttribute("Access") == "None")
                         {
                             pb.HasAccess = false;
@@ -794,6 +802,7 @@ namespace Kaenx.Classes.Helper
                         Id2ParamBlock.Add(pb.Id, pb);
                         break;
 
+                    case "Assign":
                     case "choose":
                     case "when":
                     case "Dynamic":
@@ -854,8 +863,6 @@ namespace Kaenx.Classes.Helper
 
             Id2Element.Clear();
             Id2ParamBlock.Clear();
-
-
             #region Brechne Standard sichtbarkeit
 
             Dictionary<string, ViewParamModel> Id2Param = new Dictionary<string, ViewParamModel>();
@@ -896,13 +903,14 @@ namespace Kaenx.Classes.Helper
 
             adds.Bindings = ObjectToByteArray(Hash2Bindings.Values.ToList());
             adds.ParamsHelper = ObjectToByteArray(Channels, true);
-
-
+            adds.Assignments = ObjectToByteArray(Assignments);
 
             Hash2Bindings.Clear();
             Hash2Bindings = null;
             Ref2Bindings.Clear();
             Ref2Bindings = null;
+            Assignments.Clear();
+            Assignments = null;
             updatedComs.Clear();
             updatedComs = null;
 
@@ -927,6 +935,23 @@ namespace Kaenx.Classes.Helper
                         break;
                     case "ComObjectRefRef":
                         ParseComObject(ele, textRefId, groupText);
+                        break;
+                    case "Assign":
+                        AssignParameter assign = new AssignParameter
+                        {
+                            Target = ShortId(ele.Attribute("TargetParamRefRef").Value),
+                            Conditions = GetConditions(ele)
+                        };
+                        if (ele.Attribute("SourceParamRefRef") != null)
+                        {
+                            assign.Source = ShortId(ele.Attribute("SourceParamRefRef").Value);
+                        }
+                        else
+                        {
+                            assign.Source = "Value";
+                            assign.Value = ele.Attribute("Value").Value;
+                        }
+                        Assignments.Add(assign);
                         break;
                 }
             }
@@ -995,24 +1020,26 @@ namespace Kaenx.Classes.Helper
         {
             int vers = int.Parse(xele.Name.NamespaceName.Substring(xele.Name.NamespaceName.LastIndexOf("/") + 1));
 
-            (List<ParamCondition> Conds, string Hash) list = GetConditions(xele, true);
+            (List<ParamCondition> Conds, string Hash) = GetConditions(xele, true);
 
             if(vers < 14)
             {
-                ParamSeperator sepe = new ParamSeperator();
-                sepe.Id = ShortId(xele.Attribute("Id").Value);
-                sepe.Text = xele.Attribute("Text").Value;
-                if(string.IsNullOrEmpty(sepe.Text))
+                ParamSeperator sepe = new ParamSeperator
+                {
+                    Id = ShortId(xele.Attribute("Id").Value),
+                    Text = xele.Attribute("Text").Value,
+                    Conditions = Conds,
+                    Hash = Hash
+                };
+                if (string.IsNullOrEmpty(sepe.Text))
                     sepe.Hint = "HorizontalRuler";
-                sepe.Conditions = list.Conds;
-                sepe.Hash = list.Hash;
                 block.Parameters.Add(sepe);
                 return;
             }
 
-            IDynParameter sep = null;
-
             string hint = xele.Attribute("UIHint")?.Value;
+
+            IDynParameter sep;
             switch (hint)
             {
                 case null:
@@ -1023,9 +1050,10 @@ namespace Kaenx.Classes.Helper
 
                 case "Error":
                 case "Information":
-                    sep = new ParamSeperatorBox() { 
-                        Hint = hint, 
-                        IsError = (hint == "Error") 
+                    sep = new ParamSeperatorBox()
+                    {
+                        Hint = hint,
+                        IsError = (hint == "Error")
                     };
                     break;
 
@@ -1034,8 +1062,8 @@ namespace Kaenx.Classes.Helper
                     return;
             }
 
-            sep.Conditions = list.Conds;
-            sep.Hash = list.Hash;
+            sep.Conditions = Conds;
+            sep.Hash = Hash;
             sep.Id = ShortId(xele.Attribute("Id").Value);
             sep.Text = xele.Attribute("Text").Value;
             block.Parameters.Add(sep);
@@ -1046,7 +1074,7 @@ namespace Kaenx.Classes.Helper
             AppParameter para = AppParas[ShortId(xele.Attribute("RefId").Value)];
             //TODO überprüfen
             AppParameterTypeViewModel paraType = AppParaTypes[para.ParameterTypeId];
-            var conds = GetConditions(xele, true);
+            var (paramList, hash) = GetConditions(xele, true);
 
             string refid = para.Id.Substring(para.Id.LastIndexOf("-") + 1);
 
@@ -1061,18 +1089,26 @@ namespace Kaenx.Classes.Helper
                 }
             }
 
-            bool hasAccess = para.Access == AccessType.None ? false : true;
-            bool IsCtlEnabled = para.Access == AccessType.Read ? false : true;
+            bool hasAccess = para.Access != AccessType.None;
+            bool IsCtlEnabled = para.Access != AccessType.Read;
 
             switch (paraType.Type)
             {
                 case ParamTypes.NumberInt:
                 case ParamTypes.NumberUInt:
                 case ParamTypes.Float9:
-                    Dynamic.ParamNumber pnu = new Dynamic.ParamNumber();
-                    pnu.Id = para.Id;
-                    pnu.Text = para.Text;
-                    pnu.SuffixText = para.SuffixText;
+                    Dynamic.ParamNumber pnu = new Dynamic.ParamNumber
+                    {
+                        Id = para.Id,
+                        Text = para.Text,
+                        SuffixText = para.SuffixText,
+                        Value = para.Value,
+                        Default = para.Value,
+                        Conditions = paramList,
+                        Hash = hash,
+                        HasAccess = hasAccess,
+                        IsEnabled = IsCtlEnabled
+                    };
                     try
                     {
                         pnu.Minimum = StringToInt(paraType.Tag1);
@@ -1082,12 +1118,6 @@ namespace Kaenx.Classes.Helper
                     {
 
                     }
-                    pnu.Value = para.Value;
-                    pnu.Default = para.Value;
-                    pnu.Conditions = conds.paramList;
-                    pnu.Hash = conds.hash;
-                    pnu.HasAccess = hasAccess;
-                    pnu.IsEnabled = IsCtlEnabled;
                     block.Parameters.Add(pnu);
                     break;
 
@@ -1102,8 +1132,8 @@ namespace Kaenx.Classes.Helper
                     pte.SuffixText = para.SuffixText;
                     pte.Default = para.Value;
                     pte.Value = para.Value;
-                    pte.Conditions = conds.paramList;
-                    pte.Hash = conds.hash;
+                    pte.Conditions = paramList;
+                    pte.Hash = hash;
                     pte.HasAccess = hasAccess;
                     pte.IsEnabled = IsCtlEnabled;
                     block.Parameters.Add(pte);
@@ -1119,61 +1149,69 @@ namespace Kaenx.Classes.Helper
 
                     if (count > 2 || count == 1)
                     {
-                        Dynamic.ParamEnum pen = new Dynamic.ParamEnum();
-                        pen.Id = para.Id;
-                        pen.Text = para.Text;
-                        pen.SuffixText = para.SuffixText;
-                        pen.Default = para.Value;
-                        pen.Value = para.Value;
-                        pen.Options = options;
-                        pen.Conditions = conds.paramList;
-                        pen.Hash = conds.hash;
-                        pen.HasAccess = hasAccess;
-                        pen.IsEnabled = IsCtlEnabled;
+                        Dynamic.ParamEnum pen = new Dynamic.ParamEnum
+                        {
+                            Id = para.Id,
+                            Text = para.Text,
+                            SuffixText = para.SuffixText,
+                            Default = para.Value,
+                            Value = para.Value,
+                            Options = options,
+                            Conditions = paramList,
+                            Hash = hash,
+                            HasAccess = hasAccess,
+                            IsEnabled = IsCtlEnabled
+                        };
                         block.Parameters.Add(pen);
                     } else
                     {
-                        Dynamic.ParamEnumTwo pent = new ParamEnumTwo();
-                        pent.Id = para.Id;
-                        pent.Text = para.Text;
-                        pent.SuffixText = para.SuffixText;
-                        pent.Default = para.Value;
-                        pent.Value = para.Value;
-                        pent.Option1 = options[0];
-                        pent.Option2 = options[1];
-                        pent.Conditions = conds.paramList;
-                        pent.Hash = conds.hash;
-                        pent.HasAccess = hasAccess;
-                        pent.IsEnabled = IsCtlEnabled;
+                        Dynamic.ParamEnumTwo pent = new ParamEnumTwo
+                        {
+                            Id = para.Id,
+                            Text = para.Text,
+                            SuffixText = para.SuffixText,
+                            Default = para.Value,
+                            Value = para.Value,
+                            Option1 = options[0],
+                            Option2 = options[1],
+                            Conditions = paramList,
+                            Hash = hash,
+                            HasAccess = hasAccess,
+                            IsEnabled = IsCtlEnabled
+                        };
                         block.Parameters.Add(pent);
                     }
                     break;
 
                 case ParamTypes.CheckBox:
-                    ParamCheckBox pch = new ParamCheckBox();
-                    pch.Id = para.Id;
-                    pch.Text = para.Text;
-                    pch.SuffixText = para.SuffixText;
-                    pch.Default = para.Value;
-                    pch.Value = para.Value;
-                    pch.Conditions = conds.paramList;
-                    pch.Hash = conds.hash;
-                    pch.HasAccess = hasAccess;
-                    pch.IsEnabled = IsCtlEnabled;
+                    ParamCheckBox pch = new ParamCheckBox
+                    {
+                        Id = para.Id,
+                        Text = para.Text,
+                        SuffixText = para.SuffixText,
+                        Default = para.Value,
+                        Value = para.Value,
+                        Conditions = paramList,
+                        Hash = hash,
+                        HasAccess = hasAccess,
+                        IsEnabled = IsCtlEnabled
+                    };
                     block.Parameters.Add(pch);
                     break;
 
                 case ParamTypes.Color:
-                    ParamColor pco = new ParamColor();
-                    pco.Id = para.Id;
-                    pco.Text = para.Text;
-                    pco.SuffixText = para.SuffixText;
-                    pco.Default = para.Value;
-                    pco.Value = para.Value;
-                    pco.Conditions = conds.paramList;
-                    pco.Hash = conds.hash;
-                    pco.HasAccess = hasAccess;
-                    pco.IsEnabled = IsCtlEnabled;
+                    ParamColor pco = new ParamColor
+                    {
+                        Id = para.Id,
+                        Text = para.Text,
+                        SuffixText = para.SuffixText,
+                        Default = para.Value,
+                        Value = para.Value,
+                        Conditions = paramList,
+                        Hash = hash,
+                        HasAccess = hasAccess,
+                        IsEnabled = IsCtlEnabled
+                    };
                     block.Parameters.Add(pco);
                     break;
             }
@@ -1346,7 +1384,9 @@ namespace Kaenx.Classes.Helper
             try
             {
                 string ids = xele.Attribute("RefId")?.Value;
-                if (ids == null) ids = xele.Attribute("Id").Value;
+                if (ids == null && xele.Attribute("Id") != null) ids = xele.Attribute("Id").Value;
+                else ids = "";
+
                 bool finished = false;
                 while (true)
                 {

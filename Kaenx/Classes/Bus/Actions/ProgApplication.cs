@@ -31,10 +31,7 @@ namespace Kaenx.Classes.Bus.Actions
         private int _progress;
         private bool _progressIsIndeterminate;
         private string _todoText;
-        private byte _sequence = 0x00;
         private CancellationToken _token;
-        private byte _currentSeqNum = 0;
-        private string appId;
         private List<string> addedGroups;
         private CatalogContext _context = new CatalogContext();
 
@@ -736,14 +733,6 @@ namespace Kaenx.Classes.Bus.Actions
                 unionId++;
             }
         }
-
-
-        private void Finish()
-        {
-
-            Finished(this, null);
-        }
-
 
 
         private void Changed(string name)

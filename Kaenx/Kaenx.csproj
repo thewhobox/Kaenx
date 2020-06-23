@@ -119,6 +119,7 @@
     <Compile Include="App.xaml.cs">
       <DependentUpon>App.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Classes\AssignParameter.cs" />
     <Compile Include="Classes\Buildings\Area.cs" />
     <Compile Include="Classes\Buildings\Building.cs" />
     <Compile Include="Classes\Buildings\Floor.cs" />

@@ -124,18 +124,27 @@ namespace Kaenx.View
             _ = App._dispatcher.RunAsync(CoreDispatcherPriority.Normal, () => ImportState = value);
         }
 
+        private int itStep = 0;
+        private int itLast = 0;
+
         private void Helper_ProgressAppMaxChanged(int count)
         {
             _ = App._dispatcher.RunAsync(CoreDispatcherPriority.Normal, () =>
             {
                 ProgressApp.Maximum = count;
                 ProgressApp.Value = 0;
+                itStep = count / 60;
+                itLast = 0;
             });
         }
 
         private void Helper_ProgressAppChanged(int count)
         {
-            _ = App._dispatcher.RunAsync(CoreDispatcherPriority.Normal, () => ProgressApp.Value = count);
+            if(count > itLast)
+            {
+                itLast += itStep;
+                _ = App._dispatcher.RunAsync(CoreDispatcherPriority.Normal, () => ProgressApp.Value = count);
+            }
         }
 
         private void Helper_OnError(string Error)

@@ -197,8 +197,10 @@ namespace Kaenx.Classes.Helper
                     catch (Exception e)
                     {
                         Log.Error(e, "Applikation Fehler!");
-                        OnError?.Invoke(device.ApplicationId + ": " + e.Message);
-                        device.Icon = Symbol.ReportHacked;
+                        _ = App._dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Normal, () => {
+                            OnError?.Invoke(device.ApplicationId + ": " + e.Message);
+                            device.Icon = Symbol.ReportHacked;
+                        });
                         continue;
                     }
                     Log.Information("Import Applikationen abgeschlossen");
@@ -395,9 +397,11 @@ namespace Kaenx.Classes.Helper
             {
                 foreach (Device device in Import.DeviceList)
                 {
-                    SlideListItemBase swipe = new SlideListItemBase();
-                    swipe.LeftSymbol = Symbol.Accept;
-                    swipe.LeftBackground = new SolidColorBrush(Windows.UI.Color.FromArgb(255, 22, 128, 34));
+                    SlideListItemBase swipe = new SlideListItemBase
+                    {
+                        LeftSymbol = Symbol.Accept,
+                        LeftBackground = new SolidColorBrush(Windows.UI.Color.FromArgb(255, 22, 128, 34))
+                    };
                     device.SlideSettings = swipe;
                 }
             }
@@ -417,12 +421,14 @@ namespace Kaenx.Classes.Helper
 
             foreach (XElement catalogItem in catalogItems)
             {
-                Device device = new Device();
-                device.Id = catalogItem.Attribute("Id").Value;
-                device.Name = catalogItem.Attribute("Name").Value;
-                device.VisibleDescription = catalogItem.Attribute("VisibleDescription")?.Value;
-                device.ProductRefId = catalogItem.Attribute("ProductRefId").Value;
-                device.Hardware2ProgramRefId = catalogItem.Attribute("Hardware2ProgramRefId").Value;
+                Device device = new Device
+                {
+                    Id = catalogItem.Attribute("Id").Value,
+                    Name = catalogItem.Attribute("Name").Value,
+                    VisibleDescription = catalogItem.Attribute("VisibleDescription")?.Value,
+                    ProductRefId = catalogItem.Attribute("ProductRefId").Value,
+                    Hardware2ProgramRefId = catalogItem.Attribute("Hardware2ProgramRefId").Value
+                };
 
                 XElement hard = hardXML.Descendants(XName.Get("Product", hardXML.Name.NamespaceName)).Single(p => p.Attribute("Id").Value == device.ProductRefId);
                 if(hard.Parent.Parent.Attribute("NoDownloadWithoutPlugin")?.Value == "1")
@@ -460,10 +466,12 @@ namespace Kaenx.Classes.Helper
                 {
                     CatalogViewModel section = null;
                     ManufacturerViewModel man = tempManus.Find(e => e.Id == manu);
-                    section = new CatalogViewModel();
-                    section.Id = manu;
-                    section.Name = man.Name;
-                    section.ParentId = "main";
+                    section = new CatalogViewModel
+                    {
+                        Id = manu,
+                        Name = man.Name,
+                        ParentId = "main"
+                    };
                     _context.Sections.Add(section);
                     _context.SaveChanges();
                 }
@@ -502,10 +510,12 @@ namespace Kaenx.Classes.Helper
                     bool hasItem = await GetSubItems(xele, xele.Attribute("Id").Value, devicesList);
                     if (!_context.Sections.Any(s => s.Id == xele.Attribute("Id").Value))
                     {
-                        CatalogViewModel section = new CatalogViewModel();
-                        section.Id = xele.Attribute("Id").Value;
-                        section.Name = xele.Attribute("Name")?.Value;
-                        section.ParentId = parentSub;
+                        CatalogViewModel section = new CatalogViewModel
+                        {
+                            Id = xele.Attribute("Id").Value,
+                            Name = xele.Attribute("Name")?.Value,
+                            ParentId = parentSub
+                        };
                         _context.Sections.Add(section);
                     }
                     if (hasItem) flagHasItem = true;
@@ -648,10 +658,12 @@ namespace Kaenx.Classes.Helper
 
             foreach (XElement manEle in mans.Elements())
             {
-                ManufacturerViewModel man = new ManufacturerViewModel();
-                man.Id = manEle.Attribute("Id").Value;
-                man.Name = manEle.Attribute("Name").Value;
-                man.KnxManufacturerId = int.Parse(manEle.Attribute("KnxManufacturerId").Value);
+                ManufacturerViewModel man = new ManufacturerViewModel
+                {
+                    Id = manEle.Attribute("Id").Value,
+                    Name = manEle.Attribute("Name").Value,
+                    KnxManufacturerId = int.Parse(manEle.Attribute("KnxManufacturerId").Value)
+                };
 
                 tempManus.Add(man);
             }
@@ -755,7 +767,6 @@ namespace Kaenx.Classes.Helper
             Dictionary<string, AppComObject> ComObjects = new Dictionary<string, AppComObject>();
             currentNamespace = doc.Name.NamespaceName;
             int position = 0;
-            int iterationToWait = 100;
 
             List<XElement> tempList;
 
@@ -904,9 +915,11 @@ namespace Kaenx.Classes.Helper
                         int cenu = 0;
                         foreach (XElement en in child.Elements())
                         {
-                            AppParameterTypeEnumViewModel enu = new AppParameterTypeEnumViewModel();
-                            enu.ParameterId = paramt.Id;
-                            enu.Id = en.Attribute("Id").Value;
+                            AppParameterTypeEnumViewModel enu = new AppParameterTypeEnumViewModel
+                            {
+                                ParameterId = paramt.Id,
+                                Id = en.Attribute("Id").Value
+                            };
                             if (!context.AppParameterTypeEnums.Any(p => p.Id == enu.Id))
                             {
                                 enu.Value = en.Attribute(_base).Value;
@@ -977,11 +990,13 @@ namespace Kaenx.Classes.Helper
             tempList = doc.Descendants(GetXName("Parameter")).ToList();
             foreach(XElement para in tempList)
             {
-                AppParameter param = new AppParameter();
-                param.Id = ShortId(para.Attribute("Id").Value);
-                param.Text = para.Attribute("Text").Value;
-                param.ParameterTypeId = ShortId(para.Attribute("ParameterType").Value);
-                param.Value = para.Attribute("Value")?.Value;
+                AppParameter param = new AppParameter
+                {
+                    Id = ShortId(para.Attribute("Id").Value),
+                    Text = para.Attribute("Text").Value,
+                    ParameterTypeId = ShortId(para.Attribute("ParameterType").Value),
+                    Value = para.Attribute("Value")?.Value
+                };
                 string suffix = para.Attribute("SuffixText")?.Value;
                 if (!string.IsNullOrEmpty(suffix))
                     param.SuffixText = suffix;
@@ -1103,10 +1118,10 @@ namespace Kaenx.Classes.Helper
                 final.ApplicationId = app.Id;
 
                 string text = pref.Attribute("Text")?.Value;
-                final.Text = text == null ? old.Text : text;
+                final.Text = text ?? old.Text;
 
                 string value = pref.Attribute("Value")?.Value;
-                final.Value = value == null ? old.Value : value;
+                final.Value = value ?? old.Value;
 
                 AccessType access = AccessType.Null;
                 switch (pref.Attribute("Access")?.Value)
@@ -1140,8 +1155,7 @@ namespace Kaenx.Classes.Helper
                 {
                     table = doc.Descendants(GetXName("ComObjectTable")).ElementAt(0);
                     app.Table_Object = ShortId(table.Attribute("CodeSegment").Value);
-                    int offsetObject;
-                    int.TryParse(table.Attribute("Offset").Value, out offsetObject);
+                    int.TryParse(table.Attribute("Offset").Value, out int offsetObject);
                     app.Table_Object_Offset = offsetObject;
                 }
                 else
@@ -1153,20 +1167,23 @@ namespace Kaenx.Classes.Helper
                 Log.Information("ComObjects werden eingelesen");
                 foreach (XElement com in table.Elements())
                 {
-                    AppComObject cobj = new AppComObject();
-                    cobj.Id = ShortId(com.Attribute("Id").Value);
-                    cobj.Text = com.Attribute("Text")?.Value;
-                    cobj.FunctionText = com.Attribute("FunctionText")?.Value;
+                    AppComObject cobj = new AppComObject
+                    {
+                        Id = ShortId(com.Attribute("Id").Value),
+                        Text = com.Attribute("Text")?.Value,
+                        FunctionText = com.Attribute("FunctionText")?.Value,
+                        Number = int.Parse(com.Attribute("Number").Value),
+
+                        Flag_Communicate = com.Attribute("CommunicationFlag")?.Value == "Enabled",
+                        Flag_Read = com.Attribute("ReadFlag")?.Value == "Enabled",
+                        Flag_ReadOnInit = com.Attribute("ReadOnInitFlag")?.Value == "Enabled",
+                        Flag_Transmit = com.Attribute("TransmitFlag")?.Value == "Enabled",
+                        Flag_Update = com.Attribute("UpdateFlag")?.Value == "Enabled",
+                        Flag_Write = com.Attribute("WriteFlag")?.Value == "Enabled"
+                    };
+
                     cobj.SetSize(com.Attribute("ObjectSize")?.Value);
                     cobj.SetDatapoint(com.Attribute("DatapointType")?.Value);
-                    cobj.Number = int.Parse(com.Attribute("Number").Value);
-
-                    cobj.Flag_Communicate = com.Attribute("CommunicationFlag")?.Value == "Enabled";
-                    cobj.Flag_Read = com.Attribute("ReadFlag")?.Value == "Enabled";
-                    cobj.Flag_ReadOnInit = com.Attribute("ReadOnInitFlag")?.Value == "Enabled";
-                    cobj.Flag_Transmit = com.Attribute("TransmitFlag")?.Value == "Enabled";
-                    cobj.Flag_Update = com.Attribute("UpdateFlag")?.Value == "Enabled";
-                    cobj.Flag_Write = com.Attribute("WriteFlag")?.Value == "Enabled";
 
                     ComObjects.Add(cobj.Id, cobj);
                     position++;
@@ -1186,15 +1203,16 @@ namespace Kaenx.Classes.Helper
                 ProgressAppChanged(position);
                 //del if (position % iterationToWait == 0) await Task.Delay(1);
 
-                AppComObjectRef cobjr = new AppComObjectRef();
-                cobjr.Id = ShortId(cref.Attribute("Id").Value);
-                cobjr.RefId = ShortId(cref.Attribute("RefId").Value);
-
-                cobjr.Text = cref.Attribute("Text")?.Value;
-                cobjr.FunctionText = cref.Attribute("FunctionText")?.Value;
+                AppComObjectRef cobjr = new AppComObjectRef
+                {
+                    Id = ShortId(cref.Attribute("Id").Value),
+                    RefId = ShortId(cref.Attribute("RefId").Value),
+                    Number = cref.Attribute("Number") == null ? -1 : int.Parse(cref.Attribute("Number").Value),
+                    Text = cref.Attribute("Text")?.Value,
+                    FunctionText = cref.Attribute("FunctionText")?.Value
+                };
                 cobjr.SetSize(cref.Attribute("ObjectSize")?.Value);
                 cobjr.SetDatapoint(cref.Attribute("DatapointType")?.Value);
-                cobjr.Number = cref.Attribute("Number") == null ? -1 : int.Parse(cref.Attribute("Number").Value);
 
                 if (cref.Attribute("CommunicationFlag")?.Value == "Enabled")
                     cobjr.Flag_Communicate = true;
@@ -1328,15 +1346,13 @@ namespace Kaenx.Classes.Helper
                 if(table.Attribute("CodeSegment") != null)
                 {
                     app.Table_Group = ShortId(table.Attribute("CodeSegment").Value);
-                    int offsetGroup;
-                    int.TryParse(table.Attribute("Offset")?.Value, out offsetGroup);
+                    int.TryParse(table.Attribute("Offset")?.Value, out int offsetGroup);
                     app.Table_Group_Offset = offsetGroup;
                 }
                 else
                     Log.Information("Für AddressTable wurde kein CodeSegment gefunden.");
 
-                int maxEntries;
-                int.TryParse(table.Attribute("MaxEntries")?.Value, out maxEntries);
+                int.TryParse(table.Attribute("MaxEntries")?.Value, out int maxEntries);
                 app.Table_Group_Max = maxEntries;
             }
             else
@@ -1350,15 +1366,13 @@ namespace Kaenx.Classes.Helper
                 if (table.Attribute("CodeSegment") != null)
                 {
                     app.Table_Assosiations = ShortId(table.Attribute("CodeSegment").Value);
-                    int offsetAssoc;
-                    int.TryParse(table.Attribute("Offset")?.Value, out offsetAssoc);
+                    int.TryParse(table.Attribute("Offset")?.Value, out int offsetAssoc);
                     app.Table_Assosiations_Offset = offsetAssoc;
                 }
                 else
                     Log.Information("Für AssociationTable wurde kein CodeSegment gefunden.");
 
-                int maxEntriesA;
-                int.TryParse(table.Attribute("MaxEntries")?.Value, out maxEntriesA);
+                int.TryParse(table.Attribute("MaxEntries")?.Value, out int maxEntriesA);
                 app.Table_Assosiations_Max = maxEntriesA;
             }
             else
@@ -1473,8 +1487,7 @@ namespace Kaenx.Classes.Helper
                 adds = context.AppAdditionals.Single(a => a.Id == app.Id);
             else
             {
-                adds = new AppAdditional();
-                adds.Id = app.Id;
+                adds = new AppAdditional() { Id = app.Id };
             }
 
             Log.Information("LoadProcedures werden gespeichert");
@@ -1525,7 +1538,7 @@ namespace Kaenx.Classes.Helper
         private bool GetAttributeAsBool(XElement ele, string attr)
         {
             string val = ele.Attribute(attr)?.Value;
-            return (val == "1" || val == "true") ? true : false;
+            return (val == "1" || val == "true");
         }
 
         public bool CheckApplication(XmlReader reader, List<string> errs)
