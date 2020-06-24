@@ -160,17 +160,18 @@ namespace Kaenx.Classes.Helper
                         contextProject.LineDevices.Update(linedevmodel);
                     }
 
-                    IEnumerable<LineDeviceModel> dev2delete = contextProject.LineDevices.Where(d => d.ProjectId == model.Id && d.ParentId == linem.Id && !linem.Subs.Any(lm => lm.UId == d.UId)).ToList();
+                    //List<LineDeviceModel> dev2delete = contextProject.LineDevices.Where(d => d.ProjectId == model.Id && d.ParentId == linem.Id && !linem.Subs.Any(lm => lm.UId == d.UId)).ToList();
+                    IEnumerable<LineDeviceModel> dev2delete = contextProject.LineDevices.AsEnumerable().Where(d => d.ProjectId == model.Id && d.ParentId == linem.Id && !linem.Subs.Any(lm => lm.UId == d.UId)).AsEnumerable();
                     contextProject.LineDevices.RemoveRange(dev2delete);
                 }
 
 
-                IEnumerable<LineMiddleModel> linem2delete = contextProject.LinesMiddle.Where(d => d.ProjectId == model.Id && d.ParentId == line.Id && !line.Subs.Any(lm => lm.UId == d.UId)).ToList();
+                IEnumerable<LineMiddleModel> linem2delete = contextProject.LinesMiddle.AsEnumerable().Where(d => d.ProjectId == model.Id && d.ParentId == line.Id && !line.Subs.Any(lm => lm.UId == d.UId)).AsEnumerable();
                 contextProject.LinesMiddle.RemoveRange(linem2delete);
             }
 
 
-            IEnumerable<LineModel> line2delete = contextProject.LinesMain.Where(d => d.ProjectId == model.Id && !_project.Lines.Any(lm => lm.UId == d.UId)).ToList();
+            IEnumerable<LineModel> line2delete = contextProject.LinesMain.AsEnumerable().Where(d => d.ProjectId == model.Id && !_project.Lines.Any(lm => lm.UId == d.UId)).AsEnumerable();
             contextProject.LinesMain.RemoveRange(line2delete);
 
 
@@ -368,17 +369,17 @@ namespace Kaenx.Classes.Helper
             Dictionary<string, Dictionary<string, DataPointSubType>> DPSTs = await SaveHelper.GenerateDatapoints();
 
 
-            foreach (LineModel lmodel in contextProject.LinesMain.Where(l => l.ProjectId == helper.ProjectId).OrderBy(l => l.Id))
+            foreach (LineModel lmodel in contextProject.LinesMain.AsEnumerable().Where(l => l.ProjectId == helper.ProjectId).OrderBy(l => l.Id))
             {
                 Line line = new Line(lmodel);
                 project.Lines.Add(line);
 
-                foreach (LineMiddleModel lmm in contextProject.LinesMiddle.Where(l => l.ProjectId == helper.ProjectId && l.ParentId == line.UId).OrderBy(l => l.Id))
+                foreach (LineMiddleModel lmm in contextProject.LinesMiddle.AsEnumerable().Where(l => l.ProjectId == helper.ProjectId && l.ParentId == line.UId).OrderBy(l => l.Id))
                 {
                     LineMiddle lm = new LineMiddle(lmm, line);
                     line.Subs.Add(lm);
 
-                    foreach (LineDeviceModel ldm in contextProject.LineDevices.Where(l => l.ProjectId == helper.ProjectId && l.ParentId == lm.UId).OrderBy(l => l.Id))
+                    foreach (LineDeviceModel ldm in contextProject.LineDevices.AsEnumerable().Where(l => l.ProjectId == helper.ProjectId && l.ParentId == lm.UId).OrderBy(l => l.Id))
                     {
                         LineDevice ld = new LineDevice(ldm, lm, true) { DeviceId = ldm.DeviceId };
 
@@ -1266,13 +1267,31 @@ namespace Kaenx.Classes.Helper
                 if (Id2Param != null && Id2Param.ContainsKey(cond.SourceId))
                 {
                     ViewParamModel model = Id2Param[cond.SourceId];
-                    paraValue = model.Value;
 
-                    if (!model.Parameters.Any(p => p.Visible == Visibility.Visible))
+                    if(model.Assign == null)
                     {
-                        flag = false;
-                        continue;
+                        paraValue = model.Value;
+                        if (!model.Parameters.Any(p => p.Visible == Visibility.Visible))
+                        {
+                            flag = false;
+                            continue;
+                        }
+                    } else
+                    {
+                        if (model.Assign.Source == "Value")
+                            paraValue = model.Assign.Value;
+                        else
+                            paraValue = Id2Param[model.Assign.Source].Value;
+                        if (!Id2Param[model.Assign.Source].Parameters.Any(p => p.Visible == Visibility.Visible))
+                        {
+                            flag = false;
+                            continue;
+                        }
                     }
+
+
+
+                    
                 }
                 else
                 {
@@ -1383,9 +1402,8 @@ namespace Kaenx.Classes.Helper
             List<ParamCondition> conds = new List<ParamCondition>();
             try
             {
-                string ids = xele.Attribute("RefId")?.Value;
-                if (ids == null && xele.Attribute("Id") != null) ids = xele.Attribute("Id").Value;
-                else ids = "";
+                string ids = xele.Attribute("RefId")?.Value ?? "";
+                if (ids == "" && xele.Attribute("Id") != null) ids = xele.Attribute("Id").Value;
 
                 bool finished = false;
                 while (true)
@@ -1520,7 +1538,7 @@ namespace Kaenx.Classes.Helper
 
         public static void CalculateLineCurrent(LineMiddle line, bool noNotify = false)
         {
-            if (!contextC.Devices.Any(d => d.IsPowerSupply && line.Subs.Any(l => l.DeviceId == d.Id)))
+            if (!contextC.Devices.AsEnumerable().Any(d => d.IsPowerSupply && line.Subs.Any(l => l.DeviceId == d.Id)))
                 return;
 
             int maxCurrent = CalculateLineCurrentAvailible(line);

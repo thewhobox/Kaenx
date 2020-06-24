@@ -10,6 +10,7 @@ namespace Kaenx.Classes.Dynamic
     {
         public string Value { get; set; }
         public List<IDynParameter> Parameters { get; set; } = new List<IDynParameter>();
+        public AssignParameter Assign { get; set; }
 
         public ViewParamModel(string value)
         {

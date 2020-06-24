@@ -291,7 +291,7 @@
         </Grid>
 
         <toolkit:DataGrid x:Name="ComList" Grid.Row="1"  Grid.Column="1" BorderBrush="LightGray" BorderThickness="1 1 1 0" AutoGenerateColumns="False"
-                          ItemsSource="{Binding device.ComObjects, Mode=OneWay}" IsReadOnly="True" Background="{ThemeResource BrushAccentControlBackground}" CornerRadius="2 2 0 0">
+                          ItemsSource="{Binding Device.ComObjects, Mode=OneWay}" IsReadOnly="True" Background="{ThemeResource BrushAccentControlBackground}" CornerRadius="2 2 0 0">
             <toolkit:DataGrid.Columns>
                 <toolkit:DataGridTextColumn x:Uid="/Groups/LComsNumb" FontSize="13" Tag="Number" Width="SizeToCells" Binding="{Binding Number}" />
                 <toolkit:DataGridTextColumn x:Uid="/Groups/LComsName" FontSize="13" Tag="Name" Width="SizeToCells" Binding="{Binding DisplayName}" />

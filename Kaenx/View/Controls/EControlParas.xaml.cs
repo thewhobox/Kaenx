@@ -30,6 +30,7 @@ using Windows.UI.Xaml.Media;
 using Windows.UI.Xaml.Navigation;
 using Microsoft.Toolkit.Uwp.UI.Controls;
 using Windows.ApplicationModel.Background;
+using System.Security.Cryptography;
 
 // Die Elementvorlage "Benutzersteuerelement" wird unter https://go.microsoft.com/fwlink/?LinkId=234236 dokumentiert.
 
@@ -146,7 +147,7 @@ namespace Kaenx.Views.Easy.Controls
 
             try
             {
-                _ = Load();
+                _= Load();
             }catch(Exception ex)
             {
                 Log.Error(ex, "Laden der Parameter fehlgeschlagen!");
@@ -156,16 +157,21 @@ namespace Kaenx.Views.Easy.Controls
 
         public void StartRead()
         {
-            _ = Load();
+            _= Load();
         }
 
         private async Task Load()
         {
+            try
+            {
+
+            await Task.Delay(1);
             AppAdditional adds = _context.AppAdditionals.Single(a => a.Id == Device.ApplicationId);
             comObjects = SaveHelper.ByteArrayToObject<List<DeviceComObject>>(adds.ComsAll);
             Channels = SaveHelper.ByteArrayToObject<List<IDynChannel>>(adds.ParamsHelper, true);
             Bindings = SaveHelper.ByteArrayToObject<List<ParamBinding>>(adds.Bindings);
             Assignments = SaveHelper.ByteArrayToObject<List<AssignParameter>>(adds.Assignments);
+            
 
             foreach (IDynChannel ch in Channels)
             {
@@ -214,28 +220,76 @@ namespace Kaenx.Views.Easy.Controls
                             Id2Param.Add(para.Id, new ViewParamModel(para.Value));
 
                         Id2Param[para.Id].Parameters.Add(para);
-                        Hash2Param.Add(para.Hash, para);
+                            try
+                            {
+
+                                Hash2Param.Add(para.Hash, para);
+                            }
+                            catch
+                            {
+
+                            }
                         para.PropertyChanged += Para_PropertyChanged;
                     }
                 }
             }
 
+                List<string> testL = new List<string>();
             foreach(ChangeParamModel change in ParaChanges.Values)
             {
-                try
-                {
-                    IDynParameter para = Id2Param[change.ParamId].Parameters[0];
-                    Para_PropertyChanged(para);
-                }
-                catch { }
+                    Id2Param[change.ParamId].Value = change.Value;
+                    testL.Add(change.ParamId);
             }
 
-            _= CheckComObjects();
+
+                CatalogContext co = new CatalogContext();
+                foreach(AppParameter para in co.AppParameters.Where(p => p.ApplicationId == adds.Id))
+                {
+                    if (!Id2Param.ContainsKey(para.Id))
+                    {
+                        ViewParamModel model = new ViewParamModel(para.Value);
+                        ParamText p = new ParamText();
+                        p.Value = para.Value;
+                        p.Id = para.Id;
+                        p.Visible = Visibility.Visible;
+                        model.Parameters.Add(p);
+                        Id2Param.Add(para.Id,model);
+                    }
+                }
+
+
+                foreach (AssignParameter assign in Assignments)
+                {
+                    bool test = SaveHelper.CheckConditions(assign.Conditions, Id2Param);
+                    try
+                    {
+                        Id2Param[assign.Target].Assign = test ? assign : null;
+                        if (test) testL.Add(assign.Target);
+                    } catch
+                    {
+
+                    }
+                }
+
+                foreach(string id in testL)
+                {
+                    Id2Param[id].Parameters[0].Value = Id2Param[id].Value;
+                    Para_PropertyChanged(Id2Param[id].Parameters[0]);
+                }
+
+
+                _ = CheckComObjects();
 
 
             LoadRing.Visibility = Visibility.Collapsed;
             watch.Stop();
             ViewHelper.Instance.ShowNotification("main", "Geladen nach: " + watch.Elapsed.TotalSeconds + "s", 3000);
+
+            }
+            catch
+            {
+
+            }
         }
 
         private void Para_PropertyChanged(object sender, PropertyChangedEventArgs e = null)
@@ -260,29 +314,33 @@ namespace Kaenx.Views.Easy.Controls
 
             #region Parameter neu berechnen
             List<ChannelBlock> list = new List<ChannelBlock>();
-
             List<ParameterBlock> list2 = new List<ParameterBlock>();
+            List<string> list5 = new List<string>();
+
+            foreach (AssignParameter assign in Assignments)
+            {
+                bool test = SaveHelper.CheckConditions(assign.Conditions, Id2Param);
+                if (test)
+                {
+                    Id2Param[assign.Target].Assign = assign;
+                    list5.Add(assign.Target);
+                }
+                else
+                    Id2Param[assign.Target].Assign = null;
+            }
+
             foreach (IDynChannel ch in Channels)
             {
-                if (ch is ChannelBlock && ch.Conditions.Any(c => c.SourceId == para.Id)) list.Add(ch as ChannelBlock);
+                ch.Visible = SaveHelper.CheckConditions(ch.Conditions, Id2Param) ? Visibility.Visible : Visibility.Collapsed;
 
-                list2.AddRange(ch.Blocks.Where(b => b.Conditions.Any(c => c.SourceId == para.Id)));
-            }
-            foreach (ChannelBlock block in list)
-            {
-                block.Visible = SaveHelper.CheckConditions(block.Conditions, Id2Param) ? Visibility.Visible : Visibility.Collapsed;
+                foreach (ParameterBlock block in ch.Blocks)
+                    block.Visible = SaveHelper.CheckConditions(block.Conditions, Id2Param) ? Visibility.Visible : Visibility.Collapsed;
             }
 
-            foreach(ParameterBlock block in list2)
-            {
-                block.Visible = SaveHelper.CheckConditions(block.Conditions, Id2Param) ? Visibility.Visible : Visibility.Collapsed;
-            }
 
-            IEnumerable <IDynParameter> list3 = Hash2Param.Values.Where(p => p.Conditions.Any(c => c.SourceId == para.Id));
+            IEnumerable <IDynParameter> list3 = Hash2Param.Values.Where(p => p.Conditions.Any(c => c.SourceId == para.Id || list5.Contains(c.SourceId)));
             foreach(IDynParameter par in list3)
-            {
                 par.Visible = SaveHelper.CheckConditions(par.Conditions, Id2Param) ? Visibility.Visible : Visibility.Collapsed;
-            }
 
             IEnumerable<ParamBinding> list4 = Bindings.Where(b => b.SourceId == para.Id);
             foreach(ParamBinding bind in list4)
@@ -334,9 +392,7 @@ namespace Kaenx.Views.Easy.Controls
 
             foreach (IDynChannel ch in Channels)
             {
-                bool vis = SaveHelper.CheckConditions(ch.Conditions, Id2Param);
-
-                if (vis)
+                if (ch.Visible == Visibility.Visible)
                 {
                     ch.Visible = ch.Blocks.Any(b => b.Visible == Visibility.Visible) ? Visibility.Visible : Visibility.Collapsed;
                 }
