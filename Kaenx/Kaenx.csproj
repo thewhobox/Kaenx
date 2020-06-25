@@ -178,6 +178,9 @@
     <Compile Include="Classes\MonitorTelegram.cs" />
     <Compile Include="Classes\Project\DeviceComObject.cs" />
     <Compile Include="Classes\ReconstructDevice.cs" />
+    <Compile Include="Classes\Save\ISaveHelper.cs" />
+    <Compile Include="Classes\Save\SaverAuto.cs" />
+    <Compile Include="Classes\Save\SaverManu.cs" />
     <Compile Include="Classes\TemplateSelectors\BlockSelector.cs" />
     <Compile Include="Classes\TemplateSelectors\ControlParamsSelector.cs" />
     <Compile Include="Classes\TemplateSelectors\ControlsParamTypesSelector.cs" />

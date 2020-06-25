@@ -329,18 +329,24 @@ namespace Kaenx.Views.Easy.Controls
                     Id2Param[assign.Target].Assign = null;
             }
 
+
+
+            IEnumerable<IDynParameter> list3 = Hash2Param.Values.Where(p => p.Conditions.Any(c => c.SourceId == para.Id || list5.Contains(c.SourceId)));
+            foreach (IDynParameter par in list3)
+                par.Visible = SaveHelper.CheckConditions(par.Conditions, Id2Param) ? Visibility.Visible : Visibility.Collapsed;
+
+
             foreach (IDynChannel ch in Channels)
             {
                 ch.Visible = SaveHelper.CheckConditions(ch.Conditions, Id2Param) ? Visibility.Visible : Visibility.Collapsed;
 
                 foreach (ParameterBlock block in ch.Blocks)
-                    block.Visible = SaveHelper.CheckConditions(block.Conditions, Id2Param) ? Visibility.Visible : Visibility.Collapsed;
+                    if (block.HasAccess)
+                        block.Visible = SaveHelper.CheckConditions(block.Conditions, Id2Param) ? Visibility.Visible : Visibility.Collapsed;
+                    else
+                        block.Visible = Visibility.Collapsed;
             }
 
-
-            IEnumerable <IDynParameter> list3 = Hash2Param.Values.Where(p => p.Conditions.Any(c => c.SourceId == para.Id || list5.Contains(c.SourceId)));
-            foreach(IDynParameter par in list3)
-                par.Visible = SaveHelper.CheckConditions(par.Conditions, Id2Param) ? Visibility.Visible : Visibility.Collapsed;
 
             IEnumerable<ParamBinding> list4 = Bindings.Where(b => b.SourceId == para.Id);
             foreach(ParamBinding bind in list4)

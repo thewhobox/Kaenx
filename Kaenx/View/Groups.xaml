@@ -13,19 +13,6 @@
     mc:Ignorable="d"
     Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
     <Page.Resources>
-        <DataTemplate x:Key="RowDetailsTemplate">
-            <StackPanel>
-                <TextBlock Margin="10 10 10 0" Text="Hier steht ein mega langer text. Würde ja gerne das Lorem Ipsum kopieren, aber keine Lust lange danach zu suchen...." />
-                <StackPanel Orientation="Horizontal" Margin="10 0 10 10">
-                    <CheckBox MinWidth="10" Content="R" Margin="3 0 3 0" IsChecked="{Binding Flag_Read}" IsEnabled="False" />
-                    <CheckBox MinWidth="10" Content="W" Margin="3 0 3 0" IsChecked="{Binding Flag_Write}" IsEnabled="False" />
-                    <CheckBox MinWidth="10" Content="T" Margin="3 0 3 0" IsChecked="{Binding Flag_Transmit}" IsEnabled="False" />
-                    <CheckBox MinWidth="10" Content="U" Margin="3 0 3 0" IsChecked="{Binding Flag_Update}" IsEnabled="False" />
-                    <CheckBox MinWidth="10" Content="C" Margin="3 0 3 0" IsChecked="{Binding Flag_Communication}" IsEnabled="False" />
-                </StackPanel>
-            </StackPanel>
-        </DataTemplate>
-
         <DataTemplate x:Key="StuctBuilding" x:DataType="localB:Building">
             <TreeViewItem CanDrag="False" ItemsSource="{Binding Floors}" IsExpanded="{Binding IsExpanded, Mode=TwoWay}" IsTapEnabled="True" Tapped="ClickAB_ResetSelected" IsDoubleTapEnabled="True" DoubleTapped="ClickAB_Rename">
                 <TreeViewItem.ContextFlyout>
@@ -180,7 +167,7 @@
 
 
 
-        <toolkit:DataGrid x:Name="ListComs" AreRowDetailsFrozen="True" LoadingRow="ListComs_LoadingRow" RowDetailsVisibilityMode="Collapsed" RowDetailsTemplate="{StaticResource RowDetailsTemplate}"
+        <toolkit:DataGrid x:Name="ListComs" AreRowDetailsFrozen="True" LoadingRow="ListComs_LoadingRow"
                           Grid.Column="1" Grid.Row="1" Margin="5 0 5 5" AutoGenerateColumns="False" ItemsSource="{Binding SelectedDevice.ComObjects}" IsReadOnly="True" BorderThickness="1" 
                           BorderBrush="LightGray" Background="{ThemeResource BrushAccentControlBackground}" >
             <toolkit:DataGrid.RowStyle>
