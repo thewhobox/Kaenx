@@ -302,7 +302,7 @@ namespace Kaenx.View
                         ScaledHeight = Convert.ToUInt32(newImage.PixelHeight)
                     };
                     var pixelData = await decoder.GetPixelDataAsync(
-                        BitmapPixelFormat.Bgra8,
+                        BitmapPixelFormat.Rgba8,
                         BitmapAlphaMode.Straight,
                         transform,
                         ExifOrientationMode.IgnoreExifOrientation,
@@ -312,6 +312,7 @@ namespace Kaenx.View
 
                     using var stream = newImage.PixelBuffer.AsStream();
                     await stream.WriteAsync(sourcePixels, 0, sourcePixels.Length);
+                    await stream.FlushAsync();
                 }
 
                 image = newImage;

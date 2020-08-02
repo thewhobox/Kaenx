@@ -1,12 +1,14 @@
-﻿using Kaenx.DataContext.Migrations;
+﻿using Kaenx.Classes.Project;
+using Kaenx.DataContext.Migrations;
 using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace Kaenx.DataContext.Classes
+namespace Kaenx.Classes.Save
 {
-    public class ISaveHelper
+    public interface ISaveHelper
     {
-        
+        public void Init(Kaenx.Classes.Project.Project project);
+        public void Save();
     }
 }

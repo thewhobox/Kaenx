@@ -30,6 +30,7 @@
           <uap:FileTypeAssociation Name="knx-produktdatenbank">
             <uap:SupportedFileTypes>
               <uap:FileType>.knxprod</uap:FileType>
+              <uap:FileType>.kdev</uap:FileType>
             </uap:SupportedFileTypes>
             <uap:DisplayName>KNX-Produktdatenbank</uap:DisplayName>
             <uap:Logo>Assets\FileLogo.png</uap:Logo>

@@ -42,13 +42,13 @@
                    
                     <AppBarButton x:Uid="/Catalog/BarDelete" x:Name="BarDelete" Click="ClickDelete" Icon="Delete" Foreground="White" IsEnabled="False">
                         <AppBarButton.KeyboardAccelerators>
-                            <KeyboardAccelerator Modifiers="Control" Key="I" />
+                            <KeyboardAccelerator Modifiers="Control" Key="D" />
                         </AppBarButton.KeyboardAccelerators>
                     </AppBarButton>
 
-                    <AppBarButton x:Uid="/Catalog/BarExport" Icon="Upload" Foreground="White" IsEnabled="False">
+                    <AppBarButton x:Uid="/Catalog/BarExport" Icon="Upload" Foreground="White" Click="ClickExport">
                         <AppBarButton.KeyboardAccelerators>
-                            <KeyboardAccelerator Modifiers="Control" Key="I" />
+                            <KeyboardAccelerator Modifiers="Control" Key="E" />
                         </AppBarButton.KeyboardAccelerators>
                     </AppBarButton>
 
