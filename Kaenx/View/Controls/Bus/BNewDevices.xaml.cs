@@ -1,6 +1,7 @@
 ﻿using Kaenx.Classes;
 using Kaenx.Classes.Bus;
 using Kaenx.Classes.Bus.Data;
+using Kaenx.Classes.Helper;
 using Kaenx.DataContext.Catalog;
 using Kaenx.Konnect;
 using Kaenx.Konnect.Addresses;
@@ -71,6 +72,12 @@ namespace Kaenx.View.Controls.Bus
 
             if (conn?.IsConnected == true)
                 conn.Disconnect();
+
+            if(BusConnection.Instance.SelectedInterface == null)
+            {
+                ViewHelper.Instance.ShowNotification("main", "Bitte wählen Sie erst eine Schnittstelle aus", 3000, ViewHelper.MessageType.Error);
+                return;
+            }
 
             conn = new Connection(BusConnection.Instance.SelectedInterface.Endpoint);
             conn.OnTunnelResponse += Conn_OnTunnelResponse;
