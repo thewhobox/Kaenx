@@ -398,45 +398,45 @@ namespace Kaenx.View
 
         private async void ClickExport(object sender, RoutedEventArgs e)
         {
-            FileSavePicker picker = new FileSavePicker();
-            picker.SuggestedFileName = (CatalogDeviceList.SelectedItems[0] as DeviceViewModel).Name;
-            picker.FileTypeChoices.Clear();
-            picker.FileTypeChoices.Add("Kaenx Devices", new List<string>() { ".kdev" });
-            StorageFile file = await picker.PickSaveFileAsync();
+            //FileSavePicker picker = new FileSavePicker();
+            //picker.SuggestedFileName = (CatalogDeviceList.SelectedItems[0] as DeviceViewModel).Name;
+            //picker.FileTypeChoices.Clear();
+            //picker.FileTypeChoices.Add("Kaenx Devices", new List<string>() { ".kdev" });
+            //StorageFile file = await picker.PickSaveFileAsync();
 
 
-            DevicesExport export = new DevicesExport();
-            CatalogContext context = new CatalogContext();
+            //DevicesExport export = new DevicesExport();
+            //CatalogContext context = new CatalogContext();
 
-            foreach (DeviceViewModel device in CatalogDeviceList.SelectedItems)
-            {
-                export.Devices.Add(device);
+            //foreach (DeviceViewModel device in CatalogDeviceList.SelectedItems)
+            //{
+            //    export.Devices.Add(device);
 
-                CatalogViewModel cat = context.Sections.Single(s => s.Id == device.CatalogId);
-                export.Catalog.Add(cat);
-                while (cat.ParentId != "main")
-                {
-                    cat = context.Sections.Single(s => s.Id == cat.ParentId);
-                    export.Catalog.Add(cat);
-                }
+            //    CatalogViewModel cat = context.Sections.Single(s => s.Id == device.CatalogId);
+            //    export.Catalog.Add(cat);
+            //    while (cat.ParentId != "main")
+            //    {
+            //        cat = context.Sections.Single(s => s.Id == cat.ParentId);
+            //        export.Catalog.Add(cat);
+            //    }
 
-                foreach(Hardware2AppModel h2d in context.Hardware2App.Where(h => h.HardwareId == device.HardwareId))
-                {
-                    export.Hard2App.Add(h2d);
-                    ApplicationViewModel appm = context.Applications.Single(a => a.Id == h2d.ApplicationId);
-                    export.Apps.Add(appm);
+            //    foreach(Hardware2AppModel h2d in context.Hardware2App.Where(h => h.HardwareId == device.HardwareId))
+            //    {
+            //        export.Hard2App.Add(h2d);
+            //        ApplicationViewModel appm = context.Applications.Single(a => a.Id == h2d.ApplicationId);
+            //        export.Apps.Add(appm);
 
-                    export.Parameters.AddRange(context.AppParameters.Where(p => p.ApplicationId == appm.Id));
-                    export.ComObjects.AddRange(context.AppComObjects.Where(c => c.ApplicationId == appm.Id));
-                    export.ParamTypes.AddRange(context.AppParameterTypes.Where(t => t.ApplicationId == appm.Id));
-                    foreach(AppParameterTypeViewModel model in context.AppParameterTypes.Where(t => t.ApplicationId == appm.Id && t.Type == ParamTypes.Enum))
-                    {
-                        export.Enums.AddRange(context.AppParameterTypeEnums.Where(e => e.ParameterId == model.Id));
-                    }
-                }
-            }
+            //        export.Parameters.AddRange(context.AppParameters.Where(p => p.ApplicationId == appm.Id));
+            //        export.ComObjects.AddRange(context.AppComObjects.Where(c => c.ApplicationId == appm.Id));
+            //        export.ParamTypes.AddRange(context.AppParameterTypes.Where(t => t.ApplicationId == appm.Id));
+            //        foreach(AppParameterTypeViewModel model in context.AppParameterTypes.Where(t => t.ApplicationId == appm.Id && t.Type == ParamTypes.Enum))
+            //        {
+            //            export.Enums.AddRange(context.AppParameterTypeEnums.Where(e => e.ParameterId == model.Id));
+            //        }
+            //    }
+            //}
 
-            await FileIO.WriteTextAsync(file, "KaenxDev" + Newtonsoft.Json.JsonConvert.SerializeObject(export));
+            //await FileIO.WriteTextAsync(file, "KaenxDev" + Newtonsoft.Json.JsonConvert.SerializeObject(export));
         }
     }
 }
