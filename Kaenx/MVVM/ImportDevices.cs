@@ -12,8 +12,8 @@ namespace Kaenx.MVVM
 {
     public class ImportDevices : INotifyPropertyChanged, IDisposable
     {
-        private ObservableCollection<Device> deviceList = new ObservableCollection<Device>();
-        public ObservableCollection<Device> DeviceList
+        private ObservableCollection<Kaenx.Classes.Device> deviceList = new ObservableCollection<Kaenx.Classes.Device>();
+        public ObservableCollection<Kaenx.Classes.Device> DeviceList
         {
             get
             {

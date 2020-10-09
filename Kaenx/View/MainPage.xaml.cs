@@ -1,38 +1,24 @@
-﻿using Kaenx.Classes;
-using Kaenx.Classes.Controls;
-using Kaenx.Classes.Helper;
+﻿using Kaenx.Classes.Helper;
 using Kaenx.Classes.Project;
 using Kaenx.DataContext.Local;
-using Kaenx.DataContext.Project;
 using Kaenx.Konnect;
-using Kaenx.Konnect.Addresses;
-using Kaenx.Konnect.Builders;
-using Kaenx.Konnect.Classes;
-using Kaenx.View.Controls;
 using Kaenx.View.Controls.Dialogs;
 using Microsoft.AppCenter.Analytics;
 using Microsoft.AppCenter.Crashes;
-using Newtonsoft.Json.Linq;
 using Serilog;
 using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Net;
 using System.Runtime.InteropServices.WindowsRuntime;
 using System.Threading.Tasks;
-using System.Xml.Serialization;
 using Windows.ApplicationModel;
 using Windows.ApplicationModel.Resources;
 using Windows.Devices.Enumeration;
 using Windows.Devices.HumanInterfaceDevice;
-using Windows.Foundation;
-using Windows.Foundation.Collections;
 using Windows.Graphics.Imaging;
-using Windows.Services.Store;
 using Windows.Storage;
 using Windows.Storage.Pickers;
 using Windows.Storage.Streams;
@@ -41,11 +27,8 @@ using Windows.UI.StartScreen;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Controls.Primitives;
-using Windows.UI.Xaml.Data;
 using Windows.UI.Xaml.Input;
-using Windows.UI.Xaml.Media;
 using Windows.UI.Xaml.Media.Imaging;
-using Windows.UI.Xaml.Navigation;
 
 // The Blank Page item template is documented at http://go.microsoft.com/fwlink/?LinkId=402352&clcid=0x409
 
@@ -85,7 +68,7 @@ namespace Kaenx.View
             PackageId packageId = package.Id;
             PackageVersion version = packageId.Version;
 
-            AppVersion.Text =  string.Format("{0}.{1}.{2}.{3}", version.Major, version.Minor, version.Build, version.Revision);
+            AppVersion.Text = string.Format("{0}.{1}.{2}.{3}", version.Major, version.Minor, version.Build, version.Revision);
 
             LoadProjects();
         }
@@ -93,7 +76,7 @@ namespace Kaenx.View
         private async void LoadProjects()
         {
             LocalContext context = new LocalContext();
-            foreach(LocalProject model in context.Projects.ToList())
+            foreach (LocalProject model in context.Projects.ToList())
             {
                 ProjectViewHelper helper = new ProjectViewHelper
                 {
@@ -106,14 +89,15 @@ namespace Kaenx.View
 
                 if (model.Thumbnail != null)
                 {
-                    var wb = new WriteableBitmap(512,512);
+                    var wb = new WriteableBitmap(512, 512);
                     using (Stream stream = wb.PixelBuffer.AsStream())
                     {
                         await stream.WriteAsync(model.Thumbnail, 0, model.Thumbnail.Length);
                     }
 
                     helper.Image = wb;
-                } else
+                }
+                else
                 {
                     helper.Image = new BitmapImage() { UriSource = new Uri("ms-appx:///Assets/FileLogo.png") };
                 }
@@ -123,7 +107,7 @@ namespace Kaenx.View
 
             bool didCrash = await Crashes.HasCrashedInLastSessionAsync();
 
-            if(didCrash)
+            if (didCrash)
             {
                 ErrorReport report = await Crashes.GetLastSessionCrashReportAsync();
                 Log.Error("App ist in letzter Sitzung abgestürzt!" + Environment.NewLine + report.StackTrace.Substring(0, report.StackTrace.IndexOf(Environment.NewLine)));
@@ -173,7 +157,7 @@ namespace Kaenx.View
             {
                 project = await SaveHelper.LoadProject(helper);
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 Notify.Show("Das Projekt konnte nicht geladen werden:" + Environment.NewLine + ex.Message, 4000);
                 Log.Error(ex.Message, "Verbindung fehlgeschlagen!");
@@ -222,7 +206,7 @@ namespace Kaenx.View
                 }
             }
 
-            if(helper.IsReconstruct)
+            if (helper.IsReconstruct)
                 App.AppFrame.Navigate(typeof(Reconstruct), project);
             else
                 App.AppFrame.Navigate(typeof(WorkdeskEasy), project);
@@ -328,7 +312,7 @@ namespace Kaenx.View
                 await image.SetSourceAsync(stream);
 
             }
-            
+
 
 
             byte[] pixels;
@@ -380,7 +364,7 @@ namespace Kaenx.View
 
         private void OpenArchive(object sender, RoutedEventArgs e)
         {
-            _= Launcher.LaunchFolderPathAsync(ApplicationData.Current.LocalFolder.Path + "\\Logs");
+            _ = Launcher.LaunchFolderPathAsync(ApplicationData.Current.LocalFolder.Path + "\\Logs");
         }
 
         private void GridTemplate_RightTapped(object sender, RightTappedRoutedEventArgs e)
@@ -445,36 +429,42 @@ namespace Kaenx.View
             var selector = HidDevice.GetDeviceSelector(0xFFA0, 0x0001);
             var devices = await DeviceInformation.FindAllAsync(selector);
 
-            HidDevice dev = await HidDevice.FromIdAsync(devices[1].Id, FileAccessMode.ReadWrite);
-            dev.InputReportReceived += Dev_InputReportReceived;
+
+            Kaenx.Konnect.Connections.KnxUsbTunneling usb = new Konnect.Connections.KnxUsbTunneling(devices[0].Id);
+            await usb.SendStatusReq();
 
 
-            var rep = dev.CreateOutputReport(1);
 
-            //DataWriter dw = new DataWriter();
-            //dw.WriteBytes(new byte[] { 0x01, 0x00, 0x08,
-            //    0x00, 0x01, 0x0f, 0x01, 0x00, 0x00, 0x01, 0x00,
-            //    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-            //    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-            //    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-            //    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-            //    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-            //    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-            //    0x00, 0x00
-            //});
-            //rep.Data = dw.DetachBuffer();
+            //HidDevice dev = await HidDevice.FromIdAsync(devices[1].Id, FileAccessMode.ReadWrite);
+            //dev.InputReportReceived += Dev_InputReportReceived;
 
 
-            byte[] data = new byte[64];
-            data[0] = 0x01;
-            data[1] = 0x02;
+            //var rep = dev.CreateOutputReport(1);
 
-            for (int i = 2; i < 64; i++)
-                data[i] = 0x00;
+            ////DataWriter dw = new DataWriter();
+            ////dw.WriteBytes(new byte[] { 0x01, 0x00, 0x08,
+            ////    0x00, 0x01, 0x0f, 0x01, 0x00, 0x00, 0x01, 0x00,
+            ////    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+            ////    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+            ////    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+            ////    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+            ////    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+            ////    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+            ////    0x00, 0x00
+            ////});
+            ////rep.Data = dw.DetachBuffer();
 
-            rep.Data = data.AsBuffer();
 
-            await dev.SendOutputReportAsync(rep);
+            //byte[] data = new byte[64];
+            //data[0] = 0x01;
+            //data[1] = 0x02;
+
+            //for (int i = 2; i < 64; i++)
+            //    data[i] = 0x00;
+
+            //rep.Data = data.AsBuffer();
+
+            //await dev.SendOutputReportAsync(rep);
         }
 
         private void Dev_InputReportReceived(HidDevice sender, HidInputReportReceivedEventArgs args)
