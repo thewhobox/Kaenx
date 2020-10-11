@@ -85,7 +85,7 @@ namespace Kaenx.Classes.Bus
             Run();
 
 
-            UWPHidDeviceFactory.Register(new DebugLogger(), new DebugTracer());
+            UWPHidDeviceFactory.Register(new DebugLogger() { LogToConsole = true }, new DebugTracer());
 
             searchConn.OnSearchResponse += SearchConn_OnSearchResponse;
             searchTimer.Tick += (a, b) => SearchForDevices();
@@ -267,8 +267,9 @@ namespace Kaenx.Classes.Bus
             {
                 c++;
                 await CurrentAction.Connection.Connect();
+                await Task.Delay(2000);
 
-                if (c == 20)
+                if (c == 5)
                 {
                     CurrentAction.TodoText = _cancelIsUser ? loader.GetString("Action_Canceled") : loader.GetString("Action_Timeout");
                     CurrentAction_Finished(null, null);

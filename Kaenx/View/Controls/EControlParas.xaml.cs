@@ -449,7 +449,8 @@ namespace Kaenx.Views.Easy.Controls
 
         private async Task CheckComObjects(List<DeviceComObject> newObjs = null)
         {
-            if(newObjs == null)
+            //TODO check why it doesnt work with parameter new objs!
+            if(newObjs == null || true)
             {
                 newObjs = new List<DeviceComObject>();
 
