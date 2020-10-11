@@ -6,6 +6,8 @@ using Kaenx.DataContext.Catalog;
 using Kaenx.Konnect;
 using Kaenx.Konnect.Addresses;
 using Kaenx.Konnect.Classes;
+using Kaenx.Konnect.Connections;
+using Kaenx.Konnect.Interfaces;
 using Kaenx.View.Controls.Dialogs;
 using Microsoft.AppCenter.Analytics;
 using System;
@@ -36,7 +38,7 @@ namespace Kaenx.View.Controls.Bus
     {
         public ObservableCollection<NewDeviceData> DeviceList { get; } = new ObservableCollection<NewDeviceData>();
 
-        private Connection conn;
+        private IKnxConnection conn;
         private bool isReading = false;
 
         public BNewDevices()
@@ -71,7 +73,7 @@ namespace Kaenx.View.Controls.Bus
             BtnSearch.IsEnabled = false;
 
             if (conn?.IsConnected == true)
-                conn.Disconnect();
+                await conn.Disconnect();
 
             if(BusConnection.Instance.SelectedInterface == null)
             {
@@ -79,10 +81,9 @@ namespace Kaenx.View.Controls.Bus
                 return;
             }
 
-            conn = new Connection(BusConnection.Instance.SelectedInterface.Endpoint);
+            conn = KnxInterfaceHelper.GetConnection(BusConnection.Instance.SelectedInterface);
             conn.OnTunnelResponse += Conn_OnTunnelResponse;
-            conn.Connect();
-            await Task.Delay(200);
+            await conn.Connect();
 
             //BusCommon comm = new BusCommon(conn);
             BusDevice dev = new BusDevice(UnicastAddress.FromString("15.15.255"), conn);
@@ -125,9 +126,8 @@ namespace Kaenx.View.Controls.Bus
 
                 Debug.WriteLine("New Connection");
 
-                Connection conn2 = new Connection(BusConnection.Instance.SelectedInterface.Endpoint);
-                conn2.Connect();
-                await Task.Delay(100);
+                IKnxConnection conn2 = KnxInterfaceHelper.GetConnection(BusConnection.Instance.SelectedInterface);
+                await conn2.Connect();
 
                 BusDevice dev = new BusDevice(UnicastAddress.FromString("15.15.254"), conn2);
                 await dev.Connect(true);
@@ -167,7 +167,7 @@ namespace Kaenx.View.Controls.Bus
                 data.finished = true;
             }
 
-            conn.Disconnect();
+            await conn.Disconnect();
         }
 
 

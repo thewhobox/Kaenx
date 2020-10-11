@@ -178,9 +178,9 @@ namespace Kaenx.View
             Log.Information("------------Import wurde gestartet------------");
             Log.Information("Sprache: " + Imports.SelectedLanguage);
             ImportState = resourceLoader.GetString("StateProj");
-            IEnumerable<Device> devices = from dev in Imports.DeviceList where dev.SlideSettings.IsSelected == true select dev;
+            IEnumerable<Kaenx.Classes.Device> devices = from dev in Imports.DeviceList where dev.SlideSettings.IsSelected == true select dev;
 
-            foreach (Device device in devices)
+            foreach (Kaenx.Classes.Device device in devices)
             {
                 DevicesList.Add(new DeviceImportInfo()
                 {

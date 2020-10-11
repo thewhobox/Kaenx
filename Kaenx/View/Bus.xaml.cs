@@ -6,6 +6,8 @@ using Kaenx.Classes.Helper;
 using Kaenx.Classes.Project;
 using Kaenx.Konnect;
 using Kaenx.Konnect.Builders;
+using Kaenx.Konnect.Connections;
+using Kaenx.Konnect.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -38,7 +40,7 @@ namespace Kaenx.View
         public ObservableCollection<MonitorTelegram> TelegramList { get; } = new ObservableCollection<MonitorTelegram>();
 
         private Timer _statusTimer = new Timer();
-        private Connection _conn = null;
+        private IKnxConnection _conn = null;
 
         public Bus()
         {
@@ -109,7 +111,8 @@ namespace Kaenx.View
                     ViewHelper.Instance.ShowNotification("main", "Bitte wählen Sie erst eine Schnittstelle aus", 3000, ViewHelper.MessageType.Error);
                     return;
                 }
-                _conn = new Connection(BusConnection.Instance.SelectedInterface.Endpoint);
+
+                _conn = KnxInterfaceHelper.GetConnection(BusConnection.Instance.SelectedInterface);
                 _conn.OnTunnelRequest += _conn_OnTunnelAction;
                 _conn.OnTunnelResponse += _conn_OnTunnelAction;
                 _conn.Connect();

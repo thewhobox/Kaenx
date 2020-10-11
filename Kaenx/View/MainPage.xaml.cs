@@ -429,42 +429,9 @@ namespace Kaenx.View
             var selector = HidDevice.GetDeviceSelector(0xFFA0, 0x0001);
             var devices = await DeviceInformation.FindAllAsync(selector);
 
-
             Kaenx.Konnect.Connections.KnxUsbTunneling usb = new Konnect.Connections.KnxUsbTunneling(devices[0].Id);
-            await usb.SendStatusReq();
+            await usb.Connect();
 
-
-
-            //HidDevice dev = await HidDevice.FromIdAsync(devices[1].Id, FileAccessMode.ReadWrite);
-            //dev.InputReportReceived += Dev_InputReportReceived;
-
-
-            //var rep = dev.CreateOutputReport(1);
-
-            ////DataWriter dw = new DataWriter();
-            ////dw.WriteBytes(new byte[] { 0x01, 0x00, 0x08,
-            ////    0x00, 0x01, 0x0f, 0x01, 0x00, 0x00, 0x01, 0x00,
-            ////    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-            ////    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-            ////    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-            ////    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-            ////    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-            ////    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-            ////    0x00, 0x00
-            ////});
-            ////rep.Data = dw.DetachBuffer();
-
-
-            //byte[] data = new byte[64];
-            //data[0] = 0x01;
-            //data[1] = 0x02;
-
-            //for (int i = 2; i < 64; i++)
-            //    data[i] = 0x00;
-
-            //rep.Data = data.AsBuffer();
-
-            //await dev.SendOutputReportAsync(rep);
         }
 
         private void Dev_InputReportReceived(HidDevice sender, HidInputReportReceivedEventArgs args)

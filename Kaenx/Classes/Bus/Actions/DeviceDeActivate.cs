@@ -3,6 +3,7 @@ using Kaenx.Classes.Project;
 using Kaenx.DataContext.Catalog;
 using Kaenx.Konnect;
 using Kaenx.Konnect.Classes;
+using Kaenx.Konnect.Connections;
 using Microsoft.AppCenter.Analytics;
 using System;
 using System.Collections.Generic;
@@ -32,7 +33,7 @@ namespace Kaenx.Classes.Bus.Actions
         public bool ProgressIsIndeterminate { get { return _progressIsIndeterminate; } set { _progressIsIndeterminate = value; Changed("ProgressIsIndeterminate"); } }
         public string TodoText { get => _todoText; set { _todoText = value; Changed("TodoText"); } }
 
-        public Connection Connection { get; set; }
+        public IKnxConnection Connection { get; set; }
 
         public event ActionFinishedHandler Finished;
         public event PropertyChangedEventHandler PropertyChanged;

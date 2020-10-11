@@ -7,6 +7,8 @@ using Kaenx.DataContext.Local;
 using Kaenx.Konnect;
 using Kaenx.Konnect.Addresses;
 using Kaenx.Konnect.Classes;
+using Kaenx.Konnect.Connections;
+using Kaenx.Konnect.Interfaces;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 using System;
 using System.Collections.Generic;
@@ -166,10 +168,8 @@ namespace Kaenx.View
         private async void DoScan()
         {
             CanDo = false;
-            Connection _conn = new Connection(conn.SelectedInterface.Endpoint);
-            _conn.Connect();
-
-            await Task.Delay(100);
+            IKnxConnection _conn = new KnxIpTunneling((conn.SelectedInterface as KnxInterfaceIp).Endpoint);
+            await _conn.Connect();
 
             Action = "Scanne Linie: 1.1.x";
 
@@ -233,7 +233,7 @@ namespace Kaenx.View
             CanDo = true;
         }
 
-        private async Task ReadDevice(ReconstructDevice device, Connection _conn)
+        private async Task ReadDevice(ReconstructDevice device, IKnxConnection _conn)
         {
             device.StateId = 1;
             device.Status = "Lese Info...";

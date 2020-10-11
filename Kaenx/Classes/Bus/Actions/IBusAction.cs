@@ -14,7 +14,7 @@ namespace Kaenx.Classes.Bus.Actions
         delegate void ActionFinishedHandler(IBusAction action, object data);
         event ActionFinishedHandler Finished;
 
-        Kaenx.Konnect.Connection Connection { get; set; }
+        Konnect.Connections.IKnxConnection Connection { get; set; }
         int ProgressValue { get; set; }
         bool ProgressIsIndeterminate { get; set; }
         string TodoText { get; set; }

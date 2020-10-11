@@ -140,7 +140,7 @@
     <Compile Include="Classes\Bus\Actions\ProgApplication.cs" />
     <Compile Include="Classes\Bus\Actions\ProgPhysicalAddress.cs" />
     <Compile Include="Classes\Bus\BusConnection.cs" />
-    <Compile Include="Classes\Bus\BusInterface.cs" />
+    <Compile Include="Classes\Bus\BusInterfaceHelper.cs" />
     <Compile Include="Classes\Bus\BusSettings.cs" />
     <Compile Include="Classes\Bus\Data\ErrorData.cs" />
     <Compile Include="Classes\Bus\Data\IBusData.cs" />
@@ -536,7 +536,21 @@
       <Name>Kaenx.Konnect</Name>
     </ProjectReference>
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <Reference Include="Device.Net, Version=3.1.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\..\OneDrive - Mike Gerst\Programmieren\Device.Net\Device.Net.dll</HintPath>
+    </Reference>
+    <Reference Include="Device.Net.UWP">
+      <HintPath>..\..\..\..\OneDrive - Mike Gerst\Programmieren\Device.Net\Device.Net.UWP.dll</HintPath>
+    </Reference>
+    <Reference Include="Hid.Net">
+      <HintPath>..\..\..\..\OneDrive - Mike Gerst\Programmieren\Device.Net\Hid.Net.dll</HintPath>
+    </Reference>
+    <Reference Include="Hid.Net.UWP">
+      <HintPath>..\..\..\..\OneDrive - Mike Gerst\Programmieren\Device.Net\Hid.Net.UWP.dll</HintPath>
+    </Reference>
+  </ItemGroup>
   <PropertyGroup Condition=" '$(VisualStudioVersion)' == '' or '$(VisualStudioVersion)' &lt; '14.0' ">
     <VisualStudioVersion>14.0</VisualStudioVersion>
   </PropertyGroup>

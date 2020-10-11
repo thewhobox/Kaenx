@@ -8,11 +8,15 @@ using System.Net;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using Device.Net;
+using Hid.Net.UWP;
 using Kaenx.Classes.Bus.Actions;
 using Kaenx.Classes.Helper;
 using Kaenx.DataContext.Local;
 using Kaenx.Konnect;
 using Kaenx.Konnect.Builders;
+using Kaenx.Konnect.Connections;
+using Kaenx.Konnect.Interfaces;
 using Windows.ApplicationModel.Resources;
 using Windows.UI.Xaml;
 
@@ -24,7 +28,7 @@ namespace Kaenx.Classes.Bus
         private bool _isConnected = false;
         private bool _cancelIsUser = false;
 
-        public bool IsConnected { 
+        public bool IsConnected {  
             get { return _isConnected; } 
             set { _isConnected = value; Changed("IsConnected"); }
         }
@@ -33,7 +37,7 @@ namespace Kaenx.Classes.Bus
         public event ConnectionChangedHandler ConnectionChanged;
         public event PropertyChangedEventHandler PropertyChanged;
 
-        public ObservableCollection<BusInterface> InterfaceList { get; } = new ObservableCollection<BusInterface>();
+        public ObservableCollection<IKnxInterface> InterfaceList { get; } = new ObservableCollection<IKnxInterface>();
         public Queue<IBusAction> busActions { get; set; } = new Queue<IBusAction>();
         public ObservableCollection<IBusAction> History { get; set; } = new ObservableCollection<IBusAction>();
 
@@ -41,8 +45,8 @@ namespace Kaenx.Classes.Bus
 
 
 
-        private BusInterface _selectedInterface;
-        public BusInterface SelectedInterface
+        private IKnxInterface _selectedInterface;
+        public IKnxInterface SelectedInterface
         {
             get { return _selectedInterface; }
             set { 
@@ -53,7 +57,7 @@ namespace Kaenx.Classes.Bus
                 container.Values["lastUsedInterface"] = _selectedInterface.Hash;
             }
         }
-        private Connection searchConn = new Connection(new IPEndPoint(IPAddress.Parse("224.0.23.12"), 3671));
+        private IKnxConnection searchConn = new KnxIpTunneling(new IPEndPoint(IPAddress.Parse("224.0.23.12"), 3671));
         private DispatcherTimer searchTimer = new DispatcherTimer() { Interval = TimeSpan.FromSeconds(30) };
 
 
@@ -80,6 +84,9 @@ namespace Kaenx.Classes.Bus
         {
             Run();
 
+
+            UWPHidDeviceFactory.Register(new DebugLogger(), new DebugTracer());
+
             searchConn.OnSearchResponse += SearchConn_OnSearchResponse;
             searchTimer.Tick += (a, b) => SearchForDevices();
             searchTimer.Start();
@@ -94,11 +101,7 @@ namespace Kaenx.Classes.Bus
             LocalContext _context = new LocalContext();
             foreach(LocalInterface inter in _context.Interfaces)
             {
-                BusInterface binter = new BusInterface();
-                binter.Name = inter.Name;
-                binter.Endpoint = new IPEndPoint(IPAddress.Parse(inter.Ip), inter.Port);
-                binter.Hash = inter.Id.ToString();
-                InterfaceList.Add(binter);
+                InterfaceList.Add(BusInterfaceHelper.GetInterface(inter));
             }
         }
 
@@ -111,22 +114,21 @@ namespace Kaenx.Classes.Bus
             if (hash == null || _selectedInterface != null || !InterfaceList.Any(i => i.Hash == hash)) return;
 
 
-            BusInterface inter = InterfaceList.Single(i => i.Hash == hash);
+            IKnxInterface inter = InterfaceList.Single(i => i.Hash == hash);
             SelectedInterface = inter;
         }
 
         private void SearchConn_OnSearchResponse(Konnect.Responses.SearchResponse response)
         {
-            if(InterfaceList.Any(i => i.Hash == response.endpoint.ToString() + response.FriendlyName)) {
-                BusInterface inter = InterfaceList.Single(i => i.Hash == response.endpoint.ToString() + response.FriendlyName);
+            if(InterfaceList.Any(i => i.Hash == response.FriendlyName + "#IP#" + response.endpoint.ToString())) {
+                IKnxInterface inter = InterfaceList.Single(i => i.Hash == response.FriendlyName + "#IP#" + response.endpoint.ToString());
                 inter.LastFound = DateTime.Now;
             }
             else
             {
-                BusInterface inter = new BusInterface();
+                KnxInterfaceIp inter = new KnxInterfaceIp();
                 inter.Endpoint = response.endpoint;
                 inter.Name = response.FriendlyName;
-                inter.Hash = inter.Endpoint.ToString() + inter.Name;
                 inter.LastFound = DateTime.Now;
                 _ = App._dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Normal, () =>
                 {
@@ -141,25 +143,45 @@ namespace Kaenx.Classes.Bus
             string hash = container.Values["lastUsedInterface"]?.ToString();
             Debug.WriteLine("Last Interface: " + hash);
 
-            List<BusInterface> toDelete = new List<BusInterface>();
-            foreach(BusInterface inter in InterfaceList)
+            List<IKnxInterface> toDelete = new List<IKnxInterface>();
+            foreach(IKnxInterface inter in InterfaceList)
             {
                 if (inter.LastFound.Year == 1) continue;
-                if ((DateTime.Now - TimeSpan.FromMinutes(1)) > inter.LastFound)
+                if ((DateTime.Now - TimeSpan.FromMinutes(2)) > inter.LastFound)
                     toDelete.Add(inter);
             }
             _ = App._dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Normal, () =>
             {
-                foreach (BusInterface inter in toDelete)
+                foreach (IKnxInterface inter in toDelete)
                     InterfaceList.Remove(inter);
             });
 
             SearchRequest req = new SearchRequest();
             IPAddress a = GetIpAddress();
-            req.Build(new IPEndPoint(GetIpAddress(), searchConn.Port));
-            searchConn.SendWithoutConnected(req);
+            req.Build(new IPEndPoint(GetIpAddress(), (searchConn as KnxIpTunneling).Port));
+            searchConn.Send(req, true);
+
+            SearchForHid();
         }
 
+        private async void SearchForHid()
+        {
+            IEnumerable<ConnectedDeviceDefinition> devices = await DeviceManager.Current.GetConnectedDeviceDefinitionsAsync(new FilterDeviceDefinition() { DeviceType = DeviceType.Hid, UsagePage = 0xFFA0 });
+
+            foreach(ConnectedDeviceDefinition def in devices)
+            {
+                KnxInterfaceUsb inter = KnxInterfaceUsb.CheckHid(def.VendorId, def.ProductId, def.DeviceId);
+                if (inter == null) continue;
+
+                if (InterfaceList.Any(i => i.Hash == inter.Hash))
+                    continue;
+
+                _ = App._dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Normal, () =>
+                {
+                    InterfaceList.Add(inter);
+                });
+            }
+        }
 
 
         public IPAddress GetIpAddress()
@@ -230,7 +252,9 @@ namespace Kaenx.Classes.Bus
 
         private async void ExecuteAction()
         {
-            CurrentAction.Connection = new Kaenx.Konnect.Connection(SelectedInterface.Endpoint);
+
+
+            CurrentAction.Connection = KnxInterfaceHelper.GetConnection(SelectedInterface);
             CurrentAction.Connection.ConnectionChanged += Connection_ConnectionChanged;
             
             CurrentAction.ProgressIsIndeterminate = true;
@@ -242,8 +266,8 @@ namespace Kaenx.Classes.Bus
             while (!CurrentAction.Connection.IsConnected && !_cancelTokenSource.IsCancellationRequested)
             {
                 c++;
-                CurrentAction.Connection.Connect();
-                await Task.Delay(500);
+                await CurrentAction.Connection.Connect();
+
                 if (c == 20)
                 {
                     CurrentAction.TodoText = _cancelIsUser ? loader.GetString("Action_Canceled") : loader.GetString("Action_Timeout");
@@ -279,8 +303,7 @@ namespace Kaenx.Classes.Bus
         private async void CurrentAction_Finished(IBusAction sender, object data)
         {
             _cancelTokenSource?.Cancel();
-            CurrentAction.Connection.Disconnect();
-            await Task.Delay(500);
+            await CurrentAction.Connection.Disconnect();
             _ = App._dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Low, () =>
             {
                 History.Insert(0, CurrentAction);

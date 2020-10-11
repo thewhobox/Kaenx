@@ -168,7 +168,7 @@ namespace Kaenx.View
 
         private void ClickSelectAll(object sender, RoutedEventArgs e)
         {
-            foreach(Device device in Import.DeviceList)
+            foreach(Kaenx.Classes.Device device in Import.DeviceList)
             {
                 device.SlideSettings.IsSelected = true;
             }
@@ -382,12 +382,12 @@ namespace Kaenx.View
 
         private void ImportList_ItemClick(object sender, ItemClickEventArgs e)
         {
-            if (e.ClickedItem is Device)
+            if (e.ClickedItem is Kaenx.Classes.Device)
             {
-                Device device = (Device)e.ClickedItem;
+                Kaenx.Classes.Device device = (Kaenx.Classes.Device)e.ClickedItem;
                 device.SlideSettings.IsSelected = !device.SlideSettings.IsSelected;
 
-                int count = Import.DeviceList.Where<Device>(d => d.SlideSettings.IsSelected == true).Count();
+                int count = Import.DeviceList.Where<Kaenx.Classes.Device>(d => d.SlideSettings.IsSelected == true).Count();
 
                 if (count == 0)
                     ButtonImportSelected.IsEnabled = false;

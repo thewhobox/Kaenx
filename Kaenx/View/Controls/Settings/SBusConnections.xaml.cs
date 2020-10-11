@@ -1,6 +1,8 @@
 ﻿using Kaenx.Classes.Bus;
 using Kaenx.Classes.Helper;
 using Kaenx.DataContext.Local;
+using Kaenx.Konnect.Connections;
+using Kaenx.Konnect.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -69,6 +71,7 @@ namespace Kaenx.View.Controls.Settings
             inter.Ip = InInterAddress.Text;
             inter.Port = int.Parse(InInterPort.Text);
             inter.Name = InInterName.Text;
+            inter.Type = InterfaceType.IP;
 
             _context.Interfaces.Add(inter);
             _context.SaveChanges();
@@ -79,10 +82,9 @@ namespace Kaenx.View.Controls.Settings
             InInterName.Text = "";
             InInterPort.Text = "";
 
-            BusInterface binter = new BusInterface();
+            KnxInterfaceIp binter = new KnxInterfaceIp();
             binter.Name = inter.Name;
             binter.Endpoint = new IPEndPoint(IPAddress.Parse(inter.Ip), inter.Port);
-            binter.Hash = inter.Id.ToString();
             BusConnection.Instance.InterfaceList.Add(binter);
             ListInterfaces.Add(inter);
         }
@@ -136,7 +138,7 @@ namespace Kaenx.View.Controls.Settings
 
             try
             {
-                BusInterface binter = BusConnection.Instance.InterfaceList.Single(b => b.Hash == inter.Id.ToString());
+                IKnxInterface binter = BusConnection.Instance.InterfaceList.Single(b => b.Hash == inter.Name + "#IP#" + inter.Ip + ":" + inter.Port);
                 BusConnection.Instance.InterfaceList.Remove(binter);
             }
             catch { }
@@ -148,14 +150,24 @@ namespace Kaenx.View.Controls.Settings
         {
             if (!CheckInputs()) return;
 
-            Konnect.Connection conn = new Konnect.Connection(new IPEndPoint(IPAddress.Parse(InInterAddress.Text), int.Parse(InInterPort.Text)));
-            conn.Connect();
-            await Task.Delay(1000);
+            Konnect.Connections.IKnxConnection conn = new Konnect.Connections.KnxIpTunneling(new IPEndPoint(IPAddress.Parse(InInterAddress.Text), int.Parse(InInterPort.Text)));
+            await conn.Connect();
+
             if(conn.IsConnected)
-                ViewHelper.Instance.ShowNotification("settings", "Schnittstelle ist erreichbar.", 3000, ViewHelper.MessageType.Success);
+            {
+                if(await conn.SendStatusReq())
+                {
+                    ViewHelper.Instance.ShowNotification("settings", "Schnittstelle ist erreichbar.", 3000, ViewHelper.MessageType.Success);
+                }
+                else
+                {
+                    ViewHelper.Instance.ShowNotification("settings", "Schnittstelle ist erreichbar, hat aber keine Verbindung zum Bus.", 3000, ViewHelper.MessageType.Warning);
+                }
+            }
             else
                 ViewHelper.Instance.ShowNotification("settings", "Schnittstelle nicht erreichbar.", 3000, ViewHelper.MessageType.Error);
-            conn.Disconnect();
+            
+            await conn.Disconnect();
         }
 
         private void ClickTest2(object sender, RoutedEventArgs e)

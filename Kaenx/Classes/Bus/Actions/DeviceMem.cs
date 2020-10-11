@@ -8,6 +8,7 @@ using Kaenx.Konnect;
 using Kaenx.Konnect.Addresses;
 using Kaenx.Konnect.Builders;
 using Kaenx.Konnect.Classes;
+using Kaenx.Konnect.Connections;
 using Microsoft.AppCenter.Analytics;
 using Serilog;
 using System;
@@ -39,7 +40,7 @@ namespace Kaenx.Classes.Bus.Actions
         public bool ProgressIsIndeterminate { get { return _progressIsIndeterminate; } set { _progressIsIndeterminate = value; Changed("ProgressIsIndeterminate"); } }
         public string TodoText { get => _todoText; set { _todoText = value; Changed("TodoText"); } }
 
-        public Connection Connection { get; set; }
+        public IKnxConnection Connection { get; set; }
 
         public event IBusAction.ActionFinishedHandler Finished;
         public event PropertyChangedEventHandler PropertyChanged;
