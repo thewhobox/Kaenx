@@ -177,7 +177,7 @@
   <data name="ComsDelete.PrimaryButtonText" xml:space="preserve">
     <value>Verbindungen löschen</value>
   </data>
-  <data name="ComsDelete.Text" xml:space="preserve">
+  <data name="ComsDelete.Title" xml:space="preserve">
     <value>Achtung!</value>
   </data>
   <data name="ComsDeleteBlock.Text" xml:space="preserve">

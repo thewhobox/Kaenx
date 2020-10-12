@@ -12,6 +12,7 @@ using Serilog;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Runtime.Serialization.Formatters.Binary;
@@ -264,7 +265,18 @@ namespace Kaenx.Classes.Helper
                 ComObject com;
                 if (contextProject.ComObjects.Any(co => co.ComId == comObj.Id && co.DeviceId == linedev.UId))
                 {
-                    com = contextProject.ComObjects.Single(co => co.ComId == comObj.Id && co.DeviceId == linedev.UId);
+                    try
+                    {
+                        com = contextProject.ComObjects.Single(co => co.ComId == comObj.Id && co.DeviceId == linedev.UId);
+                    }
+                    catch
+                    {
+                        List<ComObject> objs = contextProject.ComObjects.Where(co => co.ComId == comObj.Id && co.DeviceId == linedev.UId).ToList();
+                        Debug.WriteLine("Es waren " + objs.Count + " ComObjects vorhanden");
+                        com = objs[0];
+                        objs.Remove(com);
+                        contextProject.ComObjects.RemoveRange(objs);
+                    }
                     com.Groups = string.Join(",", groupIds);
                     contextProject.ComObjects.Update(com);
                 }
