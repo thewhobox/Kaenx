@@ -4,7 +4,7 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">x86</Platform>
-    <ProjectGuid>{1F03C6F1-E08B-4546-B13D-2C808F6FBC79}</ProjectGuid>
+    <ProjectGuid>{9806B4EA-C660-46D5-8AF3-0FA19B4ADBB4}</ProjectGuid>
     <OutputType>AppContainerExe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>Kaenx</RootNamespace>
