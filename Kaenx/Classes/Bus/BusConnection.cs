@@ -166,7 +166,7 @@ namespace Kaenx.Classes.Bus
 
         private async void SearchForHid()
         {
-            IEnumerable<ConnectedDeviceDefinition> devices = await DeviceManager.Current.GetConnectedDeviceDefinitionsAsync(new FilterDeviceDefinition() { DeviceType = DeviceType.Hid, UsagePage = 0xFFA0 });
+            IEnumerable<ConnectedDeviceDefinition> devices = await DeviceManager.Current.GetConnectedDeviceDefinitionsAsync(new FilterDeviceDefinition() { DeviceType = DeviceType.Hid });
 
             foreach(ConnectedDeviceDefinition def in devices)
             {
