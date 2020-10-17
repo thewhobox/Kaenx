@@ -57,8 +57,8 @@ namespace Kaenx.Classes.Bus
                 container.Values["lastUsedInterface"] = _selectedInterface.Hash;
             }
         }
-        private IKnxConnection searchConn = new KnxIpTunneling(new IPEndPoint(IPAddress.Parse("224.0.23.12"), 3671));
-        private DispatcherTimer searchTimer = new DispatcherTimer() { Interval = TimeSpan.FromSeconds(30) };
+        private KnxIpTunneling searchConn = new KnxIpTunneling(new IPEndPoint(IPAddress.Parse("224.0.23.12"), 3671));
+        private DispatcherTimer searchTimer = new DispatcherTimer() { Interval = TimeSpan.FromSeconds(10) };
 
 
 
@@ -158,8 +158,8 @@ namespace Kaenx.Classes.Bus
 
             SearchRequest req = new SearchRequest();
             IPAddress a = GetIpAddress();
-            req.Build(new IPEndPoint(GetIpAddress(), (searchConn as KnxIpTunneling).Port));
-            searchConn.Send(req, true);
+            req.Build(new IPEndPoint(GetIpAddress(), searchConn.Port));
+            searchConn.Send(req.GetBytes(), true);
 
             SearchForHid();
         }

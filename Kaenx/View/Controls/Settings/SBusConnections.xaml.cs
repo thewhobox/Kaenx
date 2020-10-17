@@ -153,6 +153,8 @@ namespace Kaenx.View.Controls.Settings
             Konnect.Connections.IKnxConnection conn = new Konnect.Connections.KnxIpTunneling(new IPEndPoint(IPAddress.Parse(InInterAddress.Text), int.Parse(InInterPort.Text)));
             await conn.Connect();
 
+            await Task.Delay(1000);
+
             if(conn.IsConnected)
             {
                 if(await conn.SendStatusReq())
