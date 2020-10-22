@@ -143,7 +143,7 @@
             </Grid>
         </DataTemplate>
         <DataTemplate x:Key="TypeCheckBox">
-            <Grid Visibility="{Binding Visible}" Margin="0 5">
+            <Grid Visibility="{Binding Visible}" Margin="0 5" >
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition MaxWidth="550" Width="9*" />
                     <ColumnDefinition MinWidth="230" MaxWidth="350" Width="3*" />
@@ -255,11 +255,8 @@
             <ColumnDefinition x:Name="ColsComs" Width="0" />
         </Grid.ColumnDefinitions>
 
-        <StackPanel Grid.ColumnSpan="2">
-            <TextBox x:Name="InTestName" />
-            <Button Content="Ausgeben" Click="Button_Click" />
-            <ToggleSwitch x:Name="ShowComsToggler" Grid.ColumnSpan="2" HorizontalAlignment="Center" OnContent="Ansicht Kommunikationsobjekte" OffContent="Ansicht Kommunikationsobjekte"  />
-        </StackPanel>
+        <ToggleSwitch x:Name="ShowComsToggler" Grid.ColumnSpan="2" HorizontalAlignment="Center" OnContent="Ansicht Kommunikationsobjekte" OffContent="Ansicht Kommunikationsobjekte"  />
+        
 
         <Grid Grid.Row="1" BorderBrush="{ThemeResource BrushAccentColorDark2}" BorderThickness="1" >
             <Grid.ColumnDefinitions>

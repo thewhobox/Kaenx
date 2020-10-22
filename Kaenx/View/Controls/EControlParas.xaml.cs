@@ -8,29 +8,13 @@ using Kaenx.View.Controls;
 using Serilog;
 using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Diagnostics;
-using System.IO;
 using System.Linq;
-using System.Runtime.InteropServices.WindowsRuntime;
 using System.Text;
-using System.Text.RegularExpressions;
 using System.Threading.Tasks;
-using System.Xml.Linq;
-using Windows.Foundation;
-using Windows.Foundation.Collections;
-using Windows.Storage;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
-using Windows.UI.Xaml.Controls.Primitives;
-using Windows.UI.Xaml.Data;
-using Windows.UI.Xaml.Input;
-using Windows.UI.Xaml.Media;
-using Windows.UI.Xaml.Navigation;
-using Microsoft.Toolkit.Uwp.UI.Controls;
-using Windows.ApplicationModel.Background;
-using System.Security.Cryptography;
 
 // Die Elementvorlage "Benutzersteuerelement" wird unter https://go.microsoft.com/fwlink/?LinkId=234236 dokumentiert.
 
@@ -147,8 +131,9 @@ namespace Kaenx.Views.Easy.Controls
 
             try
             {
-                _= Load();
-            }catch(Exception ex)
+                _ = Load();
+            }
+            catch (Exception ex)
             {
                 Log.Error(ex, "Laden der Parameter fehlgeschlagen!");
                 ViewHelper.Instance.ShowNotification("main", ex.Message, 4000, ViewHelper.MessageType.Error);
@@ -157,13 +142,8 @@ namespace Kaenx.Views.Easy.Controls
 
         public void StartRead()
         {
-            _= Load();
+            _ = Load();
         }
-
-
-
-
-        private bool isLoading = true;
 
 
 
@@ -172,61 +152,61 @@ namespace Kaenx.Views.Easy.Controls
             try
             {
 
-            await Task.Delay(1);
-            AppAdditional adds = _context.AppAdditionals.Single(a => a.Id == Device.ApplicationId);
-            comObjects = SaveHelper.ByteArrayToObject<List<DeviceComObject>>(adds.ComsAll);
-            Channels = SaveHelper.ByteArrayToObject<List<IDynChannel>>(adds.ParamsHelper, true);
-            Bindings = SaveHelper.ByteArrayToObject<List<ParamBinding>>(adds.Bindings);
-            Assignments = SaveHelper.ByteArrayToObject<List<AssignParameter>>(adds.Assignments);
-            
+                await Task.Delay(1);
+                AppAdditional adds = _context.AppAdditionals.Single(a => a.Id == Device.ApplicationId);
+                comObjects = SaveHelper.ByteArrayToObject<List<DeviceComObject>>(adds.ComsAll);
+                Channels = SaveHelper.ByteArrayToObject<List<IDynChannel>>(adds.ParamsHelper, true);
+                Bindings = SaveHelper.ByteArrayToObject<List<ParamBinding>>(adds.Bindings);
+                Assignments = SaveHelper.ByteArrayToObject<List<AssignParameter>>(adds.Assignments);
 
-            foreach (IDynChannel ch in Channels)
-            {
-                if (!ch.HasAccess)
+
+                foreach (IDynChannel ch in Channels)
                 {
-                    ch.Visible = Visibility.Collapsed;
-                    continue;
-                }
-
-                if (ch is ChannelBlock)
-                {
-                    ChannelBlock chb = ch as ChannelBlock;
-                    if (chb.Text.Contains("{{"))
-                        chb.DisplayText = chb.Text.Replace("{{dyn}}", chb.DefaultText);
-                    else
-                        chb.DisplayText = chb.Text;
-                }
-
-
-                foreach (ParameterBlock block in ch.Blocks)
-                {
-                    if (!block.HasAccess)
+                    if (!ch.HasAccess)
                     {
-                        block.Visible = Visibility.Collapsed;
+                        ch.Visible = Visibility.Collapsed;
                         continue;
                     }
 
-
-                    if (block.Text?.Contains("{{") == true)
-                        block.DisplayText = block.Text.Replace("{{dyn}}", block.DefaultText);
-                    else
-                        block.DisplayText = block.Text;
-
-                    foreach (IDynParameter para in block.Parameters)
+                    if (ch is ChannelBlock)
                     {
-                        if (!para.HasAccess)
+                        ChannelBlock chb = ch as ChannelBlock;
+                        if (chb.Text.Contains("{{"))
+                            chb.DisplayText = chb.Text.Replace("{{dyn}}", chb.DefaultText);
+                        else
+                            chb.DisplayText = chb.Text;
+                    }
+
+
+                    foreach (ParameterBlock block in ch.Blocks)
+                    {
+                        if (!block.HasAccess)
                         {
-                            para.Visible = Visibility.Collapsed;
+                            block.Visible = Visibility.Collapsed;
                             continue;
                         }
 
-                        if (ParaChanges.ContainsKey(para.Id))
-                            para.Value = ParaChanges[para.Id].Value;
 
-                        if (!Id2Param.ContainsKey(para.Id))
-                            Id2Param.Add(para.Id, new ViewParamModel(para.Value));
+                        if (block.Text?.Contains("{{") == true)
+                            block.DisplayText = block.Text.Replace("{{dyn}}", block.DefaultText);
+                        else
+                            block.DisplayText = block.Text;
 
-                        Id2Param[para.Id].Parameters.Add(para);
+                        foreach (IDynParameter para in block.Parameters)
+                        {
+                            if (!para.HasAccess)
+                            {
+                                para.Visible = Visibility.Collapsed;
+                                continue;
+                            }
+
+                            if (ParaChanges.ContainsKey(para.Id))
+                                para.Value = ParaChanges[para.Id].Value;
+
+                            if (!Id2Param.ContainsKey(para.Id))
+                                Id2Param.Add(para.Id, new ViewParamModel(para.Value));
+
+                            Id2Param[para.Id].Parameters.Add(para);
                             try
                             {
 
@@ -236,21 +216,21 @@ namespace Kaenx.Views.Easy.Controls
                             {
 
                             }
-                        para.PropertyChanged += Para_PropertyChanged;
+                            //para.PropertyChanged += Para_PropertyChanged;
+                        }
                     }
                 }
-            }
 
                 List<string> testL = new List<string>();
-            foreach(ChangeParamModel change in ParaChanges.Values)
-            {
+                foreach (ChangeParamModel change in ParaChanges.Values)
+                {
                     Id2Param[change.ParamId].Value = change.Value;
                     testL.Add(change.ParamId);
-            }
+                }
 
 
                 CatalogContext co = new CatalogContext();
-                foreach(AppParameter para in co.AppParameters.Where(p => p.ApplicationId == adds.Id))
+                foreach (AppParameter para in co.AppParameters.Where(p => p.ApplicationId == adds.Id))
                 {
                     if (!Id2Param.ContainsKey(para.Id))
                     {
@@ -260,7 +240,7 @@ namespace Kaenx.Views.Easy.Controls
                         p.Id = para.Id;
                         p.Visible = Visibility.Visible;
                         model.Parameters.Add(p);
-                        Id2Param.Add(para.Id,model);
+                        Id2Param.Add(para.Id, model);
                     }
                 }
 
@@ -272,28 +252,40 @@ namespace Kaenx.Views.Easy.Controls
                     {
                         Id2Param[assign.Target].Assign = test ? assign : null;
                         if (test) testL.Add(assign.Target);
-                    } catch
+                    }
+                    catch
                     {
 
                     }
                 }
 
 
-                isLoading = false;
-
-                foreach(string id in testL)
+                foreach (string id in testL)
                 {
                     Id2Param[id].Parameters[0].Value = Id2Param[id].Value;
                     Para_PropertyChanged(Id2Param[id].Parameters[0]);
                 }
 
 
+
+                foreach(IDynChannel ch in Channels)
+                {
+                    foreach(ParameterBlock block in ch.Blocks)
+                    {
+                        foreach(IDynParameter para in block.Parameters)
+                        {
+                            para.PropertyChanged += Para_PropertyChanged;
+                        }
+                    }
+                }
+
+
                 _ = CheckComObjects();
 
 
-            LoadRing.Visibility = Visibility.Collapsed;
-            watch.Stop();
-            ViewHelper.Instance.ShowNotification("main", "Geladen nach: " + watch.Elapsed.TotalSeconds + "s", 3000);
+                LoadRing.Visibility = Visibility.Collapsed;
+                watch.Stop();
+                ViewHelper.Instance.ShowNotification("main", "Geladen nach: " + watch.Elapsed.TotalSeconds + "s", 3000);
 
             }
             catch
@@ -304,7 +296,7 @@ namespace Kaenx.Views.Easy.Controls
 
         private async void Para_PropertyChanged(object sender, PropertyChangedEventArgs e = null)
         {
-            if ((e != null && e.PropertyName != "Value") || isLoading) return;
+            if (e != null && e.PropertyName != "Value") return;
 
             IDynParameter para = sender as IDynParameter;
             Debug.WriteLine("Wert geändert! " + para.Id + " -> " + para.Value);
@@ -321,34 +313,7 @@ namespace Kaenx.Views.Easy.Controls
 
 
 
-            //(List<DeviceComObject> allNew, List<DeviceComObject> toDelete) comObjs = (null, null);
-            //if (e != null)
-            //{
-            //    comObjs = CheckRemoveComObjects();
-
-            //    //TODO wenn weche löscht werden müssen abfragen ob das wirklich tun soll
-
-            //    StringBuilder sb = new StringBuilder();
-            //    foreach (DeviceComObject co in comObjs.allNew)
-            //        sb.AppendLine(co.Number + " " + co.DisplayName + " " + co.Function);
-            //    Debug.WriteLine("Erstes dingens");
-            //    Debug.WriteLine(sb.ToString());
-
-            //    if (comObjs.toDelete.Count > 0)
-            //    {
-            //        Debug.WriteLine("Es müssten Sachen gelöscht werden..");
-            //        //DiagComsDeleted diag = new DiagComsDeleted();
-            //        //diag.SetComs(comObjs.toDelete);
-            //        //await diag.ShowAsync();
-            //        //if (!diag.DoDelete)
-            //        //{
-            //        //    Id2Param[para.Id].Value = oldValue;
-            //        //    para.Value = oldValue;
-            //        //    CalculateVisibility(para);
-            //        //    return;
-            //        //}
-            //    }
-            //}
+            
 
 
 
@@ -356,10 +321,41 @@ namespace Kaenx.Views.Easy.Controls
 
 
 
+            (List<DeviceComObject> allNew, List<DeviceComObject> toDelete) comObjs = (null, null);
+            if (e != null)
+            {
+                comObjs = CheckRemoveComObjects();
+
+                //TODO wenn welche löscht werden müssen abfragen ob das wirklich tun soll
+
+                StringBuilder sb = new StringBuilder();
+                foreach (DeviceComObject co in comObjs.allNew)
+                    sb.AppendLine(co.Number + " " + co.DisplayName + " " + co.Function);
+                Debug.WriteLine("Erstes dingens");
+                Debug.WriteLine(sb.ToString());
+
+                if (comObjs.toDelete.Count > 0)
+                {
+                    Debug.WriteLine("Es müssten Sachen gelöscht werden..");
+                    DiagComsDeleted diag = new DiagComsDeleted();
+                    diag.SetComs(comObjs.toDelete);
+                    await diag.ShowAsync();
+                    if (!diag.DoDelete)
+                    {
+                        Id2Param[para.Id].Value = oldValue;
+                        para.Value = oldValue;
+                        CalculateVisibility(para);
+                        return;
+                    }
+                }
+            }
 
 
 
-            _ = CheckComObjects(null);// comObjs.allNew);
+
+
+
+            _ = CheckComObjects(comObjs.allNew);
 
             ChangeParamModel change = new ChangeParamModel
             {
@@ -511,7 +507,7 @@ namespace Kaenx.Views.Easy.Controls
         private async Task CheckComObjects(List<DeviceComObject> newObjs = null)
         {
             //TODO check why it doesnt work with parameter new objs!
-            if(newObjs == null )//|| true)
+            if (newObjs == null)//|| true)
             {
                 newObjs = new List<DeviceComObject>();
 
@@ -597,13 +593,6 @@ namespace Kaenx.Views.Easy.Controls
             _contextP.SaveChanges();
 
             await Task.Delay(1);
-        }
-
-        private void Button_Click(object sender, RoutedEventArgs e)
-        {
-            string paraId = SaveHelper.ShortId(InTestName.Text);
-            ViewParamModel model = Id2Param[paraId];
-            ViewHelper.Instance.ShowNotification("main", $"Val: {model.Value} - Text: {model.Parameters[0].Text}", 6000);
         }
     }
 }

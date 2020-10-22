@@ -37,7 +37,6 @@ namespace Kaenx.Classes.Bus.Actions
         public string TodoText { get => _todoText; set { _todoText = value; Changed("TodoText"); } }
 
         public IKnxConnection Connection { get; set; }
-        IKnxConnection IBusAction.Connection { get; set; }
 
         public event ActionFinishedHandler Finished;
         public event PropertyChangedEventHandler PropertyChanged;

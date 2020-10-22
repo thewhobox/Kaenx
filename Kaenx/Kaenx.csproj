@@ -287,7 +287,6 @@
       <SubType>Designer</SubType>
     </AppxManifest>
     <None Include="Data\Logos\kænx.odg" />
-    <None Include="METS_TemporaryKey.pfx" />
     <PRIResource Include="Strings\en\Topologie.resw" />
     <PRIResource Include="Strings\en\Import.resw" />
     <PRIResource Include="Strings\en\Groups.resw" />
@@ -308,7 +307,6 @@
     <PRIResource Include="Strings\en\MainPage.resw" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="Package.StoreAssociation.xml" />
     <Content Include="Assets\LargeTile.scale-100.png" />
     <Content Include="Assets\LargeTile.scale-125.png" />
     <Content Include="Assets\LargeTile.scale-150.png" />

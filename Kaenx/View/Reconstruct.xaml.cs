@@ -265,6 +265,7 @@ namespace Kaenx.View
             }
             catch
             {
+                Debug.WriteLine(device.Address.ToString() + ": " + appId);
                 if (string.IsNullOrEmpty(device.ApplicationName))
                     device.ApplicationName = "Fehler 0x03";
                 device.DeviceName = "Fehler 0x03";
