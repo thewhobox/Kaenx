@@ -9,6 +9,7 @@ using Kaenx.Konnect.Addresses;
 using Kaenx.Konnect.Classes;
 using Kaenx.Konnect.Connections;
 using Kaenx.Konnect.Interfaces;
+using Kaenx.View.Controls.Dialogs;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 using System;
 using System.Collections.Generic;
@@ -57,6 +58,28 @@ namespace Kaenx.View
             get { return _cando; }
             set { _cando = value; Changed("CanDo"); }
         }
+
+        private int _progMax = 1;
+        public int ProgMax
+        {
+            get { return _progMax; }
+            set { _progMax = value; Changed("ProgMax"); }
+        }
+
+        private int _progValue = 1;
+        public int ProgValue
+        {
+            get { return _progValue; }
+            set { _progValue = value; Changed("ProgValue"); }
+        }
+
+        private bool _progIndet = false;
+        public bool ProgIndet
+        {
+            get { return _progIndet; }
+            set { _progIndet = value; Changed("ProgIndet"); }
+        }
+
 
         public ObservableCollection<ReconstructDevice> Devices { get; set; } = new ObservableCollection<ReconstructDevice>();
 
@@ -168,28 +191,64 @@ namespace Kaenx.View
         private async void DoScan()
         {
             CanDo = false;
-            IKnxConnection _conn = new KnxIpTunneling((conn.SelectedInterface as KnxInterfaceIp).Endpoint);
+
+            DiagSelectLines diag = new DiagSelectLines();
+            await diag.ShowAsync();
+
+            if (diag.Patterns.Count == 0)
+            {
+                CanDo = true;
+                return;
+            }
+
+            List<UnicastAddress> addresses = new List<UnicastAddress>();
+
+            foreach (SearchPattern pattern in diag.Patterns)
+                foreach (UnicastAddress addr in pattern.GetAddresses())
+                    if (!addresses.Any(a => a.ToString() == addr.ToString()))
+                        addresses.Add(addr);
+
+            ProgMax = addresses.Count;
+            ProgValue = 0;
+
+
+            //foreach (UnicastAddress addr in addresses)
+            //{
+            //    Action = $"Scanne Linie: {addr.Area}.{addr.Line}.x";
+            //    await Task.Delay(100);
+            //    ProgValue++;
+            //}
+
+
+            IKnxConnection _conn = KnxInterfaceHelper.GetConnection(conn.SelectedInterface);
             await _conn.Connect();
-
-            Action = "Scanne Linie: 1.1.x";
-
             _conn.OnTunnelRequest += _conn_OnTunnelRequest;
 
-            for(int i = 0; i < 256; i++)
+
+
+            foreach (UnicastAddress addr in addresses)
             {
-                BusDevice dev = new BusDevice(UnicastAddress.FromString("1.1." + i), _conn);
+                Action = $"Scanne Linie: {addr.Area}.{addr.Line}.x";
+                BusDevice dev = new BusDevice(addr, _conn);
                 await dev.Connect(true);
+                ProgValue++;
             }
 
             Action = "Warten auf Geräte...";
+            ProgIndet = true;
             await Task.Delay(15000);
+
 
             Action = "Lese Daten aus Geräten...";
             await Task.Delay(1000);
 
+            ProgMax = Devices.Where(d => d.StateId == 0).Count();
+            ProgValue = 0;
 
             while (true)
             {
+                ProgValue++;
+
                 ReconstructDevice device;
                 try
                 {
@@ -229,7 +288,8 @@ namespace Kaenx.View
             }
 
 
-            _conn.Disconnect();
+            Action = "Fertig!";
+            await _conn.Disconnect();
             CanDo = true;
         }
 
