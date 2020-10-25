@@ -158,7 +158,7 @@ namespace Kaenx.View
                         dev.DeviceName = names[0];
                         dev.ApplicationName = names[1];
                         dev.ApplicationId = ldev.ApplicationId;
-                        dev.StateId = 2;
+                        dev.StateId = 3;
                         dev.Status = "Gespeichert";
                         dev.Manufacturer = manus[dev.ApplicationId.Substring(0, 6)];
                         Devices.Add(dev);
@@ -221,7 +221,17 @@ namespace Kaenx.View
 
 
             IKnxConnection _conn = KnxInterfaceHelper.GetConnection(conn.SelectedInterface);
-            await _conn.Connect();
+
+            try
+            {
+                await _conn.Connect();
+            } catch(Exception ex)
+            {
+                Notify.Show(ex.Message, 3000);
+                CanDo = true;
+                return;
+            }
+             
             _conn.OnTunnelRequest += _conn_OnTunnelRequest;
 
 
@@ -234,8 +244,8 @@ namespace Kaenx.View
                 ProgValue++;
             }
 
-            Action = "Warten auf Geräte...";
             ProgIndet = true;
+            Action = "Warten auf Geräte...";
             await Task.Delay(15000);
 
 
@@ -342,7 +352,7 @@ namespace Kaenx.View
                 device.Serial = "Fehler 0x02";
             }
 
-
+            device.StateId = 2;
             device.Status = "Infos gelesen";
         }
 
@@ -381,7 +391,7 @@ namespace Kaenx.View
             lined.Id = device.Address.DeviceAddress;
             lined.Name = device.DeviceName + "_" + device.ApplicationName;
 
-            device.StateId = 2;
+            device.StateId = 3;
             device.Status = "In Projekt";
         }
 
@@ -403,7 +413,12 @@ namespace Kaenx.View
 
         private void ClickReadStart(object sender, RoutedEventArgs e)
         {
+            IEnumerable<ReconstructDevice> devices = Devices.Where(d => d.StateId >= 2);
 
+            foreach(ReconstructDevice device in devices)
+            {
+
+            }
         }
 
         private void ClickSave(object sender, RoutedEventArgs e)
