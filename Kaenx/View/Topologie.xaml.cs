@@ -14,9 +14,11 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
+using Windows.ApplicationModel.Core;
 using Windows.ApplicationModel.Resources;
 using Windows.System;
 using Windows.UI.Core;
+using Windows.UI.ViewManagement;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Input;
@@ -33,6 +35,7 @@ namespace Kaenx.View
         public Project _project;
         private CatalogContext _context = new CatalogContext();
         private ResourceLoader loader = ResourceLoader.GetForCurrentView("Topologie");
+        private LineDevice SelectedDevice;
 
         public Topologie()
         {
@@ -275,6 +278,7 @@ namespace Kaenx.View
 
         private async void DoOpenParas(LineDevice device)
         {
+            SelectedDevice = device;
             EControlParas paras;
             bool isFromCache = false;
 
@@ -693,6 +697,29 @@ namespace Kaenx.View
                     ColsSett.Width = new GridLength(1, GridUnitType.Star);
                     break;
             }
+        }
+
+        private async void OpenInNewWindow(object sender, RoutedEventArgs e)
+        {
+            var currentAV = ApplicationView.GetForCurrentView();
+            var newAV = CoreApplication.CreateNewView();
+            await newAV.Dispatcher.RunAsync(
+                            CoreDispatcherPriority.Normal,
+                            async () =>
+                            {
+                                var newWindow = Window.Current;
+                                var newAppView = ApplicationView.GetForCurrentView();
+
+                                EControlParas paras = new EControlParas(SelectedDevice);
+                                newAppView.Title = paras.Device.LineName + " " + paras.Device.Name +  " - Parameter";
+                                newWindow.Content = paras;
+                                newWindow.Activate();
+                                paras.Start();
+
+                                await ApplicationViewSwitcher.TryShowAsViewModeAsync(
+                                    newAppView.Id,
+                                     ApplicationViewMode.Default);
+                            });
         }
     }
 }

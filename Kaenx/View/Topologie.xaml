@@ -181,6 +181,10 @@
                 <TextBlock x:Name="ParamHeaderName" FontSize="25" Margin="10 0 0 0" />
             </StackPanel>
 
+            <Button Click="OpenInNewWindow" HorizontalAlignment="Right">
+                <FontIcon Glyph="&#xE8A7;" />
+            </Button>
+
             <ContentPresenter x:Name="ParamPresenter" Grid.Row="1" Margin="5 0 5 0" />
         </Grid>
         

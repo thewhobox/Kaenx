@@ -256,7 +256,6 @@
         </Grid.ColumnDefinitions>
 
         <ToggleSwitch x:Name="ShowComsToggler" Grid.ColumnSpan="2" HorizontalAlignment="Center" OnContent="Ansicht Kommunikationsobjekte" OffContent="Ansicht Kommunikationsobjekte"  />
-        
 
         <Grid Grid.Row="1" BorderBrush="{ThemeResource BrushAccentColorDark2}" BorderThickness="1" >
             <Grid.ColumnDefinitions>
