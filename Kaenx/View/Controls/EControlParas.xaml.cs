@@ -342,6 +342,7 @@ namespace Kaenx.Views.Easy.Controls
                     Debug.WriteLine("Es müssten Sachen gelöscht werden..");
                     DiagComsDeleted diag = new DiagComsDeleted();
                     diag.SetComs(comObjs.toDelete);
+                    diag.XamlRoot = this.XamlRoot;
                     await diag.ShowAsync();
                     if (!diag.DoDelete)
                     {
@@ -368,7 +369,11 @@ namespace Kaenx.Views.Easy.Controls
             };
 
             Device.LoadedApplication = false;
-            ChangeHandler.Instance.ChangedParam(change);
+            _= App._dispatcher.RunAsync(CoreDispatcherPriority.Normal, () =>
+            {
+                ChangeHandler.Instance.ChangedParam(change);
+            });
+
         }
 
 

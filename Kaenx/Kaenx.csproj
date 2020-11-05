@@ -25,7 +25,7 @@
     <AppxBundlePlatforms>x86|x64|arm</AppxBundlePlatforms>
     <AppInstallerUpdateFrequency>0</AppInstallerUpdateFrequency>
     <AppInstallerCheckForUpdateFrequency>OnApplicationRun</AppInstallerCheckForUpdateFrequency>
-    <PackageCertificateThumbprint>000F87E9E07C12056633E69064F7EDD2D96E90D9</PackageCertificateThumbprint>
+    <PackageCertificateThumbprint>881FE76B3B092E92A79BD15BB89561C4F9153453</PackageCertificateThumbprint>
     <AppxPackageSigningTimestampDigestAlgorithm>SHA256</AppxPackageSigningTimestampDigestAlgorithm>
     <GenerateTestArtifacts>False</GenerateTestArtifacts>
     <HoursBetweenUpdateChecks>0</HoursBetweenUpdateChecks>
@@ -219,6 +219,9 @@
     </Compile>
     <Compile Include="View\Controls\Dialogs\DiagSelectLines.xaml.cs">
       <DependentUpon>DiagSelectLines.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="View\Controls\EControlLine.xaml.cs">
+      <DependentUpon>EControlLine.xaml</DependentUpon>
     </Compile>
     <Compile Include="View\Controls\EControlParas.xaml.cs">
       <DependentUpon>EControlParas.xaml</DependentUpon>
@@ -427,6 +430,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="View\Controls\Dialogs\DiagSelectLines.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="View\Controls\EControlLine.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

@@ -247,6 +247,7 @@
         </VisualStateManager.VisualStateGroups>
 
         <Grid.RowDefinitions>
+            <RowDefinition Height="57" />
             <RowDefinition Height="auto" />
             <RowDefinition />
         </Grid.RowDefinitions>
@@ -255,9 +256,16 @@
             <ColumnDefinition x:Name="ColsComs" Width="0" />
         </Grid.ColumnDefinitions>
 
-        <ToggleSwitch x:Name="ShowComsToggler" Grid.ColumnSpan="2" HorizontalAlignment="Center" OnContent="Ansicht Kommunikationsobjekte" OffContent="Ansicht Kommunikationsobjekte"  />
 
-        <Grid Grid.Row="1" BorderBrush="{ThemeResource BrushAccentColorDark2}" BorderThickness="1" >
+        <StackPanel Orientation="Horizontal" Margin="5 0 5 0" VerticalAlignment="Center">
+            <TextBlock Text="{Binding Device.LineName}" FontSize="25" />
+            <TextBlock Text="{Binding Device.Name}"  FontSize="25" Margin="10 0 0 0" />
+        </StackPanel>
+
+
+        <ToggleSwitch x:Name="ShowComsToggler" Grid.Row="1" Grid.ColumnSpan="2" HorizontalAlignment="Center" OnContent="Ansicht Kommunikationsobjekte" OffContent="Ansicht Kommunikationsobjekte"  />
+
+        <Grid Grid.Row="2" BorderBrush="{ThemeResource BrushAccentColorDark2}" BorderThickness="1" >
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="auto" MaxWidth="250" />
                 <ColumnDefinition />
@@ -286,7 +294,7 @@
             </ListView>
         </Grid>
 
-        <toolkit:DataGrid x:Name="ComList" Grid.Row="1"  Grid.Column="1" BorderBrush="LightGray" BorderThickness="1 1 1 0" AutoGenerateColumns="False"
+        <toolkit:DataGrid x:Name="ComList" Grid.Row="2"  Grid.Column="1" BorderBrush="LightGray" BorderThickness="1 1 1 0" AutoGenerateColumns="False"
                           ItemsSource="{Binding Device.ComObjects, Mode=OneWay}" IsReadOnly="True" Background="{ThemeResource BrushAccentControlBackground}" CornerRadius="2 2 0 0">
             <toolkit:DataGrid.Columns>
                 <toolkit:DataGridTextColumn x:Uid="/Groups/LComsNumb" FontSize="13" Tag="Number" Width="SizeToCells" Binding="{Binding Number}" />

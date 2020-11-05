@@ -175,17 +175,12 @@
                 <RowDefinition Height="57" />
                 <RowDefinition />
             </Grid.RowDefinitions>
-
-            <StackPanel Orientation="Horizontal" Margin="5 0 5 0" VerticalAlignment="Center">
-                <TextBlock x:Name="ParamHeaderLine" FontSize="25" />
-                <TextBlock x:Name="ParamHeaderName" FontSize="25" Margin="10 0 0 0" />
-            </StackPanel>
-
-            <Button Click="OpenInNewWindow" HorizontalAlignment="Right">
+            
+            <Button Click="OpenInNewWindow" HorizontalAlignment="Right" VerticalAlignment="Center" Background="Transparent" Margin="0 0 5 0">
                 <FontIcon Glyph="&#xE8A7;" />
             </Button>
 
-            <ContentPresenter x:Name="ParamPresenter" Grid.Row="1" Margin="5 0 5 0" />
+            <ContentPresenter Grid.RowSpan="2" x:Name="ParamPresenter" Margin="5 0 5 0" />
         </Grid>
         
         <toolkit:Expander x:Name="SettExpander" Grid.Row="1" Grid.Column="2" Grid.RowSpan="3" HorizontalContentAlignment="Stretch" ExpandDirection="Left" VerticalContentAlignment="Stretch" 

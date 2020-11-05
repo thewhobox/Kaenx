@@ -19,8 +19,10 @@ using Windows.ApplicationModel.Resources;
 using Windows.System;
 using Windows.UI.Core;
 using Windows.UI.ViewManagement;
+using Windows.UI.WindowManagement;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
+using Windows.UI.Xaml.Hosting;
 using Windows.UI.Xaml.Input;
 
 // Die Elementvorlage "Leere Seite" wird unter https://go.microsoft.com/fwlink/?LinkId=234238 dokumentiert.
@@ -281,16 +283,6 @@ namespace Kaenx.View
             SelectedDevice = device;
             EControlParas paras;
             bool isFromCache = false;
-
-            Windows.UI.Xaml.Data.Binding bindLine = new Windows.UI.Xaml.Data.Binding();
-            bindLine.Path = new PropertyPath("LineName");
-            bindLine.Source = device;
-            ParamHeaderLine.SetBinding(TextBlock.TextProperty, bindLine);
-
-            Windows.UI.Xaml.Data.Binding bindName = new Windows.UI.Xaml.Data.Binding();
-            bindName.Path = new PropertyPath("Name");
-            bindName.Source = device;
-            ParamHeaderName.SetBinding(TextBlock.TextProperty, bindName);
 
             if (!Window.Current.CoreWindow.GetKeyState(VirtualKey.Shift).HasFlag(CoreVirtualKeyStates.Down) && ParamStack.Any(p => p.id == device.UId))
             {
@@ -591,6 +583,9 @@ namespace Kaenx.View
                 InfoLmCurrent.Text = SaveHelper.CalculateLineCurrentUsed(line).ToString();
                 InNumber.Minimum = 0;
                 InNumber.Maximum = 15;
+
+                EControlLine present = new EControlLine(line);
+                ParamPresenter.Content = present;
             }
             else if (data is Line)
             {
@@ -701,25 +696,20 @@ namespace Kaenx.View
 
         private async void OpenInNewWindow(object sender, RoutedEventArgs e)
         {
-            var currentAV = ApplicationView.GetForCurrentView();
-            var newAV = CoreApplication.CreateNewView();
-            await newAV.Dispatcher.RunAsync(
-                            CoreDispatcherPriority.Normal,
-                            async () =>
-                            {
-                                var newWindow = Window.Current;
-                                var newAppView = ApplicationView.GetForCurrentView();
+            if (ParamPresenter.Content == null)
+                return;
 
-                                EControlParas paras = new EControlParas(SelectedDevice);
-                                newAppView.Title = paras.Device.LineName + " " + paras.Device.Name +  " - Parameter";
-                                newWindow.Content = paras;
-                                newWindow.Activate();
-                                paras.Start();
+            AppWindow appWindow = await AppWindow.TryCreateAsync();
+            appWindow.Title = "Neues Fenster";
+            UIElement ele = ParamPresenter.Content as UIElement;
+            ParamPresenter.Content = null;
+            ElementCompositionPreview.SetAppWindowContent(appWindow, ele);
+            await appWindow.TryShowAsync();
 
-                                await ApplicationViewSwitcher.TryShowAsViewModeAsync(
-                                    newAppView.Id,
-                                     ApplicationViewMode.Default);
-                            });
+            appWindow.Closed += delegate
+            {
+                appWindow = null;
+            };
         }
     }
 }
