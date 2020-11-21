@@ -21,6 +21,7 @@ namespace Kaenx.Classes.TemplateSelectors
         public DataTemplate Color { get; set; }
         public DataTemplate Seperator { get; set; }
         public DataTemplate SeperatorBox { get; set; }
+        public DataTemplate None { get; set; }
 
         protected override DataTemplate SelectTemplateCore(object item)
         {
@@ -52,6 +53,9 @@ namespace Kaenx.Classes.TemplateSelectors
 
                 case ParamSeperatorBox psex:
                     return SeperatorBox;
+
+                case ParamNone pnon:
+                    return None;
             }
 
             return NotFound;

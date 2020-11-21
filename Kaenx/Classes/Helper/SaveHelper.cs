@@ -245,7 +245,7 @@ namespace Kaenx.Classes.Helper
             linemodel.Id = line.Id;
             linemodel.Name = line.Name;
             linemodel.IsExpanded = line.IsExpanded;
-            linemodel.ParentId = line.Parent.Id;
+            linemodel.ParentId = line.Parent.UId;
             contextProject.LinesMiddle.Update(linemodel);
             contextProject.SaveChanges();
         }
@@ -1107,6 +1107,38 @@ namespace Kaenx.Classes.Helper
 
             switch (paraType.Type)
             {
+                case ParamTypes.None:
+                    IDynParameter paran = new ParamNone();
+                    paran.Id = para.Id;
+                    paran.Text = para.Text;
+                    paran.SuffixText = para.SuffixText;
+                    paran.Default = para.Value;
+                    paran.Value = para.Value;
+                    paran.Conditions = paramList;
+                    paran.Hash = hash;
+                    paran.HasAccess = hasAccess;
+                    paran.IsEnabled = IsCtlEnabled;
+                    block.Parameters.Add(paran);
+                    break;
+
+                case ParamTypes.IpAdress:
+                    IDynParameter pip;
+                    if (para.Access == AccessType.Read)
+                        pip = new Dynamic.ParamTextRead();
+                    else
+                        pip = new Dynamic.ParamText();
+                    pip.Id = para.Id;
+                    pip.Text = para.Text;
+                    pip.SuffixText = para.SuffixText;
+                    pip.Default = para.Value;
+                    pip.Value = para.Value;
+                    pip.Conditions = paramList;
+                    pip.Hash = hash;
+                    pip.HasAccess = hasAccess;
+                    pip.IsEnabled = IsCtlEnabled;
+                    block.Parameters.Add(pip);
+                    break;
+
                 case ParamTypes.NumberInt:
                 case ParamTypes.NumberUInt:
                 case ParamTypes.Float9:
@@ -1226,6 +1258,11 @@ namespace Kaenx.Classes.Helper
                         IsEnabled = IsCtlEnabled
                     };
                     block.Parameters.Add(pco);
+                    break;
+
+                default:
+                    Debug.WriteLine("Parametertyp nicht festgelegt!! " + paraType.Type.ToString());
+                    throw new Exception("Parametertyp nicht festgelegt!! " + paraType.Type.ToString());
                     break;
             }
         }

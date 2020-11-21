@@ -603,6 +603,20 @@ namespace Kaenx.Views.Easy.Controls
             await Task.Delay(1);
         }
 
-   
+        private void ShowComsToggler_Toggled(object sender, RoutedEventArgs e)
+        {
+            if (ShowComsToggler.IsOn)
+            {
+                //TODO: Über Properties die SIchtbarkeit der Spalten ändern?
+                VisualStateManager.GoToState(this, "ShowComs", true);
+                //ColsPara.Width = new GridLength(0, GridUnitType.Pixel);
+                //ColsComs.Width = new GridLength(0, GridUnitType.Auto);
+            } else
+            {
+                VisualStateManager.GoToState(this, "Default", true);
+                //ColsPara.Width = new GridLength(0, GridUnitType.Auto);
+                //ColsComs.Width = new GridLength(0, GridUnitType.Pixel);
+            }
+        }
     }
 }

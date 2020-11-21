@@ -266,7 +266,11 @@ namespace Kaenx.Classes.Bus
             while (!CurrentAction.Connection.IsConnected && !_cancelTokenSource.IsCancellationRequested)
             {
                 c++;
-                await CurrentAction.Connection.Connect();
+                try
+                {
+                    await CurrentAction.Connection.Connect();
+                }
+                catch { }
                 await Task.Delay(2000);
 
                 if (c == 5)

@@ -159,6 +159,7 @@
     <Compile Include="Classes\Dynamic\IDynParameter.cs" />
     <Compile Include="Classes\Dynamic\ParamBinding.cs" />
     <Compile Include="Classes\Dynamic\ParamCondition.cs" />
+    <Compile Include="Classes\Dynamic\ParamNone.cs" />
     <Compile Include="Classes\Dynamic\ParamEnum.cs" />
     <Compile Include="Classes\Dynamic\ParamEnumOption.cs" />
     <Compile Include="Classes\Dynamic\ParamEnumTwo.cs" />
