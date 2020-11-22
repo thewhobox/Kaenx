@@ -1,4 +1,5 @@
-﻿using Kaenx.Konnect.Addresses;
+﻿using Kaenx.Classes.Project;
+using Kaenx.Konnect.Addresses;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -53,6 +54,8 @@ namespace Kaenx.Classes
             set { _appName = value; Changed("ApplicationName"); }
         }
 
+
+        public LineDevice LineDevice { get; set; }
 
 
 

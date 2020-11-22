@@ -1,9 +1,11 @@
 ﻿using Kaenx.Classes;
 using Kaenx.Classes.Bus;
+using Kaenx.Classes.Dynamic;
 using Kaenx.Classes.Helper;
 using Kaenx.Classes.Project;
 using Kaenx.DataContext.Catalog;
 using Kaenx.DataContext.Local;
+using Kaenx.DataContext.Project;
 using Kaenx.Konnect;
 using Kaenx.Konnect.Addresses;
 using Kaenx.Konnect.Classes;
@@ -12,6 +14,7 @@ using Kaenx.Konnect.Interfaces;
 using Kaenx.View.Controls.Dialogs;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
@@ -83,6 +86,7 @@ namespace Kaenx.View
 
         public ObservableCollection<ReconstructDevice> Devices { get; set; } = new ObservableCollection<ReconstructDevice>();
 
+        private bool _stop = false;
         private Kaenx.DataContext.Project.ProjectContext _contextP;
         private Project _project;
         private BusConnection conn = new BusConnection();
@@ -125,21 +129,7 @@ namespace Kaenx.View
 
         private async void Init()
         {
-            StorageFile file = null;
-            try
-            {
-                file = await ApplicationData.Current.LocalFolder.GetFileAsync("knx_master.xml");
-            }
-            catch {
-                StorageFile defaultFile = await StorageFile.GetFileFromApplicationUriAsync(new Uri("ms-appx:///Data/knx_master.xml"));
-                file = await ApplicationData.Current.LocalFolder.CreateFileAsync("knx_master.xml");
-                await FileIO.WriteTextAsync(file, await FileIO.ReadTextAsync(defaultFile));
-            }
-
-            if (file == null) return;
-
-            XDocument master = XDocument.Load(await file.OpenStreamForReadAsync());
-
+            XDocument master = await GetKnxMaster();
             foreach (XElement ele in master.Descendants(XName.Get("Manufacturer", master.Root.Name.NamespaceName)))
                 manus.Add(ele.Attribute("Id").Value, ele.Attribute("Name").Value);
 
@@ -156,16 +146,27 @@ namespace Kaenx.View
                         dev.Serial = ldev.SerialText;
                         string[] names = ldev.Name.Split("_");
                         dev.DeviceName = names[0];
+
                         dev.ApplicationName = names[1];
                         dev.ApplicationId = ldev.ApplicationId;
-                        dev.StateId = 3;
-                        dev.Status = "Gespeichert";
+
+                        if(dev.ApplicationName.Contains(" 0x"))
+                        {
+                            dev.StateId = 2;
+                            dev.Status = "In Projekt (Unvollständig)";
+                        } else
+                        {
+                            dev.StateId = 3;
+                            dev.Status = "In Projekt";
+                        }
+
+                        dev.LineDevice = ldev;
                         dev.Manufacturer = manus[dev.ApplicationId.Substring(0, 6)];
                         Devices.Add(dev);
                     }
                 }
             }
-            
+
 
 
             CanDo = true;
@@ -210,16 +211,6 @@ namespace Kaenx.View
 
             ProgMax = addresses.Count;
             ProgValue = 0;
-
-
-            //foreach (UnicastAddress addr in addresses)
-            //{
-            //    Action = $"Scanne Linie: {addr.Area}.{addr.Line}.x";
-            //    await Task.Delay(100);
-            //    ProgValue++;
-            //}
-
-
             IKnxConnection _conn = KnxInterfaceHelper.GetConnection(conn.SelectedInterface);
 
             try
@@ -238,17 +229,20 @@ namespace Kaenx.View
 
             foreach (UnicastAddress addr in addresses)
             {
+                if (_stop) break;
                 Action = $"Scanne Linie: {addr.Area}.{addr.Line}.x";
                 BusDevice dev = new BusDevice(addr, _conn);
                 await dev.Connect(true);
                 ProgValue++;
             }
 
+            if (CheckStop(_conn)) return;
             ProgIndet = true;
             Action = "Warten auf Geräte...";
             await Task.Delay(15000);
 
 
+            if (CheckStop(_conn)) return;
             Action = "Lese Daten aus Geräten...";
             await Task.Delay(1000);
 
@@ -257,6 +251,7 @@ namespace Kaenx.View
 
             while (true)
             {
+                if (CheckStop(_conn)) return;
                 ProgValue++;
 
                 ReconstructDevice device;
@@ -284,8 +279,7 @@ namespace Kaenx.View
                     continue;
                 }
 
-                if (device.ApplicationId == null) continue;
-
+                if (CheckStop(_conn)) return;
                 try
                 {
                     await SaveDevice(device);
@@ -297,10 +291,24 @@ namespace Kaenx.View
                 }
             }
 
-
-            Action = "Fertig!";
             await _conn.Disconnect();
+            Action = "Speichern";
+            SaveHelper.SaveProject();
+            Action = "Fertig!";
             CanDo = true;
+        }
+
+        private bool CheckStop(IKnxConnection _conn = null)
+        {
+            if (_stop)
+            {
+                if (_conn != null)
+                    _conn.Disconnect();
+                Action = "Abgebrochen";
+                CanDo = true;
+            }
+
+            return _stop;
         }
 
         private async Task ReadDevice(ReconstructDevice device, IKnxConnection _conn)
@@ -337,7 +345,10 @@ namespace Kaenx.View
             {
                 Debug.WriteLine(device.Address.ToString() + ": " + appId);
                 if (string.IsNullOrEmpty(device.ApplicationName))
+                {
                     device.ApplicationName = "Fehler 0x03";
+                    device.ApplicationId = appId;
+                }
                 device.DeviceName = "Fehler 0x03";
             }
 
@@ -391,8 +402,15 @@ namespace Kaenx.View
             lined.Id = device.Address.DeviceAddress;
             lined.Name = device.DeviceName + "_" + device.ApplicationName;
 
-            device.StateId = 3;
-            device.Status = "In Projekt";
+            if(!device.ApplicationName.Contains(" 0x"))
+            {
+                device.StateId = 3;
+                device.Status = "In Projekt";
+            } else
+            {
+                device.Status = "In Projekt (Unvollständig)";
+            }
+            device.LineDevice = lined;
         }
 
         private void _conn_OnTunnelRequest(Konnect.Builders.TunnelResponse response)
@@ -411,22 +429,33 @@ namespace Kaenx.View
             }
         }
 
-        private void ClickReadStart(object sender, RoutedEventArgs e)
+        private async void ClickReadStart(object sender, RoutedEventArgs e)
         {
-            IEnumerable<ReconstructDevice> devices = Devices.Where(d => d.StateId >= 2);
+            Action = "Starte Konfiguration auslesen...";
+            CanDo = false;
 
-            foreach(ReconstructDevice device in devices)
+            IKnxConnection _conn = KnxInterfaceHelper.GetConnection(conn.SelectedInterface);
+
+            try
             {
-
+                await _conn.Connect();
             }
-        }
+            catch (Exception ex)
+            {
+                Notify.Show(ex.Message, 3000);
+                CanDo = true;
+                return;
+            }
 
-        private void ClickSave(object sender, RoutedEventArgs e)
-        {
-            SaveHelper.SaveProject();
+            IEnumerable<ReconstructDevice> devices = Devices.Where(d => d.StateId >= 3);
+            foreach (ReconstructDevice device in devices)
+            {
+                Action = device.LineDevice.LineName + " - Lese Konfiguration";
+                await StartReadConfig(device, _conn);
+            }
 
-            foreach (ReconstructDevice dev in Devices.Where(d => d.StateId == 2))
-                dev.Status = "Gespeichert";
+            Action = "Fertig!";
+            CanDo = true;
         }
 
         private void ClickToProject(object sender, RoutedEventArgs e)
@@ -438,5 +467,634 @@ namespace Kaenx.View
             con.SaveChanges();
             App.Navigate(typeof(WorkdeskEasy), SaveHelper._project);
         }
+
+        private void ClickCancel(object sender, RoutedEventArgs e)
+        {
+            _stop = true;
+        }
+
+
+        private async Task<XDocument> GetKnxMaster()
+        {
+            StorageFile file = null;
+            try
+            {
+                file = await ApplicationData.Current.LocalFolder.GetFileAsync("knx_master.xml");
+            }
+            catch
+            {
+                StorageFile defaultFile = await StorageFile.GetFileFromApplicationUriAsync(new Uri("ms-appx:///Data/knx_master.xml"));
+                file = await ApplicationData.Current.LocalFolder.CreateFileAsync("knx_master.xml");
+                await FileIO.WriteTextAsync(file, await FileIO.ReadTextAsync(defaultFile));
+            }
+
+            if (file == null) return null;
+
+            return XDocument.Load(await file.OpenStreamForReadAsync());
+        }
+
+
+
+
+        #region Read DeviceConfig
+
+
+        private BusDevice _currentBusDevice { get; set; }
+        private ReconstructDevice _currentDevice { get; set; }
+        private List<int> connectedCOs = new List<int>();
+        private Dictionary<string, string> defParas = new Dictionary<string, string>();
+        private Dictionary<int, List<string>> CO2GA = new Dictionary<int, List<string>>();
+        private Dictionary<string, byte[]> mems = new Dictionary<string, byte[]>();
+
+
+        private async Task StartReadConfig(ReconstructDevice device, IKnxConnection _conn)
+        {
+            connectedCOs.Clear();
+            CO2GA.Clear();
+            _currentDevice = device;
+            _currentBusDevice = new BusDevice(device.LineDevice.LineName, _conn);
+            await _currentBusDevice.Connect();
+
+            #region Grundinfo
+            device.Status = "Lese Maskenversion...";
+
+            await Task.Delay(100);
+
+            string maskVersion = "MV-" + await _currentBusDevice.DeviceDescriptorRead();
+            CatalogContext context = new CatalogContext();
+
+            device.Status = "Lese Assoziationstabelle...";
+            await Task.Delay(100);
+
+            ApplicationViewModel appModel = null;
+
+            if (context.Applications.Any(a => a.Id == device.ApplicationId))
+            {
+                appModel = context.Applications.Single(a => a.Id == device.ApplicationId);
+            }
+
+            if (appModel != null)
+            {
+                List<string> addresses = new List<string>();
+                if (!string.IsNullOrEmpty(appModel.Table_Group))
+                {
+                    AppSegmentViewModel segmentModel = context.AppSegments.Single(s => s.Id == appModel.Table_Group);
+                    int groupAddr = segmentModel.Address;
+                    byte[] datax = await _currentBusDevice.MemoryRead(groupAddr, 1);
+
+                    int length = Convert.ToInt16(datax[0]) - 1;
+                    datax = await _currentBusDevice.MemoryRead(groupAddr + 3, length * 2);
+
+                    for (int i = 0; i < (datax.Length / 2); i++)
+                    {
+                        int offset = i * 2;
+                        addresses.Add(MulticastAddress.FromByteArray(new byte[] { datax[offset], datax[offset + 1] }).ToString());
+                    }
+                }
+
+                if (!string.IsNullOrEmpty(appModel.Table_Assosiations))
+                {
+                    AppSegmentViewModel segmentModel = context.AppSegments.Single(s => s.Id == appModel.Table_Assosiations);
+                    int assoAddr = segmentModel.Address;
+
+                    byte[] datax = await _currentBusDevice.MemoryRead(assoAddr, 1);
+                    if (datax.Length > 0)
+                    {
+                        int length = Convert.ToInt16(datax[0]);
+
+                        datax = await _currentBusDevice.MemoryRead(assoAddr + 1, length * 2);
+                        List<Classes.Bus.Data.AssociationHelper> table = new List<Classes.Bus.Data.AssociationHelper>();
+                        for (int i = 0; i < length; i++)
+                        {
+                            int offset = i * 2;
+                            int grpIndex = datax[offset];
+                            int COnr = datax[offset + 1];
+                            string grp = addresses[grpIndex - 1];
+
+                            if (!CO2GA.ContainsKey(COnr))
+                                CO2GA.Add(COnr, new List<string>());
+
+                            if (!CO2GA[COnr].Contains(grp))
+                                CO2GA[COnr].Add(grp);
+
+                            if (!connectedCOs.Contains(COnr))
+                                connectedCOs.Add(COnr);
+                        }
+                    }
+                }
+            }
+
+
+            //ProgressValue = 40;
+            device.Status = "Berechne Konfiguration...";
+            GetConfig(device.ApplicationId);
+        }
+
+        private async void GetConfig(string appId)
+        {
+            Dictionary<string, AppParameter> paras = new Dictionary<string, AppParameter>();
+            Dictionary<string, AppParameterTypeViewModel> types = new Dictionary<string, AppParameterTypeViewModel>();
+
+            foreach (AppParameter param in _context.AppParameters.Where(p => p.ApplicationId == appId))
+            {
+                paras.Add(param.Id, param);
+                defParas.Add(param.Id, param.Value);
+            }
+
+            AppAdditional adds = _context.AppAdditionals.Single(a => a.Id == appId);
+
+            foreach (AppParameter para in paras.Values)
+            {
+                AppParameterTypeViewModel paraT;
+                if (types.ContainsKey(para.ParameterTypeId))
+                    paraT = types[para.ParameterTypeId];
+                else
+                {
+                    paraT = _context.AppParameterTypes.Single(t => t.Id == para.ParameterTypeId);
+                    types.Add(paraT.Id, paraT);
+                }
+                if (paraT.Size == 0) continue;
+
+                switch (para.SegmentType)
+                {
+                    case SegmentTypes.None:
+                        await HandleParamGhost(para, types[para.ParameterTypeId], adds);
+                        break;
+
+                    case SegmentTypes.Memory:
+                        para.Value = await GetValueFromMem(para, paraT);
+                        break;
+
+                    case SegmentTypes.Property:
+                        //TODO implement also Properties
+                        break;
+                }
+            }
+
+            SaveConfig(adds, paras);
+        }
+
+
+        private async Task HandleParamGhost(AppParameter para, AppParameterTypeViewModel paraT, AppAdditional adds)
+        {
+            XDocument dynamic = XDocument.Parse(System.Text.Encoding.UTF8.GetString(adds.Dynamic));
+
+            string ns = dynamic.Root.Name.NamespaceName;
+            IEnumerable<XElement> chooses = dynamic.Descendants(XName.Get("choose", ns)).Where(c => c.Attribute("ParamRefId") != null && SaveHelper.ShortId(c.Attribute("ParamRefId").Value) == para.Id);
+
+            foreach (XElement choose in chooses)
+            {
+                Dictionary<string, List<int>> value2Coms = new Dictionary<string, List<int>>();
+
+                #region Get ComIds and remove duplicates
+                foreach (XElement when in choose.Elements())
+                {
+                    if (when.Attribute("default")?.Value == "true") continue;
+                    string val = when.Attribute("test").Value;
+
+                    if (val.Contains(">") || val.Contains("<") || val.Contains("=") || val.Contains(" ")) continue;
+                    if (!value2Coms.ContainsKey(val)) value2Coms[val] = new List<int>();
+
+                    IEnumerable<XElement> tlist = when.Descendants(XName.Get("ComObjectRefRef", ns));
+                    foreach (XElement comx in tlist)
+                    {
+                        string id = SaveHelper.ShortId(comx.Attribute("RefId").Value);
+                        AppComObject com = _context.AppComObjects.Single(c => c.Id == id);
+
+                        if (!value2Coms[val].Contains(com.Number))
+                            value2Coms[val].Add(com.Number);
+                    }
+                }
+
+                List<int> toDelete = new List<int>();
+                foreach (string keyval in value2Coms.Keys)
+                {
+                    List<int> xids = value2Coms[keyval];
+
+
+                    foreach (int xid in xids)
+                    {
+                        bool flag = false;
+
+                        foreach (KeyValuePair<string, List<int>> otherids in value2Coms.Where(x => x.Key != keyval))
+                            if (otherids.Value.Contains(xid))
+                                flag = true;
+
+                        if (flag) toDelete.Add(xid);
+                    }
+                }
+
+
+                foreach (int xid in toDelete)
+                {
+                    foreach (KeyValuePair<string, List<int>> otherids in value2Coms)
+                        otherids.Value.Remove(xid);
+                }
+                #endregion
+
+
+                //Hier weiter
+                Dictionary<string, bool> val2success = new Dictionary<string, bool>();
+
+                foreach (KeyValuePair<string, List<int>> coms in value2Coms)
+                {
+                    val2success[coms.Key] = false;
+
+                    foreach (int comNr in coms.Value)
+                    {
+                        if (connectedCOs.Contains(comNr))
+                        {
+                            val2success[coms.Key] = true;
+                        }
+                    }
+                }
+
+
+                if (val2success.Count(y => y.Value == true) == 1)
+                {
+                    KeyValuePair<string, bool> success = val2success.Single(y => y.Value == true);
+                    para.Value = success.Key;
+                }
+                else
+                {
+                    await HandleParamGhost2(para, paraT, adds, choose);
+                }
+
+            }
+        }
+
+        private async Task HandleParamGhost2(AppParameter para, AppParameterTypeViewModel paraT, AppAdditional adds, XElement choose)
+        {
+            string ns = choose.Name.NamespaceName;
+            Dictionary<string, List<string>> value2Paras = new Dictionary<string, List<string>>();
+            Dictionary<string, string> test = new Dictionary<string, string>();
+
+            #region Get ParaIds and remove duplicates
+            foreach (XElement when in choose.Elements())
+            {
+                if (when.Attribute("default")?.Value == "true" || when.Attribute("default")?.Value == para.Value) continue;
+                string val = when.Attribute("test").Value;
+
+                if (val.Contains(">") || val.Contains("<") || val.Contains("=") || val.Contains(" ")) continue;
+                if (!value2Paras.ContainsKey(val)) value2Paras[val] = new List<string>();
+
+                IEnumerable<XElement> tlist = when.Descendants(XName.Get("ParameterRefRef", ns));
+                foreach (XElement comx in tlist)
+                {
+                    string id = SaveHelper.ShortId(comx.Attribute("RefId").Value);
+                    AppParameter par = _context.AppParameters.Single(c => c.Id == id);
+                    if (par.Access != AccessType.Full || par.SegmentId == null) continue;
+
+
+
+                    string oldVal = defParas[par.Id];
+
+                    AppParameterTypeViewModel partype = _context.AppParameterTypes.Single(pt => pt.Id == par.ParameterTypeId);
+                    string newVal = await GetValueFromMem(par, partype);
+
+                    if (oldVal != newVal && !value2Paras[val].Contains(id))
+                    {
+                        test.Add(par.Id, newVal);
+                        value2Paras[val].Add(id);
+                    }
+                }
+            }
+
+            List<string> toDelete = new List<string>();
+            foreach (string keyval in value2Paras.Keys)
+            {
+                List<string> xids = value2Paras[keyval];
+
+
+                foreach (string xid in xids)
+                {
+                    bool flag = false;
+
+                    foreach (KeyValuePair<string, List<string>> otherids in value2Paras.Where(x => x.Key != keyval))
+                        if (otherids.Value.Contains(xid))
+                            flag = true;
+
+                    if (flag) toDelete.Add(xid);
+                }
+            }
+
+
+            foreach (string xid in toDelete)
+            {
+                foreach (KeyValuePair<string, List<string>> otherids in value2Paras)
+                    otherids.Value.Remove(xid);
+            }
+            #endregion
+
+
+            Dictionary<string, bool> val2success = new Dictionary<string, bool>();
+
+            foreach (KeyValuePair<string, List<string>> coms in value2Paras)
+            {
+                val2success[coms.Key] = coms.Value.Count > 0;
+            }
+
+
+            if (val2success.Count(y => y.Value == true) == 1)
+            {
+                KeyValuePair<string, bool> success = val2success.Single(y => y.Value == true);
+                para.Value = success.Key;
+            }
+        }
+
+        private async Task<string> GetValueFromMem(AppParameter para, AppParameterTypeViewModel paraT)
+        {
+            if (para.SegmentId == null) return "";
+            if (!mems.ContainsKey(para.SegmentId))
+            {
+                AppSegmentViewModel seg = _context.AppSegments.Single(s => s.Id == para.SegmentId);
+                byte[] temp = await _currentBusDevice.MemoryRead(seg.Address, seg.Size);
+                mems.Add(para.SegmentId, temp);
+            }
+
+
+            byte[] bdata = null;
+            int sizeB;
+
+            if (paraT.Size % 8 == 0)
+            {
+                sizeB = paraT.Size / 8;
+                bdata = new byte[sizeB];
+                for (int i = 0; i < sizeB; i++)
+                {
+                    bdata[i] = mems[para.SegmentId][para.Offset + i];
+                }
+            }
+            else
+            {
+                sizeB = 1;
+                bdata = new byte[sizeB];
+                byte temp = mems[para.SegmentId][para.Offset];
+
+                var y = new BitArray(new byte[] { temp });
+                var z = new BitArray(8);
+
+                for (int i = 0; i < paraT.Size; i++)
+                {
+                    z.Set(i, y.Get(i + para.OffsetBit));
+                }
+                z.CopyTo(bdata, 0);
+            }
+
+
+            switch (paraT.Type)
+            {
+                case ParamTypes.Enum:
+                case ParamTypes.NumberInt:
+                case ParamTypes.NumberUInt:
+                    int x = 0;
+                    switch (bdata.Length)
+                    {
+                        case 1:
+                            x = BitConverter.ToInt16(new byte[2] { bdata[0], 0 }, 0);
+                            break;
+
+                        case 2:
+                            Array.Reverse(bdata);
+                            x = BitConverter.ToInt16(bdata, 0);
+                            break;
+
+                        case 3:
+                            Array.Reverse(bdata);
+                            x = BitConverter.ToInt32(new byte[4] { bdata[0], bdata[1], bdata[2], 0 }, 0);
+                            break;
+
+                        case 4:
+                            Array.Reverse(bdata);
+                            x = BitConverter.ToInt32(bdata, 0);
+                            break;
+                    }
+
+                    return x.ToString();
+
+                case ParamTypes.Text:
+                    return System.Text.Encoding.UTF8.GetString(bdata);
+            }
+            return "";
+        }
+
+
+        private void SaveConfig(AppAdditional adds, Dictionary<string, AppParameter> paras)
+        {
+            _currentDevice.Status = "Speichere Konfiguration...";
+
+            Dictionary<string, ViewParamModel> Id2Param = new Dictionary<string, ViewParamModel>();
+            Dictionary<string, ChangeParamModel> ParaChanges = new Dictionary<string, ChangeParamModel>();
+            Dictionary<string, ViewParamModel> VisibleParams = new Dictionary<string, ViewParamModel>();
+            List<IDynChannel> Channels = SaveHelper.ByteArrayToObject<List<IDynChannel>>(adds.ParamsHelper, true);
+            ProjectContext _c = new ProjectContext(SaveHelper.connProject);
+
+            if (_c.ChangesParam.Any(c => c.DeviceId == _currentDevice.LineDevice.UId))
+            {
+                var changes = _c.ChangesParam.Where(c => c.DeviceId == _currentDevice.LineDevice.UId).OrderByDescending(c => c.StateId);
+                foreach (ChangeParamModel model in changes)
+                {
+                    if (ParaChanges.ContainsKey(model.ParamId)) continue;
+                    ParaChanges.Add(model.ParamId, model);
+                }
+            }
+
+            Dictionary<string, List<List<ParamCondition>>> para2Conds = new Dictionary<string, List<List<ParamCondition>>>();
+            foreach (IDynChannel ch in Channels)
+            {
+                foreach (ParameterBlock block in ch.Blocks)
+                {
+                    foreach (IDynParameter para in block.Parameters)
+                    {
+                        if (paras.ContainsKey(para.Id))
+                            para.Value = paras[para.Id].Value;
+
+                        if (!Id2Param.ContainsKey(para.Id))
+                            Id2Param.Add(para.Id, new ViewParamModel(para.Value));
+
+                        Id2Param[para.Id].Parameters.Add(para);
+
+                        if (!para2Conds.ContainsKey(para.Id))
+                            para2Conds.Add(para.Id, new List<List<ParamCondition>>());
+
+                        para2Conds[para.Id].Add(para.Conditions);
+                    }
+                }
+            }
+
+            foreach (IDynChannel ch in Channels)
+            {
+                if (SaveHelper.CheckConditions(ch.Conditions, Id2Param))
+                {
+                    foreach (ParameterBlock block in ch.Blocks)
+                    {
+                        if (SaveHelper.CheckConditions(block.Conditions, Id2Param))
+                        {
+                            foreach (IDynParameter para in block.Parameters)
+                            {
+                                if (!VisibleParams.ContainsKey(para.Id))
+                                    VisibleParams.Add(para.Id, Id2Param[para.Id]);
+                            }
+                        }
+                    }
+                }
+            }
+
+
+
+            foreach (AppParameter newPara in paras.Values)
+            {
+                if (newPara.Access != AccessType.Full || !VisibleParams.ContainsKey(newPara.Id)) continue;
+
+                bool isOneVisible = false;
+                foreach (IDynParameter dPara in VisibleParams[newPara.Id].Parameters)
+                {
+                    if (SaveHelper.CheckConditions(dPara.Conditions, Id2Param))
+                        isOneVisible = true;
+                }
+
+                if (!isOneVisible) continue;
+
+
+                string oldPara = defParas[newPara.Id];
+                bool changeExists = ParaChanges.ContainsKey(newPara.Id);
+                ChangeParamModel change = null;
+                if (changeExists)
+                    change = ParaChanges[newPara.Id];
+
+                if ((changeExists && newPara.Value != change.Value) || (!changeExists && newPara.Value != oldPara))
+                {
+                    ChangeParamModel ch = new ChangeParamModel();
+                    ch.DeviceId = _currentDevice.LineDevice.UId;
+                    ch.ParamId = newPara.Id;
+                    ch.Value = newPara.Value;
+                    _ = App._dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Normal, () =>
+                    {
+                        ChangeHandler.Instance.ChangedParam(ch);
+                    });
+                }
+            }
+
+            //TodoText = "Generiere KOs";
+
+            //GenerateComs(Id2Param);
+
+            //Finish();
+        }
+
+        
+
+        
+
+        /*
+        private async void GenerateComs(Dictionary<string, ViewParamModel> Id2Param)
+        {
+            AppAdditional adds = _context.AppAdditionals.Single(a => a.Id == Device.ApplicationId);
+            List<DeviceComObject> comObjects = SaveHelper.ByteArrayToObject<List<DeviceComObject>>(adds.ComsAll);
+            List<ParamBinding> Bindings = SaveHelper.ByteArrayToObject<List<ParamBinding>>(adds.Bindings);
+            ProjectContext _contextP = new ProjectContext(SaveHelper.connProject);
+
+            List<DeviceComObject> newObjs = new List<DeviceComObject>();
+            foreach (DeviceComObject obj in comObjects)
+            {
+                if (obj.Conditions.Count == 0)
+                {
+                    newObjs.Add(obj);
+                    continue;
+                }
+
+                bool flag = SaveHelper.CheckConditions(obj.Conditions, Id2Param);
+                if (flag)
+                    newObjs.Add(obj);
+            }
+
+
+            List<DeviceComObject> toAdd = new List<DeviceComObject>();
+            foreach (DeviceComObject cobj in newObjs)
+            {
+                if (!Device.ComObjects.Any(co => co.Id == cobj.Id))
+                    toAdd.Add(cobj);
+            }
+
+            Dictionary<string, ComObject> coms = new Dictionary<string, ComObject>();
+            foreach (ComObject com in _contextP.ComObjects)
+                if (!coms.ContainsKey(com.ComId))
+                    coms.Add(com.ComId, com);
+
+            Dictionary<string, FunctionGroup> groupsMap = new Dictionary<string, FunctionGroup>();
+
+            foreach (Building building in SaveHelper._project.Area.Buildings)
+                foreach (Floor floor in building.Floors)
+                    foreach (Room room in floor.Rooms)
+                        foreach (Function func in room.Functions)
+                            foreach (FunctionGroup funcG in func.Subs)
+                                if (!groupsMap.ContainsKey(funcG.Address.ToString()))
+                                    groupsMap.Add(funcG.Address.ToString(), funcG);
+
+            bool flagGroups = false;
+
+            foreach (DeviceComObject dcom in toAdd)
+            {
+                List<string> groupIds = new List<string>();
+
+                if (CO2GA.ContainsKey(dcom.Number))
+                    groupIds = CO2GA[dcom.Number];
+
+                if (dcom.Name.Contains("{{"))
+                {
+                    ParamBinding bind = Bindings.Single(b => b.Hash == "CO:" + dcom.Id);
+                    string value = Id2Param[dcom.BindedId].Value;
+                    if (string.IsNullOrEmpty(value))
+                        dcom.DisplayName = dcom.Name.Replace("{{dyn}}", bind.DefaultText);
+                    else
+                        dcom.DisplayName = dcom.Name.Replace("{{dyn}}", value);
+                }
+                else
+                {
+                    dcom.DisplayName = dcom.Name;
+                }
+
+                await App._dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Normal, () =>
+                {
+                    Device.ComObjects.Add(dcom);
+                });
+
+                ComObject com = new ComObject();
+                com.ComId = dcom.Id;
+                com.DeviceId = Device.UId;
+
+                if (groupIds.Count > 0) com.Groups = string.Join(",", groupIds);
+                foreach (string groupId in groupIds)
+                {
+                    if (groupsMap.ContainsKey(groupId))
+                    {
+                        dcom.Groups.Add(groupsMap[groupId]);
+                        groupsMap[groupId].ComObjects.Add(dcom);
+                    }
+                    else
+                    {
+                        flagGroups = true;
+                    }
+                }
+
+                _contextP.ComObjects.Add(com);
+            }
+
+
+            await App._dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Normal, () =>
+            {
+                Device.ComObjects.Sort(s => s.Number);
+
+                if (flagGroups)
+                    ViewHelper.Instance.ShowNotification("main", "Es konnten einige Gruppenadressen nicht zugeordnet werden, da diese nicht im Projekt existieren.", 4000, ViewHelper.MessageType.Warning);
+            });
+            _contextP.SaveChanges();
+        }
+        */
+
+
+
+        #endregion
     }
 }
+#endregion

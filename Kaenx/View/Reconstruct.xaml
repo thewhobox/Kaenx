@@ -6,8 +6,12 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:toolkit="using:Microsoft.Toolkit.Uwp.UI.Controls"
+    xmlns:conv="using:Microsoft.Toolkit.Uwp.UI.Converters"
     mc:Ignorable="d"
     Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+    <Page.Resources>
+        <conv:BoolNegationConverter x:Key="BoolNegator" />
+    </Page.Resources>
 
     <Grid>
         <Grid.RowDefinitions>
@@ -28,8 +32,12 @@
                     <FontIcon Glyph="&#xF259;" />
                 </AppBarButton.Icon>
             </AppBarButton>
-            <AppBarButton Label="Speichern" Icon="Save" Foreground="White" Click="ClickSave" IsEnabled="{Binding CanDo}" />
-
+            <AppBarButton Label="Abbrechen" Foreground="White" Click="ClickCancel" IsEnabled="{Binding CanDo, Converter={StaticResource ResourceKey=BoolNegator}}">
+                <AppBarButton.Icon>
+                    <FontIcon Glyph="&#xEB90;" />
+                </AppBarButton.Icon>
+            </AppBarButton>
+            
             <TextBlock Foreground="White" FontSize="20" Margin="20 0" VerticalAlignment="Center" Text="{Binding Action}" />
         </StackPanel>
 

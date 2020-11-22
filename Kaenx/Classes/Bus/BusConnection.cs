@@ -5,6 +5,7 @@ using System.ComponentModel;
 using System.Diagnostics;
 using System.Linq;
 using System.Net;
+using System.Net.NetworkInformation;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -17,6 +18,7 @@ using Kaenx.Konnect;
 using Kaenx.Konnect.Builders;
 using Kaenx.Konnect.Connections;
 using Kaenx.Konnect.Interfaces;
+using Kaenx.Konnect.Messages.Request;
 using Windows.ApplicationModel.Resources;
 using Windows.UI.Xaml;
 
@@ -57,7 +59,7 @@ namespace Kaenx.Classes.Bus
                 container.Values["lastUsedInterface"] = _selectedInterface.Hash;
             }
         }
-        private KnxIpTunneling searchConn = new KnxIpTunneling(new IPEndPoint(IPAddress.Parse("224.0.23.12"), 3671));
+        private KnxIpTunneling searchConn = new KnxIpTunneling(new IPEndPoint(IPAddress.Parse("224.0.23.12"), 3671), true);
         private DispatcherTimer searchTimer = new DispatcherTimer() { Interval = TimeSpan.FromSeconds(10) };
 
 
@@ -156,10 +158,15 @@ namespace Kaenx.Classes.Bus
                     InterfaceList.Remove(inter);
             });
 
-            SearchRequest req = new SearchRequest();
-            IPAddress a = GetIpAddress();
-            req.Build(new IPEndPoint(GetIpAddress(), searchConn.Port));
-            searchConn.Send(req.GetBytes(), true);
+
+            MsgSearch msg = new MsgSearch();
+
+            //SearchRequest req = new SearchRequest();
+
+            //IPEndPoint end = new IPEndPoint(IPAddress.Any, searchConn.Port);
+            //req.Build(end);
+            searchConn.Send(msg, true);
+
 
             SearchForHid();
         }
@@ -184,15 +191,10 @@ namespace Kaenx.Classes.Bus
         }
 
 
-        public IPAddress GetIpAddress()
+        public List<IPAddress> GetIpAddresses()
         {
             string hostName = Dns.GetHostName();
-            foreach(IPAddress addr in Dns.GetHostAddresses(hostName))
-            {
-                if (addr.AddressFamily == System.Net.Sockets.AddressFamily.InterNetwork)
-                    return addr;
-            }
-            return null;
+            return Dns.GetHostAddresses(hostName).Where(h => h.AddressFamily == System.Net.Sockets.AddressFamily.InterNetwork).ToList();
         }
 
 

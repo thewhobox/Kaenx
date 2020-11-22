@@ -18,6 +18,7 @@ namespace Kaenx.Classes.Bus.Data
         public string ApplicationName { get; set; }
         public string Manufacturer { get; set; }
         public string DeviceName { get; set; }
+        public string Description { get; set; }
         public string Additional { get; set; }
         public bool SupportsEF { get; set; }
         public LineDevice Device { get; set; }

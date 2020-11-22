@@ -252,6 +252,8 @@
                                 <MenuFlyout Placement="BottomEdgeAlignedRight">
                                     <MenuFlyoutItem Icon="BrowsePhotos" Text="Information" Click="ReadInfo" />
                                     <MenuFlyoutItem Icon="Save" Text="Speicher" Click="ReadMem" />
+                                    <MenuFlyoutItem Icon="ClearSelection" Text="Test" Click="SetTest" />
+                                    <MenuFlyoutItem Icon="ClearSelection" Text="Test2" Click="SetTest2" />
                                     <!--<MenuFlyoutItem Icon="Find" Text="Konfiguration" Click="ReadConf" />-->
                                 </MenuFlyout>
                             </DropDownButton.Flyout>
@@ -267,6 +269,7 @@
                         <toolkit:DataGrid.Columns>
                             <toolkit:DataGridTextColumn Header="Adresse" Width="SizeToCells" Binding="{Binding Device.LineName}" />
                             <toolkit:DataGridTextColumn Header="Typ" Binding="{Binding Type}" />
+                            <toolkit:DataGridTextColumn Header="Hersteller" Binding="{Binding Description}" />
                             <toolkit:DataGridTextColumn Header="Hersteller" Binding="{Binding Manufacturer}" />
                             <toolkit:DataGridTextColumn Header="Seriennummer" Binding="{Binding SerialNumber}" />
                             <toolkit:DataGridTextColumn Header="Applikation" Binding="{Binding ApplicationName}" />

@@ -228,5 +228,33 @@ namespace Kaenx.View
             action.Finished += Action_Finished;
             BusConnection.Instance.AddAction(action);
         }
+
+        private async void SetTest(object sender, RoutedEventArgs e)
+        {
+            LineDevice ldev = GetDevice();
+            IKnxConnection conn = KnxInterfaceHelper.GetConnection(BusConnection.Instance.SelectedInterface);
+            await conn.Connect();
+            await System.Threading.Tasks.Task.Delay(2000);
+            Konnect.Classes.BusDevice dev = new Konnect.Classes.BusDevice(ldev.LineName, conn);
+            await dev.Connect();
+            await dev.PropertyWrite(0, 21, System.Text.Encoding.UTF8.GetBytes("123"));
+            dev.Disconnect();
+            await System.Threading.Tasks.Task.Delay(200);
+            await conn.Disconnect();
+        }
+
+        private async void SetTest2(object sender, RoutedEventArgs e)
+        {
+            LineDevice ldev = GetDevice();
+            IKnxConnection conn = KnxInterfaceHelper.GetConnection(BusConnection.Instance.SelectedInterface);
+            await conn.Connect();
+            await System.Threading.Tasks.Task.Delay(2000);
+            Konnect.Classes.BusDevice dev = new Konnect.Classes.BusDevice(ldev.LineName, conn);
+            await dev.Connect();
+            string resp = await dev.PropertyRead<string>(0, 21);
+            dev.Disconnect();
+            await System.Threading.Tasks.Task.Delay(200);
+            await conn.Disconnect();
+        }
     }
 }

@@ -25,7 +25,7 @@
     <AppxBundlePlatforms>x86|x64|arm</AppxBundlePlatforms>
     <AppInstallerUpdateFrequency>0</AppInstallerUpdateFrequency>
     <AppInstallerCheckForUpdateFrequency>OnApplicationRun</AppInstallerCheckForUpdateFrequency>
-    <PackageCertificateThumbprint>881FE76B3B092E92A79BD15BB89561C4F9153453</PackageCertificateThumbprint>
+    <PackageCertificateThumbprint>25D4066F92BC8818AA98BC5BA3B11A2F74957BBD</PackageCertificateThumbprint>
     <AppxPackageSigningTimestampDigestAlgorithm>SHA256</AppxPackageSigningTimestampDigestAlgorithm>
     <GenerateTestArtifacts>False</GenerateTestArtifacts>
     <HoursBetweenUpdateChecks>0</HoursBetweenUpdateChecks>
@@ -179,6 +179,7 @@
     <Compile Include="Classes\MonitorTelegram.cs" />
     <Compile Include="Classes\Project\DeviceComObject.cs" />
     <Compile Include="Classes\ReconstructDevice.cs" />
+    <Compile Include="Classes\SaveConfigHelper.cs" />
     <Compile Include="Classes\Save\ISaveHelper.cs" />
     <Compile Include="Classes\Save\SaverAuto.cs" />
     <Compile Include="Classes\Save\SaverManu.cs" />
@@ -546,8 +547,8 @@
       <Project>{976D8A24-ECA9-483F-9481-2F12BC425E28}</Project>
       <Name>Kaenx.DataContext</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\Kaenx.Konnect\Kaenx.Konnect.csproj">
-      <Project>{dc75fe5e-7c97-4422-8348-dcfb0c3af35f}</Project>
+    <ProjectReference Include="..\..\Kaenx.Konnect\Kaenx.Konnect\Kaenx.Konnect.csproj">
+      <Project>{59eb266e-5bf8-4265-a130-0c75994d768a}</Project>
       <Name>Kaenx.Konnect</Name>
     </ProjectReference>
   </ItemGroup>
