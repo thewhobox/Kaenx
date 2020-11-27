@@ -1,4 +1,5 @@
 ﻿using Kaenx.Classes;
+using Kaenx.Classes.Buildings;
 using Kaenx.Classes.Bus;
 using Kaenx.Classes.Dynamic;
 using Kaenx.Classes.Helper;
@@ -515,7 +516,6 @@ namespace Kaenx.View
             _currentBusDevice = new BusDevice(device.LineDevice.LineName, _conn);
             await _currentBusDevice.Connect();
 
-            #region Grundinfo
             device.Status = "Lese Maskenversion...";
 
             await Task.Delay(100);
@@ -631,7 +631,7 @@ namespace Kaenx.View
                 }
             }
 
-            SaveConfig(adds, paras);
+            await SaveConfig(adds, paras);
         }
 
 
@@ -879,7 +879,7 @@ namespace Kaenx.View
         }
 
 
-        private void SaveConfig(AppAdditional adds, Dictionary<string, AppParameter> paras)
+        private async Task SaveConfig(AppAdditional adds, Dictionary<string, AppParameter> paras)
         {
             _currentDevice.Status = "Speichere Konfiguration...";
 
@@ -975,9 +975,9 @@ namespace Kaenx.View
                 }
             }
 
-            //TodoText = "Generiere KOs";
+            _currentDevice.Status = "Generiere KOs";
 
-            //GenerateComs(Id2Param);
+            await GenerateComs(Id2Param);
 
             //Finish();
         }
@@ -986,10 +986,10 @@ namespace Kaenx.View
 
         
 
-        /*
-        private async void GenerateComs(Dictionary<string, ViewParamModel> Id2Param)
+        
+        private async Task GenerateComs(Dictionary<string, ViewParamModel> Id2Param)
         {
-            AppAdditional adds = _context.AppAdditionals.Single(a => a.Id == Device.ApplicationId);
+            AppAdditional adds = _context.AppAdditionals.Single(a => a.Id == _currentDevice.ApplicationId);
             List<DeviceComObject> comObjects = SaveHelper.ByteArrayToObject<List<DeviceComObject>>(adds.ComsAll);
             List<ParamBinding> Bindings = SaveHelper.ByteArrayToObject<List<ParamBinding>>(adds.Bindings);
             ProjectContext _contextP = new ProjectContext(SaveHelper.connProject);
@@ -1012,7 +1012,7 @@ namespace Kaenx.View
             List<DeviceComObject> toAdd = new List<DeviceComObject>();
             foreach (DeviceComObject cobj in newObjs)
             {
-                if (!Device.ComObjects.Any(co => co.Id == cobj.Id))
+                if (!_currentDevice.LineDevice.ComObjects.Any(co => co.Id == cobj.Id))
                     toAdd.Add(cobj);
             }
 
@@ -1056,12 +1056,12 @@ namespace Kaenx.View
 
                 await App._dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Normal, () =>
                 {
-                    Device.ComObjects.Add(dcom);
+                    _currentDevice.LineDevice.ComObjects.Add(dcom);
                 });
 
                 ComObject com = new ComObject();
                 com.ComId = dcom.Id;
-                com.DeviceId = Device.UId;
+                com.DeviceId = _currentDevice.LineDevice.UId;
 
                 if (groupIds.Count > 0) com.Groups = string.Join(",", groupIds);
                 foreach (string groupId in groupIds)
@@ -1083,18 +1083,17 @@ namespace Kaenx.View
 
             await App._dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Normal, () =>
             {
-                Device.ComObjects.Sort(s => s.Number);
+                _currentDevice.LineDevice.ComObjects.Sort(s => s.Number);
 
                 if (flagGroups)
                     ViewHelper.Instance.ShowNotification("main", "Es konnten einige Gruppenadressen nicht zugeordnet werden, da diese nicht im Projekt existieren.", 4000, ViewHelper.MessageType.Warning);
             });
             _contextP.SaveChanges();
         }
-        */
+       
 
 
 
         #endregion
     }
 }
-#endregion
