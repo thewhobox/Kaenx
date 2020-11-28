@@ -8,6 +8,7 @@ using Kaenx.Konnect;
 using Kaenx.Konnect.Builders;
 using Kaenx.Konnect.Connections;
 using Kaenx.Konnect.Interfaces;
+using Kaenx.Konnect.Messages.Response;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -139,14 +140,15 @@ namespace Kaenx.View
             }
         }
 
-        private void _conn_OnTunnelAction(Konnect.Builders.TunnelResponse response)
+        private void _conn_OnTunnelAction(Konnect.Messages.IMessage response)
         {
+            //Todo IMessageResponse Addr source and destination
             MonitorTelegram tel = new MonitorTelegram();
-            tel.From = response.SourceAddress;
-            tel.To = (Konnect.Addresses.IKnxAddress)response.DestinationAddress;
+            //tel.From = response.SourceAddress;
+            //tel.To = (Konnect.Addresses.IKnxAddress)response.DestinationAddress;
             tel.Time = DateTime.Now;
-            tel.Data = "0x" + BitConverter.ToString(response.Data).Replace("-", "");
-            tel.Type = response.APCI;
+            tel.Data = "0x" + BitConverter.ToString(response.Raw).Replace("-", "");
+            tel.Type = response.ApciType;
             _=App._dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Normal, () =>
             {
                 TelegramList.Insert(0, tel);

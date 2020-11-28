@@ -89,9 +89,9 @@ namespace Kaenx.View.Controls.Settings
             ListInterfaces.Add(inter);
         }
 
-        private bool CheckInputs()
+        private bool CheckInputs(bool onlyTest = false)
         {
-            if (string.IsNullOrEmpty(InInterName.Text))
+            if (!onlyTest && string.IsNullOrEmpty(InInterName.Text))
             {
                 ViewHelper.Instance.ShowNotification("settings", "Bitte gib einen Namen ein.", 3000, ViewHelper.MessageType.Error);
                 return false;
@@ -148,27 +148,20 @@ namespace Kaenx.View.Controls.Settings
 
         private async void ClickTest(object sender, RoutedEventArgs e)
         {
-            if (!CheckInputs()) return;
+            if (!CheckInputs(true)) return;
 
             Konnect.Connections.IKnxConnection conn = new Konnect.Connections.KnxIpTunneling(new IPEndPoint(IPAddress.Parse(InInterAddress.Text), int.Parse(InInterPort.Text)));
-            await conn.Connect();
-
-            await Task.Delay(1000);
-
-            if(conn.IsConnected)
+            try
             {
-                if(await conn.SendStatusReq())
-                {
-                    ViewHelper.Instance.ShowNotification("settings", "Schnittstelle ist erreichbar.", 3000, ViewHelper.MessageType.Success);
-                }
-                else
-                {
-                    ViewHelper.Instance.ShowNotification("settings", "Schnittstelle ist erreichbar, hat aber keine Verbindung zum Bus.", 3000, ViewHelper.MessageType.Warning);
-                }
+                await conn.Connect();
             }
-            else
-                ViewHelper.Instance.ShowNotification("settings", "Schnittstelle nicht erreichbar.", 3000, ViewHelper.MessageType.Error);
+            catch(Exception ex)
+            {
+                ViewHelper.Instance.ShowNotification("settings", "Fehler bei der Verbindung!\r\n" + ex.Message, 3000, ViewHelper.MessageType.Error);
+                return;
+            }
             
+            ViewHelper.Instance.ShowNotification("settings", "Schnittstelle ist erreichbar und hat eine Verbindung zum Bus (" + conn.PhysicalAddress.ToString() + ")", 3000, ViewHelper.MessageType.Error);
             await conn.Disconnect();
         }
 

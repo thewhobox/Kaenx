@@ -5,6 +5,7 @@ using Kaenx.Konnect.Addresses;
 using Kaenx.Konnect.Builders;
 using Kaenx.Konnect.Classes;
 using Kaenx.Konnect.Connections;
+using Kaenx.Konnect.Messages.Response;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -41,16 +42,17 @@ namespace Kaenx.Classes.Bus.Actions
         {
         }
 
-        List<TunnelResponse> devices = new List<TunnelResponse>();
+        List<IMessageResponse> devices = new List<IMessageResponse>();
 
-        private void _conn_OnTunnelResponse(TunnelResponse response)
+        private void _conn_OnTunnelResponse(IMessageResponse response)
         {
             devices.Add(response);
 
-            if(response.APCI == Kaenx.Konnect.Parser.ApciTypes.IndividualAddressResponse && response.SourceAddress.Area != 0 && !progDevices.Contains(response.SourceAddress.ToString()))
-            {
-                progDevices.Add(response.SourceAddress.ToString());
-            }
+            //TODO MsgIndividualAddressResponse
+            //if(response.APCI == Kaenx.Konnect.Parser.ApciTypes.IndividualAddressResponse && response.SourceAddress.Area != 0 && !progDevices.Contains(response.SourceAddress.ToString()))
+            //{
+            //    progDevices.Add(response.SourceAddress.ToString());
+            //}
         }
 
         public void Run(CancellationToken token)

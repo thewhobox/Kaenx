@@ -11,6 +11,7 @@ using Kaenx.Konnect.Addresses;
 using Kaenx.Konnect.Classes;
 using Kaenx.Konnect.Connections;
 using Kaenx.Konnect.Interfaces;
+using Kaenx.Konnect.Messages.Request;
 using Kaenx.View.Controls.Dialogs;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 using System;
@@ -413,14 +414,14 @@ namespace Kaenx.View
             device.LineDevice = lined;
         }
 
-        private void _conn_OnTunnelRequest(Konnect.Builders.TunnelResponse response)
+        private void _conn_OnTunnelRequest(IMessageRequest response)
         {
-            if(response.APCI == Konnect.Parser.ApciTypes.Disconnect)
+            if(response.ApciType == Konnect.Parser.ApciTypes.Disconnect)
             {
                 if (Devices.Any(d => d.Address.ToString() == response.SourceAddress.ToString())) return;
 
                 ReconstructDevice dev = new ReconstructDevice();
-                dev.Address = response.SourceAddress;
+                dev.Address = (UnicastAddress)response.SourceAddress;
                 dev.Status = "Gefunden";
                 _= App._dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Normal, () =>
                 {

@@ -8,6 +8,7 @@ using Kaenx.Konnect.Addresses;
 using Kaenx.Konnect.Classes;
 using Kaenx.Konnect.Connections;
 using Kaenx.Konnect.Interfaces;
+using Kaenx.Konnect.Messages.Response;
 using Kaenx.View.Controls.Dialogs;
 using Microsoft.AppCenter.Analytics;
 using System;
@@ -47,11 +48,11 @@ namespace Kaenx.View.Controls.Bus
             this.DataContext = this;
         }
 
-        private void Conn_OnTunnelResponse(Konnect.Builders.TunnelResponse response)
+        private void Conn_OnTunnelResponse(IMessageResponse response)
         {
-            if (response.APCI == Konnect.Parser.ApciTypes.PropertyValueResponse)
+            if (response.ApciType == Konnect.Parser.ApciTypes.PropertyValueResponse)
             {
-                byte[] serialb = response.Data.Skip(4).ToArray();
+                byte[] serialb = response.Raw.Skip(4).ToArray();
                 string serial = BitConverter.ToString(serialb).Replace("-", "");
                 if (!DeviceList.Any(d => d.SerialText == serial))
                 {

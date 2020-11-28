@@ -19,6 +19,7 @@ using Kaenx.Konnect.Builders;
 using Kaenx.Konnect.Connections;
 using Kaenx.Konnect.Interfaces;
 using Kaenx.Konnect.Messages.Request;
+using Kaenx.Konnect.Messages.Response;
 using Windows.ApplicationModel.Resources;
 using Windows.UI.Xaml;
 
@@ -120,16 +121,16 @@ namespace Kaenx.Classes.Bus
             SelectedInterface = inter;
         }
 
-        private void SearchConn_OnSearchResponse(Konnect.Responses.SearchResponse response)
+        private void SearchConn_OnSearchResponse(MsgSearchRes response)
         {
-            if(InterfaceList.Any(i => i.Hash == response.FriendlyName + "#IP#" + response.endpoint.ToString())) {
-                IKnxInterface inter = InterfaceList.Single(i => i.Hash == response.FriendlyName + "#IP#" + response.endpoint.ToString());
+            if(InterfaceList.Any(i => i.Hash == response.FriendlyName + "#IP#" + response.Endpoint.ToString())) {
+                IKnxInterface inter = InterfaceList.Single(i => i.Hash == response.FriendlyName + "#IP#" + response.Endpoint.ToString());
                 inter.LastFound = DateTime.Now;
             }
             else
             {
                 KnxInterfaceIp inter = new KnxInterfaceIp();
-                inter.Endpoint = response.endpoint;
+                inter.Endpoint = response.Endpoint;
                 inter.Name = response.FriendlyName;
                 inter.LastFound = DateTime.Now;
                 _ = App._dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Normal, () =>
@@ -143,7 +144,6 @@ namespace Kaenx.Classes.Bus
         {
             Windows.Storage.ApplicationDataContainer container = Windows.Storage.ApplicationData.Current.LocalSettings;
             string hash = container.Values["lastUsedInterface"]?.ToString();
-            Debug.WriteLine("Last Interface: " + hash);
 
             List<IKnxInterface> toDelete = new List<IKnxInterface>();
             foreach(IKnxInterface inter in InterfaceList)
@@ -159,12 +159,7 @@ namespace Kaenx.Classes.Bus
             });
 
 
-            MsgSearch msg = new MsgSearch();
-
-            //SearchRequest req = new SearchRequest();
-
-            //IPEndPoint end = new IPEndPoint(IPAddress.Any, searchConn.Port);
-            //req.Build(end);
+            MsgSearchReq msg = new MsgSearchReq();
             searchConn.Send(msg, true);
 
 
