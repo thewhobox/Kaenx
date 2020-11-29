@@ -141,8 +141,10 @@ namespace Kaenx.View
             {
                 foreach(LineMiddle linemi in linema.Subs)
                 {
+                    linemi.Parent = linema;
                     foreach(LineDevice ldev in linemi.Subs)
                     {
+                        ldev.Parent = linemi;
                         ReconstructDevice dev = new ReconstructDevice();
                         dev.Address = UnicastAddress.FromString(ldev.LineName);
                         dev.Serial = ldev.SerialText;
@@ -389,6 +391,7 @@ namespace Kaenx.View
                 lineM = new LineMiddle(device.Address.Line, "Neue Linie", line);
                 line.Subs.Add(lineM);
             }
+            lineM.Parent = line;
 
             LineDevice lined;
             if (lineM.Subs.Any(d => d.Id == device.Address.DeviceAddress))
@@ -399,6 +402,7 @@ namespace Kaenx.View
                 lineM.Subs.Add(lined);
             }
 
+            lined.Parent = lineM;
             lined.Serial = device.SerialBytes;
             lined.ApplicationId = device.ApplicationId;
             lined.Id = device.Address.DeviceAddress;
@@ -452,7 +456,7 @@ namespace Kaenx.View
             IEnumerable<ReconstructDevice> devices = Devices.Where(d => d.StateId >= 3);
             foreach (ReconstructDevice device in devices)
             {
-                Action = device.LineDevice.LineName + " - Lese Konfiguration";
+                Action = device.Address + " - Lese Konfiguration";
                 await StartReadConfig(device, _conn);
             }
 
@@ -463,6 +467,7 @@ namespace Kaenx.View
         private void ClickToProject(object sender, RoutedEventArgs e)
         {
             SaveHelper.SaveProject();
+            SaveHelper.SaveStructure();
             SaveHelper._project.Local.IsReconstruct = false;
             LocalContext con = new LocalContext();
             con.Projects.Update(SaveHelper._project.Local);
@@ -514,7 +519,7 @@ namespace Kaenx.View
             connectedCOs.Clear();
             CO2GA.Clear();
             _currentDevice = device;
-            _currentBusDevice = new BusDevice(device.LineDevice.LineName, _conn);
+            _currentBusDevice = new BusDevice(device.Address, _conn);
             await _currentBusDevice.Connect();
 
             device.Status = "Lese Maskenversion...";
@@ -588,11 +593,12 @@ namespace Kaenx.View
 
             //ProgressValue = 40;
             device.Status = "Berechne Konfiguration...";
-            GetConfig(device.ApplicationId);
+            await GetConfig(device.ApplicationId);
         }
 
-        private async void GetConfig(string appId)
+        private async Task GetConfig(string appId)
         {
+            defParas.Clear();
             Dictionary<string, AppParameter> paras = new Dictionary<string, AppParameter>();
             Dictionary<string, AppParameterTypeViewModel> types = new Dictionary<string, AppParameterTypeViewModel>();
 
@@ -990,6 +996,8 @@ namespace Kaenx.View
         
         private async Task GenerateComs(Dictionary<string, ViewParamModel> Id2Param)
         {
+            Function currentFunction = CheckReconstructBuilding();
+
             AppAdditional adds = _context.AppAdditionals.Single(a => a.Id == _currentDevice.ApplicationId);
             List<DeviceComObject> comObjects = SaveHelper.ByteArrayToObject<List<DeviceComObject>>(adds.ComsAll);
             List<ParamBinding> Bindings = SaveHelper.ByteArrayToObject<List<ParamBinding>>(adds.Bindings);
@@ -1032,8 +1040,6 @@ namespace Kaenx.View
                                 if (!groupsMap.ContainsKey(funcG.Address.ToString()))
                                     groupsMap.Add(funcG.Address.ToString(), funcG);
 
-            bool flagGroups = false;
-
             foreach (DeviceComObject dcom in toAdd)
             {
                 List<string> groupIds = new List<string>();
@@ -1069,29 +1075,90 @@ namespace Kaenx.View
                 {
                     if (groupsMap.ContainsKey(groupId))
                     {
-                        dcom.Groups.Add(groupsMap[groupId]);
                         groupsMap[groupId].ComObjects.Add(dcom);
                     }
                     else
                     {
-                        flagGroups = true;
+                        FunctionGroup funcGroup = new FunctionGroup(currentFunction) { Name = groupId };
+                        funcGroup.Address = MulticastAddress.FromString(groupId);
+                        funcGroup.ComObjects.Add(dcom);
+                        groupsMap.Add(groupId, funcGroup);
+                        currentFunction.Subs.Add(funcGroup);
                     }
+                    dcom.Groups.Add(groupsMap[groupId]);
                 }
 
                 _contextP.ComObjects.Add(com);
             }
 
 
+            _currentDevice.Status = "Fertig";
+            _currentDevice.StateId = 4;
             await App._dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Normal, () =>
             {
                 _currentDevice.LineDevice.ComObjects.Sort(s => s.Number);
-
-                if (flagGroups)
-                    ViewHelper.Instance.ShowNotification("main", "Es konnten einige Gruppenadressen nicht zugeordnet werden, da diese nicht im Projekt existieren.", 4000, ViewHelper.MessageType.Warning);
             });
             _contextP.SaveChanges();
+            SaveHelper.SaveStructure();
         }
        
+
+        private Function CheckReconstructBuilding()
+        {
+            Building building;
+            if (SaveHelper._project.Area.Buildings.Any(b => b.Name == "Reconstruct"))
+                building = SaveHelper._project.Area.Buildings.Single(b => b.Name == "Reconstruct");
+            else
+            {
+                building = new Building()
+                {
+                    Name = "Reconstruct",
+                    ParentArea = SaveHelper._project.Area
+                };
+                SaveHelper._project.Area.Buildings.Add(building);
+            }
+
+            Floor floor;
+            if (building.Floors.Any(f => f.Name == "Reconstruct"))
+                floor = building.Floors.Single(f => f.Name == "Reconstruct");
+            else
+            {
+                floor = new Floor()
+                {
+                    Name = "Reconstruct",
+                    ParentBuilding = building
+                };
+                building.Floors.Add(floor);
+            }
+
+            Room room;
+            if (floor.Rooms.Any(r => r.Name == "Reconstruct"))
+                room = floor.Rooms.Single(r => r.Name == "Reconstruct");
+            else
+            {
+                room = new Room()
+                {
+                    Name = "Reconstruct",
+                    ParentFloor = floor
+                };
+                floor.Rooms.Add(room);
+            }
+
+            Function func;
+            if (room.Functions.Any(f => f.Name == "Reconsctruct"))
+                func = room.Functions.Single(f => f.Name == "Reconstruct");
+            else
+            {
+                func = new Function()
+                {
+                    Name = "Reconstruct",
+                    ParentRoom = room
+                };
+                room.Functions.Add(func);
+            }
+
+            return func;
+        }
 
 
 

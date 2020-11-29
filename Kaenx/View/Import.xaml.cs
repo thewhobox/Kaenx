@@ -149,7 +149,7 @@ namespace Kaenx.View
 
         private void Helper_OnError(string Error)
         {
-            ImportError.Add(Error);
+            _ = App._dispatcher.RunAsync(CoreDispatcherPriority.Normal, () => ImportError.Add(Error));
         }
 
         protected override void OnNavigatedTo(NavigationEventArgs e)
