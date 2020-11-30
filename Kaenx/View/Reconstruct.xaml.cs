@@ -931,18 +931,22 @@ namespace Kaenx.View
 
             foreach (IDynChannel ch in Channels)
             {
-                if (SaveHelper.CheckConditions(ch.Conditions, Id2Param))
+                if(ch.HasAccess)
+                    ch.Visible = SaveHelper.CheckConditions(ch.Conditions, Id2Param) ? Visibility.Visible : Visibility.Collapsed;
+
+                foreach (ParameterBlock block in ch.Blocks)
                 {
-                    foreach (ParameterBlock block in ch.Blocks)
+                    if (block.HasAccess)
                     {
-                        if (SaveHelper.CheckConditions(block.Conditions, Id2Param))
-                        {
-                            foreach (IDynParameter para in block.Parameters)
-                            {
-                                if (!VisibleParams.ContainsKey(para.Id))
-                                    VisibleParams.Add(para.Id, Id2Param[para.Id]);
-                            }
-                        }
+                        block.Visible = SaveHelper.CheckConditions(block.Conditions, Id2Param) ? Visibility.Visible : Visibility.Collapsed;
+                    }
+
+
+                    foreach (IDynParameter para in block.Parameters)
+                    {
+                        para.Visible = SaveHelper.CheckConditions(para.Conditions, Id2Param) ? Visibility.Visible : Visibility.Collapsed;
+                        if (!VisibleParams.ContainsKey(para.Id))
+                            VisibleParams.Add(para.Id, Id2Param[para.Id]);
                     }
                 }
             }
@@ -996,8 +1000,6 @@ namespace Kaenx.View
         
         private async Task GenerateComs(Dictionary<string, ViewParamModel> Id2Param)
         {
-            Function currentFunction = CheckReconstructBuilding();
-
             AppAdditional adds = _context.AppAdditionals.Single(a => a.Id == _currentDevice.ApplicationId);
             List<DeviceComObject> comObjects = SaveHelper.ByteArrayToObject<List<DeviceComObject>>(adds.ComsAll);
             List<ParamBinding> Bindings = SaveHelper.ByteArrayToObject<List<ParamBinding>>(adds.Bindings);
@@ -1079,12 +1081,10 @@ namespace Kaenx.View
                     }
                     else
                     {
-                        FunctionGroup funcGroup = new FunctionGroup(currentFunction) { Name = groupId };
-                        funcGroup.Address = MulticastAddress.FromString(groupId);
-                        funcGroup.ComObjects.Add(dcom);
+                        FunctionGroup funcGroup = CreateFuncGroup(groupId);
                         groupsMap.Add(groupId, funcGroup);
-                        currentFunction.Subs.Add(funcGroup);
                     }
+                    groupsMap[groupId].ComObjects.Add(dcom);
                     dcom.Groups.Add(groupsMap[groupId]);
                 }
 
@@ -1103,11 +1103,13 @@ namespace Kaenx.View
         }
        
 
-        private Function CheckReconstructBuilding()
+        private FunctionGroup CreateFuncGroup(string groupId)
         {
+            string[] groupIds = groupId.Split("/");
+
             Building building;
             if (SaveHelper._project.Area.Buildings.Any(b => b.Name == "Reconstruct"))
-                building = SaveHelper._project.Area.Buildings.Single(b => b.Name == "Reconstruct");
+                building = SaveHelper._project.Area.Buildings.First(b => b.Name == "Reconstruct");
             else
             {
                 building = new Building()
@@ -1120,7 +1122,7 @@ namespace Kaenx.View
 
             Floor floor;
             if (building.Floors.Any(f => f.Name == "Reconstruct"))
-                floor = building.Floors.Single(f => f.Name == "Reconstruct");
+                floor = building.Floors.First(f => f.Name == "Reconstruct");
             else
             {
                 floor = new Floor()
@@ -1132,32 +1134,46 @@ namespace Kaenx.View
             }
 
             Room room;
-            if (floor.Rooms.Any(r => r.Name == "Reconstruct"))
-                room = floor.Rooms.Single(r => r.Name == "Reconstruct");
+            if (floor.Rooms.Any(r => r.Name == "Main " + groupIds[0]))
+                room = floor.Rooms.First(r => r.Name == "Main " + groupIds[0]);
             else
             {
                 room = new Room()
                 {
-                    Name = "Reconstruct",
+                    Name = "Main " + groupIds[0],
                     ParentFloor = floor
                 };
                 floor.Rooms.Add(room);
             }
 
             Function func;
-            if (room.Functions.Any(f => f.Name == "Reconsctruct"))
-                func = room.Functions.Single(f => f.Name == "Reconstruct");
+            if (room.Functions.Any(f => f.Name == "Middle " + groupIds[0] + "/" + groupIds[1]))
+                func = room.Functions.First(f => f.Name == "Middle " + groupIds[0] + "/" + groupIds[1]);
             else
             {
                 func = new Function()
                 {
-                    Name = "Reconstruct",
+                    Name = "Middle " + groupIds[0] + "/" + groupIds[1],
                     ParentRoom = room
                 };
                 room.Functions.Add(func);
             }
 
-            return func;
+            FunctionGroup funcGroup;
+            if (func.Subs.Any(fg => fg.Name == "Group " + groupId))
+                funcGroup = func.Subs.First(fg => fg.Name == "Group " + groupId);
+            else
+            {
+                funcGroup = new FunctionGroup()
+                {
+                    Name = "Group " + groupId,
+                    ParentFunction = func
+                };
+                funcGroup.Address = MulticastAddress.FromString(groupId);
+                func.Subs.Add(funcGroup);
+            }
+
+            return funcGroup;
         }
 
 

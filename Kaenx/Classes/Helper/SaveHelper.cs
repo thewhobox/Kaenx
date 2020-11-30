@@ -1614,6 +1614,8 @@ namespace Kaenx.Classes.Helper
 
             foreach (LineDevice dev in line.Subs)
             {
+                if (!contextC.Devices.Any(s => s.Id == dev.DeviceId)) continue;
+
                 DeviceViewModel model = contextC.Devices.Single(s => s.Id == dev.DeviceId);
 
                 if (model.IsPowerSupply)
@@ -1629,6 +1631,8 @@ namespace Kaenx.Classes.Helper
 
             foreach (LineDevice dev in line.Subs)
             {
+                if (!contextC.Devices.Any(s => s.Id == dev.DeviceId)) continue;
+
                 DeviceViewModel model = contextC.Devices.Single(s => s.Id == dev.DeviceId);
 
                 if (!model.IsPowerSupply)

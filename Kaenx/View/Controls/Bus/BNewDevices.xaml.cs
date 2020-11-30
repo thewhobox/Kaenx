@@ -84,7 +84,14 @@ namespace Kaenx.View.Controls.Bus
 
             conn = KnxInterfaceHelper.GetConnection(BusConnection.Instance.SelectedInterface);
             conn.OnTunnelResponse += Conn_OnTunnelResponse;
-            await conn.Connect();
+            try
+            {
+                await conn.Connect();
+            }catch(Exception ex)
+            {
+                ViewHelper.Instance.ShowNotification("main", "Probleme beim Verbinden mit der Schnittstelle!\r\n" + ex.Message, 3000, ViewHelper.MessageType.Error);
+                return;
+            }
 
             //BusCommon comm = new BusCommon(conn);
             BusDevice dev = new BusDevice(UnicastAddress.FromString("15.15.255"), conn);
