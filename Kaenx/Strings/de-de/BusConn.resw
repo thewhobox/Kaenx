@@ -117,88 +117,88 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="TabsCurrent.Header" xml:space="preserve">
-    <value>Aktuell</value>
+  <data name="NoInterfaceSelected" xml:space="preserve">
+    <value>Bitte wählen Sie eine Schnittstelle aus!</value>
   </data>
-  <data name="TabsCurrentQueue.Text" xml:space="preserve">
-    <value>Warteliste:</value>
+  <data name="Action_Connecting" xml:space="preserve">
+    <value>Verbindung wird hergestellt...</value>
   </data>
-  <data name="TabsCurrentQueueCancel.Text" xml:space="preserve">
-    <value>Abbrechen</value>
+  <data name="Action_Canceled" xml:space="preserve">
+    <value>Wurde abgebrochen</value>
   </data>
-  <data name="TabsCurrentQueueFirst.Text" xml:space="preserve">
-    <value>Vorziehen</value>
+  <data name="Action_Timeout" xml:space="preserve">
+    <value>Zeitüberschreitung (10s)</value>
   </data>
-  <data name="TabsHistory.Header" xml:space="preserve">
-    <value>Verlauf</value>
+  <data name="Action_TimeoutProc" xml:space="preserve">
+    <value>Zeitüberschreitung Proess (30s)</value>
   </data>
-  <data name="TabsInfo.Header" xml:space="preserve">
-    <value>Geräte Info</value>
+  <data name="DeviceInfoAddress.Text" xml:space="preserve">
+    <value>Ph. Adresse:</value>
   </data>
-  <data name="TabsInfoAddr.Text" xml:space="preserve">
-    <value>Adresse:</value>
+  <data name="DeviceInfoApp.Text" xml:space="preserve">
+    <value>Aktuellste Applikation:</value>
   </data>
-  <data name="TabsInfoCollAddr.Header" xml:space="preserve">
-    <value>Adresse</value>
+  <data name="DeviceInfoCoupler.Text" xml:space="preserve">
+    <value>Koppler:</value>
   </data>
-  <data name="TabsInfoCollApp.Header" xml:space="preserve">
-    <value>Applikation</value>
+  <data name="DeviceInfoCurrent.Text" xml:space="preserve">
+    <value>Busstrom:</value>
   </data>
-  <data name="TabsInfoCollDesc.Header" xml:space="preserve">
+  <data name="DeviceInfoHasApp.Text" xml:space="preserve">
+    <value>Applikation:</value>
+  </data>
+  <data name="DeviceInfoHeader2.Text" xml:space="preserve">
+    <value>Geräte Informationen</value>
+  </data>
+  <data name="DeviceInfoName.Text" xml:space="preserve">
+    <value>Name:</value>
+  </data>
+  <data name="DeviceInfoOrder.Text" xml:space="preserve">
+    <value>Bestellnummer:</value>
+  </data>
+  <data name="DeviceInfoSupply.Text" xml:space="preserve">
+    <value>Netzteil:</value>
+  </data>
+  <data name="DListDesc.Header" xml:space="preserve">
     <value>Beschreibung</value>
   </data>
-  <data name="TabsInfoCollManu.Header" xml:space="preserve">
-    <value>Hersteller</value>
+  <data name="DListName.Header" xml:space="preserve">
+    <value>Name</value>
   </data>
-  <data name="TabsInfoCollSerial.Header" xml:space="preserve">
-    <value>Seriennummer</value>
+  <data name="DListNumb.Header" xml:space="preserve">
+    <value>Bestellnummer</value>
   </data>
-  <data name="TabsInfoCollType.Header" xml:space="preserve">
-    <value>Typ</value>
+  <data name="ImportAll.Content" xml:space="preserve">
+    <value>Alle</value>
   </data>
-  <data name="TabsInfoMenInfo.Text" xml:space="preserve">
-    <value>Information</value>
+  <data name="ImportCancel.Content" xml:space="preserve">
+    <value>Abbrechen</value>
   </data>
-  <data name="TabsInfoMenMemory.Text" xml:space="preserve">
-    <value>Speicher</value>
+  <data name="ImportChangeLange.Text" xml:space="preserve">
+    <value>Ändern</value>
   </data>
-  <data name="TabsInfoRead.Content" xml:space="preserve">
-    <value>Auslesen</value>
+  <data name="ImportHeader.Text" xml:space="preserve">
+    <value>Welche Geräte sollen importiert werden?</value>
   </data>
-  <data name="TabsInterfaces.Header" xml:space="preserve">
-    <value>Schnittstelle</value>
+  <data name="ImportSelected.Content" xml:space="preserve">
+    <value>Ausgewählte</value>
   </data>
-  <data name="TabsInterfacesList.Text" xml:space="preserve">
-    <value>Verfügbare Schnittstellen:</value>
+  <data name="ImportSelectedLang.Text" xml:space="preserve">
+    <value>Sprache: </value>
   </data>
-  <data name="TabsInterfacesSelected.Text" xml:space="preserve">
-    <value>Ausgewählte Schnittstelle:</value>
+  <data name="MansListAll" xml:space="preserve">
+    <value>Alle Hersteller</value>
   </data>
-  <data name="TabsMonitor.Header" xml:space="preserve">
-    <value>Monitor</value>
+  <data name="MsgNotCopied" xml:space="preserve">
+    <value>Die Datei konnte nicht kopiert werden.</value>
   </data>
-  <data name="TabsMonitorCollData.Header" xml:space="preserve">
-    <value>Daten</value>
+  <data name="WindowTitle" xml:space="preserve">
+    <value>Katalog</value>
   </data>
-  <data name="TabsMonitorCollFrom.Header" xml:space="preserve">
-    <value>Von</value>
+  <data name="SideProps.Text" xml:space="preserve">
+    <value>Geräteinfos</value>
   </data>
-  <data name="TabsMonitorCollTime.Header" xml:space="preserve">
-    <value>Zeit</value>
-  </data>
-  <data name="TabsMonitorCollTo.Header" xml:space="preserve">
-    <value>An</value>
-  </data>
-  <data name="TabsMonitorCollType.Header" xml:space="preserve">
-    <value>Typ</value>
-  </data>
-  <data name="TabsMonitorTipClear.ToolTipService.ToolTip" xml:space="preserve">
-    <value>Liste leeren</value>
-  </data>
-  <data name="TabsMonitorTipToggle.ToolTipService.ToolTip" xml:space="preserve">
-    <value>Starten / Anhalten</value>
-  </data>
-  <data name="TabsNew.Header" xml:space="preserve">
-    <value>Neue Geräte</value>
+  <data name="SideFilter.Text" xml:space="preserve">
+    <value>Filter</value>
   </data>
 </root>

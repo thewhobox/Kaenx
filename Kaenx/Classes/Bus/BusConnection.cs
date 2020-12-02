@@ -27,7 +27,7 @@ namespace Kaenx.Classes.Bus
 {
     public class BusConnection :INotifyPropertyChanged
     {
-        private ResourceLoader loader = ResourceLoader.GetForCurrentView("Bus");
+        private ResourceLoader loader = ResourceLoader.GetForCurrentView("BusConn");
         private bool _isConnected = false;
         private bool _cancelIsUser = false;
 
