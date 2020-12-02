@@ -294,6 +294,7 @@
       <SubType>Designer</SubType>
     </AppxManifest>
     <None Include="Data\Logos\kænx.odg" />
+    <PRIResource Include="Strings\en\Bus.resw" />
     <PRIResource Include="Strings\de-de\Bus.resw" />
     <PRIResource Include="Strings\en\Topologie.resw" />
     <PRIResource Include="Strings\en\Import.resw" />

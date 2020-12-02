@@ -79,7 +79,7 @@
         </Grid.ColumnDefinitions>
 
         <toolkit:TabView>
-            <toolkit:TabViewItem Header="Aktuell">
+            <toolkit:TabViewItem x:Uid="/Bus/TabsCurrent">
                 <Grid>
                     <Grid.RowDefinitions>
                         <RowDefinition Height="auto" />
@@ -108,7 +108,7 @@
                     </StackPanel>
                     
 
-                    <TextBlock Grid.Row="2" Text="Warteliste:" Margin="5 10 5 5" FontSize="17" />
+                    <TextBlock x:Uid="/Bus/TabsCurrentQueue" Grid.Row="2" Margin="5 10 5 5" FontSize="17" />
 
                     <ListView Grid.Row="3" Grid.ColumnSpan="2" ItemsSource="{Binding actions}" IsItemClickEnabled="False" SelectionMode="None">
                         <ListView.ItemContainerStyle>
@@ -136,7 +136,7 @@
                 </Grid>
             </toolkit:TabViewItem>
 
-            <toolkit:TabViewItem Header="Verlauf">
+            <toolkit:TabViewItem x:Uid="/Bus/TabsHistory">
                 <ListView Grid.Row="2" ItemsSource="{Binding History}" IsItemClickEnabled="False" SelectionMode="None">
                     <ListView.ItemContainerStyle>
                         <Style TargetType="ListViewItem">
@@ -146,12 +146,6 @@
                     <ListView.ItemTemplate>
                         <DataTemplate>
                             <StackPanel Padding="0 10" BorderThickness="0 0 0 0.5" BorderBrush="Gray">
-                                <StackPanel.ContextFlyout>
-                                    <MenuFlyout>
-                                        <MenuFlyoutItem Text="Vorziehen" Icon="Upload" IsEnabled="False" />
-                                        <MenuFlyoutItem Text="Abbrechen" Icon="Cancel" IsEnabled="False" />
-                                    </MenuFlyout>
-                                </StackPanel.ContextFlyout>
                                 <TextBlock Text="{Binding Path=Device.Name}" />
                                 <TextBlock Text="{Binding Path=Device.LineName}" Foreground="Gray" />
                                 <TextBlock Text="{Binding Path=TodoText}" Foreground="Gray" />
@@ -162,7 +156,7 @@
                 </ListView>
             </toolkit:TabViewItem>
 
-            <toolkit:TabViewItem x:Name="TabConns" Header="Schnittstelle">
+            <toolkit:TabViewItem x:Name="TabConns" x:Uid="/Bus/TabsInterfaces">
                 <Grid Margin="10 20">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="auto" />
@@ -174,13 +168,13 @@
                         <RowDefinition />
                     </Grid.RowDefinitions>
                     
-                    <TextBlock Text="Ausgewählte Schnittstelle:" Foreground="{ThemeResource SystemAccentColorDark1}" Margin="10 0 0 0" />
+                    <TextBlock x:Uid="/Bus/TabsInterfacesSelected" Foreground="{ThemeResource SystemAccentColorDark1}" Margin="10 0 0 0" />
                     <StackPanel Grid.Row="1" DataContext="{Binding SelectedInterface}" Orientation="Vertical" Margin="10 5">
                         <TextBlock Text="{Binding Name}" />
                         <TextBlock Text="{Binding Description}" FontSize="10" Foreground="Gray" />
                     </StackPanel>
 
-                    <TextBlock Grid.Row="2" Text="Schnittstellen:" Foreground="{ThemeResource SystemAccentColorDark1}" Margin="10 20 0 0" />
+                    <TextBlock x:Uid="/Bus/TabsInterfacesList" Grid.Row="2" Foreground="{ThemeResource SystemAccentColorDark1}" Margin="10 20 0 0" />
                     <ListView x:Name="ListInterfaces" Grid.Row="3" ItemsSource="{Binding InterfaceList}" SelectedItem="{Binding SelectedInterface, Mode=TwoWay}">
                         <ListView.ItemTemplate>
                             <DataTemplate>
@@ -191,12 +185,6 @@
                             </DataTemplate>
                         </ListView.ItemTemplate>
                     </ListView>
-
-                    <!--<TextBlock Grid.Row="4" Text="Gespeicherte Schnittstellen:" Foreground="{ThemeResource SystemAccentColorDark1}" Margin="10 20 0 0" />
-                    <Button Grid.Row="4" HorizontalAlignment="Right">
-                        <SymbolIcon Symbol="Add" />
-                    </Button>-->
-
                 </Grid>
             </toolkit:TabViewItem>
         </toolkit:TabView>
@@ -207,7 +195,7 @@
                 <SolidColorBrush Color="#FFE0E0E0" />
             </toolkit:TabView.Background>
 
-            <toolkit:TabViewItem Header="Monitor">
+            <toolkit:TabViewItem x:Uid="/Bus/TabsMonitor">
                 <Grid>
                     <Grid.RowDefinitions>
                         <RowDefinition Height="auto" />
@@ -236,7 +224,7 @@
                 </Grid>
             </toolkit:TabViewItem>
 
-            <toolkit:TabViewItem Header="Auslesen">
+            <toolkit:TabViewItem x:Uid="/Bus/TabsInfo">
                 <Grid x:Name="GridOutput">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="auto" />
@@ -244,14 +232,14 @@
                     </Grid.RowDefinitions>
 
                     <StackPanel Orientation="Horizontal" Margin="10">
-                        <TextBlock Text="Adresse:" Margin="10 0 10 0" VerticalAlignment="Center" />
+                        <TextBlock x:Uid="/Bus/TabsInfoAddr" Margin="10 0 10 0" VerticalAlignment="Center" />
                         <TextBox x:Name="InAddress2" Width="200" CornerRadius="2 0 0 2" 
                                  extensions:TextBoxRegex.Regex="(^[0-9]{1,1}|1[0-5]{1,1})\.([0-9]{1}|1[0-5]{1})\.(1[0-9]{1,2}|2[0-4]{1}[0-9]{1}|25[0-5]{1}|[0-9]{1,2})$" />
-                        <DropDownButton Content="Auslesen">
+                        <DropDownButton x:Uid="/Bus/TabsInfoRead">
                             <DropDownButton.Flyout>
                                 <MenuFlyout Placement="BottomEdgeAlignedRight">
-                                    <MenuFlyoutItem Icon="BrowsePhotos" Text="Information" Click="ReadInfo" />
-                                    <MenuFlyoutItem Icon="Save" Text="Speicher" Click="ReadMem" />
+                                    <MenuFlyoutItem x:Uid="/Bus/TabsInfoMenInfo" Icon="BrowsePhotos" Click="ReadInfo" />
+                                    <MenuFlyoutItem x:Uid="/Bus/TabsInfoMenMemory" Icon="Save" Click="ReadMem" />
                                     <MenuFlyoutItem Icon="ClearSelection" Text="Test" Click="SetTest" />
                                     <MenuFlyoutItem Icon="ClearSelection" Text="Test2" Click="SetTest2" />
                                     <!--<MenuFlyoutItem Icon="Find" Text="Konfiguration" Click="ReadConf" />-->
@@ -275,18 +263,13 @@
                             <toolkit:DataGridTextColumn Header="Applikation" Binding="{Binding ApplicationName}" />
                         </toolkit:DataGrid.Columns>
                     </toolkit:DataGrid>
-
-
-
-
                 </Grid>
             </toolkit:TabViewItem>
 
-            <toolkit:TabViewItem Header="Neue Geräte">
+            <toolkit:TabViewItem x:Uid="/Bus/TabsNew">
                 <bus:BNewDevices />
             </toolkit:TabViewItem>
         </toolkit:TabView>
-
 
     </Grid>
 </Page>
