@@ -209,6 +209,9 @@ namespace Kaenx.Classes.Bus.Actions
                             await Task.Delay(ms);
                             break;
 
+                        case "LdCtrlWriteMem":
+                            break;
+
                         default:
                             Debug.WriteLine("Unbekanntes Element: " + ctrl.Name.LocalName);
                             break;
@@ -253,9 +256,9 @@ namespace Kaenx.Classes.Bus.Actions
                     {
                         await WriteApplication(adds);
                     }
-                    catch
+                    catch (Exception ex)
                     {
-
+                        Debug.WriteLine("Hier lief was schief... " + ex.Message);
                     }
                     break;
 
@@ -502,7 +505,7 @@ namespace Kaenx.Classes.Bus.Actions
 
         private async Task WriteAssociationTable(int addr)
         {
-            TodoText = "Schreibe Assozationstabelle...";
+            TodoText = "Schreibe Assoziationstabelle...";
 
             //Setze länge der Tabelle auf 0
             await dev.MemoryWriteSync(addr, new byte[] { 0x00 });
@@ -570,6 +573,9 @@ namespace Kaenx.Classes.Bus.Actions
                 foreach (FunctionGroup group in com.Groups)
                     if (!addedGroups.Contains(group.Address.ToString()))
                         addedGroups.Add(group.Address.ToString());
+            if (addedGroups.Count > app.Table_Group_Max)
+                throw new Exception("Die Applikation erlaubt nur " + app.Table_Group_Max + " Gruppenverbindungen. Verwendet werden " + addedGroups.Count + ".");
+
             addedGroups.Sort();
 
             dataGroupTable = new List<byte>();
@@ -611,6 +617,9 @@ namespace Kaenx.Classes.Bus.Actions
                     dataAssoTable.Add(index);
                 }
             }
+
+            if ((dataAssoTable.Count / 2) > app.Table_Assosiations_Max)
+                throw new Exception("Die Applikation erlaubt nur " + app.Table_Assosiations_Max + " Assoziationsverbindungen. Verwendet werden " + (dataAssoTable.Count / 2) + ".");
         }
 
 

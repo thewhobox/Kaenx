@@ -477,15 +477,31 @@ namespace Kaenx.Classes.Helper
 
             List<ProjectModel> ps = contextProject.Projects.Where(p => p.Id == helper.ProjectId).ToList();
             contextProject.Projects.RemoveRange(ps);
+            ps = null;
 
             List<LineModel> ls = contextProject.LinesMain.Where(l => l.ProjectId == helper.ProjectId).ToList();
             contextProject.LinesMain.RemoveRange(ls);
+            ls = null;
 
             List<LineMiddleModel> lms = contextProject.LinesMiddle.Where(l => l.ProjectId == helper.ProjectId).ToList();
             contextProject.LinesMiddle.RemoveRange(lms);
+            lms = null;
 
             List<LineDeviceModel> lds = contextProject.LineDevices.Where(l => l.ProjectId == helper.ProjectId).ToList();
             contextProject.LineDevices.RemoveRange(lds);
+            foreach (LineDeviceModel dev in lds)
+            {
+                IEnumerable<ChangeParamModel> changes = contextProject.ChangesParam.Where(c => c.DeviceId == dev.UId);
+                contextProject.ChangesParam.RemoveRange(changes);
+                changes = null;
+                IEnumerable<ComObject> comobjs = contextProject.ComObjects.Where(c => c.DeviceId == dev.UId);
+                contextProject.ComObjects.RemoveRange(comobjs);
+            }
+            lds = null;
+
+            IEnumerable<StateModel> states = contextProject.States.Where(s => s.ProjectId == helper.ProjectId);
+            contextProject.States.RemoveRange(states);
+            states = null;
 
             contextProject.SaveChanges();
         }

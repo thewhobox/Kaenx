@@ -79,33 +79,33 @@ namespace Kaenx.Classes.Bus.Actions
             _data.MaskVersion = "MV-" + await dev.DeviceDescriptorRead();
 
 
-            if(Device.Serial == null)
-            {
-                ProgressValue = 10;
-                TodoText = "Lese Seriennummer...";
-                await Task.Delay(500);
+            //if(Device.Serial == null)
+            //{
+            //    ProgressValue = 10;
+            //    TodoText = "Lese Seriennummer...";
+            //    await Task.Delay(500);
 
-                byte[] serial = new byte[0];
-                try
-                {
-                    serial = await dev.PropertyRead(0, 11);
-                    _data.SerialNumber = BitConverter.ToString(serial).Replace("-", "");
-                }
-                catch (Exception e)
-                {
-                    _data.SerialNumber = e.Message;
-                    Log.Error(e, "Fehler beim holen der Seirennummer");
-                }
+            //    byte[] serial = new byte[0];
+            //    try
+            //    {
+            //        serial = await dev.PropertyRead(0, 11);
+            //        _data.SerialNumber = BitConverter.ToString(serial).Replace("-", "");
+            //    }
+            //    catch (Exception e)
+            //    {
+            //        _data.SerialNumber = e.Message;
+            //        Log.Error(e, "Fehler beim holen der Seirennummer");
+            //    }
 
-                if (serial.Length > 0)
-                {
-                    _ = App._dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Normal, () =>
-                    {
-                        Device.Serial = serial;
-                        SaveHelper.UpdateDevice(Device);
-                    });
-                }
-            }
+            //    if (serial.Length > 0)
+            //    {
+            //        _ = App._dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Normal, () =>
+            //        {
+            //            Device.Serial = serial;
+            //            SaveHelper.UpdateDevice(Device);
+            //        });
+            //    }
+            //}
 
 
             ProgressValue = 20;

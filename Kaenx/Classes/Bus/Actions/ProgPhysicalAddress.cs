@@ -49,10 +49,10 @@ namespace Kaenx.Classes.Bus.Actions
             devices.Add(response);
 
             //TODO MsgIndividualAddressResponse
-            //if(response.APCI == Kaenx.Konnect.Parser.ApciTypes.IndividualAddressResponse && response.SourceAddress.Area != 0 && !progDevices.Contains(response.SourceAddress.ToString()))
-            //{
-            //    progDevices.Add(response.SourceAddress.ToString());
-            //}
+            if (response.ApciType == Kaenx.Konnect.Parser.ApciTypes.IndividualAddressResponse && (response.SourceAddress as UnicastAddress).Area != 0 && !progDevices.Contains(response.SourceAddress.ToString()))
+            {
+                progDevices.Add(response.SourceAddress.ToString());
+            }
         }
 
         public void Run(CancellationToken token)
@@ -89,7 +89,13 @@ namespace Kaenx.Classes.Bus.Actions
                             Device.LoadedPA = true;
                         });
                         await Task.Delay(1000);
-                        await RestartCommands();
+                        try
+                        {
+                            await RestartCommands();
+                        } catch (Exception ex)
+                        {
+                            Debug.WriteLine("ProgPhysicalAddress: " + ex.Message);
+                        }
                         TodoText = "Erfolgreich abgeschlossen";
                         Finished?.Invoke(this, new EventArgs());
                         break;
@@ -171,7 +177,14 @@ namespace Kaenx.Classes.Bus.Actions
             ProgressValue = 95;
 
 
-            await RestartCommands();
+            try
+            {
+                await RestartCommands();
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine("ProgPhysicalAddress 2: " + ex.Message);
+            }
 
 
             TodoText = "Erfolgreich abgeschlossen";
@@ -191,6 +204,12 @@ namespace Kaenx.Classes.Bus.Actions
             await dev.Connect(true);
             string mask = await dev.DeviceDescriptorRead();
 
+            await dev.Restart();
+            await Task.Delay(2000);
+
+            await dev.Connect();
+
+
             byte[] serial = null;
             try
             {
@@ -207,7 +226,6 @@ namespace Kaenx.Classes.Bus.Actions
                 });
             }
 
-            dev.Restart();
 
 
 
