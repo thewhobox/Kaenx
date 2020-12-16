@@ -258,5 +258,31 @@ namespace Kaenx.View
             await System.Threading.Tasks.Task.Delay(200);
             await conn.Disconnect();
         }
+
+        private async void ClickTestInterface(object sender, RoutedEventArgs e)
+        {
+            if(BusConnection.Instance.SelectedInterface == null)
+            {
+                ViewHelper.Instance.ShowNotification("main", "Bitte wählen Sie eine Schnittstelle aus.", 3000, ViewHelper.MessageType.Error);
+                return;
+            }
+
+            BtnTest.IsEnabled = false;
+            IKnxConnection conn = KnxInterfaceHelper.GetConnection(BusConnection.Instance.SelectedInterface);
+            try
+            {
+                await conn.Connect();
+            }
+            catch (Exception ex)
+            {
+                ViewHelper.Instance.ShowNotification("main", "Fehler bei der Verbindung!\r\n" + ex.Message, 3000, ViewHelper.MessageType.Error);
+                BtnTest.IsEnabled = true;
+                return;
+            }
+
+            ViewHelper.Instance.ShowNotification("main", "Schnittstelle ist erreichbar und hat eine Verbindung zum Bus (" + conn.PhysicalAddress.ToString() + ")", 3000, ViewHelper.MessageType.Error);
+            await conn.Disconnect();
+            BtnTest.IsEnabled = true;
+        }
     }
 }

@@ -167,8 +167,12 @@
                         <RowDefinition Height="auto" />
                         <RowDefinition />
                     </Grid.RowDefinitions>
-                    
-                    <TextBlock x:Uid="/Bus/TabsInterfacesSelected" Foreground="{ThemeResource SystemAccentColorDark1}" Margin="10 0 0 0" />
+
+
+                    <TextBlock x:Uid="/Bus/TabsInterfacesSelected" Foreground="{ThemeResource SystemAccentColorDark1}" VerticalAlignment="Center" Margin="10 0 0 0" />
+                    <Button x:Name="BtnTest" HorizontalAlignment="Right" Margin="0 0 10 0" ToolTipService.ToolTip="Schnittstelle testen" Click="ClickTestInterface">
+                        <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="&#xF142;"/>
+                    </Button>
                     <StackPanel Grid.Row="1" DataContext="{Binding SelectedInterface}" Orientation="Vertical" Margin="10 5">
                         <TextBlock Text="{Binding Name}" />
                         <TextBlock Text="{Binding Description}" FontSize="10" Foreground="Gray" />
