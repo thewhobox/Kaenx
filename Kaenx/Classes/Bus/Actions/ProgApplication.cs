@@ -4,9 +4,7 @@ using Kaenx.Classes.Helper;
 using Kaenx.Classes.Project;
 using Kaenx.DataContext.Catalog;
 using Kaenx.DataContext.Project;
-using Kaenx.Konnect;
 using Kaenx.Konnect.Addresses;
-using Kaenx.Konnect.Builders;
 using Kaenx.Konnect.Classes;
 using Kaenx.Konnect.Connections;
 using Serilog;
@@ -16,7 +14,6 @@ using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Linq.Expressions;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -31,6 +28,7 @@ namespace Kaenx.Classes.Bus.Actions
         private ProgAppType _type;
         private int _progress;
         private bool _progressIsIndeterminate;
+        private bool _alreadyFinished = false;
         private string _todoText;
         private CancellationToken _token;
         private List<string> addedGroups;
@@ -42,12 +40,25 @@ namespace Kaenx.Classes.Bus.Actions
         private Dictionary<string, AppSegmentViewModel> dataSegs = new Dictionary<string, AppSegmentViewModel>();
         private Dictionary<string, byte[]> dataMems = new Dictionary<string, byte[]>();
 
-        public string Type { get; } = "Applikation";
+        public string Type { get; set; }
         public LineDevice Device { get; set; }
         public int ProgressValue { get { return _progress; } set { _progress = value; Changed("ProgressValue"); } }
         public bool ProgressIsIndeterminate { get { return _progressIsIndeterminate; } set { _progressIsIndeterminate = value; Changed("ProgressIsIndeterminate"); } }
         public string TodoText { get => _todoText; set { _todoText = value; Changed("TodoText"); } }
 
+        private ProcedureTypes _procedureType = ProcedureTypes.Load;
+        public ProcedureTypes ProcedureType
+        {
+            get { return _procedureType; }
+            set
+            {
+                _procedureType = value;
+                Type = _procedureType == ProcedureTypes.Load ? "Applikation" : "Entladen";
+            }
+        }
+
+
+        public UnloadHelper Helper;
         public IKnxConnection Connection { get; set; }
         private ApplicationViewModel app;
 
@@ -72,163 +83,205 @@ namespace Kaenx.Classes.Bus.Actions
         private async void Start()
         {
             dev = new BusDevice(Device.LineName, Connection);
-            TodoText = "Applikation schreiben";
+            TodoText = ProcedureType == ProcedureTypes.Load ? "Applikation schreiben" : "Gerät entladen";
 
 
-            CatalogContext _context = new CatalogContext();
-            AppAdditional adds = _context.AppAdditionals.Single(a => a.Id == Device.ApplicationId);
-            app = _context.Applications.Single(a => a.Id == Device.ApplicationId);
-
-            XElement temp;
-            XElement procedure = null;
-
-            switch (app.LoadProcedure)
+            if (ProcedureType == ProcedureTypes.Load || (Helper != null && (Helper.UnloadApplication || Helper.UnloadBoth)))
             {
-                case LoadProcedureTypes.Unknown:
-                    TodoText = "LadeProzedur ist unbekannt";
-                    Finished?.Invoke(this, null);
-                    break;
+                CatalogContext _context = new CatalogContext();
+                AppAdditional adds = _context.AppAdditionals.Single(a => a.Id == Device.ApplicationId);
+                app = _context.Applications.Single(a => a.Id == Device.ApplicationId);
 
-                case LoadProcedureTypes.Product:
-                    temp = XDocument.Parse(Encoding.UTF8.GetString(adds.LoadProcedures)).Root;
-                    procedure = temp.Descendants(XName.Get("LoadProcedure", temp.Name.NamespaceName)).First();
-                    break;
-
-                case LoadProcedureTypes.Default:
-                    temp = await GetKnxMaster();
-                    temp = temp.Descendants(XName.Get("MaskVersion", temp.Name.NamespaceName)).Single(m => m.Attribute("Id").Value == app.Mask);
-                    procedure = temp.Descendants(XName.Get("Procedure", temp.Name.NamespaceName)).First(m => m.Attribute("ProcedureType").Value == "Load"); //TODO beachte ob komplett, minimal, etc
-                    break;
-
-                case LoadProcedureTypes.Merge:
-                    XElement temp2 = XDocument.Parse(Encoding.UTF8.GetString(adds.LoadProcedures)).Root;
-                    temp = await GetKnxMaster();
-                    temp = temp.Descendants(XName.Get("MaskVersion", temp.Name.NamespaceName)).Single(m => m.Attribute("Id").Value == app.Mask);
-                    temp = temp.Descendants(XName.Get("Procedure", temp.Name.NamespaceName)).First(m => m.Attribute("ProcedureType").Value == "Load"); //TODO beachte ob komplett, minimal, etc
-
-                    IEnumerable<XElement> merges = temp2.Descendants(XName.Get("LoadProcedure", temp.Name.NamespaceName));
-
-                    while (temp.Descendants(XName.Get("LdCtrlMerge", temp.Name.NamespaceName)).Count() > 0)
-                    {
-                        XElement merge = temp.Descendants(XName.Get("LdCtrlMerge", temp.Name.NamespaceName)).First();
-                        if (!merges.Any(m => m.Attribute("MergeId").Value == merge.Attribute("MergeId").Value))
-                        {
-                            merge.Remove();
-                            continue;
-                        }
-
-                        XElement corres = merges.Single(m => m.Attribute("MergeId").Value == merge.Attribute("MergeId").Value);
-                        merge.PreviousNode.AddAfterSelf(corres.Elements());
-                        merge.Remove();
-
-                    }
-                    procedure = temp;
-                    break;
-            }
-
-
-
-            double stepSize = 100.0 / procedure.Elements().Count();
-            double currentProg = 0;
-            Debug.WriteLine("StepSize: " + stepSize + " - " + procedure.Elements().Count());
-
-
-            try
-            {
-
-                foreach (XElement ctrl in procedure.Elements())
+                XElement temp;
+                XElement procedure = null;
+                string procedureType = "Load";
+                if (ProcedureType == ProcedureTypes.Unload)
                 {
-                    if (_token.IsCancellationRequested)
-                        return;
+                    app.LoadProcedure = LoadProcedureTypes.Default;
+                    procedureType = "Unload";
+                }
 
-                    currentProg += stepSize;
-                    ProgressValue = (int)currentProg;
+                switch (app.LoadProcedure)
+                {
+                    case LoadProcedureTypes.Unknown:
+                        TodoText = "LadeProzedur ist unbekannt";
+                        Finished?.Invoke(this, null);
+                        break;
 
-                    Debug.WriteLine(ctrl.Name.LocalName);
-                    switch (ctrl.Name.LocalName)
-                    {
-                        case "LdCtrlConnect":
-                            await dev.Connect();
-                            break;
+                    case LoadProcedureTypes.Product:
+                        temp = XDocument.Parse(Encoding.UTF8.GetString(adds.LoadProcedures)).Root;
+                        procedure = temp.Descendants(XName.Get("LoadProcedure", temp.Name.NamespaceName)).First();
+                        break;
 
-                        case "LdCtrlDisconnect":
-                            dev.Disconnect();
-                            break;
+                    case LoadProcedureTypes.Default:
+                        temp = await GetKnxMaster();
+                        temp = temp.Descendants(XName.Get("MaskVersion", temp.Name.NamespaceName)).Single(m => m.Attribute("Id").Value == app.Mask);
+                        procedure = temp.Descendants(XName.Get("Procedure", temp.Name.NamespaceName)).First(m => m.Attribute("ProcedureType").Value == procedureType); //TODO beachte ob komplett, minimal, etc
+                        break;
 
-                        case "LdCtrlRestart":
-                            dev.Restart();
-                            break;
+                    case LoadProcedureTypes.Merge:
+                        XElement temp2 = XDocument.Parse(Encoding.UTF8.GetString(adds.LoadProcedures)).Root;
+                        temp = await GetKnxMaster();
+                        temp = temp.Descendants(XName.Get("MaskVersion", temp.Name.NamespaceName)).Single(m => m.Attribute("Id").Value == app.Mask);
+                        temp = temp.Descendants(XName.Get("Procedure", temp.Name.NamespaceName)).First(m => m.Attribute("ProcedureType").Value == procedureType); //TODO beachte ob komplett, minimal, etc
 
-                        case "LdCtrlCompareProp":
-                            int obj = int.Parse(ctrl.Attribute("ObjIdx").Value);
-                            int pid = int.Parse(ctrl.Attribute("PropId").Value);
-                            byte[] prop = await dev.PropertyRead(Convert.ToByte(obj), Convert.ToByte(pid));
-                            string dataCP = ctrl.Attribute("InlineData").Value;
+                        IEnumerable<XElement> merges = temp2.Descendants(XName.Get("LoadProcedure", temp.Name.NamespaceName));
 
-                            if (!dataCP.StartsWith(BitConverter.ToString(prop).Replace("-", "")))
+                        while (temp.Descendants(XName.Get("LdCtrlMerge", temp.Name.NamespaceName)).Count() > 0)
+                        {
+                            XElement merge = temp.Descendants(XName.Get("LdCtrlMerge", temp.Name.NamespaceName)).First();
+                            if (!merges.Any(m => m.Attribute("MergeId").Value == merge.Attribute("MergeId").Value))
                             {
-                                TodoText = "Fehler beim schreiben! PAx01";
-                                dev.Disconnect();
-                                Finished?.Invoke(this, null);
-                                return;
+                                merge.Remove();
+                                continue;
                             }
-                            break;
 
-                        case "LdCtrlUnload":
-                        case "LdCtrlLoad":
-                        case "LdCtrlLoadCompleted":
-                            await LsmState(ctrl);
-                            break;
+                            XElement corres = merges.Single(m => m.Attribute("MergeId").Value == merge.Attribute("MergeId").Value);
+                            merge.PreviousNode.AddAfterSelf(corres.Elements());
+                            merge.Remove();
 
-                        case "LdCtrlTaskSegment":
-                            await AllocSegment(ctrl, 2);
-                            break;
+                        }
+                        procedure = temp;
+                        break;
+                }
 
-                        case "LdCtrlAbsSegment":
-                            await WriteAbsSegment(ctrl, adds);
-                            break;
 
-                        case "LdCtrlRelSegment":
-                            await AllocRelSegment(adds, ctrl);
-                            // 03_05_02 - Seite 116
-                            break;
 
-                        case "LdCtrlWriteProp":
-                            //nicht ausgereift
-                            byte[] data = new byte[2];
-                            uint num = uint.Parse(ctrl.Attribute("InlineData").Value, System.Globalization.NumberStyles.AllowHexSpecifier);
-                            byte[] floatVals = BitConverter.GetBytes(num);
-                            await dev.PropertyWrite(Convert.ToByte(ctrl.Attribute("ObjIdx").Value), Convert.ToByte(ctrl.Attribute("PropId").Value), data);
-                            break;
+                double stepSize = 100.0 / procedure.Elements().Count();
+                double currentProg = 0;
+                Debug.WriteLine("StepSize: " + stepSize + " - " + procedure.Elements().Count());
 
-                        case "LdCtrlWriteRelMem":
-                            break;
 
-                        case "LdCtrlDelay":
-                            int ms = int.Parse(ctrl.Attribute("MilliSeconds").Value);
-                            await Task.Delay(ms);
-                            break;
+                try
+                {
 
-                        case "LdCtrlWriteMem":
-                            break;
+                    foreach (XElement ctrl in procedure.Elements())
+                    {
+                        if (_token.IsCancellationRequested)
+                            return;
 
-                        default:
-                            Debug.WriteLine("Unbekanntes Element: " + ctrl.Name.LocalName);
-                            break;
+                        currentProg += stepSize;
+                        ProgressValue = (int)currentProg;
+
+                        Debug.WriteLine(ctrl.Name.LocalName);
+                        switch (ctrl.Name.LocalName)
+                        {
+                            case "LdCtrlConnect":
+                                await dev.Connect();
+                                break;
+
+                            case "LdCtrlDisconnect":
+                                dev.Disconnect();
+                                break;
+
+                            case "LdCtrlRestart":
+                                await dev.Restart();
+                                break;
+
+                            case "LdCtrlCompareProp":
+                                int obj = int.Parse(ctrl.Attribute("ObjIdx").Value);
+                                int pid = int.Parse(ctrl.Attribute("PropId").Value);
+                                byte[] prop = await dev.PropertyRead(Convert.ToByte(obj), Convert.ToByte(pid));
+                                string dataCP = ctrl.Attribute("InlineData").Value;
+
+                                if (!dataCP.StartsWith(BitConverter.ToString(prop).Replace("-", "")))
+                                {
+                                    TodoText = "Fehler beim schreiben! PAx01";
+                                    dev.Disconnect();
+                                    if (!_alreadyFinished)
+                                    {
+                                        _alreadyFinished = true;
+                                        Finished?.Invoke(this, null);
+                                    }
+                                    return;
+                                }
+                                break;
+
+                            case "LdCtrlUnload":
+                            case "LdCtrlLoad":
+                            case "LdCtrlLoadCompleted":
+                                await LsmState(ctrl);
+                                break;
+
+                            case "LdCtrlTaskSegment":
+                                await AllocSegment(ctrl, 2);
+                                break;
+
+                            case "LdCtrlAbsSegment":
+                                await WriteAbsSegment(ctrl, adds);
+                                break;
+
+                            case "LdCtrlRelSegment":
+                                await AllocRelSegment(adds, ctrl);
+                                // 03_05_02 - Seite 116
+                                break;
+
+                            case "LdCtrlWriteProp":
+                                //nicht ausgereift
+                                byte[] data = new byte[2];
+                                uint num = uint.Parse(ctrl.Attribute("InlineData").Value, System.Globalization.NumberStyles.AllowHexSpecifier);
+                                byte[] floatVals = BitConverter.GetBytes(num);
+                                await dev.PropertyWrite(Convert.ToByte(ctrl.Attribute("ObjIdx").Value), Convert.ToByte(ctrl.Attribute("PropId").Value), data);
+                                break;
+
+                            case "LdCtrlWriteRelMem":
+                                break;
+
+                            case "LdCtrlDelay":
+                                int ms = int.Parse(ctrl.Attribute("MilliSeconds").Value);
+                                await Task.Delay(ms);
+                                break;
+
+                            case "LdCtrlWriteMem":
+                                await WriteMemory(adds, ctrl);
+                                break;
+
+                            default:
+                                Debug.WriteLine("Unbekanntes Element: " + ctrl.Name.LocalName);
+                                break;
+                        }
                     }
                 }
-            }catch(OperationCanceledException ex)
-            {
-                TodoText = "Gerät antwortet nicht";
-                ProgressValue = 100;
-                Finished?.Invoke(this, null);
+                catch (OperationCanceledException ex)
+                {
+                    TodoText = "Gerät antwortet nicht";
+                    ProgressValue = 100;
+                    if (!_alreadyFinished)
+                    {
+                        _alreadyFinished = true;
+                        Finished?.Invoke(this, null);
+                    }
+                }
             }
 
-            if (ProgressValue == 100) return;
+
+
+            if(Helper != null && (Helper.UnloadAddress || Helper.UnloadBoth))
+            {
+                await dev.Connect();
+                string mask = await dev.DeviceDescriptorRead();
+                mask = "MV-" + mask;
+                await dev.PropertyWrite(mask, "ProgrammingMode", new byte[] { 0x01 });
+                dev.Disconnect();
+                BusCommon comm = new BusCommon(Connection);
+                comm.IndividualAddressWrite(UnicastAddress.FromString("15.15.255"));
+                await Task.Delay(200);
+                BusDevice dev2 = new BusDevice("15.15.255", Connection);
+                await dev2.Connect();
+                await dev2.Restart();
+                dev2.Disconnect();
+            }
+
+
+
             TodoText = "Abgeschlossen";
             ProgressValue = 100;
 
-            Finished?.Invoke(this, null);
+            if (!_alreadyFinished)
+            {
+                _alreadyFinished = true;
+                Finished?.Invoke(this, null);
+            }
         }
 
 
@@ -266,6 +319,54 @@ namespace Kaenx.Classes.Bus.Actions
                     //TODO später
                     break;
             }
+        }
+
+
+        private async Task WriteMemory(AppAdditional adds, XElement ctrl)
+        {
+            if (dataMems.Count == 0)
+            {
+                TodoText = "Berechne Speicher...";
+                GenerateApplication(adds);
+            }
+
+
+            if (dataAssoTable.Count == 0 || dataGroupTable.Count == 0)
+            {
+                TodoText = "Berechne Tabellen...";
+                GenerateAssoTable();
+                GenerateGroupTable();
+                await Task.Delay(100);
+
+                for (int i = 0; i < dataGroupTable.Count; i++)
+                {
+                    dataMems[app.Table_Group][i + app.Table_Group_Offset] = dataGroupTable[i];
+                }
+                for (int i = 0; i < dataAssoTable.Count; i++)
+                {
+                    dataMems[app.Table_Assosiations][i + app.Table_Assosiations_Offset] = dataAssoTable[i];
+                }
+            }
+
+
+            byte[] value;
+            int address = int.Parse(ctrl.Attribute("Address").Value);
+
+            if (ctrl.Attribute("InlineData") != null)
+            {
+                value = StringToByteArray(ctrl.Attribute("InlineData").Value);
+            }
+            else
+            {
+                int size = int.Parse(ctrl.Attribute("Size").Value);
+                value = new byte[size];
+                for (int i = 0; i < size; i++)
+                {
+                    value[i] = dataMems.Values.ElementAt(0)[address + i];
+                }
+            }
+
+            await dev.MemoryWriteSync(address, value);
         }
 
         private async Task WriteApplication(AppAdditional adds)
@@ -366,7 +467,7 @@ namespace Kaenx.Classes.Bus.Actions
                             //xpara.Value = para.Value;
                             paras.Add(xpara);
                         }
-                        else if(AppParas.Values.Where(p => p.Offset == xpara.Offset && p.Value != xpara.Value).Count() == 0)
+                        else if (AppParas.Values.Where(p => p.Offset == xpara.Offset && p.Value != xpara.Value).Count() == 0)
                         {
                             paras.Add(xpara);
                         }
@@ -445,7 +546,7 @@ namespace Kaenx.Classes.Bus.Actions
                     string[] appid = Device.ApplicationId.Split('-');
                     int version = int.Parse(appid[3], System.Globalization.NumberStyles.HexNumber);
                     int appnr = int.Parse(appid[2], System.Globalization.NumberStyles.HexNumber);
-                    int manu = int.Parse(appid[1].Substring(0,4), System.Globalization.NumberStyles.HexNumber);
+                    int manu = int.Parse(appid[1].Substring(0, 4), System.Globalization.NumberStyles.HexNumber);
 
                     tempBytes = BitConverter.GetBytes(Convert.ToUInt16(manu));
                     data.AddRange(tempBytes.Reverse());
@@ -547,7 +648,8 @@ namespace Kaenx.Classes.Bus.Actions
                 data[0] = Convert.ToByte(state);
                 await dev.PropertyWrite(BitConverter.GetBytes(lsmIdx)[0], 5, data);
                 data = null;
-            } else
+            }
+            else
             {
                 int endU = (lsmIdx << 4) | state;
                 data[0] = Convert.ToByte(endU);
@@ -557,11 +659,13 @@ namespace Kaenx.Classes.Bus.Actions
             }
 
             Dictionary<int, byte> map = new Dictionary<int, byte>() { { 4, 0x00 }, { 3, 0x02 }, { 2, 0x01 }, { 1, 0x02 } };
-            if(data != null && data[0] != map[(int)state]){
-                if(counter > 2)
+            if (data != null && data[0] != map[(int)state])
+            {
+                if (counter > 2)
                 {
                     Debug.WriteLine("Fehlgeschlagen!");
-                } else
+                }
+                else
                     await LsmState(ctrl, counter + 1);
             }
         }
@@ -608,7 +712,7 @@ namespace Kaenx.Classes.Bus.Actions
                 }
             }
 
-            foreach(KeyValuePair<byte, List<byte>> val in Table.OrderBy(kpv => kpv.Key))
+            foreach (KeyValuePair<byte, List<byte>> val in Table.OrderBy(kpv => kpv.Key))
             {
                 val.Value.Sort();
                 foreach (byte index in val.Value)
@@ -641,7 +745,7 @@ namespace Kaenx.Classes.Bus.Actions
                 if (!dataSegs.ContainsKey(para.SegmentId))
                 {
                     AppSegmentViewModel seg = _context.AppSegments.Single(a => a.Id == para.SegmentId);
-                    if(seg.Data == null)
+                    if (seg.Data == null)
                     {
                         dataMems[para.SegmentId] = new byte[seg.Size];
                     }
@@ -649,7 +753,7 @@ namespace Kaenx.Classes.Bus.Actions
                     {
                         dataMems[para.SegmentId] = Convert.FromBase64String(seg.Data);
                     }
-                    
+
                     dataSegs[para.SegmentId] = seg;
                 }
 
@@ -745,6 +849,21 @@ namespace Kaenx.Classes.Bus.Actions
         }
 
 
+
+        private static byte[] StringToByteArray(string str)
+        {
+            Dictionary<string, byte> hexindex = new Dictionary<string, byte>();
+            for (int i = 0; i <= 255; i++)
+                hexindex.Add(i.ToString("X2"), (byte)i);
+
+            List<byte> hexres = new List<byte>();
+            for (int i = 0; i < str.Length; i += 2)
+                hexres.Add(hexindex[str.Substring(i, 2)]);
+
+            return hexres.ToArray();
+        }
+
+
         private void Changed(string name)
         {
             try
@@ -781,7 +900,7 @@ namespace Kaenx.Classes.Bus.Actions
         }
 
 
-       private enum LoadStateMachineState
+        private enum LoadStateMachineState
         {
             Undefined,
             Loading,
@@ -796,5 +915,12 @@ namespace Kaenx.Classes.Bus.Actions
             Partiell, // 1
             Minimal // 2
         }
+
+        public enum ProcedureTypes
+        {
+            Load,
+            Unload
+        }
+
     }
 }

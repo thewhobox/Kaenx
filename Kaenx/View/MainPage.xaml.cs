@@ -2,6 +2,8 @@
 using Kaenx.Classes.Project;
 using Kaenx.DataContext.Local;
 using Kaenx.Konnect;
+using Kaenx.Konnect.Classes;
+using Kaenx.Konnect.Connections;
 using Kaenx.View.Controls.Dialogs;
 using Microsoft.AppCenter.Analytics;
 using Microsoft.AppCenter.Crashes;
@@ -12,6 +14,7 @@ using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Net;
 using System.Runtime.InteropServices.WindowsRuntime;
 using System.Threading.Tasks;
 using Windows.ApplicationModel;
@@ -431,7 +434,6 @@ namespace Kaenx.View
 
             Kaenx.Konnect.Connections.KnxUsbTunneling usb = new Konnect.Connections.KnxUsbTunneling(devices[0].Id);
             await usb.Connect();
-
         }
 
         private void Dev_InputReportReceived(HidDevice sender, HidInputReportReceivedEventArgs args)

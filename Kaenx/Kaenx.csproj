@@ -186,6 +186,7 @@
     <Compile Include="Classes\TemplateSelectors\ControlParamsSelector.cs" />
     <Compile Include="Classes\TemplateSelectors\ControlsParamTypesSelector.cs" />
     <Compile Include="Classes\TemplateSelectors\StructureSelector.cs" />
+    <Compile Include="Classes\UnloadHelper.cs" />
     <Compile Include="MVVM\StoreItem.cs" />
     <Compile Include="View\Controls\Bus\BNewDevices.xaml.cs">
       <DependentUpon>BNewDevices.xaml</DependentUpon>

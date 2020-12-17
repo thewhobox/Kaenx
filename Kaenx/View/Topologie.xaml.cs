@@ -38,6 +38,7 @@ namespace Kaenx.View
         private CatalogContext _context = new CatalogContext();
         private ResourceLoader loader = ResourceLoader.GetForCurrentView("Topologie");
         private LineDevice SelectedDevice;
+        private MenuFlyout _currentFlyout = null;
 
         public Topologie()
         {
@@ -435,15 +436,15 @@ namespace Kaenx.View
 
         private void MenuFlyout_Opening(object sender, object e)
         {
-            MenuFlyout menu = (MenuFlyout)sender;
+            _currentFlyout = (MenuFlyout)sender;
 
-            TopologieBase line = (TopologieBase)((TreeViewItem)menu.Target).DataContext;
+            TopologieBase line = (TopologieBase)((TreeViewItem)_currentFlyout.Target).DataContext;
 
-            MenuFlyoutItemBase mAddL = menu.Items.Single(i => i.Name == "MFI_AddLine");
-            MenuFlyoutItemBase mAddD = menu.Items.Single(i => i.Name == "MFI_AddDevice");
-            MenuFlyoutItemBase mProg = menu.Items.Single(i => i.Name == "MFI_Prog");
-            MenuFlyoutItemBase mPara = menu.Items.Single(i => i.Name == "MFI_Para");
-            MenuFlyoutSubItem mActions = (MenuFlyoutSubItem)menu.Items.Single(i => i.Name == "MFI_Actions");
+            MenuFlyoutItemBase mAddL = _currentFlyout.Items.Single(i => i.Name == "MFI_AddLine");
+            MenuFlyoutItemBase mAddD = _currentFlyout.Items.Single(i => i.Name == "MFI_AddDevice");
+            MenuFlyoutItemBase mProg = _currentFlyout.Items.Single(i => i.Name == "MFI_Prog");
+            MenuFlyoutItemBase mPara = _currentFlyout.Items.Single(i => i.Name == "MFI_Para");
+            MenuFlyoutSubItem mActions = (MenuFlyoutSubItem)_currentFlyout.Items.Single(i => i.Name == "MFI_Actions");
             MenuFlyoutItemBase mToggle = mActions.Items.Single(i => i.Name == "MFI_Toggle");
             MenuFlyoutItemBase mAddr = mActions.Items.Single(i => i.Name == "MFI_Addr");
             MenuFlyoutItem mProgS = (MenuFlyoutItem)(mProg as MenuFlyoutSubItem).Items.Single(i => i.Name == "MFI_ProgS");
@@ -710,6 +711,30 @@ namespace Kaenx.View
             {
                 appWindow = null;
             };
+        }
+
+        private void MenuFlyoutItem_Loading(FrameworkElement sender, object args)
+        {
+            MenuFlyoutItem item = sender as MenuFlyoutItem;
+            LineDevice dev = (_currentFlyout.Target as TreeViewItem).DataContext as LineDevice;
+
+            UnloadHelper helper = new UnloadHelper();
+            helper.SerialVisible = dev.SerialText != "" ? Visibility.Visible : Visibility.Collapsed;
+
+            item.DataContext = helper;
+        }
+
+        private void Button_Click(object sender, RoutedEventArgs e)
+        {
+            UnloadHelper helper = (sender as Button).DataContext as UnloadHelper;
+            LineDevice dev = (_currentFlyout.Target as TreeViewItem).DataContext as LineDevice;
+            ProgApplication action = new ProgApplication(ProgApplication.ProgAppType.Komplett);
+            action.Device = dev;
+            action.ProcedureType = ProgApplication.ProcedureTypes.Unload;
+            action.Helper = helper;
+
+            BusConnection.Instance.AddAction(action);
+            _currentFlyout.Hide();
         }
     }
 }

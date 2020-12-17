@@ -43,7 +43,7 @@ namespace Kaenx.Classes.Bus
         public ObservableCollection<IKnxInterface> InterfaceList { get; } = new ObservableCollection<IKnxInterface>();
         public Queue<IBusAction> busActions { get; set; } = new Queue<IBusAction>();
         public ObservableCollection<IBusAction> History { get; set; } = new ObservableCollection<IBusAction>();
-
+        public int queueCount { get { return busActions.Count; } }
         public List<IBusAction> actions { get { return busActions.ToList(); } }
 
 
@@ -240,6 +240,7 @@ namespace Kaenx.Classes.Bus
                 if (action == null) continue;
                 CurrentAction = action;
                 Changed("actions");
+                Changed("queueCount");
                 _cancelIsUser = false;
                 ExecuteAction();
             }
@@ -323,6 +324,7 @@ namespace Kaenx.Classes.Bus
         {
             busActions.Enqueue(action);
             Changed("actions");
+            Changed("queueCount");
         }
 
 

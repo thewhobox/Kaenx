@@ -144,7 +144,7 @@
                     <RadioButton IsEnabled="{Binding IsEnabled}" IsChecked="{Binding Selected1, Mode=TwoWay}" Tag="{Binding Option1.Value}"  Content="{Binding Option1.Text}" GroupName="{Binding Id}" />
                     <RadioButton IsEnabled="{Binding IsEnabled}" IsChecked="{Binding Selected2, Mode=TwoWay}" Content="{Binding Option2.Text}" GroupName="{Binding Id}" />
                 </StackPanel>
-                <TextBlock Grid.Column="2" Text="{Binding Suffix}" Margin="10 0" VerticalAlignment="Center" HorizontalAlignment="Left" />
+                <TextBlock Grid.Column="2" Text="{Binding SuffixText}" Margin="10 0" VerticalAlignment="Center" HorizontalAlignment="Left" />
             </Grid>
         </DataTemplate>
         <DataTemplate x:Key="TypeCheckBox">
