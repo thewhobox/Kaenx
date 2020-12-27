@@ -9,6 +9,7 @@ using Kaenx.Konnect.Builders;
 using Kaenx.Konnect.Connections;
 using Kaenx.Konnect.Interfaces;
 using Kaenx.Konnect.Messages.Response;
+using Kaenx.View.Controls.Dialogs;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -19,6 +20,8 @@ using System.Runtime.InteropServices.WindowsRuntime;
 using System.Timers;
 using Windows.Foundation;
 using Windows.Foundation.Collections;
+using Windows.UI.Core;
+using Windows.UI.ViewManagement;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Controls.Primitives;
@@ -37,226 +40,53 @@ namespace Kaenx.View
     /// </summary>
     public sealed partial class Bus : Page
     {
-        public ObservableCollection<IBusData> ReadList { get; } = new ObservableCollection<IBusData>();
-        public ObservableCollection<MonitorTelegram> TelegramList { get; } = new ObservableCollection<MonitorTelegram>();
 
-        private Timer _statusTimer = new Timer();
-        private IKnxConnection _conn = null;
 
         public Bus()
         {
             this.InitializeComponent();
-            GridReads.DataContext = ReadList;
-            GridBusMonitor.DataContext = TelegramList;
-
-            _statusTimer.Interval = TimeSpan.FromSeconds(30).TotalMilliseconds;
-            _statusTimer.Elapsed += _statusTimer_Elapsed;
+            InBtnRemote.DataContext = RemoteConnection.Instance;
+            BlockStateRemote.DataContext = RemoteConnection.Instance;
         }
-
-        private void _statusTimer_Elapsed(object sender, ElapsedEventArgs e)
+        protected override void OnNavigatedTo(NavigationEventArgs e)
         {
-            _conn.SendStatusReq();
-        }
-
-        private void ReadInfo(object sender, RoutedEventArgs e)
-        {
-            DeviceInfo action = new DeviceInfo();
-
-            action.Device = GetDevice();
-            if (action.Device == null) return;
-
-            action.Finished += Action_Finished;
-            BusConnection.Instance.AddAction(action);
-        }
-
-        private void ReadConf(object sender, RoutedEventArgs e)
-        {
-            DeviceConfig action = new DeviceConfig();
-
-            action.Device = GetDevice();
-            if (action.Device == null) return;
-
-            action.Finished += Action_Finished;
-            BusConnection.Instance.AddAction(action);
-        }
-
-        public void AddReadData(IBusData info)
-        {
-            _ = this.Dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Normal, () =>
+            base.OnNavigatedTo(e);
+            if (e.Parameter is string && e.Parameter.ToString() == "main")
             {
-                ReadList.Insert(0, info);
-            });
+                this.DataContext = BusConnection.Instance;
+                var currentView = SystemNavigationManager.GetForCurrentView();
+                currentView.AppViewBackButtonVisibility = AppViewBackButtonVisibility.Visible;
+                currentView.BackRequested += CurrentView_BackRequested;
+                ApplicationView.GetForCurrentView().Title = "Bus";
+                ViewHelper.Instance.OnShowNotification += Instance_OnShowNotification;
+            }
         }
 
-        private void Action_Finished(IBusAction action, object data)
+        protected override void OnNavigatedFrom(NavigationEventArgs e)
         {
-            _ = this.Dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Normal, () =>
+            base.OnNavigatedFrom(e);
+            var currentView = SystemNavigationManager.GetForCurrentView();
+            currentView.BackRequested -= CurrentView_BackRequested;
+            ViewHelper.Instance.OnShowNotification -= Instance_OnShowNotification;
+        }
+
+        private void Instance_OnShowNotification(string view, string text, int duration, ViewHelper.MessageType type)
+        {
+            if(view == "main")
             {
-                IBusData d = (IBusData)data;
-                d.Device = action.Device;
-                ReadList.Insert(0, d);
-            });
+                Notify.Show(text, duration);
+            }
+        }
+
+        private void CurrentView_BackRequested(object sender, BackRequestedEventArgs e)
+        {
+            e.Handled = true;
+            App.Navigate(typeof(MainPage));
         }
 
         private void ClickCancel(object sender, RoutedEventArgs e)
         {
             BusConnection.Instance.CancelCurrent();
-        }
-
-        private void Monitor_Toggle(object sender, RoutedEventArgs e)
-        {
-            if(_conn == null)
-            {
-                if(BusConnection.Instance.SelectedInterface == null)
-                {
-                    ViewHelper.Instance.ShowNotification("main", "Bitte wählen Sie erst eine Schnittstelle aus", 3000, ViewHelper.MessageType.Error);
-                    return;
-                }
-
-                _conn = KnxInterfaceHelper.GetConnection(BusConnection.Instance.SelectedInterface);
-                _conn.OnTunnelRequest += _conn_OnTunnelAction;
-                _conn.OnTunnelResponse += _conn_OnTunnelAction;
-                _conn.Connect();
-                MonitorTelegram tel = new MonitorTelegram();
-                tel.From = Konnect.Addresses.UnicastAddress.FromString("0.0.0");
-                tel.To = Konnect.Addresses.UnicastAddress.FromString("0.0.0");
-                tel.Time = DateTime.Now;
-                tel.Type = Konnect.Parser.ApciTypes.Connect;
-                TelegramList.Insert(0, tel);
-                (BtnMonitorToggle.Content as SymbolIcon).Symbol = Symbol.Pause;
-                _statusTimer.Start();
-            } else
-            {
-                _statusTimer.Stop();
-                _conn.Disconnect();
-                _conn = null;
-                MonitorTelegram tel = new MonitorTelegram();
-                tel.From = Konnect.Addresses.UnicastAddress.FromString("0.0.0");
-                tel.To = Konnect.Addresses.UnicastAddress.FromString("0.0.0");
-                tel.Time = DateTime.Now;
-                tel.Type = Konnect.Parser.ApciTypes.Disconnect;
-                TelegramList.Insert(0, tel);
-                (BtnMonitorToggle.Content as SymbolIcon).Symbol = Symbol.Play;
-            }
-        }
-
-        private void _conn_OnTunnelAction(Konnect.Messages.IMessage response)
-        {
-            //Todo IMessageResponse Addr source and destination
-            MonitorTelegram tel = new MonitorTelegram();
-            //tel.From = response.SourceAddress;
-            //tel.To = (Konnect.Addresses.IKnxAddress)response.DestinationAddress;
-            tel.Time = DateTime.Now;
-            tel.Data = "0x" + BitConverter.ToString(response.Raw).Replace("-", "");
-            tel.Type = response.ApciType;
-            _=App._dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Normal, () =>
-            {
-                TelegramList.Insert(0, tel);
-            });
-        }
-
-        private void GridReads_LoadingRowDetails(object sender, Microsoft.Toolkit.Uwp.UI.Controls.DataGridRowDetailsEventArgs e)
-        {
-            switch (e.Row.DataContext)
-            {
-                case DeviceInfoData info:
-                    e.Row.DetailsTemplate = Resources["RowDetailsInfoTemplate"] as DataTemplate;
-                    break;
-
-                case DeviceConfigData conf:
-                    e.Row.DetailsTemplate = Resources["RowDetailsConfigTemplate"] as DataTemplate;
-                    break;
-
-                case ErrorData err:
-                    e.Row.DetailsTemplate = Resources["RowDetailsErrorTemplate"] as DataTemplate;
-                    break;
-            }
-        }
-
-        private void ClickOpenConfig(object sender, RoutedEventArgs e)
-        {
-            ViewHelper.Instance.ShowNotification("main", "Nichts passiert");
-        }
-
-        private LineDevice GetDevice()
-        {
-            LineDevice dev = null;
-
-
-            bool valid = Microsoft.Toolkit.Uwp.UI.Extensions.TextBoxRegex.GetIsValid(InAddress2);
-
-            if (!valid)
-            {
-                ViewHelper.Instance.ShowNotification("main", "Ungültige Adresse!", 3000, ViewHelper.MessageType.Error);
-                return null;
-            }
-
-            string[] address = InAddress2.Text.Split(".");
-
-            try
-            {
-                Line l = SaveHelper._project.Lines.Single(l => l.Id.ToString() == address[0]);
-                LineMiddle lm = l.Subs.Single(l => l.Id.ToString() == address[1]);
-                LineDevice ld = lm.Subs.Single(l => l.Id.ToString() == address[2]);
-                dev = ld;
-            }
-            catch
-            {
-                ViewHelper.Instance.ShowNotification("main", "Adresse konnte keinem Gerät zugewiesen werden.", 3000, ViewHelper.MessageType.Warning);
-            }
-
-            if (dev == null)
-            {
-                Line dM = new Line { IsInit = true, Id = int.Parse(address[0]) };
-                LineMiddle dL = new LineMiddle { IsInit = true, Id = int.Parse(address[1]), Parent = dM };
-                dev = new LineDevice(true) { Name = "Unbekannt", Id = int.Parse(address[2]), Parent = dL };
-            }
-
-            return dev;
-        }
-
-        private void Monitor_Delete(object sender, RoutedEventArgs e)
-        {
-            TelegramList.Clear();
-        }
-
-        private void ReadMem(object sender, RoutedEventArgs e)
-        {
-            DeviceMem action = new DeviceMem();
-
-            action.Device = GetDevice();
-            if (action.Device == null) return;
-
-            action.Finished += Action_Finished;
-            BusConnection.Instance.AddAction(action);
-        }
-
-        private async void SetTest(object sender, RoutedEventArgs e)
-        {
-            LineDevice ldev = GetDevice();
-            IKnxConnection conn = KnxInterfaceHelper.GetConnection(BusConnection.Instance.SelectedInterface);
-            await conn.Connect();
-            await System.Threading.Tasks.Task.Delay(2000);
-            Konnect.Classes.BusDevice dev = new Konnect.Classes.BusDevice(ldev.LineName, conn);
-            await dev.Connect();
-            await dev.PropertyWrite(0, 21, System.Text.Encoding.UTF8.GetBytes("123"));
-            dev.Disconnect();
-            await System.Threading.Tasks.Task.Delay(200);
-            await conn.Disconnect();
-        }
-
-        private async void SetTest2(object sender, RoutedEventArgs e)
-        {
-            LineDevice ldev = GetDevice();
-            IKnxConnection conn = KnxInterfaceHelper.GetConnection(BusConnection.Instance.SelectedInterface);
-            await conn.Connect();
-            await System.Threading.Tasks.Task.Delay(2000);
-            Konnect.Classes.BusDevice dev = new Konnect.Classes.BusDevice(ldev.LineName, conn);
-            await dev.Connect();
-            string resp = await dev.PropertyRead<string>(0, 21);
-            dev.Disconnect();
-            await System.Threading.Tasks.Task.Delay(200);
-            await conn.Disconnect();
         }
 
         private async void ClickTestInterface(object sender, RoutedEventArgs e)
@@ -283,6 +113,24 @@ namespace Kaenx.View
             ViewHelper.Instance.ShowNotification("main", "Schnittstelle ist erreichbar und hat eine Verbindung zum Bus (" + conn.PhysicalAddress.ToString() + ")", 3000, ViewHelper.MessageType.Error);
             await conn.Disconnect();
             BtnTest.IsEnabled = true;
+        }
+
+        private void ClickRemoteConnect(object sender, RoutedEventArgs e)
+        {
+            DiagRemoteConn diag = new DiagRemoteConn();
+            _ = diag.ShowAsync();
+        }
+
+        private void ClickRemoteIn(object sender, RoutedEventArgs e)
+        {
+            DiagRemoteIn diag = new DiagRemoteIn();
+            _ = diag.ShowAsync();
+        }
+
+        private void ClickRemoteOut(object sender, RoutedEventArgs e)
+        {
+            DiagRemoteOut diag = new DiagRemoteOut();
+            _ = diag.ShowAsync();
         }
     }
 }

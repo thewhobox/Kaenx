@@ -8,6 +8,7 @@ using Kaenx.Konnect.Addresses;
 using Kaenx.Konnect.Classes;
 using Kaenx.Konnect.Connections;
 using Kaenx.Konnect.Interfaces;
+using Kaenx.Konnect.Messages;
 using Kaenx.Konnect.Messages.Response;
 using Kaenx.View.Controls.Dialogs;
 using Microsoft.AppCenter.Analytics;
@@ -50,7 +51,7 @@ namespace Kaenx.View.Controls.Bus
 
         private void Conn_OnTunnelResponse(IMessageResponse response)
         {
-            if (response.ApciType == Konnect.Parser.ApciTypes.PropertyValueResponse)
+            if (response.ApciType == ApciTypes.PropertyValueResponse)
             {
                 byte[] serialb = response.Raw.Skip(4).ToArray();
                 string serial = BitConverter.ToString(serialb).Replace("-", "");
@@ -72,6 +73,7 @@ namespace Kaenx.View.Controls.Bus
         private async void ClickSearch(object sender, RoutedEventArgs e)
         {
             BtnSearch.IsEnabled = false;
+            BtnSearch.Content = "Suche läuft...";
 
             if (conn?.IsConnected == true)
                 await conn.Disconnect();
@@ -107,6 +109,7 @@ namespace Kaenx.View.Controls.Bus
                 ReadInfos();
 
             BtnSearch.IsEnabled = true;
+            BtnSearch.Content = "Suche starten";
 
             Analytics.TrackEvent("Neue Geräte gesucht");
         }

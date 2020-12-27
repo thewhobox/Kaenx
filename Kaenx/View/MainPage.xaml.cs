@@ -129,6 +129,11 @@ namespace Kaenx.View
             Serilog.Log.Information("Einstellungen öffnen");
             App.Navigate(typeof(Settings), "main");
         }
+        private void OpenBus(object sender, RoutedEventArgs e)
+        {
+            Serilog.Log.Information("Bus öffnen");
+            App.Navigate(typeof(Bus), "main");
+        }
 
         private void OpenNewProjekt(object sender, RoutedEventArgs e)
         {

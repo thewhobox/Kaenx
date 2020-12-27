@@ -22,7 +22,7 @@
     <GenerateAppInstallerFile>False</GenerateAppInstallerFile>
     <AppxAutoIncrementPackageRevision>False</AppxAutoIncrementPackageRevision>
     <AppxBundle>Always</AppxBundle>
-    <AppxBundlePlatforms>x86|x64|arm</AppxBundlePlatforms>
+    <AppxBundlePlatforms>x64</AppxBundlePlatforms>
     <AppInstallerUpdateFrequency>0</AppInstallerUpdateFrequency>
     <AppInstallerCheckForUpdateFrequency>OnApplicationRun</AppInstallerCheckForUpdateFrequency>
     <AppxPackageSigningTimestampDigestAlgorithm>SHA256</AppxPackageSigningTimestampDigestAlgorithm>
@@ -30,6 +30,7 @@
     <HoursBetweenUpdateChecks>0</HoursBetweenUpdateChecks>
     <AppxPackageSigningEnabled>True</AppxPackageSigningEnabled>
     <AppxSymbolPackageEnabled>True</AppxSymbolPackageEnabled>
+    <PackageCertificateThumbprint>61ABCCEF27552A16F6AD3643B70BD3645A0C65B9</PackageCertificateThumbprint>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x86'">
     <DebugSymbols>true</DebugSymbols>
@@ -143,6 +144,7 @@
     <Compile Include="Classes\Bus\Data\ErrorData.cs" />
     <Compile Include="Classes\Bus\Data\IBusData.cs" />
     <Compile Include="Classes\Bus\Data\NewDeviceData.cs" />
+    <Compile Include="Classes\Bus\RemoteConnection.cs" />
     <Compile Include="Classes\Converter\ValueCheckBoxConverter.cs" />
     <Compile Include="Classes\DataPointSubType.cs" />
     <Compile Include="Classes\Device.cs" />
@@ -188,6 +190,12 @@
     <Compile Include="Classes\TemplateSelectors\StructureSelector.cs" />
     <Compile Include="Classes\UnloadHelper.cs" />
     <Compile Include="MVVM\StoreItem.cs" />
+    <Compile Include="View\Controls\Bus\BDeviceInfo.xaml.cs">
+      <DependentUpon>BDeviceInfo.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="View\Controls\Bus\BMonitor.xaml.cs">
+      <DependentUpon>BMonitor.xaml</DependentUpon>
+    </Compile>
     <Compile Include="View\Controls\Bus\BNewDevices.xaml.cs">
       <DependentUpon>BNewDevices.xaml</DependentUpon>
     </Compile>
@@ -214,6 +222,15 @@
     </Compile>
     <Compile Include="View\Controls\Dialogs\DiagOpenProj.xaml.cs">
       <DependentUpon>DiagOpenProj.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="View\Controls\Dialogs\DiagRemoteConn.xaml.cs">
+      <DependentUpon>DiagRemoteConn.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="View\Controls\Dialogs\DiagRemoteIn.xaml.cs">
+      <DependentUpon>DiagRemoteIn.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="View\Controls\Dialogs\DiagRemoteOut.xaml.cs">
+      <DependentUpon>DiagRemoteOut.xaml</DependentUpon>
     </Compile>
     <Compile Include="View\Controls\Dialogs\DiagSelectApp.xaml.cs">
       <DependentUpon>DiagSelectApp.xaml</DependentUpon>
@@ -374,6 +391,7 @@
     <Content Include="Data\Logos\house.svg" />
     <Content Include="Data\Logos\small2.svg" />
     <Content Include="Data\Logos\small3.svg" />
+    <None Include="Kaenx_TemporaryKey.pfx" />
     <None Include="Package.StoreAssociation.xml" />
     <Content Include="Properties\Default.rd.xml" />
     <Content Include="Assets\LockScreenLogo.scale-200.png" />
@@ -389,6 +407,14 @@
       <SubType>Designer</SubType>
     </ApplicationDefinition>
     <Page Include="Classes\Controls\ControlUpdate.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="View\Controls\Bus\BDeviceInfo.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="View\Controls\Bus\BMonitor.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -425,6 +451,18 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="View\Controls\Dialogs\DiagOpenProj.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="View\Controls\Dialogs\DiagRemoteConn.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="View\Controls\Dialogs\DiagRemoteIn.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="View\Controls\Dialogs\DiagRemoteOut.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

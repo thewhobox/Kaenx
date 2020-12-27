@@ -16,8 +16,8 @@
             <RowDefinition />
         </Grid.RowDefinitions>
 
-        <StackPanel Orientation="Horizontal">
-            <Button x:Name="BtnSearch" Margin="10 5" Content="Suchen..." Click="ClickSearch" />
+        <StackPanel Orientation="Horizontal" Margin="10">
+            <Button x:Name="BtnSearch" Content="Suche starten" Click="ClickSearch" />
         </StackPanel>
 
         <toolkit:DataGrid x:Name="GridNewDevices" Grid.Row="1" ItemsSource="{Binding DeviceList}" AutoGenerateColumns="False" IsReadOnly="True" SelectionMode="Extended">

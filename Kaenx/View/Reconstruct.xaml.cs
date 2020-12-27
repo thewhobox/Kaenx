@@ -407,6 +407,7 @@ namespace Kaenx.View
             lined.ApplicationId = device.ApplicationId;
             lined.Id = device.Address.DeviceAddress;
             lined.Name = device.DeviceName + "_" + device.ApplicationName;
+            lined.LoadedPA = true;
 
             if(!device.ApplicationName.Contains(" 0x"))
             {
@@ -421,7 +422,7 @@ namespace Kaenx.View
 
         private void _conn_OnTunnelRequest(IMessageRequest response)
         {
-            if(response.ApciType == Konnect.Parser.ApciTypes.Disconnect)
+            if(response.ApciType == Konnect.Messages.ApciTypes.Disconnect)
             {
                 if (Devices.Any(d => d.Address.ToString() == response.SourceAddress.ToString())) return;
 
@@ -990,6 +991,10 @@ namespace Kaenx.View
 
             await GenerateComs(Id2Param);
 
+
+            _currentDevice.LineDevice.LoadedApplication = true;
+            _currentDevice.LineDevice.LoadedGroup = true;
+            _currentDevice.LineDevice.LoadedPA = true;
             //Finish();
         }
 

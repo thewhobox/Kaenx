@@ -96,8 +96,11 @@ namespace Kaenx.Classes.Bus
             Task.Run(async () =>
             {
                 await Task.Delay(3000);
-                SearchForDevices();
+                //SearchForDevices();
             });
+
+            RemoteConnection.Instance.OnRequest += ConnectionOut_OnRequest;
+            RemoteConnection.Instance.OnResponse += Instance_OnResponse;
 
             InterfaceList.CollectionChanged += InterfaceList_CollectionChanged;
 
@@ -105,6 +108,44 @@ namespace Kaenx.Classes.Bus
             foreach(LocalInterface inter in _context.Interfaces)
             {
                 InterfaceList.Add(BusInterfaceHelper.GetInterface(inter));
+            }
+        }
+
+        private void Instance_OnResponse(Konnect.Remote.IRemoteMessage message)
+        {
+            if(message is Konnect.Remote.SearchResponse)
+            {
+                Konnect.Remote.SearchResponse resp = message as Konnect.Remote.SearchResponse;
+
+                foreach(IKnxInterface inter in resp.Interfaces)
+                {
+                    inter.IsRemote = true;
+                    if (!InterfaceList.Any(i => i.Hash == inter.Hash))
+                    {
+                        inter.LastFound = DateTime.Now;
+                        _=App._dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Normal, () =>
+                        {
+                            InterfaceList.Add(inter);
+                        });
+                    }
+                    else
+                    {
+                        IKnxInterface i = InterfaceList.Single(i => i.Hash == inter.Hash);
+                        i.LastFound = DateTime.Now;
+                    }
+                }
+            }
+        }
+
+        private void ConnectionOut_OnRequest(Konnect.Remote.IRemoteMessage message)
+        {
+            if(message is Kaenx.Konnect.Remote.SearchRequest)
+            {
+                Konnect.Remote.SearchResponse resp = new Konnect.Remote.SearchResponse();
+                resp.SequenceNumber = message.SequenceNumber;
+                resp.ChannelId = message.ChannelId;
+                resp.Interfaces = InterfaceList.Where(inter => !inter.IsRemote).ToList();
+                _ = RemoteConnection.Instance.ConnectionOut.Send(resp, false);
             }
         }
 
@@ -122,6 +163,7 @@ namespace Kaenx.Classes.Bus
         }
 
         private void SearchConn_OnSearchResponse(MsgSearchRes response)
+
         {
             if(InterfaceList.Any(i => i.Hash == response.FriendlyName + "#IP#" + response.Endpoint.ToString())) {
                 IKnxInterface inter = InterfaceList.Single(i => i.Hash == response.FriendlyName + "#IP#" + response.Endpoint.ToString());
@@ -130,7 +172,8 @@ namespace Kaenx.Classes.Bus
             else
             {
                 KnxInterfaceIp inter = new KnxInterfaceIp();
-                inter.Endpoint = response.Endpoint;
+                inter.IP = response.Endpoint.Address.ToString();
+                inter.Port = response.Endpoint.Port;
                 inter.Name = response.FriendlyName;
                 inter.LastFound = DateTime.Now;
                 _ = App._dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Normal, () =>
@@ -140,7 +183,7 @@ namespace Kaenx.Classes.Bus
             }
         }
 
-        private void SearchForDevices()
+        private void SearchForDevices() 
         {
             Windows.Storage.ApplicationDataContainer container = Windows.Storage.ApplicationData.Current.LocalSettings;
             string hash = container.Values["lastUsedInterface"]?.ToString();
@@ -158,12 +201,14 @@ namespace Kaenx.Classes.Bus
                     InterfaceList.Remove(inter);
             });
 
-
             MsgSearchReq msg = new MsgSearchReq();
             searchConn.Send(msg, true);
 
 
             SearchForHid();
+
+            if (RemoteConnection.Instance.IsConnected)
+                _=RemoteConnection.Instance.ConnectionOut.Send(new Kaenx.Konnect.Remote.SearchRequest());
         }
 
         private async void SearchForHid()
@@ -269,7 +314,7 @@ namespace Kaenx.Classes.Bus
                     await CurrentAction.Connection.Connect();
                 }
                 catch { }
-                await Task.Delay(2000);
+                await Task.Delay(500);
 
                 if (c == 5)
                 {

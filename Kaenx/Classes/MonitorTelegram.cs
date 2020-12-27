@@ -1,4 +1,5 @@
 ﻿using Kaenx.Konnect.Addresses;
+using Kaenx.Konnect.Messages;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,6 +14,6 @@ namespace Kaenx.Classes
         public IKnxAddress To { get; set; }
         public string Data { get; set; }
         public DateTime Time { get; set; }
-        public Konnect.Parser.ApciTypes Type { get; set; }
+        public ApciTypes Type { get; set; }
     }
 }

@@ -6,70 +6,13 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:bus="using:Kaenx.View.Controls.Bus"
-    xmlns:convert="using:Microsoft.Toolkit.Uwp.UI.Converters"
     xmlns:toolkit="using:Microsoft.Toolkit.Uwp.UI.Controls"
-    xmlns:extensions="using:Microsoft.Toolkit.Uwp.UI.Extensions"
+    xmlns:conv="using:Microsoft.Toolkit.Uwp.UI.Converters"
     mc:Ignorable="d"
     Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
     <Page.Resources>
-        <convert:BoolToVisibilityConverter x:Key="ConvBoolToVis" />
-        <DataTemplate x:Key="RowDetailsInfoTemplate">
-            <Grid>
-                <Grid.RowDefinitions>
-                    <RowDefinition />
-                    <RowDefinition Height="auto" />
-                </Grid.RowDefinitions>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="auto" />
-                    <ColumnDefinition Width="auto" />
-                    <ColumnDefinition />
-                    <ColumnDefinition Width="auto" />
-                </Grid.ColumnDefinitions>
-
-                <StackPanel Orientation="Vertical" Padding="10" ScrollViewer.HorizontalScrollMode="Auto">
-                    <toolkit:HeaderedContentControl Header="Applikations Id" Margin="0 5">
-                        <TextBlock Text="{Binding ApplicationId}" />
-                    </toolkit:HeaderedContentControl>
-                    <toolkit:HeaderedContentControl Header="Masken Version" Margin="0 5">
-                        <TextBlock Text="{Binding MaskVersion}" />
-                    </toolkit:HeaderedContentControl>
-                </StackPanel>
-
-                <StackPanel Grid.Column="1" Orientation="Vertical" Padding="10" ScrollViewer.HorizontalScrollMode="Auto">
-                    <toolkit:HeaderedContentControl Header="Applikations Name" Margin="0 5">
-                        <TextBlock Text="{Binding ApplicationName}" />
-                    </toolkit:HeaderedContentControl>
-                    <toolkit:HeaderedContentControl Header="Geräte Name" Margin="0 5">
-                        <TextBlock Text="{Binding DeviceName}" />
-                    </toolkit:HeaderedContentControl>
-                </StackPanel>
-
-                <StackPanel Grid.Row="1" Grid.ColumnSpan="3" Padding="10 0 10 10">
-                    <TextBlock Margin="0 0 0 10" Text="Gerät unterstützt Extended Frames" Visibility="{Binding SupportsEF, Converter={StaticResource ConvBoolToVis}}" />
-                    <TextBlock Text="{Binding Additional}" Visibility="{Binding ShowAdditional}" />
-                </StackPanel>
-
-
-                <toolkit:DataGrid Grid.Column="3" Grid.RowSpan="2" MaxWidth="450" ItemsSource="{Binding AssociationTable}" AutoGenerateColumns="False" IsReadOnly="True">
-                    <toolkit:DataGrid.Columns>
-                        <toolkit:DataGridTextColumn Header="Gruppenadresse" Binding="{Binding GroupIndex}" />
-                        <toolkit:DataGridTextColumn Header="KO Nr." Binding="{Binding ObjectIndex}" />
-                        <toolkit:DataGridTextColumn Header="KO Desc." Binding="{Binding ObjectInfo}" />
-                        <toolkit:DataGridTextColumn Header="KO Func." Binding="{Binding ObjectFunc}" />
-                    </toolkit:DataGrid.Columns>
-                </toolkit:DataGrid>
-            </Grid>
-        </DataTemplate>
-        <DataTemplate x:Key="RowDetailsConfigTemplate">
-            <Grid Padding="30 10">
-                <Button Content="Config ansehen" HorizontalAlignment="Stretch" Click="ClickOpenConfig" />
-            </Grid>
-        </DataTemplate>
-        <DataTemplate x:Key="RowDetailsErrorTemplate">
-            <Grid Padding="30 10">
-                <TextBlock Text="{Binding Message}" />
-            </Grid>
-        </DataTemplate>
+        <conv:BoolNegationConverter x:Key="BoolNegator" />
+        <conv:BoolToObjectConverter x:Key="BoolToBackground" TrueValue="Orange" FalseValue="Transparent" />
     </Page.Resources>
 
     <Grid Margin="0 10 0 0">
@@ -158,37 +101,56 @@
 
             <toolkit:TabViewItem x:Name="TabConns" x:Uid="/Bus/TabsInterfaces">
                 <Grid Margin="10 20">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition />
+                        <ColumnDefinition />
+                    </Grid.ColumnDefinitions>
                     <Grid.RowDefinitions>
                         <RowDefinition Height="auto" />
                         <RowDefinition Height="auto" />
                         <RowDefinition Height="auto" />
                         <RowDefinition Height="auto" />
-                        <RowDefinition Height="auto" />
-                        <RowDefinition Height="auto" />
                         <RowDefinition />
+                        <RowDefinition Height="auto" />
+                        <RowDefinition Height="auto" />
                     </Grid.RowDefinitions>
 
 
-                    <TextBlock x:Uid="/Bus/TabsInterfacesSelected" Foreground="{ThemeResource SystemAccentColorDark1}" VerticalAlignment="Center" Margin="10 0 0 0" />
-                    <Button x:Name="BtnTest" HorizontalAlignment="Right" Margin="0 0 10 0" ToolTipService.ToolTip="Schnittstelle testen" Click="ClickTestInterface">
+                    <TextBlock x:Uid="/Bus/TabsInterfacesSelected" Grid.ColumnSpan="2" Foreground="{ThemeResource SystemAccentColorDark1}" VerticalAlignment="Center" Margin="10 0 0 0" />
+                    <Button x:Name="BtnTest" Grid.ColumnSpan="2" HorizontalAlignment="Right" Margin="0 0 10 0" ToolTipService.ToolTip="Schnittstelle testen" Click="ClickTestInterface">
                         <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="&#xF142;"/>
                     </Button>
-                    <StackPanel Grid.Row="1" DataContext="{Binding SelectedInterface}" Orientation="Vertical" Margin="10 5">
+                    <StackPanel Grid.Row="1" Grid.ColumnSpan="2" DataContext="{Binding SelectedInterface}" Orientation="Vertical" Margin="10 5">
                         <TextBlock Text="{Binding Name}" />
                         <TextBlock Text="{Binding Description}" FontSize="10" Foreground="Gray" />
                     </StackPanel>
 
-                    <TextBlock x:Uid="/Bus/TabsInterfacesList" Grid.Row="2" Foreground="{ThemeResource SystemAccentColorDark1}" Margin="10 20 0 0" />
-                    <ListView x:Name="ListInterfaces" Grid.Row="3" ItemsSource="{Binding InterfaceList}" SelectedItem="{Binding SelectedInterface, Mode=TwoWay}">
+                    <TextBlock x:Uid="/Bus/TabsInterfacesList" Grid.Row="2" Grid.ColumnSpan="2" Foreground="{ThemeResource SystemAccentColorDark1}" Margin="10 20 0 0" />
+                    <ListView x:Name="ListInterfaces" Grid.Row="3" Grid.ColumnSpan="2" ItemsSource="{Binding InterfaceList}" SelectedItem="{Binding SelectedInterface, Mode=TwoWay}">
                         <ListView.ItemTemplate>
                             <DataTemplate>
-                                <StackPanel Orientation="Vertical" Margin="0 5">
+                                <StackPanel Orientation="Vertical" Margin="0 5" Background="{Binding IsRemote, Converter={StaticResource BoolToBackground}}">
                                     <TextBlock Text="{Binding Name}" />
                                     <TextBlock Text="{Binding Description}" FontSize="10" Foreground="Gray" />
                                 </StackPanel>
                             </DataTemplate>
                         </ListView.ItemTemplate>
                     </ListView>
+
+                    <!--<Button Grid.Row="5" HorizontalAlignment="Stretch" Content="Freigeben" Click="ClickRemoteShare" />-->
+                    <DropDownButton Name="InBtnRemote" Grid.Row="5" Grid.ColumnSpan="2" HorizontalAlignment="Stretch" Content="Einstellungen">
+                        <DropDownButton.Flyout>
+                            <MenuFlyout Placement="BottomEdgeAlignedRight">
+                                <MenuFlyoutItem Text="Verbindung" Icon="Switch" Click="ClickRemoteConnect" />
+                                <MenuFlyoutItem Text="Eingehend" Icon="NewWindow" Click="ClickRemoteIn" IsEnabled="{Binding IsActive}" />
+                                <MenuFlyoutItem Text="Ausgehend" Icon="Share" Click="ClickRemoteOut"  IsEnabled="{Binding IsActive}" />
+                            </MenuFlyout>
+                        </DropDownButton.Flyout>
+                    </DropDownButton>
+                    <TextBlock x:Name="BlockStateRemote" Grid.Row="6" Grid.ColumnSpan="2">
+                        <Run Text="Status:" />
+                        <Run Text="{Binding State}" />
+                    </TextBlock>
                 </Grid>
             </toolkit:TabViewItem>
         </toolkit:TabView>
@@ -200,74 +162,11 @@
             </toolkit:TabView.Background>
 
             <toolkit:TabViewItem x:Uid="/Bus/TabsMonitor">
-                <Grid>
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="auto" />
-                        <RowDefinition />
-                    </Grid.RowDefinitions>
-
-                    <StackPanel Orientation="Horizontal">
-                        <Button x:Name="BtnMonitorToggle" Click="Monitor_Toggle" ToolTipService.ToolTip="Starten / Anhalten">
-                            <SymbolIcon Symbol="Play" />
-                        </Button>
-
-                        <Button Click="Monitor_Delete" ToolTipService.ToolTip="Liste leeren">
-                            <SymbolIcon Symbol="Delete" />
-                        </Button>
-                    </StackPanel>
-
-                    <toolkit:DataGrid x:Name="GridBusMonitor" Grid.Row="1"  AutoGenerateColumns="False" IsReadOnly="True" ItemsSource="{Binding}">
-                        <toolkit:DataGrid.Columns>
-                            <toolkit:DataGridTextColumn Header="Zeit" Binding="{Binding Time}" />
-                            <toolkit:DataGridTextColumn Header="Von" Binding="{Binding From}" />
-                            <toolkit:DataGridTextColumn Header="An" Binding="{Binding To}" />
-                            <toolkit:DataGridTextColumn Header="Typ" Binding="{Binding Type}" />
-                            <toolkit:DataGridTextColumn Header="Daten" Binding="{Binding Data}" />
-                        </toolkit:DataGrid.Columns>
-                    </toolkit:DataGrid>
-                </Grid>
+                <bus:BMonitor />
             </toolkit:TabViewItem>
 
             <toolkit:TabViewItem x:Uid="/Bus/TabsInfo">
-                <Grid x:Name="GridOutput">
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="auto" />
-                        <RowDefinition Height="auto" />
-                    </Grid.RowDefinitions>
-
-                    <StackPanel Orientation="Horizontal" Margin="10">
-                        <TextBlock x:Uid="/Bus/TabsInfoAddr" Margin="10 0 10 0" VerticalAlignment="Center" />
-                        <TextBox x:Name="InAddress2" Width="200" CornerRadius="2 0 0 2" 
-                                 extensions:TextBoxRegex.Regex="(^[0-9]{1,1}|1[0-5]{1,1})\.([0-9]{1}|1[0-5]{1})\.(1[0-9]{1,2}|2[0-4]{1}[0-9]{1}|25[0-5]{1}|[0-9]{1,2})$" />
-                        <DropDownButton x:Uid="/Bus/TabsInfoRead">
-                            <DropDownButton.Flyout>
-                                <MenuFlyout Placement="BottomEdgeAlignedRight">
-                                    <MenuFlyoutItem x:Uid="/Bus/TabsInfoMenInfo" Icon="BrowsePhotos" Click="ReadInfo" />
-                                    <MenuFlyoutItem x:Uid="/Bus/TabsInfoMenMemory" Icon="Save" Click="ReadMem" />
-                                    <MenuFlyoutItem Icon="ClearSelection" Text="Test" Click="SetTest" />
-                                    <MenuFlyoutItem Icon="ClearSelection" Text="Test2" Click="SetTest2" />
-                                    <!--<MenuFlyoutItem Icon="Find" Text="Konfiguration" Click="ReadConf" />-->
-                                </MenuFlyout>
-                            </DropDownButton.Flyout>
-                        </DropDownButton>
-                    </StackPanel>
-
-                    <toolkit:DataGrid x:Name="GridReads" Grid.Row="1" ItemsSource="{Binding}" IsReadOnly="True" AutoGenerateColumns="False" AreRowDetailsFrozen="True" LoadingRowDetails="GridReads_LoadingRowDetails" RowDetailsVisibilityMode="VisibleWhenSelected">
-                        <toolkit:DataGrid.RowDetailsTemplate>
-                            <DataTemplate>
-                                <ContentPresenter Content="{Binding}" />
-                            </DataTemplate>
-                        </toolkit:DataGrid.RowDetailsTemplate>
-                        <toolkit:DataGrid.Columns>
-                            <toolkit:DataGridTextColumn Header="Adresse" Width="SizeToCells" Binding="{Binding Device.LineName}" />
-                            <toolkit:DataGridTextColumn Header="Typ" Binding="{Binding Type}" />
-                            <toolkit:DataGridTextColumn Header="Hersteller" Binding="{Binding Description}" />
-                            <toolkit:DataGridTextColumn Header="Hersteller" Binding="{Binding Manufacturer}" />
-                            <toolkit:DataGridTextColumn Header="Seriennummer" Binding="{Binding SerialNumber}" />
-                            <toolkit:DataGridTextColumn Header="Applikation" Binding="{Binding ApplicationName}" />
-                        </toolkit:DataGrid.Columns>
-                    </toolkit:DataGrid>
-                </Grid>
+                <bus:BDeviceInfo />
             </toolkit:TabViewItem>
 
             <toolkit:TabViewItem x:Uid="/Bus/TabsNew">
@@ -275,5 +174,6 @@
             </toolkit:TabViewItem>
         </toolkit:TabView>
 
+        <toolkit:InAppNotification x:Name="Notify" Grid.ColumnSpan="2" />
     </Grid>
 </Page>

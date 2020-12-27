@@ -23,8 +23,7 @@ namespace Kaenx.Classes.Bus
                     {
                         Name = inter.Name,
                         Port = inter.Port,
-                        IP = inter.Ip,
-                        Endpoint = new IPEndPoint(IPAddress.Parse(inter.Ip), inter.Port)
+                        IP = inter.Ip
                     };
                     break;
 

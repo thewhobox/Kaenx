@@ -58,8 +58,9 @@ namespace Kaenx.Classes.Project
             get { return _isDeactivated; } 
             set {
                 if (_isDeactivated == value) return;
-                _isDeactivated = value; 
-                Changed("CurrentBackBrush"); 
+                _isDeactivated = value;
+                Changed("IsDeactivated");
+                Changed("CurrentBackBrush");
                 if (!IsInit) SaveHelper.UpdateDevice(this); 
             } 
         }

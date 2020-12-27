@@ -5,9 +5,13 @@
     xmlns:local="using:Kaenx.View.Controls"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:conv="using:Microsoft.Toolkit.Uwp.UI.Converters"
     mc:Ignorable="d"
     d:DesignHeight="300"
     d:DesignWidth="400">
+    <UserControl.Resources>
+        <conv:BoolNegationConverter x:Key="BoolNegation" />
+    </UserControl.Resources>
 
     <Grid x:Name="ContentGrid">
         <Grid.RowDefinitions>
@@ -42,7 +46,7 @@
                             <CheckBox IsChecked="{Binding LoadedPA}" Margin="3" MinWidth="0" IsEnabled="False" ToolTipService.ToolTip="Ph. Adresse vergeben" />
                             <CheckBox IsChecked="{Binding LoadedGroup}" Margin="3" MinWidth="0" IsEnabled="False" ToolTipService.ToolTip="Gruppentabelle geladen" />
                             <CheckBox IsChecked="{Binding LoadedApplication}" Margin="3" MinWidth="0" IsEnabled="False" ToolTipService.ToolTip="Applikation geladen" />
-                            <CheckBox IsChecked="{Binding IsDeactivated}" Margin="3" MinWidth="0" IsEnabled="False" ToolTipService.ToolTip="Gerät ist deaktiviert" />
+                            <CheckBox IsChecked="{Binding IsDeactivated, Converter={StaticResource BoolNegation}}" Margin="3" MinWidth="0" IsEnabled="False" ToolTipService.ToolTip="Gerät ist deaktiviert" />
                         </StackPanel>
                     </Grid>
                 </DataTemplate>

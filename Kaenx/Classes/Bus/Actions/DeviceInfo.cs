@@ -11,7 +11,9 @@ using Microsoft.AppCenter;
 using Microsoft.AppCenter.Analytics;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -19,7 +21,9 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Xml.Linq;
 using Windows.Storage;
+using Windows.UI.Xaml.Data;
 using static Kaenx.Classes.Bus.Actions.IBusAction;
+using static Kaenx.Classes.Bus.Data.DeviceInfoData;
 
 namespace Kaenx.Classes.Bus.Actions
 {
@@ -59,6 +63,7 @@ namespace Kaenx.Classes.Bus.Actions
             try
             {
                 BusDevice dev = new BusDevice(Device.LineName, Connection);
+
                 TodoText = "Lese Maskenversion...";
                 await dev.Connect();
 
@@ -66,9 +71,27 @@ namespace Kaenx.Classes.Bus.Actions
                 _data.SupportsEF = dev.SupportsExtendedFrames;
                 _data.MaskVersion = "MV-" + await dev.DeviceDescriptorRead();
 
-                ProgressValue = 10;
+
+
+                XElement master = (await GetKnxMaster()).Root;
+                XElement maskEle = master.Descendants(XName.Get("MaskVersion", master.Name.NamespaceName)).Single(m => m.Attribute("Id").Value == _data.MaskVersion);
+
+                List<string> dontread = new List<string>() { "ManagementStyle", "DeviceBusVoltage", "GroupAddressTable", "GroupAssociationTable", "GroupObjectTable" };
+
+                IEnumerable<XElement> resources = maskEle.Descendants(XName.Get("Resource", master.Name.NamespaceName)).Where(res =>
+                {
+                    string name = res.Attribute("Name").Value;
+                    XElement access = res.Element(XName.Get("AccessRights", master.Name.NamespaceName));
+                    if (access.Attribute("Read").Value == "None") return false;
+                    return !dontread.Contains(name) && !name.EndsWith("Ptr");
+                });
+                //TODO auch InterfaceObject Property auslesen
+
+                int stepsize = (int)(100 / (resources.Count() + 4));
+
+                ProgressValue += stepsize;
                 TodoText = "Lese Seriennummer...";
-                await Task.Delay(500);
+                //await Task.Delay(500);
 
                 try
                 {
@@ -80,16 +103,15 @@ namespace Kaenx.Classes.Bus.Actions
                 }
 
 
-                ProgressValue = 20;
+                ProgressValue += stepsize;
                 TodoText = "Lese Applikations Id...";
-                await Task.Delay(500);
+                //await Task.Delay(500);
                 string appId = await dev.PropertyRead<string>(_data.MaskVersion, "ApplicationId");
                 if (appId.Length == 8) appId = "00" + appId;
                 appId = "M-" + appId.Substring(0, 4) + "_A-" + appId.Substring(4, 4) + "-" + appId.Substring(8, 2);
 
                 CatalogContext context = new CatalogContext();
 
-                XElement master = (await GetKnxMaster()).Root;
                 XElement manu = master.Descendants(XName.Get("Manufacturer", master.Name.NamespaceName)).Single(m => m.Attribute("Id").Value == appId.Substring(0, 6));
                 _data.Manufacturer = manu.Attribute("Name").Value;
 
@@ -114,9 +136,9 @@ namespace Kaenx.Classes.Bus.Actions
                 _data.ApplicationId = appId;
 
 
-                ProgressValue = 30;
+                ProgressValue += stepsize;
                 TodoText = "Lese Gruppentabelle...";
-                await Task.Delay(500);
+                //await Task.Delay(500);
                 int grpAddr = -1;
 
                 ApplicationViewModel appModel = null;
@@ -168,9 +190,9 @@ namespace Kaenx.Classes.Bus.Actions
                 }
 
 
-                ProgressValue = 30;
+                ProgressValue += stepsize;
                 TodoText = "Lese Assoziationstabelle...";
-                await Task.Delay(500);
+                //await Task.Delay(500);
 
                 if (appModel != null)
                 {
@@ -229,6 +251,64 @@ namespace Kaenx.Classes.Bus.Actions
                     }
 
                 }
+
+
+                Dictionary<string, GroupInfoCollection<OtherResource>> dic = new Dictionary<string, GroupInfoCollection<OtherResource>>();
+
+                TodoText = "Lese andere Resourcen...";
+                foreach (XElement resource in resources)
+                {
+                    byte[] value = await dev.PropertyRead(_data.MaskVersion, resource.Attribute("Name").Value);
+
+                    OtherResource resx = new OtherResource();
+                    resx.Name = resource.Attribute("Name").Value;
+                    resx.Value = BitConverter.ToString(value != null ? value : new byte[] { 0x00 });
+                    resx.ValueRaw = BitConverter.ToString(value != null ? value : new byte[] { 0x00 });
+
+                    if(resx.Name.StartsWith("Pei"))
+                    {
+                        if (!dic.ContainsKey("Applikation 2"))
+                            dic.Add("Applikation 2", new GroupInfoCollection<OtherResource>() { Key = "Applikation 2" });
+                    } else if (resx.Name.StartsWith("Application"))
+                    {
+                        if (!dic.ContainsKey("Applikation"))
+                            dic.Add("Applikation", new GroupInfoCollection<OtherResource>() { Key = "Applikation" });
+                    }
+                    else if (resx.Name.StartsWith("Group"))
+                    {
+                        if (!dic.ContainsKey("Group"))
+                            dic.Add("Group", new GroupInfoCollection<OtherResource>() { Key = "Group" });
+                    }
+                    else
+                    {
+                        if (!dic.ContainsKey("Allgemein"))
+                            dic.Add("Allgemein", new GroupInfoCollection<OtherResource>() { Key = "Allgemein" });
+                    }
+
+                    //TODO übersetzung der Property anzeigen
+
+                    if (resx.Name.StartsWith("Pei"))
+                    {
+                        dic["Applikation 2"].Add(resx);
+                    }
+                    else if (resx.Name.StartsWith("Application"))
+                    {
+                        dic["Applikation"].Add(resx);
+                    }
+                    else if (resx.Name.StartsWith("Group"))
+                    {
+                        dic["Group"].Add(resx);
+                    }
+                    else
+                    {
+                        dic["Allgemein"].Add(resx);
+                    }
+                    ProgressValue += stepsize;
+                }
+                _ = App._dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Normal, () =>
+                {
+                    _data.OtherResources = (new CollectionViewSource() { IsSourceGrouped = true, Source = new ObservableCollection<GroupInfoCollection<OtherResource>>(dic.Values) }).View;
+                });
             } catch(OperationCanceledException)
             {
                 Finish("Gerät antwortet nicht");

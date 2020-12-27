@@ -1,0 +1,35 @@
+﻿<ContentDialog
+    x:Class="Kaenx.View.Controls.Dialogs.DiagRemoteConn"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:Kaenx.View.Controls.Dialogs"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:conv="using:Microsoft.Toolkit.Uwp.UI.Converters"
+    mc:Ignorable="d"
+    Title="Verbindung zu Remoteserver"
+    CloseButtonText="Schließen">
+    <ContentDialog.Resources>
+        <conv:BoolNegationConverter x:Key="BoolNegator" />
+    </ContentDialog.Resources>
+
+    <Grid>
+        <Grid Width="350">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition />
+                <ColumnDefinition />
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition />
+                <RowDefinition />
+                <RowDefinition />
+            </Grid.RowDefinitions>
+
+            <ComboBox Name="InRemote" Grid.ColumnSpan="2" DisplayMemberPath="Name" HorizontalAlignment="Stretch" Margin="0 0 0 10" IsEnabled="{Binding IsActive, Converter={StaticResource BoolNegator}}" />
+
+            <Button Grid.Row="2" Content="Verbinden" HorizontalAlignment="Stretch" Margin="0 0 5 0" IsEnabled="{Binding IsActive, Converter={StaticResource BoolNegator}}"  Click="ClickConnect"/>
+            <Button Grid.Row="2" Grid.Column="1" Content="Trennen" HorizontalAlignment="Stretch" Margin="5 0 0 0" IsEnabled="{Binding IsActive}" Click="ClickDisconnect" />
+
+        </Grid>
+    </Grid>
+</ContentDialog>

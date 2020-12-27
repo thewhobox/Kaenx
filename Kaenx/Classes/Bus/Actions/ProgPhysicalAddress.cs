@@ -5,6 +5,7 @@ using Kaenx.Konnect.Addresses;
 using Kaenx.Konnect.Builders;
 using Kaenx.Konnect.Classes;
 using Kaenx.Konnect.Connections;
+using Kaenx.Konnect.Messages;
 using Kaenx.Konnect.Messages.Response;
 using System;
 using System.Collections.Generic;
@@ -49,7 +50,7 @@ namespace Kaenx.Classes.Bus.Actions
             devices.Add(response);
 
             //TODO MsgIndividualAddressResponse
-            if (response.ApciType == Kaenx.Konnect.Parser.ApciTypes.IndividualAddressResponse && (response.SourceAddress as UnicastAddress).Area != 0 && !progDevices.Contains(response.SourceAddress.ToString()))
+            if (response.ApciType == ApciTypes.IndividualAddressResponse && (response.SourceAddress as UnicastAddress).Area != 0 && !progDevices.Contains(response.SourceAddress.ToString()))
             {
                 progDevices.Add(response.SourceAddress.ToString());
             }

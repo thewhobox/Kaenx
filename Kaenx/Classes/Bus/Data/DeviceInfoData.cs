@@ -2,10 +2,12 @@
 using Kaenx.Konnect.Addresses;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Windows.UI.Xaml;
+using Windows.UI.Xaml.Data;
 
 namespace Kaenx.Classes.Bus.Data
 {
@@ -29,8 +31,28 @@ namespace Kaenx.Classes.Bus.Data
         public List<MulticastAddress> GroupTable { get; set; }
 
         public List<AssociationHelper> AssociationTable { get; set; }
+
+        public ICollectionView OtherResources { get; set; }
     }
 
+
+    public class GroupInfoCollection<T> : ObservableCollection<T>
+    {
+        public string Key { get; set; }
+
+        public new IEnumerator<T> GetEnumerator()
+        {
+            return (IEnumerator<T>)base.GetEnumerator();
+        }
+    }
+
+
+    public class OtherResource
+    {
+        public string Name { get; set; }
+        public string Value { get; set; }
+        public string ValueRaw { get; set; }
+    }
 
     public class AssociationHelper
     {

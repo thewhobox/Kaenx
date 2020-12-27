@@ -32,6 +32,7 @@ namespace Kaenx.View.Controls.Settings
         private LocalContext _context = new LocalContext();
         public ObservableCollection<LocalInterface> ListInterfaces { get; set; } = new ObservableCollection<LocalInterface>();
         public ObservableCollection<LocalConnectionProject> ListDatabases { get; set; } = new ObservableCollection<LocalConnectionProject>();
+        public ObservableCollection<LocalRemote> ListRemotes { get; set; } = new ObservableCollection<LocalRemote>();
 
         public SBusConnections()
         {
@@ -43,6 +44,9 @@ namespace Kaenx.View.Controls.Settings
 
             foreach (LocalConnectionProject pro in _context.ConnsProject)
                 ListDatabases.Add(pro);
+
+            foreach (LocalRemote rem in _context.Remotes)
+                ListRemotes.Add(rem);
         }
 
         private void ClickToggleAddInterface(object sender, RoutedEventArgs e)
@@ -62,17 +66,20 @@ namespace Kaenx.View.Controls.Settings
             DiagNewFileConn.Visibility = DiagNewFileConn.Visibility == Visibility.Visible ? Visibility.Collapsed : Visibility.Visible;
         }
 
+        private void ClickToggleAddRemote(object sender, RoutedEventArgs e)
+        {
+            DiagNewRemote.Visibility = DiagNewRemote.Visibility == Visibility.Visible ? Visibility.Collapsed : Visibility.Visible;
+        }
+
         private void ClickSaveInterface(object sender, RoutedEventArgs e)
         {
             if (!CheckInputs()) return;
-
 
             LocalInterface inter = new LocalInterface();
             inter.Ip = InInterAddress.Text;
             inter.Port = int.Parse(InInterPort.Text);
             inter.Name = InInterName.Text;
             inter.Type = InterfaceType.IP;
-
             _context.Interfaces.Add(inter);
             _context.SaveChanges();
 
@@ -84,7 +91,10 @@ namespace Kaenx.View.Controls.Settings
 
             KnxInterfaceIp binter = new KnxInterfaceIp();
             binter.Name = inter.Name;
-            binter.Endpoint = new IPEndPoint(IPAddress.Parse(inter.Ip), inter.Port);
+            binter.IP = inter.Ip;
+            binter.Port = inter.Port;
+
+
             BusConnection.Instance.InterfaceList.Add(binter);
             ListInterfaces.Add(inter);
         }
@@ -119,6 +129,7 @@ namespace Kaenx.View.Controls.Settings
                 }
             }
 
+
             int port;
             if (!int.TryParse(InInterPort.Text, out port))
             {
@@ -129,7 +140,7 @@ namespace Kaenx.View.Controls.Settings
             return true;
         }
 
-        private void ClickDelete(object sender, RoutedEventArgs e)
+        private void ClickDeleteConn(object sender, RoutedEventArgs e)
         {
             LocalInterface inter = (sender as Button).DataContext as LocalInterface;
             ListInterfaces.Remove(inter);
@@ -141,9 +152,26 @@ namespace Kaenx.View.Controls.Settings
                 IKnxInterface binter = BusConnection.Instance.InterfaceList.Single(b => b.Hash == inter.Name + "#IP#" + inter.Ip + ":" + inter.Port);
                 BusConnection.Instance.InterfaceList.Remove(binter);
             }
-            catch { }
+            catch { 
+            }
 
             ViewHelper.Instance.ShowNotification("settings", "Schnittstelle erfolgreich gelöscht.", 3000, ViewHelper.MessageType.Success);
+        }
+
+        private void ClickDeleteData(object sender, RoutedEventArgs e)
+        {
+            LocalConnectionProject conn = (sender as Button).DataContext as LocalConnectionProject;
+            ListDatabases.Remove(conn);
+            _context.ConnsProject.Remove(conn);
+            _context.SaveChanges();
+        }
+
+        private void ClickDeleteRemote(object sender, RoutedEventArgs e)
+        {
+            LocalRemote rem = (sender as Button).DataContext as LocalRemote;
+            ListRemotes.Remove(rem);
+            _context.Remotes.Remove(rem);
+            _context.SaveChanges();
         }
 
         private async void ClickTest(object sender, RoutedEventArgs e)
@@ -151,6 +179,7 @@ namespace Kaenx.View.Controls.Settings
             if (!CheckInputs(true)) return;
 
             Konnect.Connections.IKnxConnection conn = new Konnect.Connections.KnxIpTunneling(new IPEndPoint(IPAddress.Parse(InInterAddress.Text), int.Parse(InInterPort.Text)));
+
             try
             {
                 await conn.Connect();
@@ -162,10 +191,15 @@ namespace Kaenx.View.Controls.Settings
             }
             
             ViewHelper.Instance.ShowNotification("settings", "Schnittstelle ist erreichbar und hat eine Verbindung zum Bus (" + conn.PhysicalAddress.ToString() + ")", 3000, ViewHelper.MessageType.Error);
-            await conn.Disconnect();
+            //await conn.Disconnect();
         }
 
         private void ClickTest2(object sender, RoutedEventArgs e)
+        {
+
+        }
+
+        private void ClickTestRemote(object sender, RoutedEventArgs e)
         {
 
         }
@@ -214,7 +248,6 @@ namespace Kaenx.View.Controls.Settings
             picker.SuggestedStartLocation = Windows.Storage.Pickers.PickerLocationId.DocumentsLibrary;
             StorageFile file = await picker.PickSingleFileAsync();
             if (file == null) return;
-            InFilePath.Text = file.Path;
             Windows.Storage.AccessCache.StorageApplicationPermissions.FutureAccessList.AddOrReplace("ImportDb", file);
         }
 
@@ -237,11 +270,6 @@ namespace Kaenx.View.Controls.Settings
                 ViewHelper.Instance.ShowNotification("settings", "Bitte gib einen Namen ein.", 3000, ViewHelper.MessageType.Success);
                 return;
             }
-            if (!InFilePath.Text.Contains(".db"))
-            {
-                ViewHelper.Instance.ShowNotification("settings", "Bitte wähle die Datenbank aus.", 3000, ViewHelper.MessageType.Success);
-                return;
-            }
 
             StorageFile file = await Windows.Storage.AccessCache.StorageApplicationPermissions.FutureAccessList.GetFileAsync("ImportDb");
             await file.RenameAsync(InFileName.Text + ".db");
@@ -257,6 +285,35 @@ namespace Kaenx.View.Controls.Settings
             _context.SaveChanges();
             ListDatabases.Add(conn);
             ClickToggleAddFile(null, null);
+        }
+
+        private void ClickSaveRemote(object sender, RoutedEventArgs e)
+        {
+            if (string.IsNullOrEmpty(InRemoteName.Text))
+            {
+                ViewHelper.Instance.ShowNotification("settings", "Bitte gib einen Namen ein.", 3000, ViewHelper.MessageType.Success);
+                return;
+            }
+            if (string.IsNullOrEmpty(InRemoteHost.Text))
+            {
+                ViewHelper.Instance.ShowNotification("settings", "Bitte gib einen Hostnamen ein.", 3000, ViewHelper.MessageType.Success);
+                return;
+            }
+            if (string.IsNullOrEmpty(InRemoteAuth.Text))
+            {
+                ViewHelper.Instance.ShowNotification("settings", "Bitte gib einen gültigen Authentifizierungskey ein.", 3000, ViewHelper.MessageType.Success);
+                return;
+            }
+
+            LocalRemote rem = new LocalRemote();
+            rem.Name = InRemoteName.Text;
+            rem.Authentification = InRemoteAuth.Text;
+            rem.Host = InRemoteHost.Text;
+
+            _context.Remotes.Add(rem);
+            _context.SaveChanges();
+            ListRemotes.Add(rem);
+            ClickToggleAddRemote(null, null);
         }
     }
 }

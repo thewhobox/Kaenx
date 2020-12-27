@@ -1,0 +1,137 @@
+﻿<UserControl
+    x:Class="Kaenx.View.Controls.Bus.BDeviceInfo"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:Kaenx.View.Controls.Bus"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:extensions="using:Microsoft.Toolkit.Uwp.UI.Extensions"
+    xmlns:toolkit="using:Microsoft.Toolkit.Uwp.UI.Controls"
+    xmlns:convert="using:Microsoft.Toolkit.Uwp.UI.Converters"
+    xmlns:data="using:Kaenx.Classes.Bus.Data"
+    mc:Ignorable="d"
+    d:DesignHeight="300"
+    d:DesignWidth="400">
+    <UserControl.Resources>
+        <convert:BoolToVisibilityConverter x:Key="ConvBoolToVis" />
+        <DataTemplate x:Key="RowDetailsInfoTemplate" x:DataType="data:DeviceInfoData">
+            <Grid MaxHeight="350">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition />
+                    <!--<ColumnDefinition MinWidth="450" />-->
+                </Grid.ColumnDefinitions>
+
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="auto" />
+                        <RowDefinition Height="auto" />
+                        <RowDefinition Height="auto" />
+                    </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition />
+                        <ColumnDefinition />
+                        <ColumnDefinition />
+                    </Grid.ColumnDefinitions>
+
+                    <StackPanel Grid.ColumnSpan="4" Padding="10 0 10 10">
+                        <TextBlock Margin="0 0 0 10" Text="Gerät unterstützt Extended Frames" Visibility="{Binding SupportsEF, Converter={StaticResource ConvBoolToVis}}" />
+                        <TextBlock Text="{Binding Additional}" Visibility="{Binding ShowAdditional}" />
+                    </StackPanel>
+
+                    
+                    <toolkit:HeaderedContentControl Grid.Row="1" Header="Applikations Id" Margin="0 5" HorizontalAlignment="Center" VerticalAlignment="Center" Width="200">
+                        <TextBlock Text="{Binding ApplicationId}" />
+                    </toolkit:HeaderedContentControl>
+
+                    <toolkit:HeaderedContentControl Grid.Row="2"  Header="Masken Version" Margin="0 5" HorizontalAlignment="Center" VerticalAlignment="Center" Width="200">
+                        <TextBlock Text="{Binding MaskVersion}" />
+                    </toolkit:HeaderedContentControl>
+
+                    <toolkit:HeaderedContentControl Grid.Row="1" Grid.Column="1" Header="Applikations Name" Margin="0 5" HorizontalAlignment="Center" VerticalAlignment="Center" Width="200">
+                        <TextBlock Text="{Binding ApplicationName}" />
+                    </toolkit:HeaderedContentControl>
+
+                    <toolkit:HeaderedContentControl Grid.Row="2" Grid.Column="1" Header="Geräte Name" Margin="0 5" HorizontalAlignment="Center" VerticalAlignment="Center" Width="200">
+                        <TextBlock Text="{Binding DeviceName}" />
+                    </toolkit:HeaderedContentControl>
+
+                    <Button Grid.Row="1" Grid.Column="2" Content="Erweiterte Ansicht"  HorizontalAlignment="Stretch"/>
+                    <Button Grid.Row="2" Grid.Column="2" Content="Aller verbundenen Gruppenadressen anzeigen"  HorizontalAlignment="Stretch"/>
+
+
+                    <!--<toolkit:DataGrid Grid.Row="2" LoadingRowGroup="DataGrid_LoadingRowGroup" Grid.ColumnSpan="2" ItemsSource="{x:Bind OtherResources }" IsReadOnly="True" AutoGenerateColumns="True">
+                        <toolkit:DataGrid.RowGroupHeaderStyles>
+                            <Style TargetType="toolkit:DataGridRowGroupHeader">
+                                <Setter Property="Background" Value="LightGray" />
+                            </Style>
+                        </toolkit:DataGrid.RowGroupHeaderStyles>
+                        --><!--<toolkit:DataGrid.Columns>
+                            <toolkit:DataGridTextColumn Header="Name" Binding="{Binding Name}" />
+                            <toolkit:DataGridTextColumn Header="Wert" Binding="{Binding Value}" />
+                            <toolkit:DataGridTextColumn Header="Raw" Binding="{Binding ValueRaw}" />
+                        </toolkit:DataGrid.Columns>--><!--
+                    </toolkit:DataGrid>-->
+                </Grid>
+
+
+                <!--<toolkit:DataGrid Grid.Column="1" ItemsSource="{Binding AssociationTable}" AutoGenerateColumns="False" IsReadOnly="True">
+                    <toolkit:DataGrid.Columns>
+                        <toolkit:DataGridTextColumn Header="Gruppenadresse" Binding="{Binding GroupIndex}" />
+                        <toolkit:DataGridTextColumn Header="KO Nr." Binding="{Binding ObjectIndex}" />
+                        <toolkit:DataGridTextColumn Header="KO Desc." Binding="{Binding ObjectInfo}" />
+                        <toolkit:DataGridTextColumn Header="KO Func." Binding="{Binding ObjectFunc}" />
+                    </toolkit:DataGrid.Columns>
+                </toolkit:DataGrid>-->
+            </Grid>
+        </DataTemplate>
+        <DataTemplate x:Key="RowDetailsConfigTemplate">
+            <Grid Padding="30 10">
+                <Button Content="Config ansehen" HorizontalAlignment="Stretch" Click="ClickOpenConfig" />
+            </Grid>
+        </DataTemplate>
+        <DataTemplate x:Key="RowDetailsErrorTemplate">
+            <Grid Padding="30 10">
+                <TextBlock Text="{Binding Message}" />
+            </Grid>
+        </DataTemplate>
+    </UserControl.Resources>
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="auto" />
+            <RowDefinition Height="auto" />
+        </Grid.RowDefinitions>
+
+        <StackPanel Orientation="Horizontal" Margin="10">
+            <TextBlock x:Uid="/Bus/TabsInfoAddr" Margin="10 0 10 0" VerticalAlignment="Center" />
+            <TextBox x:Name="InAddress2" Width="200" CornerRadius="2 0 0 2" 
+                                 extensions:TextBoxRegex.Regex="(^[0-9]{1,1}|1[0-5]{1,1})\.([0-9]{1}|1[0-5]{1})\.(1[0-9]{1,2}|2[0-4]{1}[0-9]{1}|25[0-5]{1}|[0-9]{1,2})$" />
+            <DropDownButton x:Uid="/Bus/TabsInfoRead">
+                <DropDownButton.Flyout>
+                    <MenuFlyout Placement="BottomEdgeAlignedRight">
+                        <MenuFlyoutItem x:Uid="/Bus/TabsInfoMenInfo" Icon="BrowsePhotos" Click="ReadInfo" />
+                        <MenuFlyoutItem x:Uid="/Bus/TabsInfoMenMemory" Icon="Save" Click="ReadMem" />
+                        <MenuFlyoutItem Icon="ClearSelection" Text="Test" Click="SetTest" />
+                        <MenuFlyoutItem Icon="ClearSelection" Text="Test2" Click="SetTest2" />
+                        <!--<MenuFlyoutItem Icon="Find" Text="Konfiguration" Click="ReadConf" />-->
+                    </MenuFlyout>
+                </DropDownButton.Flyout>
+            </DropDownButton>
+        </StackPanel>
+
+        <toolkit:DataGrid x:Name="GridReads" Grid.Row="1" ItemsSource="{Binding}" IsReadOnly="True" AutoGenerateColumns="False" AreRowDetailsFrozen="True" LoadingRowDetails="GridReads_LoadingRowDetails" RowDetailsVisibilityMode="VisibleWhenSelected">
+            <toolkit:DataGrid.RowDetailsTemplate>
+                <DataTemplate>
+                    <ContentPresenter Content="{Binding}" />
+                </DataTemplate>
+            </toolkit:DataGrid.RowDetailsTemplate>
+            <toolkit:DataGrid.Columns>
+                <toolkit:DataGridTextColumn Header="Adresse" Width="SizeToCells" Binding="{Binding Device.LineName}" />
+                <toolkit:DataGridTextColumn Header="Typ" Binding="{Binding Type}" />
+                <toolkit:DataGridTextColumn Header="Hersteller" Binding="{Binding Manufacturer}" />
+                <toolkit:DataGridTextColumn Header="Seriennummer" Binding="{Binding SerialNumber}" />
+                <toolkit:DataGridTextColumn Header="Applikation" Binding="{Binding ApplicationName}" />
+            </toolkit:DataGrid.Columns>
+        </toolkit:DataGrid>
+    </Grid>
+</UserControl>
