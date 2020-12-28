@@ -127,12 +127,22 @@
 
                     <TextBlock x:Uid="/Bus/TabsInterfacesList" Grid.Row="2" Grid.ColumnSpan="2" Foreground="{ThemeResource SystemAccentColorDark1}" Margin="10 20 0 0" />
                     <ListView x:Name="ListInterfaces" Grid.Row="3" Grid.ColumnSpan="2" ItemsSource="{Binding InterfaceList}" SelectedItem="{Binding SelectedInterface, Mode=TwoWay}">
+                        <ListView.Resources>
+                            <Style TargetType="ListViewItem">
+                                <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+                                <Setter Property="Padding" Value="0" />
+                                <Setter Property="Margin" Value="0" />
+                            </Style>
+                        </ListView.Resources>
                         <ListView.ItemTemplate>
                             <DataTemplate>
-                                <StackPanel Orientation="Vertical" Margin="0 5" Background="{Binding IsRemote, Converter={StaticResource BoolToBackground}}">
-                                    <TextBlock Text="{Binding Name}" />
-                                    <TextBlock Text="{Binding Description}" FontSize="10" Foreground="Gray" />
-                                </StackPanel>
+                                <Grid>
+                                    <Border BorderThickness="5 0" BorderBrush="{Binding IsRemote, Converter={StaticResource BoolToBackground}}" />
+                                    <StackPanel Orientation="Vertical" Padding="10 5">
+                                        <TextBlock Text="{Binding Name}" />
+                                        <TextBlock Text="{Binding Description}" FontSize="10" Foreground="Gray" />
+                                    </StackPanel>
+                                </Grid>
                             </DataTemplate>
                         </ListView.ItemTemplate>
                     </ListView>

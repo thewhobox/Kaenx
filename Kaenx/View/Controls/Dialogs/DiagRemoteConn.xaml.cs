@@ -25,14 +25,14 @@ namespace Kaenx.View.Controls.Dialogs
         public DiagRemoteConn()
         {
             this.InitializeComponent();
-            this.DataContext = RemoteConnection.Instance;
+            this.DataContext = BusRemoteConnection.Instance;
 
             LocalContext context = new LocalContext();
             List<LocalRemote> remotes = context.Remotes.ToList();
             InRemote.ItemsSource = remotes;
 
-            if (RemoteConnection.Instance.ConnectionOut != null && remotes.Any(r => r.Host == RemoteConnection.Instance.ConnectionOut.Hostname && r.Authentification == RemoteConnection.Instance.ConnectionOut.Authentication))
-                InRemote.SelectedItem = remotes.First(r => r.Host == RemoteConnection.Instance.ConnectionOut.Hostname && r.Authentification == RemoteConnection.Instance.ConnectionOut.Authentication);
+            if (remotes.Any(r => r.Host == BusRemoteConnection.Instance.Hostname && r.Authentification == BusRemoteConnection.Instance.Authentification))
+                InRemote.SelectedItem = remotes.First(r => r.Host == BusRemoteConnection.Instance.Hostname && r.Authentification == BusRemoteConnection.Instance.Authentification);
 
         }
 
@@ -46,12 +46,13 @@ namespace Kaenx.View.Controls.Dialogs
 
         private void ClickConnect(object sender, RoutedEventArgs e)
         {
-            _= RemoteConnection.Instance.SetNewConnection((LocalRemote)InRemote.SelectedItem);
+            LocalRemote local = (LocalRemote)InRemote.SelectedItem;
+            _ = BusRemoteConnection.Instance.Connect(local.Host, local.Authentification);
         }
 
         private void ClickDisconnect(object sender, RoutedEventArgs e)
         {
-            _=RemoteConnection.Instance.Disconnect();
+            _ = BusRemoteConnection.Instance.Disconnect();
         }
     }
 }

@@ -99,8 +99,8 @@ namespace Kaenx.Classes.Bus
                 //SearchForDevices();
             });
 
-            RemoteConnection.Instance.OnRequest += ConnectionOut_OnRequest;
-            RemoteConnection.Instance.OnResponse += Instance_OnResponse;
+            BusRemoteConnection.Instance.OnRequest += ConnectionOut_OnRequest;
+            BusRemoteConnection.Instance.OnResponse += Instance_OnResponse;
 
             InterfaceList.CollectionChanged += InterfaceList_CollectionChanged;
 
@@ -119,13 +119,19 @@ namespace Kaenx.Classes.Bus
 
                 foreach(IKnxInterface inter in resp.Interfaces)
                 {
-                    inter.IsRemote = true;
-                    if (!InterfaceList.Any(i => i.Hash == inter.Hash))
+                    KnxInterfaceRemote xinter = new KnxInterfaceRemote(inter.Description, inter.Hash);
+                    xinter.LastFound = DateTime.Now;
+                    xinter.Name = inter.Name;
+                    if (!InterfaceList.Any(i => i.Hash == xinter.Hash))
                     {
-                        inter.LastFound = DateTime.Now;
+                        if (inter is KnxInterfaceIp)
+                            xinter.Type = RemoteType.Ip;
+                        else if (inter is KnxInterfaceUsb)
+                            xinter.Type = RemoteType.Usb;
+
                         _=App._dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Normal, () =>
                         {
-                            InterfaceList.Add(inter);
+                            InterfaceList.Add(xinter);
                         });
                     }
                     else
@@ -145,7 +151,13 @@ namespace Kaenx.Classes.Bus
                 resp.SequenceNumber = message.SequenceNumber;
                 resp.ChannelId = message.ChannelId;
                 resp.Interfaces = InterfaceList.Where(inter => !inter.IsRemote).ToList();
-                _ = RemoteConnection.Instance.ConnectionOut.Send(resp, false);
+                _ = BusRemoteConnection.Instance.Send(resp, false);
+            } else if(message is Konnect.Remote.TunnelRequest)
+            {
+                //Konnect.Remote.TunnelRequest req = message as Konnect.Remote.TunnelRequest;
+                //string hash = Encoding.UTF8.GetString(req.)
+                //IKnxInterface inter = InterfaceList.Single(i => i.Hash == req.)
+                //Debug.WriteLine("W")
             }
         }
 
@@ -192,7 +204,7 @@ namespace Kaenx.Classes.Bus
             foreach(IKnxInterface inter in InterfaceList)
             {
                 if (inter.LastFound.Year == 1) continue;
-                if ((DateTime.Now - TimeSpan.FromMinutes(2)) > inter.LastFound)
+                if ((DateTime.Now - TimeSpan.FromMinutes(1)) > inter.LastFound)
                     toDelete.Add(inter);
             }
             _ = App._dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Normal, () =>
@@ -207,8 +219,8 @@ namespace Kaenx.Classes.Bus
 
             SearchForHid();
 
-            if (RemoteConnection.Instance.IsConnected)
-                _=RemoteConnection.Instance.ConnectionOut.Send(new Kaenx.Konnect.Remote.SearchRequest());
+            if (BusRemoteConnection.Instance.IsConnected)
+                _=BusRemoteConnection.Instance.Send(new Konnect.Remote.SearchRequest());
         }
 
         private async void SearchForHid()
@@ -295,9 +307,7 @@ namespace Kaenx.Classes.Bus
 
         private async void ExecuteAction()
         {
-
-
-            CurrentAction.Connection = KnxInterfaceHelper.GetConnection(SelectedInterface);
+            CurrentAction.Connection = KnxInterfaceHelper.GetConnection(SelectedInterface, BusRemoteConnection.Instance);
             CurrentAction.Connection.ConnectionChanged += Connection_ConnectionChanged;
             
             CurrentAction.ProgressIsIndeterminate = true;

@@ -47,7 +47,7 @@ namespace Kaenx.View
             this.InitializeComponent();
             ContentFrame.Navigated += ContentFrame_Navigated;
 
-            ViewBar.DataContext = Classes.Bus.RemoteConnection.Instance;
+            ViewBar.DataContext = Classes.Bus.BusRemoteConnection.Instance;
             InfoUpdate.DataContext = Classes.Project.UpdateManager.Instance;
             InfoChange.DataContext = Classes.Project.ChangeHandler.Instance;
             Log.Information("WorkdeskEasy initialisierung abgeschlossen");
