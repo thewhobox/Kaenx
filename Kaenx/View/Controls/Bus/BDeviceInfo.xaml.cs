@@ -153,7 +153,7 @@ namespace Kaenx.View.Controls.Bus
         private async void SetTest(object sender, RoutedEventArgs e)
         {
             LineDevice ldev = GetDevice();
-            IKnxConnection conn = KnxInterfaceHelper.GetConnection(BusConnection.Instance.SelectedInterface);
+            IKnxConnection conn = KnxInterfaceHelper.GetConnection(BusConnection.Instance.SelectedInterface, BusRemoteConnection.Instance);
             await conn.Connect();
             await System.Threading.Tasks.Task.Delay(2000);
             Konnect.Classes.BusDevice dev = new Konnect.Classes.BusDevice(ldev.LineName, conn);
@@ -167,7 +167,7 @@ namespace Kaenx.View.Controls.Bus
         private async void SetTest2(object sender, RoutedEventArgs e)
         {
             LineDevice ldev = GetDevice();
-            IKnxConnection conn = KnxInterfaceHelper.GetConnection(BusConnection.Instance.SelectedInterface);
+            IKnxConnection conn = KnxInterfaceHelper.GetConnection(BusConnection.Instance.SelectedInterface, BusRemoteConnection.Instance);
             await conn.Connect();
             await System.Threading.Tasks.Task.Delay(2000);
             Konnect.Classes.BusDevice dev = new Konnect.Classes.BusDevice(ldev.LineName, conn);

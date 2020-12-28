@@ -84,7 +84,7 @@ namespace Kaenx.View.Controls.Bus
                 return;
             }
 
-            conn = KnxInterfaceHelper.GetConnection(BusConnection.Instance.SelectedInterface);
+            conn = KnxInterfaceHelper.GetConnection(BusConnection.Instance.SelectedInterface, BusRemoteConnection.Instance);
             conn.OnTunnelResponse += Conn_OnTunnelResponse;
             try
             {
@@ -137,7 +137,7 @@ namespace Kaenx.View.Controls.Bus
 
                 Debug.WriteLine("New Connection");
 
-                IKnxConnection conn2 = KnxInterfaceHelper.GetConnection(BusConnection.Instance.SelectedInterface);
+                IKnxConnection conn2 = KnxInterfaceHelper.GetConnection(BusConnection.Instance.SelectedInterface, BusRemoteConnection.Instance);
                 await conn2.Connect();
 
                 BusDevice dev = new BusDevice(UnicastAddress.FromString("15.15.254"), conn2);

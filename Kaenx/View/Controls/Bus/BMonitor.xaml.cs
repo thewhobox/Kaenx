@@ -64,7 +64,7 @@ namespace Kaenx.View.Controls.Bus
                     return;
                 }
 
-                _conn = KnxInterfaceHelper.GetConnection(BusConnection.Instance.SelectedInterface);
+                _conn = KnxInterfaceHelper.GetConnection(BusConnection.Instance.SelectedInterface, BusRemoteConnection.Instance);
                 _conn.OnTunnelRequest += _conn_OnTunnelAction;
                 _conn.OnTunnelResponse += _conn_OnTunnelAction;
                 _conn.Connect();

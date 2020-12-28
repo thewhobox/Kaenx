@@ -215,7 +215,7 @@ namespace Kaenx.View
 
             ProgMax = addresses.Count;
             ProgValue = 0;
-            IKnxConnection _conn = KnxInterfaceHelper.GetConnection(conn.SelectedInterface);
+            IKnxConnection _conn = KnxInterfaceHelper.GetConnection(conn.SelectedInterface, BusRemoteConnection.Instance);
 
             try
             {
@@ -441,7 +441,7 @@ namespace Kaenx.View
             Action = "Starte Konfiguration auslesen...";
             CanDo = false;
 
-            IKnxConnection _conn = KnxInterfaceHelper.GetConnection(conn.SelectedInterface);
+            IKnxConnection _conn = KnxInterfaceHelper.GetConnection(conn.SelectedInterface, BusRemoteConnection.Instance);
 
             try
             {
