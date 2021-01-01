@@ -62,6 +62,7 @@ namespace Kaenx.Classes.Bus
         }
         private KnxIpTunneling searchConn = new KnxIpTunneling(new IPEndPoint(IPAddress.Parse("224.0.23.12"), 3671), true);
         private DispatcherTimer searchTimer = new DispatcherTimer() { Interval = TimeSpan.FromSeconds(10) };
+        private Dictionary<int, IKnxConnection> RemoteConnections = new Dictionary<int, IKnxConnection>();
 
 
 
@@ -93,11 +94,7 @@ namespace Kaenx.Classes.Bus
             searchConn.OnSearchResponse += SearchConn_OnSearchResponse;
             searchTimer.Tick += (a, b) => SearchForDevices();
             searchTimer.Start();
-            Task.Run(async () =>
-            {
-                await Task.Delay(3000);
-                //SearchForDevices();
-            });
+            SearchForDevices();
 
             BusRemoteConnection.Instance.OnRequest += ConnectionOut_OnRequest;
             BusRemoteConnection.Instance.OnResponse += Instance_OnResponse;
@@ -140,10 +137,13 @@ namespace Kaenx.Classes.Bus
                         i.LastFound = DateTime.Now;
                     }
                 }
+            } else if(message is Konnect.Remote.TunnelResponse)
+            {
+
             }
         }
 
-        private void ConnectionOut_OnRequest(Konnect.Remote.IRemoteMessage message)
+        private async void ConnectionOut_OnRequest(Konnect.Remote.IRemoteMessage message)
         {
             if(message is Kaenx.Konnect.Remote.SearchRequest)
             {
@@ -154,10 +154,42 @@ namespace Kaenx.Classes.Bus
                 _ = BusRemoteConnection.Instance.Send(resp, false);
             } else if(message is Konnect.Remote.TunnelRequest)
             {
-                //Konnect.Remote.TunnelRequest req = message as Konnect.Remote.TunnelRequest;
-                //string hash = Encoding.UTF8.GetString(req.)
-                //IKnxInterface inter = InterfaceList.Single(i => i.Hash == req.)
-                //Debug.WriteLine("W")
+                Konnect.Remote.TunnelRequest req = message as Konnect.Remote.TunnelRequest;
+                switch (req.Type)
+                {
+                    case Konnect.Remote.TunnelTypes.Connect:
+                        string hash = Encoding.UTF8.GetString(req.Data);
+                        IKnxInterface inter = InterfaceList.Single(i => i.Hash == hash);
+                        Debug.WriteLine("Request to Connect to: " + inter.Name);
+
+                        int conn = 0;
+                        do
+                        {
+                            conn = new Random().Next(1, 255);
+                        } while (RemoteConnections.ContainsKey(conn));
+
+                        RemoteConnections[conn] = KnxInterfaceHelper.GetConnection(inter, BusRemoteConnection.Instance);
+                        try
+                        {
+                            await RemoteConnections[conn].Connect();
+                            Konnect.Remote.TunnelResponse res = new Konnect.Remote.TunnelResponse();
+                            res.SequenceNumber = req.SequenceNumber;
+                            res.Group = req.Group;
+                            res.ChannelId = req.ChannelId;
+                            res.ConnId = conn;
+                            BusRemoteConnection.Instance.Send(res, false);
+                        } catch (Exception ex)
+                        {
+                            Konnect.Remote.TunnelResponse res = new Konnect.Remote.TunnelResponse();
+                            res.Group = req.Group;
+                            res.ChannelId = req.ChannelId;
+                            res.ConnId = 0;
+                            res.Data = Encoding.UTF8.GetBytes(ex.Message);
+                            BusRemoteConnection.Instance.Send(res, false);
+                        }
+                        break;
+
+                }
             }
         }
 
@@ -324,9 +356,12 @@ namespace Kaenx.Classes.Bus
                     await CurrentAction.Connection.Connect();
                 }
                 catch { }
-                await Task.Delay(500);
+                if(CurrentAction.Connection is KnxRemote)
+                    await Task.Delay(2000);
+                else
+                    await Task.Delay(500);
 
-                if (c == 5)
+                if (c == 3)
                 {
                     CurrentAction.TodoText = _cancelIsUser ? loader.GetString("Action_Canceled") : loader.GetString("Action_Timeout");
                     CurrentAction_Finished(null, null);

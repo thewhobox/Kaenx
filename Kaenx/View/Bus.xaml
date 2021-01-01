@@ -148,7 +148,11 @@
                     </ListView>
 
                     <!--<Button Grid.Row="5" HorizontalAlignment="Stretch" Content="Freigeben" Click="ClickRemoteShare" />-->
-                    <DropDownButton Name="InBtnRemote" Grid.Row="5" Grid.ColumnSpan="2" HorizontalAlignment="Stretch" Content="Einstellungen">
+                    <TextBlock x:Name="BlockStateRemote" Grid.Row="5" Grid.ColumnSpan="2" Margin="0 0 0 5">
+                        <Run Text="Status:" />
+                        <Run Text="{Binding State}" />
+                    </TextBlock>
+                    <DropDownButton Name="InBtnRemote" Grid.Row="6" Grid.ColumnSpan="2" HorizontalAlignment="Stretch" Content="Einstellungen">
                         <DropDownButton.Flyout>
                             <MenuFlyout Placement="BottomEdgeAlignedRight">
                                 <MenuFlyoutItem Text="Verbindung" Icon="Switch" Click="ClickRemoteConnect" />
@@ -157,10 +161,6 @@
                             </MenuFlyout>
                         </DropDownButton.Flyout>
                     </DropDownButton>
-                    <TextBlock x:Name="BlockStateRemote" Grid.Row="6" Grid.ColumnSpan="2">
-                        <Run Text="Status:" />
-                        <Run Text="{Binding State}" />
-                    </TextBlock>
                 </Grid>
             </toolkit:TabViewItem>
         </toolkit:TabView>

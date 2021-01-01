@@ -51,6 +51,7 @@ namespace Kaenx.View.Controls.Dialogs
                 case ConnectResponse connmsg:
                     BusRemoteConnection.Instance.IsConnected = true;
                     BusRemoteConnection.Instance.ChannelId = connmsg.ChannelId;
+                    BusRemoteConnection.Instance.GroupOut = req.Group;
                     OutState.Text = "ChannelId: " + connmsg.ChannelId;
                     break;
 

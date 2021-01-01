@@ -8,6 +8,6 @@ namespace Kaenx.Classes.Bus
 {
     public class BusRemoteConnection
     {
-        public static Kaenx.Konnect.Remote.RemoteConnection Instance { get; } = new Konnect.Remote.RemoteConnection();
+        public static Kaenx.Konnect.Connections.RemoteConnection Instance { get; } = new Konnect.Connections.RemoteConnection();
     }
 }
