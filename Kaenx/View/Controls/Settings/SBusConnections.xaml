@@ -272,6 +272,7 @@
                     <RowDefinition Height="auto" />
                     <RowDefinition />
                     <RowDefinition Height="auto" />
+                    <RowDefinition Height="auto" />
                 </Grid.RowDefinitions>
 
                 <TextBlock Grid.ColumnSpan="2" Text="Neue Remote Verbindung" VerticalAlignment="Center" FontSize="22" Margin="5 5 0 10" />
@@ -285,8 +286,25 @@
                     <TextBox Name="InRemoteAuth" HorizontalAlignment="Stretch" Header="Authentifizierung" />
                 </StackPanel>
 
-                <Button Grid.Row="2" Margin="5" Content="Testen" HorizontalAlignment="Stretch" Click="ClickTestRemote" />
-                <Button Grid.Row="2" Grid.Column="1" Margin="5" Content="Speichern" HorizontalAlignment="Stretch" Click="ClickSaveRemote" />
+                <toolkit:Expander Grid.Row="2" Grid.ColumnSpan="2" Header="Erweitert">
+                    <Grid Width="350">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition />
+                            <ColumnDefinition />
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition />
+                            <RowDefinition />
+                        </Grid.RowDefinitions>
+
+                        <TextBox Name="InRemoteGroup" PlaceholderText="Gruppe" Margin="5" />
+                        <TextBox Name="InRemoteCode" Grid.Column="1" PlaceholderText="Code" Margin="5" />
+                        <CheckBox Name="InRemoteSecure" Grid.Row="1" Grid.ColumnSpan="2" Content="Verbindung über HTTPS/WSS" Margin="5 0" IsChecked="True" />
+                    </Grid>
+                </toolkit:Expander>
+
+                <Button Grid.Row="3" Margin="5" Content="Testen" HorizontalAlignment="Stretch" Click="ClickTestRemote" />
+                <Button Grid.Row="3" Grid.Column="1" Margin="5" Content="Speichern" HorizontalAlignment="Stretch" Click="ClickSaveRemote" />
             </Grid>
         </Border>
 

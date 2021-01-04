@@ -309,6 +309,9 @@ namespace Kaenx.View.Controls.Settings
             rem.Name = InRemoteName.Text;
             rem.Authentification = InRemoteAuth.Text;
             rem.Host = InRemoteHost.Text;
+            rem.Group = InRemoteGroup.Text;
+            rem.Code = InRemoteCode.Text;
+            rem.IsSecure = InRemoteSecure.IsChecked == true;
 
             _context.Remotes.Add(rem);
             _context.SaveChanges();

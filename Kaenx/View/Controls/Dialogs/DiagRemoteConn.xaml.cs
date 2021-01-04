@@ -36,18 +36,10 @@ namespace Kaenx.View.Controls.Dialogs
 
         }
 
-        private void ContentDialog_PrimaryButtonClick(ContentDialog sender, ContentDialogButtonClickEventArgs args)
-        {
-        }
-
-        private void ContentDialog_SecondaryButtonClick(ContentDialog sender, ContentDialogButtonClickEventArgs args)
-        {
-        }
-
         private void ClickConnect(object sender, RoutedEventArgs e)
         {
             LocalRemote local = (LocalRemote)InRemote.SelectedItem;
-            _ = BusRemoteConnection.Instance.Connect(local.Host, local.Authentification);
+            _ = BusRemoteConnection.Instance.Connect(local.Host, local.Authentification, local.IsSecure, local.Group, local.Code);
         }
 
         private void ClickDisconnect(object sender, RoutedEventArgs e)

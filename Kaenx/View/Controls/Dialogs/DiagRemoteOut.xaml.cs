@@ -44,7 +44,7 @@ namespace Kaenx.View.Controls.Dialogs
 
             switch(resp)
             {
-                case StateMessage statemsg:
+                case StateResponse statemsg:
                     OutState.Text = statemsg.Code.ToString();
                     break;
 
@@ -56,7 +56,9 @@ namespace Kaenx.View.Controls.Dialogs
                     break;
 
                 default:
-                    throw new Exception("Unerwartete Antwort: DiagRemoteOut Connect - " + resp);
+                    OutState.Text = "Unbekannte Antwort: " + resp;
+                    //throw new Exception("Unerwartete Antwort: DiagRemoteOut Connect - " + resp);
+                    return;
             }
         }
     }
