@@ -128,20 +128,26 @@ namespace Kaenx.View.Controls.Bus
 
             string[] address = InAddress2.Text.Split(".");
 
-            try
+
+
+            if(SaveHelper._project != null && SaveHelper._project.Lines.Any(l => l.Id.ToString() == address[0]))
             {
                 Line l = SaveHelper._project.Lines.Single(l => l.Id.ToString() == address[0]);
-                LineMiddle lm = l.Subs.Single(l => l.Id.ToString() == address[1]);
-                LineDevice ld = lm.Subs.Single(l => l.Id.ToString() == address[2]);
-                dev = ld;
-            }
-            catch
-            {
-                ViewHelper.Instance.ShowNotification("main", "Adresse konnte keinem Gerät zugewiesen werden.", 3000, ViewHelper.MessageType.Warning);
+
+                if(l.Subs.Any(l => l.Id.ToString() == address[1]))
+                {
+                    LineMiddle lm = l.Subs.Single(l => l.Id.ToString() == address[1]);
+
+                    if(lm.Subs.Any(l => l.Id.ToString() == address[2]))
+                    {
+                        dev = lm.Subs.Single(l => l.Id.ToString() == address[2]);
+                    }
+                }
             }
 
             if (dev == null)
             {
+                ViewHelper.Instance.ShowNotification("main", "Adresse konnte keinem Gerät zugewiesen werden.", 3000, ViewHelper.MessageType.Warning);
                 Line dM = new Line { IsInit = true, Id = int.Parse(address[0]) };
                 LineMiddle dL = new LineMiddle { IsInit = true, Id = int.Parse(address[1]), Parent = dM };
                 dev = new LineDevice(true) { Name = "Unbekannt", Id = int.Parse(address[2]), Parent = dL };
