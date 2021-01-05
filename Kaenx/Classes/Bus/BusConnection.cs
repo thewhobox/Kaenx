@@ -130,11 +130,6 @@ namespace Kaenx.Classes.Bus
                     xinter.Name = inter.Name;
                     if (!InterfaceList.Any(i => i.Hash == xinter.Hash))
                     {
-                        if (inter is KnxInterfaceIp)
-                            xinter.Type = RemoteType.Ip;
-                        else if (inter is KnxInterfaceUsb)
-                            xinter.Type = RemoteType.Usb;
-
                         _=App._dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Normal, () =>
                         {
                             InterfaceList.Add(xinter);
