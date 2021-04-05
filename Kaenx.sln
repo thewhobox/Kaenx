@@ -11,6 +11,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Kaenx.Konnect", "..\Kaenx.K
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Kaenx.Migration", "..\Kaenx.Migration\Kaenx.Migration.csproj", "{C6B2F17F-2F0B-47A3-9E80-D94AAF1BD290}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Kaenx.Test", "Kaenx.Test\Kaenx.Test.csproj", "{0B09B3FB-1C6B-4C34-82F2-FC456B586D35}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU

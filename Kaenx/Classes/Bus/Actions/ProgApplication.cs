@@ -61,6 +61,8 @@ namespace Kaenx.Classes.Bus.Actions
 
         public UnloadHelper Helper;
         public IKnxConnection Connection { get; set; }
+        public CatalogContext Context { get => _context; set => _context = value; }
+
         private ApplicationViewModel app;
 
         private BusDevice dev;
@@ -77,11 +79,11 @@ namespace Kaenx.Classes.Bus.Actions
             _token = token;
 
 
-            Start();
+            _ = Start();
         }
 
 
-        private async void Start()
+        private async Task Start()
         {
             dev = new BusDevice(Device.LineName, Connection);
             TodoText = ProcedureType == ProcedureTypes.Load ? "Applikation schreiben" : "Gerät entladen";
@@ -89,7 +91,6 @@ namespace Kaenx.Classes.Bus.Actions
 
             if (ProcedureType == ProcedureTypes.Load || (Helper != null && (Helper.UnloadApplication || Helper.UnloadBoth)))
             {
-                CatalogContext _context = new CatalogContext();
                 AppAdditional adds = _context.AppAdditionals.Single(a => a.Id == Device.ApplicationId);
                 app = _context.Applications.Single(a => a.Id == Device.ApplicationId);
 
