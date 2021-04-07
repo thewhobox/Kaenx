@@ -58,6 +58,30 @@ namespace Kaenx.Classes.Bus.Actions
             }
         }
 
+        private string ProcedureSubType
+        {
+            get
+            {
+                switch (_type)
+                {
+                    case ProgAppType.Komplett:
+                        return "all";
+                    case ProgAppType.Partiell:
+                        if (!Device.LoadedApplication && !Device.LoadedGroup)
+                            return "par,grp";
+                        else if (!Device.LoadedApplication)
+                            return "par";
+                        else if (!Device.LoadedGroup)
+                            return "grp";
+                        else
+                            return "cfg";
+                    case ProgAppType.Minimal:
+                        throw new NotImplementedException("Minimal Programmieren");
+                    default:
+                        throw new InvalidOperationException("Unreachable");
+                }
+            }
+        }
 
         public UnloadHelper Helper;
         public IKnxConnection Connection { get; set; }
@@ -118,14 +142,14 @@ namespace Kaenx.Classes.Bus.Actions
                     case LoadProcedureTypes.Default:
                         temp = await GetKnxMaster();
                         temp = temp.Descendants(XName.Get("MaskVersion", temp.Name.NamespaceName)).Single(m => m.Attribute("Id").Value == app.Mask);
-                        procedure = temp.Descendants(XName.Get("Procedure", temp.Name.NamespaceName)).First(m => m.Attribute("ProcedureType").Value == procedureType); //TODO beachte ob komplett, minimal, etc
+                        procedure = temp.Descendants(XName.Get("Procedure", temp.Name.NamespaceName)).Single(m => m.Attribute("ProcedureType").Value == procedureType && m.Attribute("ProcedureSubType").Value == ProcedureSubType);
                         break;
 
                     case LoadProcedureTypes.Merge:
                         XElement temp2 = XDocument.Parse(Encoding.UTF8.GetString(adds.LoadProcedures)).Root;
                         temp = await GetKnxMaster();
                         temp = temp.Descendants(XName.Get("MaskVersion", temp.Name.NamespaceName)).Single(m => m.Attribute("Id").Value == app.Mask);
-                        temp = temp.Descendants(XName.Get("Procedure", temp.Name.NamespaceName)).First(m => m.Attribute("ProcedureType").Value == procedureType); //TODO beachte ob komplett, minimal, etc
+                        temp = temp.Descendants(XName.Get("Procedure", temp.Name.NamespaceName)).First(m => m.Attribute("ProcedureType").Value == procedureType && m.Attribute("ProcedureSubType").Value == ProcedureSubType);
 
                         IEnumerable<XElement> merges = temp2.Descendants(XName.Get("LoadProcedure", temp.Name.NamespaceName));
 
@@ -151,6 +175,25 @@ namespace Kaenx.Classes.Bus.Actions
                 XNamespace kaenxNS = XNamespace.Get("https://github.com/thewhobox/Kaenx");
                 connect.AddAfterSelf(new XElement(kaenxNS + "PreDownloadChecks"));
 
+                if (true) //TODO: if !device.HasApplicationProgram2
+                {
+                    foreach (XElement ctrl in procedure.Elements())
+                    {
+                        switch (ctrl.Name.LocalName)
+                        {
+                            case "LdCtrlUnload":
+                                if (ctrl.Attribute("LsmIdx").Value == "5")
+                                    ctrl.SetAttributeValue("OnError", "Ignore");
+                                break;
+                            case "LdCtrlLoad":
+                            case "LdCtrlWriteProp":
+                            case "LdCtrlLoadCompleted":
+                                if (ctrl.Attribute("LsmIdx").Value == "5")
+                                    ctrl.Remove();
+                                break;
+                        }
+                    }
+                }
 
                 double stepSize = 100.0 / procedure.Elements().Count();
                 double currentProg = 0;
