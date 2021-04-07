@@ -375,7 +375,7 @@ namespace Kaenx.Classes.Bus.Actions
 
 
 
-            if(Helper != null && (Helper.UnloadAddress || Helper.UnloadBoth))
+            if (Helper != null && (Helper.UnloadAddress || Helper.UnloadBoth))
             {
                 await dev.Connect();
                 string mask = await dev.DeviceDescriptorRead();
@@ -796,7 +796,11 @@ namespace Kaenx.Classes.Bus.Actions
 
         private async Task LsmState(XElement ctrl, int counter = 0)
         {
-            byte[] data = new byte[app.IsRelativeSegment ? 10 : 11];
+            XNamespace ns = dev.MaskXML.GetDefaultNamespace();
+            XElement propertyLsmFeature = dev.MaskXML.Element(ns + "HawkConfigurationData").Element(ns + "Features").Elements().FirstOrDefault(x => x.Attribute("Name").Value == "PropertyMappedLsms");
+            bool useProperty = propertyLsmFeature != null && propertyLsmFeature.Attribute("Value").Value == "1";
+
+            byte[] data = new byte[useProperty ? 10 : 11];
             int lsmIdx = int.Parse(ctrl.Attribute("LsmIdx").Value);
             int state = 1;
             switch (ctrl.Name.LocalName)
@@ -813,7 +817,7 @@ namespace Kaenx.Classes.Bus.Actions
             }
 
 
-            if (app.IsRelativeSegment)
+            if (useProperty)
             {
                 data[0] = Convert.ToByte(state);
                 await dev.PropertyWrite(BitConverter.GetBytes(lsmIdx)[0], 5, data);
