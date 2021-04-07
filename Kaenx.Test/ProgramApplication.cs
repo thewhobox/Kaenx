@@ -62,6 +62,7 @@ namespace Kaenx.Test
             {
                 Id = progApplication.Device.ApplicationId,
                 Mask = "MV-07B0",
+                Manufacturer = 0x0188,
                 LoadProcedure = LoadProcedureTypes.Merge
             });
             progApplication.Context.SaveChanges();
@@ -71,8 +72,6 @@ namespace Kaenx.Test
             progApplication.Connection = connection;
 
             connection.Expect(new MsgConnectReq(address));
-            connection.Expect(new MsgDescriptorReadReq(address));
-            connection.Response(ApciTypes.DeviceDescriptorResponse, 0x07, 0xB0);
 
             const byte DEVICE = 0;
             const byte ADDRESS_TABLE = 1;
@@ -93,16 +92,21 @@ namespace Kaenx.Test
             const byte PID_MAX_APDULENGTH = 56;
             const byte PID_HARDWARE_TYPE = 78;
 
-            connection.Expect(new MsgPropertyReadReq(DEVICE, PID_MAX_APDULENGTH, address));
-            connection.Response(ApciTypes.PropertyDescriptionResponse, DEVICE, PID_MAX_APDULENGTH, 0x10, 0x01, 0x00, 254);
-            //connection.Expect(new MsgAuthorizeReq(address, level = 0, key = 0xffffffff));
-            connection.Response(ApciTypes.AuthorizeResponse, 0);
-
             // Pre download checks
+            connection.Expect(new MsgDescriptorReadReq(address));
+            connection.Response(ApciTypes.DeviceDescriptorResponse, 0x07, 0xB0);
+            connection.Expect(new MsgPropertyReadReq(DEVICE, PID_MAX_APDULENGTH, address));
+            connection.Response(ApciTypes.PropertyValueResponse, DEVICE, PID_MAX_APDULENGTH, 0x10, 0x01, 0x00, 254);
+            //connection.Expect(new MsgAuthorizeReq(address, level = 0, key = 0xffffffff));
+            //connection.Response(ApciTypes.AuthorizeResponse, 0);
+
             //connection.Expect(new MsgPropertyDescRead(ASSOCIATION_TABLE, PID_TABLE, address));
-            connection.Response(ApciTypes.PropertyDescriptionResponse, ASSOCIATION_TABLE, PID_TABLE, 0x03, 0x12, 0x00, 0x01, 0x30);
+            //connection.Response(ApciTypes.PropertyDescriptionResponse, ASSOCIATION_TABLE, PID_TABLE, 0x03, 0x12, 0x00, 0x01, 0x30);
+
+            /* Not According to documentation, but ETS does this anyway
             connection.Expect(new MsgPropertyReadReq(DEVICE, PID_SERIAL_NUMBER, address));
             connection.Response(ApciTypes.PropertyValueResponse, DEVICE, PID_SERIAL_NUMBER, 0x10, 0x01, 0x01, 0x88, 0x00, 0x00, 0x00, 0x00);
+            */
             connection.Expect(new MsgPropertyReadReq(DEVICE, PID_MANUFACTURER_ID, address));
             connection.Response(ApciTypes.PropertyValueResponse, DEVICE, PID_MANUFACTURER_ID, 0x10, 0x01, 0x01, 0x88);
             connection.Expect(new MsgPropertyReadReq(DEVICE, PID_VERSION, address));
@@ -228,6 +232,7 @@ namespace Kaenx.Test
 
         public readonly Queue<IMessage> ExpectedMessages = new Queue<IMessage>();
         private byte sequenceCounter = 0;
+        private int sequenceNumber = 0;
 
         public void Expect(IMessageRequest message)
         {
@@ -236,7 +241,10 @@ namespace Kaenx.Test
 
         public void Response(ApciTypes resApci, params byte[] resData)
         {
-            ExpectedMessages.Enqueue(new MsgDefaultRes() { ApciType = resApci, Raw = resData });
+            if (resApci == ApciTypes.PropertyValueResponse)
+                ExpectedMessages.Enqueue(new MsgPropertyReadRes(resData));
+            else
+                ExpectedMessages.Enqueue(new MsgDefaultRes() { ApciType = resApci, Raw = resData });
         }
 
         public Task Connect()
@@ -277,7 +285,10 @@ namespace Kaenx.Test
 
             while (ExpectedMessages.Count != 0 && ExpectedMessages.Peek() is IMessageResponse)
             {
-                OnTunnelResponse?.Invoke((IMessageResponse)ExpectedMessages.Dequeue());
+                IMessageResponse response = (IMessageResponse)ExpectedMessages.Dequeue();
+                response.SequenceNumber = sequenceNumber;
+                sequenceNumber = (sequenceNumber + 1) % 16;
+                OnTunnelResponse?.Invoke(response);
             }
             return Task.FromResult(message.SequenceCounter);
         }

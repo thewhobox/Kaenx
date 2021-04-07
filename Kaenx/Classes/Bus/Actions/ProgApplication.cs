@@ -147,6 +147,9 @@ namespace Kaenx.Classes.Bus.Actions
                         break;
                 }
 
+                XElement connect = procedure.Elements(procedure.GetDefaultNamespace() + "LdCtrlConnect").First();
+                XNamespace kaenxNS = XNamespace.Get("https://github.com/thewhobox/Kaenx");
+                connect.AddAfterSelf(new XElement(kaenxNS + "PreDownloadChecks"));
 
 
                 double stepSize = 100.0 / procedure.Elements().Count();
@@ -236,6 +239,77 @@ namespace Kaenx.Classes.Bus.Actions
 
                             case "LdCtrlWriteMem":
                                 await WriteMemory(adds, ctrl);
+                                break;
+
+                            case "PreDownloadChecks":
+                                {
+                                    await dev.DeviceDescriptorRead(await GetKnxMaster());
+                                    ushort databaseMask = ushort.Parse(app.Mask.Replace("MV-", ""), System.Globalization.NumberStyles.HexNumber);
+                                    if (databaseMask != dev.MaskVersion)
+                                        throw new Exception($"Maskenversion im Gerät ({dev.MaskVersion:X4}) stimmt nicht mit der Produktdatenbank ({databaseMask:X4}) überein");
+                                    //Medium independant
+                                    int maskVersion = (ushort)dev.MaskVersion & 0x0fff;
+                                    await dev.ReadMaxAPDULength();
+
+                                    //TODO: When to authorize
+
+                                    bool programAssociations = _type == ProgAppType.Komplett || !Device.LoadedGroup;
+                                    if (maskVersion == 0x07B0 && programAssociations)
+                                    {
+                                        //TODO: Read ASSOCIATION_TABLE PropertyDescription of PID_TABLE to determine if short or long associations are used
+                                    }
+
+                                    if (_type == ProgAppType.Komplett)
+                                    {
+                                        string maskString = $"MV-{dev.MaskVersion:X4}";
+                                        if (maskVersion != 0x0701 && !(0x0910 <= maskVersion && maskVersion <= 0x091f))
+                                        {
+                                            int deviceManufacturer = await dev.PropertyRead<int>(maskString, "DeviceManufacturerId");
+                                            if (app.Manufacturer != deviceManufacturer)
+                                                throw new Exception("Hersteller des Gerätes ist nicht gleich mit der Produktdatenbank");
+                                        }
+                                        //TODO: PortADDR for BCU1 (Memory: 010C) and BCU2 (PID_PORT_CONFIGURATION in device object)
+                                        // Compare to download image 010C if this address is included
+                                        if (maskVersion == 0x07B0)
+                                        {
+                                            const byte PID_ORDER_INFO = 15;
+                                            const byte PID_VERSION = 25;
+                                            const byte PID_HARDWARE_TYPE = 78;
+                                            await dev.PropertyRead(0, PID_VERSION);
+                                            await dev.PropertyRead(0, PID_HARDWARE_TYPE);
+                                            await dev.PropertyRead(0, PID_ORDER_INFO);
+                                            //TODO: Compare if properties are included in download image 
+                                            // KNX suggests an unused ParameterTypeRestriction with a default including BinaryValue = Value to compare, and a Property Parameter with respective objIdx and propId
+                                            // Compare PID_ORDER_INFO and PID_HARDWARE_TYPE with ==, PID_VERSION with >= according to DPT 217.001
+                                        }
+                                    }
+                                    else if (_type == ProgAppType.Partiell)
+                                    {
+                                        // if has load state machine: PID_LOAD_STATE_CONTROL of ApplicationProgram must be loaded
+                                        if (maskVersion < 0x0910 || 0x091f < maskVersion)
+                                        {
+                                            // ApplicationId must be equal to ProductDatabase
+                                        }
+
+                                        if (maskVersion == 0x0701 || maskVersion == 0x0705 || maskVersion == 0x07B0)
+                                        {
+                                            if (false) // Has ApplicationProgram2
+                                            {
+                                                // PID_LOAD_STATE_CONTROL of InterfaceProgram must be loaded
+                                                // InterfaceProgramId must be equal to ProductDatabase
+                                            }
+                                            else
+                                            {
+                                                // PID_LOAD_STATE_CONTROL of InterfaceProgram must be unloaded
+                                            }
+                                        }
+                                        throw new NotImplementedException();
+                                    }
+                                    else
+                                    {
+                                        throw new NotImplementedException();
+                                    }
+                                }
                                 break;
 
                             default:
