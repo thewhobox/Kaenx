@@ -45,8 +45,8 @@ namespace Kaenx.View
         public Bus()
         {
             this.InitializeComponent();
-            InBtnRemote.DataContext = BusRemoteConnection.Instance;
-            BlockStateRemote.DataContext = BusRemoteConnection.Instance;
+            InBtnRemote.DataContext = BusRemoteConnection.Instance.Remote;
+            BlockStateRemote.DataContext = BusRemoteConnection.Instance.Remote;
         }
         protected override void OnNavigatedTo(NavigationEventArgs e)
         {
@@ -98,7 +98,7 @@ namespace Kaenx.View
             }
 
             BtnTest.IsEnabled = false;
-            IKnxConnection conn = KnxInterfaceHelper.GetConnection(BusConnection.Instance.SelectedInterface, BusRemoteConnection.Instance);
+            IKnxConnection conn = await KnxInterfaceHelper.GetConnection(BusConnection.Instance.SelectedInterface, BusRemoteConnection.Instance.Remote, BusConnection.Instance.GetDevice);
             try
             {
                 await conn.Connect();

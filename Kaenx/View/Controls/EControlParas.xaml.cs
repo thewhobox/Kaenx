@@ -197,6 +197,15 @@ namespace Kaenx.Views.Easy.Controls
 
                         foreach (IDynParameter para in block.Parameters)
                         {
+                            try
+                            {
+
+                                Hash2Param.Add(para.Hash, para);
+                            }
+                            catch
+                            {
+
+                            }
                             if (!para.HasAccess)
                             {
                                 para.Visible = Visibility.Collapsed;
@@ -210,15 +219,7 @@ namespace Kaenx.Views.Easy.Controls
                                 Id2Param.Add(para.Id, new ViewParamModel(para.Value));
 
                             Id2Param[para.Id].Parameters.Add(para);
-                            try
-                            {
-
-                                Hash2Param.Add(para.Hash, para);
-                            }
-                            catch
-                            {
-
-                            }
+                            
                             //para.PropertyChanged += Para_PropertyChanged;
                         }
                     }
@@ -399,11 +400,13 @@ namespace Kaenx.Views.Easy.Controls
 
             IEnumerable<IDynParameter> list3 = Hash2Param.Values.Where(p => p.Conditions.Any(c => c.SourceId == para.Id || list5.Contains(c.SourceId)));
             foreach (IDynParameter par in list3)
-                par.Visible = SaveHelper.CheckConditions(par.Conditions, Id2Param) ? Visibility.Visible : Visibility.Collapsed;
+                if(par.HasAccess)
+                    par.Visible = SaveHelper.CheckConditions(par.Conditions, Id2Param) ? Visibility.Visible : Visibility.Collapsed;
 
             foreach (IDynChannel ch in Channels)
             {
-                ch.Visible = SaveHelper.CheckConditions(ch.Conditions, Id2Param) ? Visibility.Visible : Visibility.Collapsed;
+                if(ch.HasAccess)
+                    ch.Visible = SaveHelper.CheckConditions(ch.Conditions, Id2Param) ? Visibility.Visible : Visibility.Collapsed;
 
                 foreach (ParameterBlock block in ch.Blocks)
                     if (block.HasAccess)

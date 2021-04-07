@@ -32,6 +32,7 @@ using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Controls.Primitives;
 using Windows.UI.Xaml.Input;
 using Windows.UI.Xaml.Media.Imaging;
+using Windows.UI.Xaml.Navigation;
 
 // The Blank Page item template is documented at http://go.microsoft.com/fwlink/?LinkId=402352&clcid=0x409
 
@@ -76,10 +77,21 @@ namespace Kaenx.View
             LoadProjects();
         }
 
+
+        protected override void OnNavigatedTo(NavigationEventArgs e)
+        {
+            base.OnNavigatedTo(e);
+            
+            if(e.Parameter != null && e.Parameter is string && !string.IsNullOrEmpty(e.Parameter.ToString()))
+            {
+                Notify.Show(e.Parameter.ToString());
+            }
+        }
+
         private async void LoadProjects()
         {
             LocalContext context = new LocalContext();
-            foreach (LocalProject model in context.Projects.ToList())
+            foreach (LocalProject model in context.Projects.OrderByDescending(lp => lp.LastOpened).ToList())
             {
                 ProjectViewHelper helper = new ProjectViewHelper
                 {
@@ -181,6 +193,14 @@ namespace Kaenx.View
                 return;
             }
 
+
+            helper.Local.LastOpened = DateTime.Now;
+
+            LocalContext context = new LocalContext();
+            context.Projects.Update(helper.Local);
+            context.SaveChanges();
+
+
             ChangeHandler.Instance = new ChangeHandler(project.Id);
             Serilog.Log.Information("Projekt geöffnet: " + project.Id + " - " + project.Name);
 
@@ -194,6 +214,7 @@ namespace Kaenx.View
                 if (jumpList.Items.Any(i => i.Arguments == "open:" + helper.Id))
                 {
                     JumpListItem itemN = jumpList.Items.Single(i => i.Arguments == "open:" + helper.Id);
+                    itemN.Logo = new Uri("ms-appx:///Assets/FileLogo.png");
                     jumpList.Items.Remove(itemN);
                     jumpList.Items.Insert(0, itemN);
                 }
@@ -339,6 +360,7 @@ namespace Kaenx.View
                 ProjectId = proj.Id,
                 Name = proj.Name,
                 Thumbnail = proj.Image,
+                LastOpened = DateTime.Now,
                 ConnectionId = proj.Connection.Id,
                 IsReconstruct = tag == "rec"
             };
@@ -430,15 +452,6 @@ namespace Kaenx.View
             }
 
             DoOpenProject(helper);
-        }
-
-        private async void TestUSB(object sender, RoutedEventArgs e)
-        {
-            var selector = HidDevice.GetDeviceSelector(0xFFA0, 0x0001);
-            var devices = await DeviceInformation.FindAllAsync(selector);
-
-            Kaenx.Konnect.Connections.KnxUsbTunneling usb = new Konnect.Connections.KnxUsbTunneling(devices[0].Id);
-            await usb.Connect();
         }
 
         private void Dev_InputReportReceived(HidDevice sender, HidInputReportReceivedEventArgs args)

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
@@ -31,6 +32,7 @@ namespace Kaenx.Classes.Dynamic
         }
 
         public bool HasAccess { get; set; }
+        [JsonProperty("o")]
         public List<ParamEnumOption> Options { get; set; }
         public bool IsEnabled { get; set; } = true;
         public List<ParamCondition> Conditions { get; set; }

@@ -26,6 +26,15 @@
             </Button>
         </StackPanel>
 
+        <StackPanel Orientation="Horizontal" Margin="10" HorizontalAlignment="Right">
+
+            <TextBox Name="InDestination" PlaceholderText="Gruppenadresse x/x/x" Margin="20 0 0 0" Width="100" />
+            <TextBox Name="InData" PlaceholderText="Hex-Wert 02BF" Margin="20 0 5 0" MinWidth="100" />
+
+            <Button Content="Schreiben" VerticalAlignment="Stretch" Margin="5 0" Click="Monitor_Write" />
+            <Button Content="Lesen" VerticalAlignment="Stretch" Margin="5 0 0 0" Click="Monitor_Read" />
+        </StackPanel>
+
         <toolkit:DataGrid x:Name="GridBusMonitor" Grid.Row="1"  AutoGenerateColumns="False" IsReadOnly="True" ItemsSource="{Binding}">
             <toolkit:DataGrid.Columns>
                 <toolkit:DataGridTextColumn Header="Zeit" Binding="{Binding Time}" />

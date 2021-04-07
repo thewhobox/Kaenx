@@ -159,7 +159,7 @@ namespace Kaenx.View.Controls.Bus
         private async void SetTest(object sender, RoutedEventArgs e)
         {
             LineDevice ldev = GetDevice();
-            IKnxConnection conn = KnxInterfaceHelper.GetConnection(BusConnection.Instance.SelectedInterface, BusRemoteConnection.Instance);
+            IKnxConnection conn = await KnxInterfaceHelper.GetConnection(BusConnection.Instance.SelectedInterface, BusRemoteConnection.Instance.Remote, BusConnection.Instance.GetDevice);
             await conn.Connect();
             await System.Threading.Tasks.Task.Delay(2000);
             Konnect.Classes.BusDevice dev = new Konnect.Classes.BusDevice(ldev.LineName, conn);
@@ -173,7 +173,7 @@ namespace Kaenx.View.Controls.Bus
         private async void SetTest2(object sender, RoutedEventArgs e)
         {
             LineDevice ldev = GetDevice();
-            IKnxConnection conn = KnxInterfaceHelper.GetConnection(BusConnection.Instance.SelectedInterface, BusRemoteConnection.Instance);
+            IKnxConnection conn = await KnxInterfaceHelper.GetConnection(BusConnection.Instance.SelectedInterface, BusRemoteConnection.Instance.Remote, BusConnection.Instance.GetDevice);
             await conn.Connect();
             await System.Threading.Tasks.Task.Delay(2000);
             Konnect.Classes.BusDevice dev = new Konnect.Classes.BusDevice(ldev.LineName, conn);
@@ -189,6 +189,21 @@ namespace Kaenx.View.Controls.Bus
             ICollectionViewGroup group = e.RowGroupHeader.CollectionViewGroup;
             GroupInfoCollection<OtherResource> g = group.Group as GroupInfoCollection<OtherResource>;
             e.RowGroupHeader.PropertyValue = g.Key;
+        }
+
+        private async void ReadMax(object sender, RoutedEventArgs e)
+        {
+            LineDevice ldev = GetDevice();
+            IKnxConnection conn = await KnxInterfaceHelper.GetConnection(BusConnection.Instance.SelectedInterface, BusRemoteConnection.Instance.Remote, BusConnection.Instance.GetDevice);
+            await conn.Connect();
+            await System.Threading.Tasks.Task.Delay(2000);
+            Konnect.Classes.BusDevice dev = new Konnect.Classes.BusDevice(ldev.LineName, conn);
+            await dev.Connect(true);
+            int resp = await dev.PropertyRead<int>(0, 56);
+            ViewHelper.Instance.ShowNotification("main", "MaxAPDU: " + resp, 3000, ViewHelper.MessageType.Info);
+            dev.Disconnect();
+            await System.Threading.Tasks.Task.Delay(200);
+            await conn.Disconnect();
         }
     }
 }

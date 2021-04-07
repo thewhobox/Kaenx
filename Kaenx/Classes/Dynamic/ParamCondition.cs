@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -8,8 +9,12 @@ namespace Kaenx.Classes.Dynamic
 {
     public class ParamCondition
     {
+
+        [JsonProperty("s")]
         public string SourceId { get; set; }
+        [JsonProperty("v")]
         public string Values { get; set; }
+        [JsonProperty("o")]
         public ConditionOperation Operation { get; set; }
 
         public ParamCondition() { }

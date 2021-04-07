@@ -32,7 +32,7 @@ namespace Kaenx.View.Controls.Dialogs
             //ListGroups.SelectedItem = null;
             CodesRequest req = new CodesRequest();
             req.Action = CodeRequestActions.Create;
-            req.Group = BusRemoteConnection.Instance.Group;
+            req.Group = BusRemoteConnection.Instance.Remote.Group;
 
             if(InCode.Text != "")
             {
@@ -40,7 +40,7 @@ namespace Kaenx.View.Controls.Dialogs
                 InCode.Text = "";
             }
 
-            IRemoteMessage resp = await BusRemoteConnection.Instance.Send(req);
+            IRemoteMessage resp = await BusRemoteConnection.Instance.Remote.Send(req);
             
             if(resp is CodesResponse)
             {
@@ -56,8 +56,8 @@ namespace Kaenx.View.Controls.Dialogs
         private async void ClickReload(object sender, RoutedEventArgs e)
         {
             CodesRequest req = new CodesRequest();
-            req.Group = BusRemoteConnection.Instance.Group;
-            IRemoteMessage resp = await BusRemoteConnection.Instance.Send(req);
+            req.Group = BusRemoteConnection.Instance.Remote.Group;
+            IRemoteMessage resp = await BusRemoteConnection.Instance.Remote.Send(req);
 
             if (resp is CodesResponse)
             {
@@ -74,9 +74,9 @@ namespace Kaenx.View.Controls.Dialogs
         {
             CodesRequest req = new CodesRequest();
             req.Action = CodeRequestActions.Remove;
-            req.Group = BusRemoteConnection.Instance.Group;
+            req.Group = BusRemoteConnection.Instance.Remote.Group;
             req.Code = ListCodes.SelectedItem as string;
-            IRemoteMessage resp = await BusRemoteConnection.Instance.Send(req);
+            IRemoteMessage resp = await BusRemoteConnection.Instance.Remote.Send(req);
 
             if (resp is CodesResponse)
             {

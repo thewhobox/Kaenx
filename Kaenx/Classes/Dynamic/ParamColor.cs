@@ -1,4 +1,5 @@
 ﻿using Microsoft.Toolkit.Uwp.Helpers;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -43,6 +44,7 @@ namespace Kaenx.Classes.Dynamic
         }
 
         private Windows.UI.Color _color;
+        [JsonProperty("co")]
         public Windows.UI.Color Color
         {
             get { return _color; }

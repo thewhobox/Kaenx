@@ -24,7 +24,7 @@ namespace Kaenx.View.Controls.Dialogs
         public DiagRemoteOut()
         {
             this.InitializeComponent();
-            this.DataContext = BusRemoteConnection.Instance;
+            this.DataContext = BusRemoteConnection.Instance.Remote;
         }
 
         private void ContentDialog_PrimaryButtonClick(ContentDialog sender, ContentDialogButtonClickEventArgs args)
@@ -40,7 +40,7 @@ namespace Kaenx.View.Controls.Dialogs
             ConnectRequest req = new ConnectRequest();
             req.Group = InGroup.Text;
             req.Code = InCode.Text;
-            IRemoteMessage resp = await BusRemoteConnection.Instance.Send(req);
+            IRemoteMessage resp = await BusRemoteConnection.Instance.Remote.Send(req);
 
             switch(resp)
             {
@@ -49,7 +49,8 @@ namespace Kaenx.View.Controls.Dialogs
                     break;
 
                 case ConnectResponse connmsg:
-                    BusRemoteConnection.Instance.IsConnected = true;
+                    BusRemoteConnection.Instance.Remote.IsConnected = true;
+                    BusRemoteConnection.Instance.Remote.ChannelId = connmsg.ChannelId;
                     OutState.Text = "ChannelId: " + connmsg.ChannelId;
                     break;
 

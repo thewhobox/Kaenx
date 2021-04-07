@@ -12,7 +12,7 @@
     Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
     <Page.Resources>
         <conv:BoolNegationConverter x:Key="BoolNegator" />
-        <conv:BoolToObjectConverter x:Key="BoolToBackground" TrueValue="Orange" FalseValue="Transparent" />
+        <conv:BoolToVisibilityConverter x:Key="BoolToVis" />
     </Page.Resources>
 
     <Grid Margin="0 10 0 0">
@@ -117,13 +117,23 @@
 
 
                     <TextBlock x:Uid="/Bus/TabsInterfacesSelected" Grid.ColumnSpan="2" Foreground="{ThemeResource SystemAccentColorDark1}" VerticalAlignment="Center" Margin="10 0 0 0" />
-                    <Button x:Name="BtnTest" Grid.ColumnSpan="2" HorizontalAlignment="Right" Margin="0 0 10 0" ToolTipService.ToolTip="Schnittstelle testen" Click="ClickTestInterface">
+                    <Button x:Name="BtnTest" Grid.ColumnSpan="2" HorizontalAlignment="Right" Margin="0 0 5 0" Height="25" ToolTipService.ToolTip="Schnittstelle testen" Click="ClickTestInterface">
                         <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="&#xF142;"/>
                     </Button>
-                    <StackPanel Grid.Row="1" Grid.ColumnSpan="2" DataContext="{Binding SelectedInterface}" Orientation="Vertical" Margin="10 5">
-                        <TextBlock Text="{Binding Name}" />
-                        <TextBlock Text="{Binding Description}" FontSize="10" Foreground="Gray" />
-                    </StackPanel>
+
+                    <Grid Grid.Row="1" Grid.ColumnSpan="2" Margin="0 10 0 0" DataContext="{Binding SelectedInterface}">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition />
+                            <ColumnDefinition Width="auto" />
+                        </Grid.ColumnDefinitions>
+                        <StackPanel Orientation="Vertical" Margin="10 5">
+                            <TextBlock Text="{Binding Name}" />
+                            <TextBlock Text="{Binding Description}" FontSize="10" Foreground="Gray" />
+                        </StackPanel>
+                        <Border Grid.Column="1" BorderThickness="5 0" Background="DarkOrange" Visibility="{Binding IsRemote, Converter={StaticResource BoolToVis}}">
+                            <FontIcon Glyph="&#xE8AF;" Margin="8 0" Foreground="White" />
+                        </Border>
+                    </Grid>
 
                     <TextBlock x:Uid="/Bus/TabsInterfacesList" Grid.Row="2" Grid.ColumnSpan="2" Foreground="{ThemeResource SystemAccentColorDark1}" Margin="10 20 0 0" />
                     <ListView x:Name="ListInterfaces" Grid.Row="3" Grid.ColumnSpan="2" ItemsSource="{Binding InterfaceList}" SelectedItem="{Binding SelectedInterface, Mode=TwoWay}">
@@ -137,11 +147,20 @@
                         <ListView.ItemTemplate>
                             <DataTemplate>
                                 <Grid>
-                                    <Border BorderThickness="5 0" BorderBrush="{Binding IsRemote, Converter={StaticResource BoolToBackground}}" />
-                                    <StackPanel Orientation="Vertical" Padding="10 5">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition />
+                                        <ColumnDefinition Width="auto" />
+                                    </Grid.ColumnDefinitions>
+                                    
+                                    <StackPanel Orientation="Vertical" Padding="10 5 0 5">
                                         <TextBlock Text="{Binding Name}" />
                                         <TextBlock Text="{Binding Description}" FontSize="10" Foreground="Gray" />
                                     </StackPanel>
+
+
+                                    <Border Grid.Column="1" BorderThickness="5 0" Background="DarkOrange" Visibility="{Binding IsRemote, Converter={StaticResource BoolToVis}}">
+                                        <FontIcon Glyph="&#xE8AF;" Margin="8 0" Foreground="White" />
+                                    </Border>
                                 </Grid>
                             </DataTemplate>
                         </ListView.ItemTemplate>

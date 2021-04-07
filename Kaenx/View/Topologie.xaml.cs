@@ -281,45 +281,15 @@ namespace Kaenx.View
 
         private async void DoOpenParas(LineDevice device)
         {
+            if (SelectedDevice == device) return;
+
             SelectedDevice = device;
-            EControlParas paras;
-            bool isFromCache = false;
+            EControlParas paras = new EControlParas(device);
 
-            if (!Window.Current.CoreWindow.GetKeyState(VirtualKey.Shift).HasFlag(CoreVirtualKeyStates.Down) && ParamStack.Any(p => p.id == device.UId))
-            {
-                (UIElement ui, int id) element = ParamStack.Single(i => i.id == device.UId);
-                paras = (EControlParas)element.ui;
-                isFromCache = true;
-            }
-            else
-            {
-                paras = new EControlParas(device);
-
-                if (ParamStack.Any(p => p.id == device.UId))
-                {
-                    var ele = ParamStack.Single(i => i.id == device.UId);
-                    ele.ui = paras;
-                } else
-                {
-                    ParamStack.Add((paras, device.UId));
-                }
-
-                if (ParamStack.Count >= 5) //TODO move to app settings
-                {
-                    ParamStack.RemoveAt(0);
-                }
-            }
 
             ParamPresenter.Content = paras;
-
-            if (ColsPara.Width.Value == 0)
-                SubNavPanel.SelectedItem = SubNavPanel.MenuItems[1];
-
-            if (!isFromCache)
-            {
-                await Task.Delay(500);
-                paras.Start();
-            }
+            await Task.Delay(500);
+            paras.Start();
         }
 
 
@@ -695,17 +665,29 @@ namespace Kaenx.View
             }
         }
 
-        private async void OpenInNewWindow(object sender, RoutedEventArgs e)
+        private void OpenInNewWindow(object sender, RoutedEventArgs e)
+        {
+            OpenInNewWindow(SelectedDevice);
+        }
+
+        private async void OpenInNewWindow(LineDevice device)
         {
             if (ParamPresenter.Content == null)
                 return;
 
             AppWindow appWindow = await AppWindow.TryCreateAsync();
             appWindow.Title = "Neues Fenster";
-            UIElement ele = ParamPresenter.Content as UIElement;
+            //UIElement ele = ParamPresenter.Content as UIElement;
             ParamPresenter.Content = null;
-            ElementCompositionPreview.SetAppWindowContent(appWindow, ele);
+
+
+            EControlParas paras = new EControlParas(device);
+
+            ElementCompositionPreview.SetAppWindowContent(appWindow, paras);
             await appWindow.TryShowAsync();
+
+            await Task.Delay(500);
+            paras.Start();
 
             appWindow.Closed += delegate
             {

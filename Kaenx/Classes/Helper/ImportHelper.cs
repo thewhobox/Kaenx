@@ -142,7 +142,7 @@ namespace Kaenx.Classes.Helper
                     catch (Exception e)
                     {
                         Log.Error(e, "Hardware Fehler!");
-                        OnError?.Invoke(device.ApplicationId + ": " + e.Message);
+                        OnError?.Invoke(device.ApplicationId + ": " + e.Message + Environment.NewLine + e.StackTrace);
                         device.Icon = Symbol.ReportHacked;
                         continue;
                     }
@@ -166,10 +166,10 @@ namespace Kaenx.Classes.Helper
 
                     if (!isOk)
                     {
-                        Log.Error("Check mit Warnungen bestanden! " + string.Join(",", errs));
+                        Log.Warning("Check mit Warnungen bestanden! " + string.Join(",", errs));
                         OnWarning?.Invoke(device.ApplicationId + ": Die Applikation hat die Überprüfung nicht bestanden. (evtl. Plugin benötigt) " + string.Join(",", errs));
-                        device.Icon = Symbol.ReportHacked;
-                        continue;
+                        //_ = App._dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Normal, () => device.Icon = Symbol.ReportHacked);
+                        //continue;
                     }
 
                     if (errs.Count > 0)
@@ -347,11 +347,19 @@ namespace Kaenx.Classes.Helper
                         tempLangs.Add(lang.Attribute("Identifier").Value);
                     }
 
+                    XElement xapp = catXML.Descendants(XName.Get("CatalogSection", ns)).First();
+                    string appDefaultLang = xapp.Attribute("DefaultLanguage")?.Value;
+                    if (!string.IsNullOrEmpty(appDefaultLang))
+                    {
+                        if (!tempLangs.Contains(appDefaultLang))
+                            tempLangs.Add(appDefaultLang);
+                    }
+
+                    ApplicationDataContainer container = ApplicationData.Current.LocalSettings;
+                    string defaultLang = container.Values["defaultLang"]?.ToString();
+
                     if (tempLangs.Count > 1)
                     {
-                        ApplicationDataContainer container = ApplicationData.Current.LocalSettings;
-                        string defaultLang = container.Values["defaultLang"]?.ToString();
-
                         if (!tempLangs.Contains(defaultLang) || changeLang)
                         {
                             if (!changeLang && !string.IsNullOrEmpty(defaultLang) && tempLangs.Any(l => l.StartsWith(defaultLang.Split("-")[0])))
@@ -374,7 +382,7 @@ namespace Kaenx.Classes.Helper
                     }
                     else if (tempLangs.Count == 1)
                     {
-                        Import.SelectedLanguage = tempLangs[0];
+                        Import.SelectedLanguage = defaultLang;
                         ImportHelper.TranslateXml(catXML.Root, tempLangs[0]);
                     }
                 } else
@@ -425,7 +433,7 @@ namespace Kaenx.Classes.Helper
                 {
                     Id = catalogItem.Attribute("Id").Value,
                     Name = catalogItem.Attribute("Name").Value,
-                    VisibleDescription = catalogItem.Attribute("VisibleDescription")?.Value,
+                    VisibleDescription = catalogItem.Attribute("VisibleDescription")?.Value.Replace(Environment.NewLine, " "),
                     ProductRefId = catalogItem.Attribute("ProductRefId").Value,
                     Hardware2ProgramRefId = catalogItem.Attribute("Hardware2ProgramRefId").Value
                 };
@@ -908,6 +916,13 @@ namespace Kaenx.Classes.Helper
                         paramt.Tag1 = child.Attribute("minInclusive").Value;
                         paramt.Tag2 = child.Attribute("maxInclusive").Value;
                         break;
+                    case "TypeTime":
+                        paramt.Type = ParamTypes.Time;
+                        paramt.Size = int.Parse(child.Attribute("SizeInBit").Value);
+                        paramt.Tag1 = child.Attribute("minInclusive").Value + ";" + child.Attribute("Unit").Value;
+                        paramt.Tag2 = child.Attribute("maxInclusive").Value;
+                        break;
+
                     case "TypeRestriction":
                         paramt.Type = ParamTypes.Enum;
                         paramt.Size = int.Parse(child.Attribute("SizeInBit").Value);
@@ -920,6 +935,7 @@ namespace Kaenx.Classes.Helper
                                 ParameterId = paramt.Id,
                                 Id = en.Attribute("Id").Value
                             };
+                            //TODO prüfen ob langdauernde abfrage notwendig ist
                             if (!context.AppParameterTypeEnums.Any(p => p.Id == enu.Id))
                             {
                                 enu.Value = en.Attribute(_base).Value;
@@ -1082,11 +1098,11 @@ namespace Kaenx.Classes.Helper
                     param.OffsetBit = t3 + offb;
                     param.SegmentType = segType;
                     param.UnionId = unionId;
-                    param.UnionDefault = para.Attribute("DefaultUnionParameter")?.Value.ToLower() == "true";
+                    string def = para.Attribute("DefaultUnionParameter")?.Value.ToLower();
+                    param.UnionDefault = def == "true" || def == "1";
                 }
                 position++;
                 ProgressAppChanged(position);
-                //del if (position % iterationToWait == 0) await Task.Delay(1);
             }
 
 
@@ -1121,6 +1137,7 @@ namespace Kaenx.Classes.Helper
                 final.Text = text ?? old.Text;
 
                 string value = pref.Attribute("Value")?.Value;
+                if (final.UnionDefault && value != null && value != old.Value) final.UnionDefault = false;
                 final.Value = value ?? old.Value;
 
                 AccessType access = AccessType.Null;
@@ -1239,15 +1256,21 @@ namespace Kaenx.Classes.Helper
                 if (cref.Attribute("WriteFlag")?.Value == "Disabled")
                     cobjr.Flag_Write = false;
 
-                AppComObject obj;
+                AppComObject obj = null;
                 bool existed = contextIds.Contains(cobjr.Id);
-                if (existed)
-                    obj = context.AppComObjects.Single(c => c.Id == cobjr.Id);
-                else
+                try
                 {
-                    obj = new AppComObject();
-                    obj.LoadComp(ComObjects[cobjr.RefId]);
-                    obj.Id = cobjr.Id;
+                    if (existed)
+                        obj = context.AppComObjects.Single(c => c.Id == cobjr.Id);
+                    else
+                    {
+                        obj = new AppComObject();
+                        obj.LoadComp(ComObjects[cobjr.RefId]);
+                        obj.Id = cobjr.Id;
+                    }
+                } catch(Exception ex)
+                {
+
                 }
 
 
@@ -1495,14 +1518,14 @@ namespace Kaenx.Classes.Helper
             if(loads.Count() != 0)
             {
                 XElement procedures = doc.Descendants(GetXName("LoadProcedures"))?.ElementAt(0);
-                adds.LoadProcedures = System.Text.Encoding.UTF8.GetBytes(procedures.ToString());
+                adds.LoadProcedures = System.Text.Encoding.UTF8.GetBytes(MinimizeXML(procedures.ToString()));
             }
 
             if (doc.Descendants(GetXName("Dynamic")).Count() != 0)
             {
                 Log.Information("Dynamic wird gespeichert");
                 table = doc.Descendants(GetXName("Dynamic")).ElementAt(0);
-                adds.Dynamic = System.Text.Encoding.UTF8.GetBytes(table.ToString());
+                adds.Dynamic = System.Text.Encoding.UTF8.GetBytes(MinimizeXML(table.ToString()));
             }
             else
                 Log.Information("Kein Dynamic vorhanden");
@@ -1533,6 +1556,15 @@ namespace Kaenx.Classes.Helper
                 context.AppAdditionals.Add(adds);
 
             context.SaveChanges();
+        }
+
+
+        private string MinimizeXML(string xml)
+        {
+            xml = xml.Replace("  ", "");
+            xml = xml.Replace("> <", "><");
+            xml = xml.Replace(Environment.NewLine, "");
+            return xml;
         }
 
         private bool GetAttributeAsBool(XElement ele, string attr)
@@ -1573,8 +1605,8 @@ namespace Kaenx.Classes.Helper
                         Log.Warning("Applikation enthält Extension: " + reader.Name, reader.ReadOuterXml());
                         break;
                     case "RelativeSegment":
-                        if(!errs.Contains("RelativeSegment")) 
-                            errs.Add("RelativeSegment");
+                        //if(!errs.Contains("RelativeSegment")) 
+                        //    errs.Add("RelativeSegment");
                         break;
                     case "ParameterCalculations":
                         if (!errs.Contains("ParameterCalculations"))

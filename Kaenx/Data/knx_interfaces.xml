@@ -1,0 +1,325 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Interfaces Version="47">
+
+  <Interface VendorID="0403" ProductID="6898" KnxManufacturer="00AB" DefaultDisplayText="KNX-USB Interface">
+  </Interface>
+
+  <Interface VendorID="04CC" ProductID="0301" KnxManufacturer="00DF" DefaultDisplayText="EIBWeiche USB">
+    <Translation Language="de-DE" Text="EIBWeiche USB"/>
+  </Interface>
+
+  <Interface VendorID="0681" ProductID="0014" KnxManufacturer="00FD" DefaultDisplayText="Siemens Interface OCI700 USB" PersistsIndividualAddress="false">
+    <Translation Language="de-DE" Text="Siemens Schnittstelle OCI700 USB"/>
+  </Interface>
+
+  <Interface VendorID="0908" ProductID="02DC" KnxManufacturer="00FD" DefaultDisplayText="Siemens Interface OCI702 USB">
+    <Translation Language="de-DE" Text="Siemens Schnittstelle OCI702 USB"/>
+  </Interface>
+
+  <Interface VendorID="0908" ProductID="02DD" KnxManufacturer="0001" DefaultDisplayText="Siemens Interface N 148/12 USB">
+    <Translation Language="de-DE" Text="Siemens Schnittstelle N 148/12 USB"/>
+  </Interface>
+
+  <Interface VendorID="0908" ProductID="02E6" KnxManufacturer="014F" DefaultDisplayText="Interface USB KXIK00RU--">
+    <Translation Language="de-DE" Text="Schnittstelle USB KXIK00RU--"/>
+  </Interface>
+
+  <Interface VendorID="0E77" ProductID="0102" KnxManufacturer="00C5" DefaultDisplayText="KNX-USB Interface (Flush mounted)">
+    <Translation Language="de-DE" Text="KNX-USB Interface (UP)"/>
+  </Interface>
+
+  <Interface VendorID="0E77" ProductID="0103" KnxManufacturer="00C5" DefaultDisplayText="KNX-USB Interface (RS232)">
+    <Translation Language="de-DE" Text="KNX-USB Interface (RS232)"/>
+  </Interface>
+
+  <Interface VendorID="0E77" ProductID="0104" KnxManufacturer="00C5" DefaultDisplayText="KNX-USB Interface (TP)">
+    <Translation Language="en-US" Text="KNX-USB Interface (TP)"/>
+    <Translation Language="de-DE" Text="KNX-USB Interface (TP)"/>
+  </Interface>
+
+  <Interface VendorID="0E77" ProductID="0111" KnxManufacturer="0001" DefaultDisplayText="KNX/EIB-USB Interface (Flush mounted)">
+    <Translation Language="de-DE" Text="KNX/EIB-USB Schnittstelle UP"/>
+  </Interface>
+
+  <Interface VendorID="0E77" ProductID="0112" KnxManufacturer="0001" DefaultDisplayText="KNX/EIB-USB Interface (DIN rail)">
+    <Translation Language="de-DE" Text="KNX/EIB-USB Schnittstelle N"/>
+  </Interface>
+
+  <Interface VendorID="0E77" ProductID="0121" KnxManufacturer="00CD" DefaultDisplayText="KNX-USB Interface (Rail mounted)">
+    <Translation Language="de-DE" Text="KNX-USB Interface (Reiheneinbau)"/>
+  </Interface>
+
+  <Interface VendorID="0E77" ProductID="0141" KnxManufacturer="00F9" DefaultDisplayText="KNX-USB Interface (Flush mounted)">
+    <Translation Language="de-DE" Text="KNX-USB Interface (UP)"/>
+  </Interface>
+
+  <Interface VendorID="0E77" ProductID="2001" KnxManufacturer="00C5" DefaultDisplayText="KNX-USB Interface (RF)">
+    <Translation Language="de-DE" Text="KNX-USB Interface (RF)"/>
+  </Interface>
+
+  <Interface VendorID="0E77" ProductID="6910" KnxManufacturer="0007" DefaultDisplayText="Mxx 6910-0016">
+    <Translation Language="de-DE" Text="Mxx 6910-0016"/>
+  </Interface>
+
+  <Interface VendorID="135E" ProductID="0020" KnxManufacturer="000A" DefaultDisplayText="KNX-USB Data Interface">
+    <Translation Language="de-DE" Text="KNX-USB Datenschnittstelle"/>
+  </Interface>
+
+  <Interface VendorID="135E" ProductID="0320" KnxManufacturer="000A" DefaultDisplayText="USB data interface, RMD">
+    <Translation Language="de-DE" Text="USB-Datenschnittstelle REG"/>
+    <Translation Language="en-US" Text="USB data interface, RMD" />
+  </Interface>
+
+  <Interface VendorID="135E" ProductID="0021" KnxManufacturer="0006" DefaultDisplayText="KNX-USB Data Interface">
+    <Translation Language="de-DE" Text="KNX-USB Datenschnittstelle"/>
+  </Interface>
+
+  <Interface VendorID="135E" ProductID="0022" KnxManufacturer="0008" DefaultDisplayText="KNX-USB Data Interface">
+    <Translation Language="de-DE" Text="KNX-USB Datenschnittstelle"/>
+  </Interface>
+
+  <Interface VendorID="135E" ProductID="0023" KnxManufacturer="0004" DefaultDisplayText="KNX-USB Data Interface">
+    <Translation Language="de-DE" Text="KNX-USB Datenschnittstelle"/>
+  </Interface>
+
+  <Interface VendorID="135E" ProductID="0323" KnxManufacturer="0004" DefaultDisplayText="USB-Datenschnittstelle">
+    <Translation Language="en-US" Text="USB data interface"/>
+    <Translation Language="de-DE" Text="KNX-USB Datenschnittstelle"/>
+    <Translation Language="nl-NL" Text="USB-data-aansluiting"/>
+    <Translation Language="fr-FR" Text="Interface USB"/>
+    <Translation Language="nb-NO" Text="USB-datagrensesnitt"/>
+    <Translation Language="es-ES" Text="Módulo comunicación USB"/>
+    <Translation Language="it-IT" Text="Interfaccia USB"/>
+    <Translation Language="ru-RU" Text="USB-интерфейс"/>
+    <Translation Language="pt-PT" Text="Módulo comunicação USB"/>
+    <Translation Language="zh-CN" Text="USB数据接口"/>
+  </Interface>
+
+  <Interface VendorID="135E" ProductID="0024" KnxManufacturer="000C" DefaultDisplayText="KNX-USB Data Interface">
+    <Translation Language="de-DE" Text="KNX-USB Datenschnittstelle"/>
+  </Interface>
+
+  <Interface VendorID="135E" ProductID="0025" KnxManufacturer="0009" DefaultDisplayText="KNX-USB Data Interface">
+    <Translation Language="de-DE" Text="KNX-USB Datenschnittstelle"/>
+  </Interface>
+
+  <Interface VendorID="135E" ProductID="0026" KnxManufacturer="001E" DefaultDisplayText="KNX-USB Data Interface">
+    <Translation Language="de-DE" Text="KNX-USB Datenschnittstelle"/>
+  </Interface>
+
+  <Interface VendorID="135E" ProductID="0027" KnxManufacturer="008B" DefaultDisplayText="KNX-USB Data Interface">
+    <Translation Language="de-DE" Text="KNX-USB Datenschnittstelle"/>
+  </Interface>
+
+  <Interface VendorID="135E" ProductID="0122" KnxManufacturer="0008" DefaultDisplayText="KNX RF USB data interface">
+    <Translation Language="de-DE" Text="KNX RF USB Datenschnittstelle" />
+    <Translation Language="en-US" Text="KNX RF USB data interface" />
+  </Interface>
+
+  <Interface VendorID="135E" ProductID="0123" KnxManufacturer="0004" DefaultDisplayText="KNX Radio USB stick">
+    <Translation Language="de-DE" Text="KNX Funk-USB Stick" />
+    <Translation Language="en-US" Text="KNX Radio USB stick" />
+  </Interface>
+
+  <Interface VendorID="145C" ProductID="1330" KnxManufacturer="0007" DefaultDisplayText="KNX-USB Interface (Flush mounted)">
+    <Translation Language="de-DE" Text="KNX-USB Interface (UP)"/>
+  </Interface>
+
+  <Interface VendorID="145C" ProductID="1490" KnxManufacturer="0007" DefaultDisplayText="KNX-USB Interface (surface mounted)">
+    <Translation Language="de-DE" Text="KNX-USB Interface (AP)"/>
+  </Interface>
+
+  <Interface VendorID="147B" ProductID="5120" KnxManufacturer="0002" DefaultDisplayText="USB Interface (MDRC)">
+    <Translation Language="de-DE" Text="USB Schnittstelle (REG)"/>
+    <Translation Language="fr-FR" Text="USB Interface (MRD)"/>
+    <Translation Language="nl-NL" Text="USB Interface (DIN-rail)"/>
+    <Translation Language="it-IT" Text="USB Interfaccia (MDRC)"/>
+    <Translation Language="pl-PL" Text="USB Złącze (MDRC)"/>
+    <Translation Language="ru-RU" Text="USB интерфейс (MDRC)"/>
+    <Translation Language="es-ES" Text="USB Interfaz (MDRC)"/>
+  </Interface>
+
+  <Interface VendorID="147B" ProductID="2200" KnxManufacturer="0002" DefaultDisplayText="Control4 USB Interface (MDRC)">
+    <Translation Language="de-DE" Text="Control4 USB-Schnittstelle (REG)"/>
+    <Translation Language="fr-FR" Text="Control4 Interface USB (MRD)"/>
+    <Translation Language="nl-NL" Text="Control4 USB interface (DIN-rail)"/>
+    <Translation Language="it-IT" Text="Control4 Interfaccia USB (MDRC)"/>
+    <Translation Language="pl-PL" Text="Control4 Interfejs USB (MDRC)"/>
+    <Translation Language="ru-RU" Text="Control4 USB интерфейс (MDRC)"/>
+    <Translation Language="es-ES" Text="Control4 Interfaz USB (MDRC)"/>
+  </Interface>
+
+  <Interface VendorID="16D0" ProductID="0490" KnxManufacturer="0072" DefaultDisplayText="Tapko USB Interface">
+    <Translation Language="de-DE" Text="Tapko USB Interface"/>
+  </Interface>
+
+  <Interface VendorID="16D0" ProductID="0491" KnxManufacturer="0083" DefaultDisplayText="MDT KNX_USB_Interface">
+    <Translation Language="de-DE" Text="MDT KNX_USB_Interface"/>
+  </Interface>
+
+  <Interface VendorID="16D0" ProductID="0492" KnxManufacturer="0092" DefaultDisplayText="preussen automation USB2KNX">
+    <Translation Language="de-DE" Text="preussen automation USB2KNX"/>
+  </Interface>
+
+  <Interface VendorID="28C2" ProductID="0002" KnxManufacturer="0071" DefaultDisplayText="Zennio KNX USB Interface">
+    <Translation Language="en-US" Text="Zennio KNX USB Interface"/>
+    <Translation Language="es-ES" Text="Zennio KNX USB Interface"/>
+    <Translation Language="de-DE" Text="Zennio KNX USB Interface"/>
+    <Translation Language="fr-FR" Text="Zennio KNX USB Interface"/>
+  </Interface>
+
+  <Interface VendorID="28C2" ProductID="0003" KnxManufacturer="00B6" DefaultDisplayText="SBS KNX USB Interface">
+    <Translation Language="it-IT" Text="SBS Interfaccia USB"/>
+  </Interface>
+
+  <Interface VendorID="28C2" ProductID="0004" KnxManufacturer="0072" DefaultDisplayText="KNX USB Interface">
+  </Interface>
+
+  <Interface VendorID="28C2" ProductID="0005" KnxManufacturer="00B3" DefaultDisplayText="Philips KNX USB Interface">
+  </Interface>
+
+  <Interface VendorID="28C2" ProductID="0006" KnxManufacturer="0073" DefaultDisplayText="HDL USB Interface">
+  </Interface>
+
+  <Interface VendorID="28C2" ProductID="0007" KnxManufacturer="0079" DefaultDisplayText="Zueblin USB Interface">
+  </Interface>
+
+  <Interface VendorID="28C2" ProductID="0008" KnxManufacturer="0072" DefaultDisplayText="Tapko RF USB Interface">
+    <Translation Language="de-DE" Text="Tapko RF USB Interface" />
+  </Interface>
+
+  <Interface VendorID="28C2" ProductID="000B" KnxManufacturer="00FB" DefaultDisplayText="KNX/USB Interface VIVO">
+    <Translation Language="en-US" Text="KNX/USB Interface VIVO"/>
+  </Interface>
+
+  <Interface VendorID="28C2" ProductID="000C" KnxManufacturer="0080" DefaultDisplayText="ESYLUX KNX-USB Interface">
+    <Translation Language="de-DE" Text="ESYLUX KNX-USB Schnittstelle" />
+    <Translation Language="en-US" Text="ESYLUX KNX-USB Interface" />
+    <Translation Language="nl-NL" Text="ESYLUX KNX-USB Interface" />
+    <Translation Language="it-IT" Text="ESYLUX KNX-USB Interfaccia" />
+    <Translation Language="ru-RU" Text="ESYLUX KNX-USB интерфейс" />
+    <Translation Language="es-ES" Text="ESYLUX KNX-USB Interfaz" />
+    <Translation Language="se-SE" Text="ESYLUX KNX-USB Interface" />
+  </Interface>
+
+  <Interface VendorID="28C2" ProductID="000D" KnxManufacturer="00FB" DefaultDisplayText=" VIVO Deneb USB RF S-Mode ">
+    <Translation Language="en-US" Text=" VIVO Deneb USB RF S-Mode "/>
+  </Interface>
+
+  <Interface VendorID="28C2" ProductID="000E" KnxManufacturer="00A2" DefaultDisplayText="Apricum UIM RF">
+    <Translation Language="de-DE" Text="Apricum UIM RF"/>
+  </Interface>
+
+  <Interface VendorID="28C2" ProductID="000F" KnxManufacturer="00A2" DefaultDisplayText="Apricum UIM KNX 42">
+    <Translation Language="de-DE" Text="Apricum UIM KNX 42"/>
+  </Interface>
+
+  <Interface VendorID="28C2" ProductID="0012" KnxManufacturer="00EE" DefaultDisplayText="gUSB USB Interface">
+    <Translation Language="de-DE" Text="gUSB USB Interface"/>
+  </Interface>
+
+  <Interface VendorID="28C2" ProductID="0015" KnxManufacturer="009E" DefaultDisplayText="BES KNX USB Interface">
+    <Translation Language="en-US" Text="BES KNX USB Interface"/>
+  </Interface>
+
+  <Interface VendorID="2A07" ProductID="0001" KnxManufacturer="007C" DefaultDisplayText="KNX RF USB-Stick">
+    <Translation Language="de-DE" Text="KNX RF USB-Stick"/>
+  </Interface>
+
+  <Interface VendorID="2A07" ProductID="0002" KnxManufacturer="00C9" DefaultDisplayText="KNX RF USB-Stick">
+    <Translation Language="de-DE" Text="KNX RF USB-Stick"/>
+  </Interface>
+
+  <Interface VendorID="7660" ProductID="0002" KnxManufacturer="00FA" DefaultDisplayText="KNX RF - USB Interface">
+  </Interface>
+
+  <Interface VendorID="28C2" ProductID="0011" KnxManufacturer="00EE" DefaultDisplayText="IFUSB USB Interface">
+    <Translation Language="de-DE" Text="IFUSB USB Interface"/>
+  </Interface>
+
+  <Interface VendorID="28C2" ProductID="0010" KnxManufacturer="0085" DefaultDisplayText="KNX USB Interface">
+    <Translation Language="en-US" Text="KNX USB Interface"/>
+    <Translation Language="de-DE" Text="KNX USB Schnittstelle"/>
+  </Interface>
+
+  <Interface VendorID="28C2" ProductID="0013" KnxManufacturer="0162" DefaultDisplayText="MEAN WELL KNX_USB_Interface">
+    <Translation Language="en-US" Text="MEAN WELL KNX_USB_Interface"/>
+  </Interface>
+
+  <Interface VendorID="0111" ProductID="1022" KnxManufacturer="0111" DefaultDisplayText="KNX USB Interface">
+    <Translation Language="en-US" Text="KNX USB Interface"/>
+  </Interface>
+
+  <Interface VendorID="28C2" ProductID="0014" KnxManufacturer="01BE" DefaultDisplayText="Ergo3 KNX/USB Interface">
+    <Translation Language="en-us" Text="Ergo3 KNX/USB Interface"/>
+  </Interface>
+
+  <Interface VendorID="0E77" ProductID="0104" KnxManufacturer="004E" DefaultDisplayText="KNX USB Interface B">
+    <Translation Language="en-us" Text="KNX USB Interface B"/>
+  </Interface>
+
+  <Interface VendorID="0E77" ProductID="0104" KnxManufacturer="0019" DefaultDisplayText="KNX USB Interface">
+    <Translation Language="en-us" Text="KNX USB Interface"/>
+    <Translation Language="de-DE" Text="Schnittstelle KNX/USB"/>
+    <Translation Language="es-ES" Text="Interfaz KNX/USB"/>
+    <Translation Language="it-IT" Text="Interfaccia KNX/USB"/>
+  </Interface>
+
+  <Interface VendorID="24D5" ProductID="0106" KnxManufacturer="0144" DefaultDisplayText="SATEL KNX-USB Interface">
+    <Translation Language="en-us" Text="SATEL KNX-USB Interface"/>
+  </Interface>
+
+  <Interface VendorID="135E" ProductID="0028" KnxManufacturer="001F" DefaultDisplayText="LMS USB Data Interface">
+    <Translation Language="de-DE" Text="LMS USB Datenschnittstelle"/>
+    <Translation Language="en-US" Text="LMS USB Data Interface"/>
+  </Interface>
+
+  <Interface VendorID="2D72" ProductID="0002" KnxManufacturer="018F" DefaultDisplayText="PEAKnx USB Interface">
+    <Translation Language="en-US" Text="PEAKnx USB Interface"/>
+  </Interface>
+
+  <Interface VendorID="0E77" ProductID="0115" KnxManufacturer="0087" DefaultDisplayText="KNX-USB Interface">
+    <Translation Language="en-US" Text="KNX-USB Interface"/>
+    <Translation Language="de-DE" Text="KNX-USB Interface"/>
+  </Interface>
+
+  <Interface VendorID="28C2" ProductID="0017" KnxManufacturer="0107" DefaultDisplayText="Interra KNX USB Interface">
+    <Translation Language="en-us" Text="Interra KNX USB Interface"/>
+    <Translation Language="de-DE" Text="Interra Schnittstelle KNX/USB"/>
+    <Translation Language="es-ES" Text="Interra Interfaz KNX/USB"/>
+    <Translation Language="it-IT" Text="Interra Interfaccia KNX/USB"/>
+    <Translation Language="tr-TR" Text="Interra KNX/USB Arabirimi"/>
+  </Interface>
+
+  <Interface VendorID="28C2" ProductID="001A" KnxManufacturer="002C" DefaultDisplayText="01540.1 USB-Interface">
+    <Translation Language="en-US" Text="01540.1 USB-Interface"/>
+  </Interface>
+
+  <Interface VendorID="135E" ProductID="0326" KnxManufacturer="001E" DefaultDisplayText="USB-Datenschnittstelle KNX-S">
+    <Translation Language="de-DE" Text="USB-Datenschnittstelle KNX-S"/>
+    <Translation Language="fr-FR" Text="Interface de données USB KNX-S"/>
+    <Translation Language="it-IT" Text="Interfaccia dati USB KNX-S"/>
+  </Interface>
+
+  <Interface VendorID="135E" ProductID="0322" KnxManufacturer="0008" DefaultDisplayText="KNX USB data interface">
+    <Translation Language="en-US" Text="KNX USB data interface"/>
+    <Translation Language="de-DE" Text="KNX USB Datenschnittstelle"/>
+    <Translation Language="nl-NL" Text="KNX USB-gegevensinterface"/>
+    <Translation Language="fr-FR" Text="KNX Interface de données USB"/>
+    <Translation Language="nb-NO" Text="KNX USB-datagrensesnitt"/>
+    <Translation Language="es-ES" Text="KNX Interfaz de datos USB"/>
+    <Translation Language="it-IT" Text="KNX Interfaccia dati USB"/>
+    <Translation Language="ru-RU" Text="KNX USB-интерфейс передачи данных"/>
+    <Translation Language="zh-CN" Text="KNX USB 数据接口"/>
+    <Translation Language="pl-PL" Text="KNX Złącze magistralne USB"/>
+    <Translation Language="sv-SV" Text="KNX USB-datagränssnitt"/>
+    <Translation Language="is-IS" Text="KNX USB-gagnatengi"/>
+    <Translation Language="si-SI" Text="KNX USB podatkovni vmesnik"/>
+    <Translation Language="el-EL" Text="KNX Διεπαφή δεδομένων USB"/>
+  </Interface>
+
+  <Interface VendorID="135E" ProductID="0329" KnxManufacturer="00C8" DefaultDisplayText="USB-IF/KNX REG">
+    <Translation Language="en-US" Text="USB-IF/KNX REG"/>
+  </Interface>
+
+</Interfaces>

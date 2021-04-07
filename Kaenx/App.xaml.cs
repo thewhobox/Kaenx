@@ -52,15 +52,6 @@ namespace Kaenx
             this.InitializeComponent();
             this.Suspending += OnSuspending;
 
-            // Required for XBOX
-            try
-            {
-                //this.RequiresPointerMode = Windows.UI.Xaml.ApplicationRequiresPointerMode.WhenRequested;
-                bool result = Windows.UI.ViewManagement.ApplicationViewScaling.TrySetDisableLayoutScaling(true);
-                Windows.UI.ViewManagement.ApplicationView.GetForCurrentView().SetDesiredBoundsMode(Windows.UI.ViewManagement.ApplicationViewBoundsMode.UseCoreWindow);
-            }
-            catch { }
-
             using (var db = new LocalContext())
             {
                 db.Database.Migrate();
@@ -91,14 +82,7 @@ namespace Kaenx
                     conC.Database.Migrate();
                 }
             }
-            //using (var db = new CatalogContext())
-            //{
-            //    db.Database.Migrate();
-            //}
-            //using (var db = new ProjectContext())
-            //{
-            //    db.Database.Migrate();
-            //}
+
             CreateLogger();
 
 
@@ -155,24 +139,35 @@ namespace Kaenx
                 case ".knxprod":
                     //Window.Current.Content as Frame: Content je nach 
                     Log.Information("Window Content: " + Window.Current.Content.GetType().FullName);
-                    Frame root = Window.Current.Content as Frame;
-                    if (root.Content == null || root.Content is View.MainPage)
+                    
+                    if (rootFrame.Content == null || rootFrame.Content is View.MainPage)
                     {
                         Navigate(typeof(View.Catalog), file);
                     }
-                    else if (root.Content is View.Catalog)
+                    else if (rootFrame.Content is View.Catalog)
                     {
-                        ((View.Catalog)root.Content).PrepareImport(file);
+                        ((View.Catalog)rootFrame.Content).PrepareImport(file);
                     }
-                    Log.Information("Frame Content: " + root.Content.GetType().FullName);
+                    Log.Information("Frame Content: " + rootFrame.Content.GetType().FullName);
                     break;
 
                 default:
-                    Log.Warning("Nicht unterstützter Dateityp: " + file.FileType);
+                    string errMsg = "Nicht unterstützter Dateityp: " + file.FileType;
+                    if (rootFrame.Content == null)
+                    {
+                        Navigate(typeof(View.MainPage), errMsg);
+                    } else
+                    {
+                        Classes.Helper.ViewHelper.Instance.ShowNotification("main", errMsg, 3000, Classes.Helper.ViewHelper.MessageType.Error);
+                    }
+                    Log.Warning(errMsg);
                     break;
             }
 
             Window.Current.Activate();
+
+
+            App._dispatcher = Window.Current.Dispatcher;
         }
 
         private async void CreateLogger()
@@ -280,8 +275,8 @@ namespace Kaenx
             var deferral = e.SuspendingOperation.GetDeferral();
             //TODO: Save application state and stop any background activity
             
-            if(BusRemoteConnection.Instance.IsActive)
-                await BusRemoteConnection.Instance.Disconnect();
+            if(BusRemoteConnection.Instance.Remote.IsActive)
+                await BusRemoteConnection.Instance.Remote.Disconnect();
             deferral.Complete();
         }
     }

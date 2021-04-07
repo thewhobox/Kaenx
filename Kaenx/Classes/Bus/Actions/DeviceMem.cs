@@ -70,15 +70,15 @@ namespace Kaenx.Classes.Bus.Actions
                 appModel = context.Applications.Single(a => a.Id == Device.ApplicationId);
             }
 
-            if(appModel != null)
+            Dictionary<string, byte[]> segments = new Dictionary<string, byte[]>();
+
+            foreach(AppSegmentViewModel seg in context.AppSegments.Where(s => s.ApplicationId == Device.ApplicationId))
             {
-                if (!string.IsNullOrEmpty(appModel.Table_Assosiations))
-                {
-                    AppSegmentViewModel segmentModel = context.AppSegments.Single(s => s.Id == "M-0083_A-0023-15_AS-4400");
-                    byte[] datax = await dev.MemoryRead(segmentModel.Address, segmentModel.Size);
-                }
+                byte[] datax = await dev.MemoryRead(seg.Address, seg.Size);
+                segments.Add(seg.Id, datax);
             }
 
+            
 
 
             Finish();

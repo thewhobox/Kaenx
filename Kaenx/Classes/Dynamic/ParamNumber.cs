@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
@@ -31,7 +32,9 @@ namespace Kaenx.Classes.Dynamic
             set { _visible = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Visible")); }
         }
 
+        [JsonProperty("mi")]
         public int Minimum { get; set; }
+        [JsonProperty("ma")]
         public int Maximum { get; set; }
 
         public bool HasAccess { get; set; }

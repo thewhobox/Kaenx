@@ -111,6 +111,7 @@
                     <MenuFlyout Placement="BottomEdgeAlignedRight">
                         <MenuFlyoutItem x:Uid="/Bus/TabsInfoMenInfo" Icon="BrowsePhotos" Click="ReadInfo" />
                         <MenuFlyoutItem x:Uid="/Bus/TabsInfoMenMemory" Icon="Save" Click="ReadMem" />
+                        <MenuFlyoutItem Text="MaxAPDU" Icon="Save" Click="ReadMax" />
                         <MenuFlyoutItem Icon="ClearSelection" Text="Test" Click="SetTest" />
                         <MenuFlyoutItem Icon="ClearSelection" Text="Test2" Click="SetTest2" />
                         <!--<MenuFlyoutItem Icon="Find" Text="Konfiguration" Click="ReadConf" />-->

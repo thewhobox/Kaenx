@@ -15,7 +15,9 @@ namespace Kaenx.Classes
         public Symbol Icon
         {
             get { return _icon; }
-            set { _icon = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Icon")); PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("IconBrush")); }
+            set { _icon = value; 
+                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Icon")); 
+                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("IconBrush")); }
         }
 
         public SolidColorBrush IconBrush

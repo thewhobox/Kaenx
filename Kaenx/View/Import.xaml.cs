@@ -92,7 +92,7 @@ namespace Kaenx.View
 
         private void Helper_OnWarning(string value)
         {
-            ImportWarning.Add(value);
+            _ = App._dispatcher.RunAsync(CoreDispatcherPriority.Normal, () => ImportWarning.Add(value));
         }
 
         private void Helper_ProgressChanged(int count)

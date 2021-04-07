@@ -1,12 +1,15 @@
 ﻿using Kaenx.Classes;
 using Kaenx.Classes.Bus;
 using Kaenx.Classes.Helper;
+using Kaenx.Konnect.Addresses;
+using Kaenx.Konnect.Classes;
 using Kaenx.Konnect.Connections;
 using Kaenx.Konnect.Interfaces;
 using Kaenx.Konnect.Messages;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices.WindowsRuntime;
@@ -31,6 +34,7 @@ namespace Kaenx.View.Controls.Bus
 
         private IKnxConnection _conn = null;
         private Timer _statusTimer = new Timer();
+        private BusCommon _comm = null;
 
 
         public BMonitor()
@@ -54,7 +58,7 @@ namespace Kaenx.View.Controls.Bus
             TelegramList.Clear();
         }
 
-        private void Monitor_Toggle(object sender, RoutedEventArgs e)
+        private async void Monitor_Toggle(object sender, RoutedEventArgs e)
         {
             if (_conn == null)
             {
@@ -64,10 +68,17 @@ namespace Kaenx.View.Controls.Bus
                     return;
                 }
 
-                _conn = KnxInterfaceHelper.GetConnection(BusConnection.Instance.SelectedInterface, BusRemoteConnection.Instance);
+                _conn = await KnxInterfaceHelper.GetConnection(BusConnection.Instance.SelectedInterface, BusRemoteConnection.Instance.Remote, BusConnection.Instance.GetDevice);
                 _conn.OnTunnelRequest += _conn_OnTunnelAction;
                 _conn.OnTunnelResponse += _conn_OnTunnelAction;
-                _conn.Connect();
+                try
+                {
+                    await _conn.Connect();
+                } catch(Exception ex)
+                {
+                    ViewHelper.Instance.ShowNotification("main", ex.Message, 3000, ViewHelper.MessageType.Error);
+                    return;
+                }
                 MonitorTelegram tel = new MonitorTelegram();
                 tel.From = Konnect.Addresses.UnicastAddress.FromString("0.0.0");
                 tel.To = Konnect.Addresses.UnicastAddress.FromString("0.0.0");
@@ -76,12 +87,14 @@ namespace Kaenx.View.Controls.Bus
                 TelegramList.Insert(0, tel);
                 (BtnMonitorToggle.Content as SymbolIcon).Symbol = Symbol.Pause;
                 _statusTimer.Start();
+                _comm = new BusCommon(_conn);
             }
             else
             {
                 _statusTimer.Stop();
-                _conn.Disconnect();
+                await _conn.Disconnect();
                 _conn = null;
+                _comm = null;
                 MonitorTelegram tel = new MonitorTelegram();
                 tel.From = Konnect.Addresses.UnicastAddress.FromString("0.0.0");
                 tel.To = Konnect.Addresses.UnicastAddress.FromString("0.0.0");
@@ -92,12 +105,17 @@ namespace Kaenx.View.Controls.Bus
             }
         }
 
-        private void _conn_OnTunnelAction(Konnect.Messages.IMessage response)
+        private void _conn_OnTunnelAction(IMessage response)
         {
+            if(response == null)
+            {
+                return;
+            }
+
             //Todo IMessageResponse Addr source and destination
             MonitorTelegram tel = new MonitorTelegram();
             tel.From = response.SourceAddress;
-            tel.To = (Konnect.Addresses.IKnxAddress)response.DestinationAddress;
+            tel.To = response.DestinationAddress;
             tel.Time = DateTime.Now;
             tel.Data = "0x" + BitConverter.ToString(response.Raw).Replace("-", "");
             tel.Type = response.ApciType;
@@ -105,6 +123,55 @@ namespace Kaenx.View.Controls.Bus
             {
                 TelegramList.Insert(0, tel);
             });
+        }
+
+        private void Monitor_Write(object sender, RoutedEventArgs e)
+        {
+            MulticastAddress dest = null;
+            try
+            {
+                dest = MulticastAddress.FromString(InDestination.Text);
+            }
+            catch
+            {
+                ViewHelper.Instance.ShowNotification("main", "Gruppenadresse ist ungültig!", 3000, ViewHelper.MessageType.Error);
+                return;
+            }
+            _comm.GroupValueWrite(dest, ConvertHexStringToByteArray(InData.Text));
+        }
+
+        private async void Monitor_Read(object sender, RoutedEventArgs e)
+        {
+            MulticastAddress dest = null;
+            try
+            {
+                dest = MulticastAddress.FromString(InDestination.Text);
+            }
+            catch
+            {
+                ViewHelper.Instance.ShowNotification("main", "Gruppenadresse ist ungültig!", 3000, ViewHelper.MessageType.Error);
+                return;
+            }
+
+            Konnect.Messages.Response.IMessageResponse resp = await _comm.GroupValueRead(dest);
+        }
+
+
+        private static byte[] ConvertHexStringToByteArray(string hexString)
+        {
+            if (hexString.Length % 2 != 0)
+            {
+                hexString = "0" + hexString;
+            }
+
+            byte[] data = new byte[hexString.Length / 2];
+            for (int index = 0; index < data.Length; index++)
+            {
+                string byteValue = hexString.Substring(index * 2, 2);
+                data[index] = byte.Parse(byteValue, NumberStyles.HexNumber, CultureInfo.InvariantCulture);
+            }
+
+            return data;
         }
 
     }

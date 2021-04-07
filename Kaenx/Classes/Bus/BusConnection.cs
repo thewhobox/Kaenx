@@ -11,7 +11,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Device.Net;
-using Hid.Net.UWP;
+using Hid.Net.Windows;
 using Kaenx.Classes.Bus.Actions;
 using Kaenx.Classes.Helper;
 using Kaenx.DataContext.Local;
@@ -21,9 +21,14 @@ using Kaenx.Konnect.Connections;
 using Kaenx.Konnect.Interfaces;
 using Kaenx.Konnect.Messages.Request;
 using Kaenx.Konnect.Messages.Response;
+using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
+using Usb.Net.Windows;
 using Windows.ApplicationModel.Resources;
+using Windows.Devices.Enumeration;
+using Windows.Devices.HumanInterfaceDevice;
 using Windows.UI.Xaml;
+using Hid.Net.UWP;
 
 namespace Kaenx.Classes.Bus
 {
@@ -62,10 +67,9 @@ namespace Kaenx.Classes.Bus
                 container.Values["lastUsedInterface"] = _selectedInterface.Hash;
             }
         }
-        private KnxIpTunneling searchConn = new KnxIpTunneling(new IPEndPoint(IPAddress.Parse("224.0.23.12"), 3671), true);
+        private KnxIpTunneling searchConn;
         private DispatcherTimer searchTimer = new DispatcherTimer() { Interval = TimeSpan.FromSeconds(10) };
-        private Dictionary<int, IKnxConnection> RemoteConnections = new Dictionary<int, IKnxConnection>();
-
+        private IDeviceFactory hidFactory = new FilterDeviceDefinition(vendorId: 0x147b).CreateUwpHidDeviceFactory();
 
 
         private IBusAction _currentAction;
@@ -91,17 +95,26 @@ namespace Kaenx.Classes.Bus
             Run();
 
 
-            UWPHidDeviceFactory.Register(new DebugLogger() { LogToConsole = true }, new DebugTracer());
 
-            searchConn.OnSearchResponse += SearchConn_OnSearchResponse;
+            try
+            {
+                searchConn = new KnxIpTunneling(new IPEndPoint(IPAddress.Parse("224.0.23.12"), 3671), true);
+                searchConn.OnSearchResponse += SearchConn_OnSearchResponse;
+            }
+            catch
+            {
+                searchConn = null;
+                ViewHelper.Instance.ShowNotification("main", "Es besteht keine Verbindung zu einenm lokalen Netzwerk, somit können auch keine IP-Schnittstellen gefunden werden.", 6000, ViewHelper.MessageType.Error);
+            }
+
             searchTimer.Tick += (a, b) => SearchForDevices();
             searchTimer.Start();
             SearchForDevices();
 
 
-            BusRemoteConnection.Instance.OnRequestInterface += Instance_OnRequestInterface;
-            BusRemoteConnection.Instance.OnRequest += ConnectionOut_OnRequest;
-            BusRemoteConnection.Instance.OnResponse += Instance_OnResponse;
+            BusRemoteConnection.Instance.Remote.OnRequestInterface += Instance_OnRequestInterface;
+            BusRemoteConnection.Instance.Remote.OnRequest += ConnectionOut_OnRequest;
+            BusRemoteConnection.Instance.Remote.OnResponse += Instance_OnResponse;
 
             InterfaceList.CollectionChanged += InterfaceList_CollectionChanged;
 
@@ -152,7 +165,7 @@ namespace Kaenx.Classes.Bus
                 resp.SequenceNumber = message.SequenceNumber;
                 resp.ChannelId = message.ChannelId;
                 resp.Interfaces = InterfaceList.Where(inter => !inter.IsRemote).ToList();
-                _ = BusRemoteConnection.Instance.Send(resp, false);
+                _ = BusRemoteConnection.Instance.Remote.Send(resp, false);
             }
         }
 
@@ -192,9 +205,6 @@ namespace Kaenx.Classes.Bus
 
         private void SearchForDevices() 
         {
-            Windows.Storage.ApplicationDataContainer container = Windows.Storage.ApplicationData.Current.LocalSettings;
-            string hash = container.Values["lastUsedInterface"]?.ToString();
-
             List<IKnxInterface> toDelete = new List<IKnxInterface>();
             foreach(IKnxInterface inter in InterfaceList)
             {
@@ -208,23 +218,27 @@ namespace Kaenx.Classes.Bus
                     InterfaceList.Remove(inter);
             });
 
-            MsgSearchReq msg = new MsgSearchReq();
-            searchConn.Send(msg, true);
+
+            if(searchConn != null)
+            {
+                MsgSearchReq msg = new MsgSearchReq();
+                searchConn.Send(msg, true);
+            }
 
 
             SearchForHid();
 
-            if (BusRemoteConnection.Instance.IsConnected)
-                _=BusRemoteConnection.Instance.Send(new Konnect.Remote.SearchRequest());
+            if (BusRemoteConnection.Instance.Remote.IsConnected)
+                _=BusRemoteConnection.Instance.Remote.Send(new Konnect.Remote.SearchRequest() { ChannelId = BusRemoteConnection.Instance.Remote.ChannelId });
         }
 
         private async void SearchForHid()
         {
-            IEnumerable<ConnectedDeviceDefinition> devices = await DeviceManager.Current.GetConnectedDeviceDefinitionsAsync(new FilterDeviceDefinition() { DeviceType = DeviceType.Hid });
+            var devices = await hidFactory.GetConnectedDeviceDefinitionsAsync().ConfigureAwait(false);
 
-            foreach(ConnectedDeviceDefinition def in devices)
+            foreach (ConnectedDeviceDefinition def in devices)
             {
-                KnxInterfaceUsb inter = KnxInterfaceUsb.CheckHid(def.VendorId, def.ProductId, def.DeviceId);
+                KnxInterfaceUsb inter = KnxInterfaceUsb.CheckHid(def);
                 if (inter == null) continue;
 
                 if (InterfaceList.Any(i => i.Hash == inter.Hash))
@@ -234,6 +248,7 @@ namespace Kaenx.Classes.Bus
                 {
                     InterfaceList.Add(inter);
                 });
+
             }
         }
 
@@ -300,9 +315,16 @@ namespace Kaenx.Classes.Bus
 
         private CancellationTokenSource _cancelTokenSource;
 
+
+        public async Task<IDevice> GetDevice(KnxInterfaceUsb inter)
+        {
+            return await hidFactory.GetDeviceAsync(inter.ConnDefinition);
+        }
+
+
         private async void ExecuteAction()
         {
-            CurrentAction.Connection = KnxInterfaceHelper.GetConnection(SelectedInterface, BusRemoteConnection.Instance);
+            CurrentAction.Connection = await KnxInterfaceHelper.GetConnection(SelectedInterface, BusRemoteConnection.Instance.Remote, GetDevice);
             CurrentAction.Connection.ConnectionChanged += Connection_ConnectionChanged;
             
             CurrentAction.ProgressIsIndeterminate = true;

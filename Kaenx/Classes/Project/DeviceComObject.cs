@@ -44,21 +44,33 @@ namespace Kaenx.Classes.Project
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Connections"));
         }
 
+        [JsonProperty("d")]
         public DataPointSubType DataPointSubType { get; set; }
+        [JsonProperty("is")]
         public bool IsSelected { get; set; } = false;
+        [JsonProperty("ie")]
         public bool IsEnabled { get; set; } = true;
+        [JsonProperty("io")]
         public bool IsOk { get; set; } = true;
 
         private string _name;
         private string _dname;
 
+        [JsonProperty("i")]
         public string Id { get; set; }
+        [JsonProperty("pd")]
         public LineDevice ParentDevice { get; set; }
+        [JsonProperty("bi")]
         public string BindedId { get; set; }
+        [JsonProperty("nu")]
         public int Number { get; set; }
+        [JsonProperty("na")]
         public string Name { get { return _name; } set { _name = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Name")); } }
+        [JsonProperty("dn")]
         public string DisplayName { get { return _dname; } set { _dname = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("DisplayName")); } }
+        [JsonProperty("f")]
         public string Function { get; set; }
+        [JsonProperty("c")]
         public List<Dynamic.ParamCondition> Conditions { get; set; }
         [JsonIgnore]
         public ObservableCollection<FunctionGroup> Groups { get; set; } = new ObservableCollection<FunctionGroup>();
@@ -76,13 +88,21 @@ namespace Kaenx.Classes.Project
                 return groups == "" ? "" : groups.Substring(2);
             }
         }
+        [JsonProperty("v")]
         public Visibility Visible { get; set; }
 
+
+        [JsonProperty("fr")]
         public bool Flag_Read { get; set; }
+        [JsonProperty("fw")]
         public bool Flag_Write { get; set; }
+        [JsonProperty("fu")]
         public bool Flag_Update { get; set; }
+        [JsonProperty("ft")]
         public bool Flag_Transmit { get; set; }
+        [JsonProperty("fc")]
         public bool Flag_Communication { get; set; }
+        [JsonProperty("fi")]
         public bool Flag_ReadOnInit { get; set; }
     }
 }

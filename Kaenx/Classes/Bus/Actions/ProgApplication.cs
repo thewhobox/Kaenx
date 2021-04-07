@@ -39,6 +39,7 @@ namespace Kaenx.Classes.Bus.Actions
         private List<byte> dataAssoTable = new List<byte>();
         private Dictionary<string, AppSegmentViewModel> dataSegs = new Dictionary<string, AppSegmentViewModel>();
         private Dictionary<string, byte[]> dataMems = new Dictionary<string, byte[]>();
+        private Dictionary<string, int> dataAddresses = new Dictionary<string, int>();
 
         public string Type { get; set; }
         public LineDevice Device { get; set; }
@@ -334,23 +335,30 @@ namespace Kaenx.Classes.Bus.Actions
             if (dataAssoTable.Count == 0 || dataGroupTable.Count == 0)
             {
                 TodoText = "Berechne Tabellen...";
-                GenerateAssoTable();
                 GenerateGroupTable();
+                GenerateAssoTable();
                 await Task.Delay(100);
 
+
+
+                dataMems[app.Table_Group][app.Table_Group_Offset] = Convert.ToByte(addedGroups.Count);
                 for (int i = 0; i < dataGroupTable.Count; i++)
                 {
-                    dataMems[app.Table_Group][i + app.Table_Group_Offset] = dataGroupTable[i];
+                    dataMems[app.Table_Group][i + app.Table_Group_Offset + 3] = dataGroupTable[i];
                 }
+
+                dataMems[app.Table_Assosiations][app.Table_Assosiations_Offset] = Convert.ToByte(dataAssoTable.Count / 2);
                 for (int i = 0; i < dataAssoTable.Count; i++)
                 {
-                    dataMems[app.Table_Assosiations][i + app.Table_Assosiations_Offset] = dataAssoTable[i];
+                    dataMems[app.Table_Assosiations][i + app.Table_Assosiations_Offset + 1] = dataAssoTable[i];
                 }
             }
 
+            TodoText = "Schreibe Speicher...";
 
             byte[] value;
             int address = int.Parse(ctrl.Attribute("Address").Value);
+            int offset = dataAddresses.ElementAt(0).Value;
 
             if (ctrl.Attribute("InlineData") != null)
             {
@@ -362,7 +370,12 @@ namespace Kaenx.Classes.Bus.Actions
                 value = new byte[size];
                 for (int i = 0; i < size; i++)
                 {
-                    value[i] = dataMems.Values.ElementAt(0)[address + i];
+                    try
+                    {
+                        value[i] = dataMems.Values.ElementAt(0)[address - offset + i];
+                    } catch{
+
+                    }
                 }
             }
 
@@ -382,8 +395,6 @@ namespace Kaenx.Classes.Bus.Actions
                 case ProgAppType.Komplett:
                     foreach (AppSegmentViewModel seg in dataSegs.Values)
                     {
-                        //byte[] data = Convert.FromBase64String("QAcAB0BPAAdI1wAHUNsAB1jbAAdg2wAHRE8AB0zXAAdUTwAHXNsAB2HbAAdi2wAHZNsAB2bbAAdj2wAHZdsAB2fbAAdo2wAHadsAB2rbAAdr2wAHbNsAB23bAAdu2wAHb9sAB3DbAAdx2wAHctsAB3PbAAd02wAHddsAB3bbAAd32wAHeNsAB3nbAAd62wAHe9sAB3zbAAd92wAHftsAB3/bAAeA2wAHgdsAB4LbAAeD2wAHhNsAB4XbAAeG2wAHh9sAB4jbAAeJ2wAHitsAB4vbAAeM2wAHjdsAB47bAAeP2wAHkNsAB5HbAAeS2wAHk9sAB5TbAAeV2wAHltsAB5fbAAAAMgGQAAAAAwAAAAABAAAAAQAAAAEAAAAAAAAAAAAAAAAAAAcAAAEAAQAAAAAAAAAAAAEAAAcAAAAAAQAAAAEAAAABAAAAAgAAAAAAAAAAAAAHAAABAAEAAAAAAAAAAAABAf8AAAAAAAAAAP8AAAAAAAAAAAAAAQABAAAAAwEAAQICAAABAA==");
-                        //await dev.MemoryWriteSync(seg.Address, data);
                         await dev.MemoryWriteSync(seg.Address, dataMems[seg.Id]);
                     }
                     break;
@@ -395,8 +406,6 @@ namespace Kaenx.Classes.Bus.Actions
                     break;
             }
         }
-
-
 
 
         private List<AppParameter> GetVisibleParams(AppAdditional adds)
@@ -441,6 +450,8 @@ namespace Kaenx.Classes.Bus.Actions
             }
 
 
+            Dictionary<int, List<string>> unions = new Dictionary<int, List<string>>();
+
             foreach (IDynChannel ch in Channels)
             {
                 bool vis1 = SaveHelper.CheckConditions(ch.Conditions, Id2Param);
@@ -451,27 +462,64 @@ namespace Kaenx.Classes.Bus.Actions
 
                     foreach (IDynParameter para in block.Parameters)
                     {
-                        if (!para.Id.Contains("_R-")) continue;
                         bool vis3 = SaveHelper.CheckConditions(para.Conditions, Id2Param);
+
+
                         AppParameter xpara = AppParas[para.Id];
-                        if (vis1 && vis2 && vis3)
+
+                        //Wenn Parameter in keiner Union ist zurück geben
+                        if(xpara.UnionId == 0)
                         {
-                            if (!paras.Contains(xpara)) // && xpara.Access == AccessType.Full) //IDEE wenn man alle enzeigt hier ebenfalls mitbedenken
+                            //TODO prüfen ob auch bei neuen notwendig oder nur Namespace 11
+                            if(vis1 && vis2 && vis3)
                             {
                                 xpara.Value = para.Value;
                                 paras.Add(xpara);
                             }
-                        }
-                        else if (AppParas.Values.Where(p => p.Offset == xpara.Offset).Count() < 2)
+                        } else
                         {
-                            //xpara.Value = para.Value;
-                            paras.Add(xpara);
+                            if (!unions.ContainsKey(xpara.UnionId))
+                            {
+                                unions.Add(xpara.UnionId, new List<string>());
+                            }
+
+                            if (vis1 && vis2 && vis3)
+                            {
+                                if (!paras.Contains(xpara)) // && xpara.Access == AccessType.Full) //IDEE wenn man alle enzeigt hier ebenfalls mitbedenken
+                                {
+                                    xpara.Value = para.Value;
+                                    paras.Add(xpara);
+                                }
+
+                                unions[xpara.UnionId].Add(xpara.Id);
+                            }
+
                         }
-                        else if (AppParas.Values.Where(p => p.Offset == xpara.Offset && p.Value != xpara.Value).Count() == 0)
-                        {
-                            paras.Add(xpara);
-                        }
+
+                        //TODO keine ahnung was das soll
+                        //else if (AppParas.Values.Where(p => p.Offset == xpara.Offset).Count() < 2)
+                        //{
+                        //    //xpara.Value = para.Value;
+                        //    paras.Add(xpara);
+                        //}
+                        //else if (AppParas.Values.Where(p => p.Offset == xpara.Offset && p.Value != xpara.Value).Count() == 0)
+                        //{
+                        //    paras.Add(xpara);
+                        //}
                     }
+                }
+            }
+            
+            foreach(KeyValuePair<int, List<string>> union in unions.Where(x => x.Value.Count == 0))
+            {
+                if(AppParas.Values.Any(p => p.UnionId == union.Key && p.UnionDefault))
+                {
+                    if(AppParas.Values.Where(p => p.UnionId == union.Key && p.UnionDefault).Count() > 1)
+                    {
+                        Log.Error("Applikation enthält mehrere DefaultUnionParameter: Id = " + union.Key);
+                    }
+                    AppParameter para = AppParas.Values.First(p => p.UnionId == union.Key && p.UnionDefault);
+                    paras.Add(para);
                 }
             }
 
@@ -481,32 +529,33 @@ namespace Kaenx.Classes.Bus.Actions
 
         private async Task AllocRelSegment(AppAdditional adds, XElement ctrl)
         {
-            int length = 1;
             string LsmId = ctrl.Attribute("LsmIdx").Value;
-            switch (LsmId)
-            {
-                case "1":
-                    GenerateGroupTable();
-                    length = dataGroupTable.Count;
-                    break;
-                case "2":
-                    GenerateAssoTable();
-                    length = dataAssoTable.Count;
-                    break;
-                case "3":
-                    GenerateApplication(adds);
-                    length = dataMems.Values.ElementAt(0).Length;
-                    break;
-            }
+            //switch (LsmId)
+            //{
+            //    case "1":
+            //        GenerateGroupTable();
+            //        length = dataGroupTable.Count;
+            //        break;
+            //    case "2":
+            //        GenerateAssoTable();
+            //        length = dataAssoTable.Count;
+            //        break;
+            //    case "3":
+            //        GenerateApplication(adds);
+            //        length = dataMems.Values.ElementAt(0).Length;
+            //        break;
+            //}
 
 
-            byte[] tempBytes;
+            //byte[] tempBytes;
             List<byte> data = new List<byte>() { 0x03, 0x0b };
 
-            tempBytes = BitConverter.GetBytes(Convert.ToUInt32(length));
-
+            byte[] tempBytes = BitConverter.GetBytes(Convert.ToUInt32(ctrl.Attribute("Size").Value));
             data.AddRange(tempBytes.Reverse()); // Length
-            data.AddRange(new byte[] { 0x00, 0x00, 0x00, 0x00 });
+
+            byte mode = (byte)(ctrl.Attribute("Mode").Value == "1" ? 0x01 : 0x00);
+            byte fill = byte.Parse(ctrl.Attribute("Fill").Value, System.Globalization.NumberStyles.HexNumber, System.Globalization.CultureInfo.InvariantCulture);
+            data.AddRange(new byte[] { mode, fill, 0x00, 0x00 });
 
             await dev.PropertyWrite(Convert.ToByte(LsmId), 5, data.ToArray(), true);
         }
@@ -571,6 +620,7 @@ namespace Kaenx.Classes.Bus.Actions
                 if (counter > 2)
                 {
                     Debug.WriteLine("Fehlgeschlagen!");
+                    Log.Error($"AllocSegment fehlgeschlagen: Idx = {lsmIdx}, Response = {Convert.ToString(data2)}");
                 }
                 else
                     await AllocSegment(ctrl, segType, counter + 1);
@@ -588,19 +638,19 @@ namespace Kaenx.Classes.Bus.Actions
             //Gruppenadressen in Tabelle eintragen
             GenerateGroupTable();
             Debug.WriteLine("Tabelle schreiben");
+            Log.Information($"Gruppentabelle mit {addedGroups.Count} einträgen schreiben");
             await dev.MemoryWriteSync(addr + 3, dataGroupTable.ToArray());
 
             await Task.Delay(100);
 
             Debug.WriteLine("Tabelle länge setzen");
-            await dev.MemoryWriteSync(addr, new byte[] { BitConverter.GetBytes(addedGroups.Count)[0] });
+            await dev.MemoryWriteSync(addr, new byte[] { Convert.ToByte(addedGroups.Count) });
+            Log.Information($"Gruppentabelle fertig");
 
 
             _ = App._dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Low, () =>
             {
                 Device.LoadedGroup = true;
-                Device.LoadedApplication = true;
-                Device.LoadedPA = true;
             });
         }
 
@@ -613,10 +663,12 @@ namespace Kaenx.Classes.Bus.Actions
 
             //Schreibe Assoziationstabelle in Speicher
             GenerateAssoTable();
+            Log.Information($"Assoziationstabelle mit {dataAddresses.Count / 2} einträgen schreiben");
             await dev.MemoryWriteSync(addr + 1, dataAssoTable.ToArray());
 
             //Setze Länge der Tabelle
             await dev.MemoryWriteSync(addr, new byte[] { Convert.ToByte(dataAssoTable.Count / 2) });
+            Log.Information("Assoziationstabelle fertig");
 
             _ = App._dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Low, () =>
             {
@@ -664,6 +716,7 @@ namespace Kaenx.Classes.Bus.Actions
                 if (counter > 2)
                 {
                     Debug.WriteLine("Fehlgeschlagen!");
+                    Log.Error($"LsmState fehlgeschlagen: Idx = {lsmIdx}, State = {state}, Response = {Convert.ToString(data)}");
                 }
                 else
                     await LsmState(ctrl, counter + 1);
@@ -678,7 +731,10 @@ namespace Kaenx.Classes.Bus.Actions
                     if (!addedGroups.Contains(group.Address.ToString()))
                         addedGroups.Add(group.Address.ToString());
             if (addedGroups.Count > app.Table_Group_Max)
+            {
+                Log.Error("Die Applikation erlaubt nur " + app.Table_Group_Max + " Gruppenverbindungen. Verwendet werden " + addedGroups.Count + ".");
                 throw new Exception("Die Applikation erlaubt nur " + app.Table_Group_Max + " Gruppenverbindungen. Verwendet werden " + addedGroups.Count + ".");
+            }
 
             addedGroups.Sort();
 
@@ -723,10 +779,13 @@ namespace Kaenx.Classes.Bus.Actions
             }
 
             if ((dataAssoTable.Count / 2) > app.Table_Assosiations_Max)
+            {
+                Log.Error("Die Applikation erlaubt nur " + app.Table_Assosiations_Max + " Assoziationsverbindungen. Verwendet werden " + (dataAssoTable.Count / 2) + ".");
                 throw new Exception("Die Applikation erlaubt nur " + app.Table_Assosiations_Max + " Assoziationsverbindungen. Verwendet werden " + (dataAssoTable.Count / 2) + ".");
+            }
         }
 
-
+        /*
         private void GenerateApplication(AppAdditional adds)
         {
             Dictionary<string, AppParameter> paras = new Dictionary<string, AppParameter>();
@@ -755,6 +814,7 @@ namespace Kaenx.Classes.Bus.Actions
                     }
 
                     dataSegs[para.SegmentId] = seg;
+                    dataAddresses.Add(seg.Id, seg.Address);
                 }
 
                 AppParameterTypeViewModel type = types[para.ParameterTypeId];
@@ -841,6 +901,151 @@ namespace Kaenx.Classes.Bus.Actions
                             memory[defPara.Offset + i] = paraData[i];
                             changed.Add(defPara.Offset + i);
                         }
+                    }
+                }
+
+                unionId++;
+            }
+        }
+        */
+
+        private void GenerateApplication(AppAdditional adds)
+        {
+            Dictionary<string, AppParameter> paras = new Dictionary<string, AppParameter>();
+            Dictionary<string, AppParameterTypeViewModel> types = new Dictionary<string, AppParameterTypeViewModel>();
+            List<int> changed = new List<int>();
+
+            foreach (AppParameter para in GetVisibleParams(adds))
+                paras.Add(para.Id, para);
+
+            foreach (AppParameterTypeViewModel type in _context.AppParameterTypes)
+                types.Add(type.Id, type);
+
+            foreach (AppParameter para in paras.Values)
+            {
+                if (para.SegmentId == null) continue;
+                if (!dataSegs.ContainsKey(para.SegmentId))
+                {
+                    AppSegmentViewModel seg = _context.AppSegments.Single(a => a.Id == para.SegmentId);
+                    if (seg.Data == null)
+                    {
+                        dataMems[para.SegmentId] = new byte[seg.Size];
+                    }
+                    else
+                    {
+                        dataMems[para.SegmentId] = Convert.FromBase64String(seg.Data);
+                    }
+
+                    dataSegs[para.SegmentId] = seg;
+                    dataAddresses.Add(seg.Id, seg.Address);
+                }
+
+                AppParameterTypeViewModel type = types[para.ParameterTypeId];
+
+                int paraDataLength = type.Size >= 8 ? (type.Size / 8) : 1;
+                byte[] paraData = new byte[paraDataLength];
+
+                switch (type.Type)
+                {
+                    case ParamTypes.Enum:
+                    case ParamTypes.NumberUInt:
+                        paraData = BitConverter.GetBytes(Convert.ToUInt32(para.Value)).Take(paraDataLength).ToArray();
+                        Array.Reverse(paraData);
+                        break;
+                    case ParamTypes.NumberInt:
+                        paraData = BitConverter.GetBytes(Convert.ToInt32(para.Value)).Take(paraDataLength).ToArray();
+                        Array.Reverse(paraData);
+                        break;
+
+                    case ParamTypes.Text:
+                        Encoding.UTF8.GetBytes(para.Value).CopyTo(paraData, 0);
+                        break;
+                    default:
+                        Log.Error("Parametertyp wurde noch nicht beim Applikation schreiben eingepflegt... Typ: " + type.Type.ToString());
+                        throw new Exception("Unbekannter ParaTyp: " + type.Type.ToString());
+                }
+
+
+
+
+                if (type.Size >= 8)
+                {
+                    Debug.WriteLine(para.Offset);
+                    byte[] memory = dataMems[para.SegmentId];
+                    for (int i = 0; i < type.Size / 8; i++)
+                    {
+                        memory[para.Offset + i] = paraData[i];
+                        changed.Add(para.Offset + i);
+                    }
+                } else
+                {
+                    List<int> masks = new List<int>() { 0b00000001, 0b00000011, 0b00000111, 0b00001111, 0b00011111, 0b00111111, 0b01111111 };
+                    int dataByte = paraData[0];
+
+                    int mask = masks[type.Size - 1];
+                    dataByte &= mask;
+                    dataByte = dataByte << para.OffsetBit;
+
+                    int memByte = dataMems[para.SegmentId][para.Offset];
+                    memByte = ((mask << para.OffsetBit) ^ 255) & memByte;
+                    memByte |= dataByte;
+                    dataMems[para.SegmentId][para.Offset] = Convert.ToByte(memByte);
+                }
+            }
+
+            int unionId = 1;
+            while (true)
+            {
+                if (!_context.AppParameters.Any(p => p.ApplicationId == adds.Id && p.UnionId == unionId)) break;
+
+                bool flag = false;
+                foreach (AppParameter para in _context.AppParameters.Where(p => p.ApplicationId == adds.Id && p.UnionId == unionId))
+                {
+                    if (paras.ContainsKey(para.Id))
+                    {
+                        flag = true;
+                        break;
+                    }
+                }
+
+                if (!flag && _context.AppParameters.Any(p => p.ApplicationId == adds.Id && p.UnionId == unionId && p.UnionDefault))
+                {
+                    AppParameter defPara = _context.AppParameters.First(p => p.ApplicationId == adds.Id && p.UnionId == unionId && p.UnionDefault);
+
+                    AppParameterTypeViewModel type = types[defPara.ParameterTypeId];
+
+                    byte[] paraData = type.Size >= 8 ? new byte[type.Size / 8] : new byte[1];
+
+                    switch (type.Type)
+                    {
+                        case ParamTypes.Enum:
+                        case ParamTypes.NumberUInt:
+                            paraData = BitConverter.GetBytes(Convert.ToUInt32(defPara.Value)).Take(type.Size / 8).ToArray();
+                            Array.Reverse(paraData);
+                            break;
+                        case ParamTypes.NumberInt:
+                            paraData = BitConverter.GetBytes(Convert.ToInt32(defPara.Value)).Take(type.Size / 8).ToArray();
+                            Array.Reverse(paraData);
+                            break;
+
+                        case ParamTypes.Text:
+                            paraData = Encoding.UTF8.GetBytes(defPara.Value);
+                            break;
+                    }
+
+
+
+                    if (type.Size >= 8)
+                    {
+                        byte[] memory = dataMems[defPara.SegmentId];
+                        for (int i = 0; i < type.Size / 8; i++)
+                        {
+                            memory[defPara.Offset + i] = paraData[i];
+                            changed.Add(defPara.Offset + i);
+                        }
+                    } else
+                    {
+
                     }
                 }
 

@@ -1,4 +1,5 @@
 ﻿using Kaenx.Classes.Helper;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -17,12 +18,17 @@ namespace Kaenx.Classes.Dynamic
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
         }
 
+        [JsonProperty("i")]
         public string Id { get; set; }
+        [JsonProperty("t")]
         public string Text { get; set; }
+        [JsonProperty("d")]
         public string DefaultText { get; set; }
+        [JsonProperty("a")]
         public bool HasAccess { get; set; } = true;
 
         private string _dtext;
+        [JsonProperty("di")]
         public string DisplayText
         {
             get { return _dtext; }
@@ -33,7 +39,9 @@ namespace Kaenx.Classes.Dynamic
             }
         }
 
+
         private Visibility _visible;
+        [JsonProperty("v")]
         public Visibility Visible
         {
             get { return _visible; }
@@ -43,7 +51,9 @@ namespace Kaenx.Classes.Dynamic
             }
         }
 
+        [JsonProperty("c")]
         public List<ParamCondition> Conditions { get; set; } = new List<ParamCondition>();
+        [JsonProperty("p")]
         public List<IDynParameter> Parameters { get; set; } = new List<IDynParameter>();
     }
 }

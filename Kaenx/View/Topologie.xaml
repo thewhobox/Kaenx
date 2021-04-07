@@ -32,6 +32,7 @@
                         <Setter Target="TreeV.MaxWidth" Value="250" />
                         <Setter Target="SettExpander.IsExpanded" Value="False" />
                         <Setter Target="PanelSettings.Width" Value="300" />
+                        <Setter Target="BtnNewWindow.Visibility" Value="Visible" />
                     </VisualState.Setters>
                 </VisualState>
                 <VisualState>
@@ -46,6 +47,7 @@
                         <Setter Target="TreeV.MaxWidth" Value="400" />
                         <Setter Target="SettExpander.IsExpanded" Value="True" />
                         <Setter Target="PanelSettings.Width" Value="300" />
+                        <Setter Target="BtnNewWindow.Visibility" Value="Visible" />
                     </VisualState.Setters>
                 </VisualState>
                 <VisualState>
@@ -197,7 +199,7 @@
                 <RowDefinition />
             </Grid.RowDefinitions>
             
-            <Button Click="OpenInNewWindow" HorizontalAlignment="Right" VerticalAlignment="Center" Background="Transparent" Margin="0 0 5 0">
+            <Button x:Name="BtnNewWindow" Click="OpenInNewWindow" HorizontalAlignment="Right" VerticalAlignment="Center" Background="Transparent" Margin="0 0 5 0" Visibility="Collapsed">
                 <FontIcon Glyph="&#xE8A7;" />
             </Button>
 

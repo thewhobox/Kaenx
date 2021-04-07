@@ -215,7 +215,7 @@ namespace Kaenx.View
 
             ProgMax = addresses.Count;
             ProgValue = 0;
-            IKnxConnection _conn = KnxInterfaceHelper.GetConnection(conn.SelectedInterface, BusRemoteConnection.Instance);
+            IKnxConnection _conn = await KnxInterfaceHelper.GetConnection(conn.SelectedInterface, BusRemoteConnection.Instance.Remote, BusConnection.Instance.GetDevice);
 
             try
             {
@@ -286,7 +286,7 @@ namespace Kaenx.View
                 if (CheckStop(_conn)) return;
                 try
                 {
-                    await SaveDevice(device);
+                    SaveDevice(device);
                 }
                 catch
                 {
@@ -350,18 +350,26 @@ namespace Kaenx.View
                 Debug.WriteLine(device.Address.ToString() + ": " + appId);
                 if (string.IsNullOrEmpty(device.ApplicationName))
                 {
-                    device.ApplicationName = "Fehler 0x03";
+                    device.ApplicationName = appId;
                     device.ApplicationId = appId;
                 }
-                device.DeviceName = "Fehler 0x03";
+                device.DeviceName = "Applikation nicht im Katalog";
             }
 
 
 
             try
             {
-                device.SerialBytes = await dev.PropertyRead(0,11);
+                device.SerialBytes = await dev.PropertyRead(mask, "DeviceSerialNumber");
                 device.Serial = BitConverter.ToString(device.SerialBytes).Replace("-", "");
+            }
+            catch (NotSupportedException ex)
+            {
+                device.Serial = "Wird nicht unterstützt";
+            }
+            catch(TimeoutException ex)
+            {
+                device.Serial = "Timeout";
             }
             catch {
                 device.Serial = "Fehler 0x02";
@@ -371,7 +379,7 @@ namespace Kaenx.View
             device.Status = "Infos gelesen";
         }
 
-        private async Task SaveDevice(ReconstructDevice device)
+        private void SaveDevice(ReconstructDevice device)
         {
             Line line;
             if (SaveHelper._project.Lines.Any(l => l.Id == device.Address.Area))
@@ -441,7 +449,7 @@ namespace Kaenx.View
             Action = "Starte Konfiguration auslesen...";
             CanDo = false;
 
-            IKnxConnection _conn = KnxInterfaceHelper.GetConnection(conn.SelectedInterface, BusRemoteConnection.Instance);
+            IKnxConnection _conn = await KnxInterfaceHelper.GetConnection(conn.SelectedInterface, BusRemoteConnection.Instance.Remote, BusConnection.Instance.GetDevice);
 
             try
             {

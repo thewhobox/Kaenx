@@ -65,18 +65,22 @@ namespace Kaenx.Classes.Dynamic
             }
         }
 
+
+        [JsonProperty("o")]
         public Windows.UI.Xaml.Controls.Orientation Orientation
         {
             get { return Option1.Text.Length + Option2.Text.Length > 16 ? Windows.UI.Xaml.Controls.Orientation.Vertical : Windows.UI.Xaml.Controls.Orientation.Horizontal; }
         }
 
         private ParamEnumOption _opt1;
+        [JsonProperty("o1")]
         public ParamEnumOption Option1
         {
             get { return _opt1; }
             set { _opt1 = value; if (_opt1.Value == Value) Selected1 = true; }
         }
         private ParamEnumOption _opt2;
+        [JsonProperty("o2")]
         public ParamEnumOption Option2
         {
             get { return _opt2; }

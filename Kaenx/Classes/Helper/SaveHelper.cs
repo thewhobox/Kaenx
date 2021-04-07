@@ -8,6 +8,8 @@ using Kaenx.Views.Easy.Controls;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Toolkit.Uwp.Helpers;
 using Microsoft.Toolkit.Uwp.UI.Extensions;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Bson;
 using Serilog;
 using System;
 using System.Collections.Generic;
@@ -431,13 +433,24 @@ namespace Kaenx.Classes.Helper
                                 dcom.DisplayName = dcom.Name;
                             }
 
-                            if(comObj.DatapointSub == -1)
+
+                            if (comObj.Datapoint == -1)
                             {
-                                dcom.DataPointSubType = DPSTs[comObj.Datapoint.ToString()]["xxx"];
-                            } else
-                            {
-                                dcom.DataPointSubType = DPSTs[comObj.Datapoint.ToString()][comObj.DatapointSub.ToString()];
+                                dcom.DataPointSubType = new DataPointSubType() { SizeInBit = comObj.Size, Name = "x Bytes", Number = "..." };
                             }
+                            else
+                            {
+                                if (comObj.DatapointSub == -1)
+                                {
+                                    dcom.DataPointSubType = DPSTs[comObj.Datapoint.ToString()]["xxx"];
+                                }
+                                else
+                                {
+                                    dcom.DataPointSubType = DPSTs[comObj.Datapoint.ToString()][comObj.DatapointSub.ToString()];
+                                }
+                            }
+
+                           
 
                             ld.ComObjects.Add(dcom);
                         }
@@ -1276,10 +1289,89 @@ namespace Kaenx.Classes.Helper
                     block.Parameters.Add(pco);
                     break;
 
+                case ParamTypes.Time:
+                    string[] tags = paraType.Tag1.Split(";");
+                    ParamTime pti = new ParamTime()
+                    {
+                        Id = para.Id,
+                        Text = para.Text,
+                        Default = para.Value,
+                        Value = para.Value,
+                        Conditions = paramList,
+                        Hash = hash,
+                        HasAccess = hasAccess,
+                        IsEnabled = IsCtlEnabled,
+                        Minimum = int.Parse(tags[0]),
+                        Maximum = int.Parse(paraType.Tag2)
+                    };
+
+                    switch (tags[1])
+                    {
+                        case "Hours":
+                            pti.SuffixText = "Stunden";
+                            pti.Divider = 1;
+                            break;
+                        case "Seconds":
+                            pti.SuffixText = "Sekunden";
+                            pti.Divider = 1;
+                            break;
+                        case "TenSeconds":
+                            pti.SuffixText = "Zehn Sekunden";
+                            pti.Divider = 10;
+                            break;
+                        case "HundredSeconds":
+                            pti.SuffixText = "Hundert Sekunden";
+                            pti.Divider = 100;
+                            break;
+                        case "Milliseconds":
+                            pti.SuffixText = "Millisekunden";
+                            pti.Divider = 1;
+                            break;
+                        case "TenMilliseconds":
+                            pti.SuffixText = "Zehn Millisekunden";
+                            pti.Divider = 10;
+                            break;
+                        case "HundredMilliseconds":
+                            pti.SuffixText = "Hundert Millisekunden";
+                            pti.Divider = 100;
+                            break;
+
+                        //Todo 
+                        /*
+                         * PackedSecondsAndMilliseconds
+                            Integer value in milliseconds
+                            2 bytes:
+                            (lo) lower 8 bits of milliseconds
+                            (hi) ffssssss
+                            (upper 2 bits of milliseconds + seconds)
+
+                            Example: 2.500 seconds are encoded as F4h 42h
+                            
+                            11 110100  01000010
+
+                            PackedDaysHoursMinutesAndSeconds
+                            Integer value in seconds
+                            3 bytes, same as DPT 10.001:
+
+                            (lo) seconds
+                            | minutes
+                            (hi) dddhhhhh (days and hours)
+
+                            Example: 2 days, 8 hours, 20 minutes and 10 seconds is encoded as 0Ah 14h 48h
+
+                         */
+
+                        default:
+                            Log.Error("TypeTime Unit nicht unterstützt!! " + tags[1]);
+                            throw new Exception("TypeTime Unit nicht unterstützt!! " + tags[1]);
+                    }
+                    block.Parameters.Add(pti);
+                    break;
+
                 default:
+                    Serilog.Log.Error("Parametertyp nicht festgelegt!! " + paraType.Type.ToString());
                     Debug.WriteLine("Parametertyp nicht festgelegt!! " + paraType.Type.ToString());
                     throw new Exception("Parametertyp nicht festgelegt!! " + paraType.Type.ToString());
-                    break;
             }
         }
 
@@ -1302,14 +1394,23 @@ namespace Kaenx.Classes.Helper
 
                 DeviceComObject comobject = new DeviceComObject(appCom);
 
-                if(appCom.DatapointSub == -1)
+                if(appCom.Datapoint == -1)
                 {
-                    comobject.DataPointSubType = DPST[appCom.Datapoint.ToString()]["xxx"];
-                }
-                else
+                    comobject.DataPointSubType = new DataPointSubType() { SizeInBit = appCom.Size, Name = "x Bytes", Number = "..." };
+                } else
                 {
-                    comobject.DataPointSubType = DPST[appCom.Datapoint.ToString()][appCom.DatapointSub.ToString()];
+                    if (appCom.DatapointSub == -1)
+                    {
+                        comobject.DataPointSubType = DPST[appCom.Datapoint.ToString()]["xxx"];
+                    }
+                    else
+                    {
+                        comobject.DataPointSubType = DPST[appCom.Datapoint.ToString()][appCom.DatapointSub.ToString()];
+                    }
                 }
+
+
+                
 
                 comobject.Conditions = GetConditions(xcom);
                 comObjects.Add(comobject);
@@ -1666,7 +1767,7 @@ namespace Kaenx.Classes.Helper
 
             if (full)
             {
-                text = Newtonsoft.Json.JsonConvert.SerializeObject(obj, Newtonsoft.Json.Formatting.Indented, new Newtonsoft.Json.JsonSerializerSettings
+                text = Newtonsoft.Json.JsonConvert.SerializeObject(obj, Newtonsoft.Json.Formatting.None, new Newtonsoft.Json.JsonSerializerSettings
                 {
                     TypeNameHandling = Newtonsoft.Json.TypeNameHandling.Objects,
                     TypeNameAssemblyFormatHandling = Newtonsoft.Json.TypeNameAssemblyFormatHandling.Simple
@@ -1688,7 +1789,8 @@ namespace Kaenx.Classes.Helper
                 return Newtonsoft.Json.JsonConvert.DeserializeObject<T>(text, new Newtonsoft.Json.JsonSerializerSettings
                 {
                     TypeNameHandling = Newtonsoft.Json.TypeNameHandling.Objects,
-                    TypeNameAssemblyFormatHandling = Newtonsoft.Json.TypeNameAssemblyFormatHandling.Simple
+                    TypeNameAssemblyFormatHandling = Newtonsoft.Json.TypeNameAssemblyFormatHandling.Simple,
+                    Formatting = Newtonsoft.Json.Formatting.None
                 });
             }
             else

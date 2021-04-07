@@ -43,15 +43,12 @@ namespace Kaenx.Classes.Bus.Actions
         {
         }
 
-        List<IMessageResponse> devices = new List<IMessageResponse>();
-
         private void _conn_OnTunnelResponse(IMessageResponse response)
         {
-            devices.Add(response);
-
             //TODO MsgIndividualAddressResponse
-            if (response.ApciType == ApciTypes.IndividualAddressResponse && (response.SourceAddress as UnicastAddress).Area != 0 && !progDevices.Contains(response.SourceAddress.ToString()))
+            if (response.ApciType == ApciTypes.IndividualAddressResponse && !progDevices.Contains(response.SourceAddress.ToString()))
             {
+                Debug.WriteLine("IndResp = " + response.SourceAddress.ToString());
                 progDevices.Add(response.SourceAddress.ToString());
             }
         }
@@ -67,10 +64,31 @@ namespace Kaenx.Classes.Bus.Actions
 
         private async void CheckProgMode()
         {
-            TodoText = "Bitte Programmierknopf drücken...";
-
+            TodoText = "Prüfen ob Adresse frei";
             ProgressIsIndeterminate = true;
             progDevices.Clear();
+
+
+            //BusDevice dev = new BusDevice(Device.LineName, Connection);
+            //await dev.Connect();
+            //string desc = "";
+            //try
+            //{
+            //    desc = await dev.DeviceDescriptorRead();
+            //}
+            //catch { }
+
+
+            //if (!string.IsNullOrEmpty(desc))
+            //{
+            //    TodoText = "Adresse wird bereits verwendet";
+            //    Finished?.Invoke(this, new EventArgs());
+            //    return;
+            //}
+
+
+            TodoText = "Bitte Programmierknopf drücken...";
+
 
             int threeshold = 0;
 
@@ -203,29 +221,29 @@ namespace Kaenx.Classes.Bus.Actions
             TodoText = "Gerät wird neu gestartet";
             BusDevice dev = new BusDevice(Device.LineName, Connection);
             await dev.Connect(true);
-            string mask = await dev.DeviceDescriptorRead();
+            //string mask = await dev.DeviceDescriptorRead();
 
             await dev.Restart();
             await Task.Delay(2000);
 
-            await dev.Connect();
+            //await dev.Connect();
 
 
-            byte[] serial = null;
-            try
-            {
-                serial = await dev.PropertyRead(0,11);
-            } catch {
-            }
+            //byte[] serial = null;
+            //try
+            //{
+            //    serial = await dev.PropertyRead(0,11);
+            //} catch {
+            //}
 
-            if(serial != null)
-            {
-                Device.Serial = serial;
-                _ = App._dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Low, () =>
-                {
-                    SaveHelper.UpdateDevice(Device);
-                });
-            }
+            //if(serial != null)
+            //{
+            //    Device.Serial = serial;
+            //    _ = App._dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Low, () =>
+            //    {
+            //        SaveHelper.UpdateDevice(Device);
+            //    });
+            //}
 
 
 

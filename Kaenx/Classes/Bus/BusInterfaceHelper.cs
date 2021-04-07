@@ -28,13 +28,13 @@ namespace Kaenx.Classes.Bus
                     break;
 
 
-                case InterfaceType.USB:
-                    ninter = new KnxInterfaceUsb()
-                    {
-                        Name = inter.Name,
-                        DeviceId = inter.Ip
-                    };
-                    break;
+                //case InterfaceType.USB:
+                //    ninter = new KnxInterfaceUsb()
+                //    {
+                //        Name = inter.Name,
+                //        DeviceId = inter.Ip
+                //    };
+                //    break;
 
 
                 default:
