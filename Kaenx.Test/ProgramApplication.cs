@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Threading;
@@ -100,8 +101,8 @@ namespace Kaenx.Test
             //connection.Expect(new MsgAuthorizeReq(address, level = 0, key = 0xffffffff));
             //connection.Response(ApciTypes.AuthorizeResponse, 0);
 
-            //connection.Expect(new MsgPropertyDescRead(ASSOCIATION_TABLE, PID_TABLE, address));
-            //connection.Response(ApciTypes.PropertyDescriptionResponse, ASSOCIATION_TABLE, PID_TABLE, 0x03, 0x12, 0x00, 0x01, 0x30);
+            connection.Expect(new MsgPropertyDescriptionReq(ASSOCIATION_TABLE, PID_TABLE, 0, address));
+            connection.Response(ApciTypes.PropertyDescriptionResponse, ASSOCIATION_TABLE, PID_TABLE, 0x03, 0x12, 0x00, 0x01, 0x30);
 
             /* Not According to documentation, but ETS does this anyway
             connection.Expect(new MsgPropertyReadReq(DEVICE, PID_SERIAL_NUMBER, address));
@@ -241,10 +242,28 @@ namespace Kaenx.Test
 
         public void Response(ApciTypes resApci, params byte[] resData)
         {
-            if (resApci == ApciTypes.PropertyValueResponse)
-                ExpectedMessages.Enqueue(new MsgPropertyReadRes(resData));
-            else
-                ExpectedMessages.Enqueue(new MsgDefaultRes() { ApciType = resApci, Raw = resData });
+            var q = from t in Assembly.GetAssembly(typeof(IMessageResponse)).GetTypes()
+                    where t.IsClass && t.IsNested == false && (t.Namespace == "Kaenx.Konnect.Messages.Response" || t.Namespace == "Kaenx.Konnect.Messages.Request")
+                    select t;
+
+            IMessage message = null;
+
+            foreach (Type t in q.ToList())
+            {
+                IMessage resp = (IMessage)Activator.CreateInstance(t);
+
+                if (resp.ApciType == resApci)
+                {
+                    message = resp;
+                    break;
+                }
+            }
+
+            if (message == null)
+                message = new MsgDefaultRes() { ApciType = resApci };
+            message.Raw = resData;
+            message.ParseDataCemi();
+            ExpectedMessages.Enqueue(message);
         }
 
         public Task Connect()
@@ -271,9 +290,10 @@ namespace Kaenx.Test
 
             Assert.IsTrue(ExpectedMessages.Count > 0, "Expected no more messages");
             IMessage expected = ExpectedMessages.Dequeue();
+            expected.SequenceNumber = message.SequenceNumber;
             Assert.AreEqual(expected.DestinationAddress.ToString(), message.DestinationAddress.ToString());
             Assert.AreEqual(expected.ApciType, message.ApciType);
-            Assert.AreEqual(expected.Raw, message.Raw);
+            CollectionAssert.AreEqual(expected.GetBytesCemi(), message.GetBytesCemi());
             OnTunnelAck?.Invoke(new MsgAckRes()
             {
                 ChannelId = 0,

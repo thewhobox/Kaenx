@@ -7,6 +7,7 @@ using Kaenx.DataContext.Project;
 using Kaenx.Konnect.Addresses;
 using Kaenx.Konnect.Classes;
 using Kaenx.Konnect.Connections;
+using Kaenx.Konnect.Messages.Response;
 using Serilog;
 using System;
 using System.Collections.Generic;
@@ -36,6 +37,7 @@ namespace Kaenx.Classes.Bus.Actions
 
 
         private List<byte> dataGroupTable = new List<byte>();
+        private bool useLongAssociations = false;
         private List<byte> dataAssoTable = new List<byte>();
         private Dictionary<string, AppSegmentViewModel> dataSegs = new Dictionary<string, AppSegmentViewModel>();
         private Dictionary<string, byte[]> dataMems = new Dictionary<string, byte[]>();
@@ -58,30 +60,16 @@ namespace Kaenx.Classes.Bus.Actions
             }
         }
 
-        private string ProcedureSubType
+        private string ProcedureSubType => _type switch
         {
-            get
-            {
-                switch (_type)
-                {
-                    case ProgAppType.Komplett:
-                        return "all";
-                    case ProgAppType.Partiell:
-                        if (!Device.LoadedApplication && !Device.LoadedGroup)
-                            return "par,grp";
-                        else if (!Device.LoadedApplication)
-                            return "par";
-                        else if (!Device.LoadedGroup)
-                            return "grp";
-                        else
-                            return "cfg";
-                    case ProgAppType.Minimal:
-                        throw new NotImplementedException("Minimal Programmieren");
-                    default:
-                        throw new InvalidOperationException("Unreachable");
-                }
-            }
-        }
+            ProgAppType.Komplett => "all",
+            ProgAppType.Partiell when !Device.LoadedApplication && !Device.LoadedGroup => "par,grp",
+            ProgAppType.Partiell when !Device.LoadedApplication => "par",
+            ProgAppType.Partiell when !Device.LoadedGroup => "grp",
+            ProgAppType.Partiell => "cfg",
+            ProgAppType.Minimal => throw new NotImplementedException("Minimal Programmieren"),
+            _ => throw new InvalidOperationException("Unreachable"),
+        };
 
         public UnloadHelper Helper;
         public IKnxConnection Connection { get; set; }
@@ -285,74 +273,7 @@ namespace Kaenx.Classes.Bus.Actions
                                 break;
 
                             case "PreDownloadChecks":
-                                {
-                                    await dev.DeviceDescriptorRead(await GetKnxMaster());
-                                    ushort databaseMask = ushort.Parse(app.Mask.Replace("MV-", ""), System.Globalization.NumberStyles.HexNumber);
-                                    if (databaseMask != dev.MaskVersion)
-                                        throw new Exception($"Maskenversion im Gerät ({dev.MaskVersion:X4}) stimmt nicht mit der Produktdatenbank ({databaseMask:X4}) überein");
-                                    //Medium independant
-                                    int maskVersion = (ushort)dev.MaskVersion & 0x0fff;
-                                    await dev.ReadMaxAPDULength();
-
-                                    //TODO: When to authorize
-
-                                    bool programAssociations = _type == ProgAppType.Komplett || !Device.LoadedGroup;
-                                    if (maskVersion == 0x07B0 && programAssociations)
-                                    {
-                                        //TODO: Read ASSOCIATION_TABLE PropertyDescription of PID_TABLE to determine if short or long associations are used
-                                    }
-
-                                    if (_type == ProgAppType.Komplett)
-                                    {
-                                        string maskString = $"MV-{dev.MaskVersion:X4}";
-                                        if (maskVersion != 0x0701 && !(0x0910 <= maskVersion && maskVersion <= 0x091f))
-                                        {
-                                            int deviceManufacturer = await dev.PropertyRead<int>(maskString, "DeviceManufacturerId");
-                                            if (app.Manufacturer != deviceManufacturer)
-                                                throw new Exception("Hersteller des Gerätes ist nicht gleich mit der Produktdatenbank");
-                                        }
-                                        //TODO: PortADDR for BCU1 (Memory: 010C) and BCU2 (PID_PORT_CONFIGURATION in device object)
-                                        // Compare to download image 010C if this address is included
-                                        if (maskVersion == 0x07B0)
-                                        {
-                                            const byte PID_ORDER_INFO = 15;
-                                            const byte PID_VERSION = 25;
-                                            const byte PID_HARDWARE_TYPE = 78;
-                                            await dev.PropertyRead(0, PID_VERSION);
-                                            await dev.PropertyRead(0, PID_HARDWARE_TYPE);
-                                            await dev.PropertyRead(0, PID_ORDER_INFO);
-                                            //TODO: Compare if properties are included in download image 
-                                            // KNX suggests an unused ParameterTypeRestriction with a default including BinaryValue = Value to compare, and a Property Parameter with respective objIdx and propId
-                                            // Compare PID_ORDER_INFO and PID_HARDWARE_TYPE with ==, PID_VERSION with >= according to DPT 217.001
-                                        }
-                                    }
-                                    else if (_type == ProgAppType.Partiell)
-                                    {
-                                        // if has load state machine: PID_LOAD_STATE_CONTROL of ApplicationProgram must be loaded
-                                        if (maskVersion < 0x0910 || 0x091f < maskVersion)
-                                        {
-                                            // ApplicationId must be equal to ProductDatabase
-                                        }
-
-                                        if (maskVersion == 0x0701 || maskVersion == 0x0705 || maskVersion == 0x07B0)
-                                        {
-                                            if (false) // Has ApplicationProgram2
-                                            {
-                                                // PID_LOAD_STATE_CONTROL of InterfaceProgram must be loaded
-                                                // InterfaceProgramId must be equal to ProductDatabase
-                                            }
-                                            else
-                                            {
-                                                // PID_LOAD_STATE_CONTROL of InterfaceProgram must be unloaded
-                                            }
-                                        }
-                                        throw new NotImplementedException();
-                                    }
-                                    else
-                                    {
-                                        throw new NotImplementedException();
-                                    }
-                                }
+                                await PreDownloadChecks();
                                 break;
 
                             default:
@@ -491,13 +412,93 @@ namespace Kaenx.Classes.Bus.Actions
                     try
                     {
                         value[i] = dataMems.Values.ElementAt(0)[address - offset + i];
-                    } catch{
+                    }
+                    catch
+                    {
 
                     }
                 }
             }
 
             await dev.MemoryWriteSync(address, value);
+        }
+
+        private async Task PreDownloadChecks()
+        {
+            await dev.DeviceDescriptorRead(await GetKnxMaster());
+            ushort databaseMask = ushort.Parse(app.Mask.Replace("MV-", ""), System.Globalization.NumberStyles.HexNumber);
+            if (databaseMask != dev.MaskVersion)
+                throw new Exception($"Maskenversion im Gerät ({dev.MaskVersion:X4}) stimmt nicht mit der Produktdatenbank ({databaseMask:X4}) überein");
+            //Medium independant
+            int maskVersion = (ushort)dev.MaskVersion & 0x0fff;
+            await dev.ReadMaxAPDULength();
+
+            //TODO: When to authorize
+
+            bool programGroupObjects = _type == ProgAppType.Komplett || !Device.LoadedGroup;
+            if (maskVersion == 0x07B0 && programGroupObjects)
+            {
+                const byte ASSOCIATION_TABLE = 2;
+                const byte PID_TABLE = 23;
+                MsgPropertyDescriptionRes description = await dev.PropertyDescriptionRead(ASSOCIATION_TABLE, PID_TABLE);
+                useLongAssociations = description.Type switch
+                {
+                    18 => false, // PDT_GENERIC_02
+                    20 => true, // PDT_GENERIC_04
+                    _ => throw new Exception($"Datentyp von Assoziazionstabelle kann nicht PDT-{description.Type} sein"),
+                };
+            }
+
+            if (_type == ProgAppType.Komplett)
+            {
+                string maskString = $"MV-{dev.MaskVersion:X4}";
+                if (maskVersion != 0x0701 && !(0x0910 <= maskVersion && maskVersion <= 0x091f))
+                {
+                    int deviceManufacturer = await dev.PropertyRead<int>(maskString, "DeviceManufacturerId");
+                    if (app.Manufacturer != deviceManufacturer)
+                        throw new Exception("Hersteller des Gerätes ist nicht gleich mit der Produktdatenbank");
+                }
+                //TODO: PortADDR for BCU1 (Memory: 010C) and BCU2 (PID_PORT_CONFIGURATION in device object)
+                // Compare to download image 010C if this address is included
+                if (maskVersion == 0x07B0)
+                {
+                    const byte PID_ORDER_INFO = 15;
+                    const byte PID_VERSION = 25;
+                    const byte PID_HARDWARE_TYPE = 78;
+                    await dev.PropertyRead(0, PID_VERSION);
+                    await dev.PropertyRead(0, PID_HARDWARE_TYPE);
+                    await dev.PropertyRead(0, PID_ORDER_INFO);
+                    //TODO: Compare if properties are included in download image 
+                    // KNX suggests an unused ParameterTypeRestriction with a default including BinaryValue = Value to compare, and a Property Parameter with respective objIdx and propId
+                    // Compare PID_ORDER_INFO and PID_HARDWARE_TYPE with ==, PID_VERSION with >= according to DPT 217.001
+                }
+            }
+            else if (_type == ProgAppType.Partiell)
+            {
+                // if has load state machine: PID_LOAD_STATE_CONTROL of ApplicationProgram must be loaded
+                if (maskVersion < 0x0910 || 0x091f < maskVersion)
+                {
+                    // ApplicationId must be equal to ProductDatabase
+                }
+
+                if (maskVersion == 0x0701 || maskVersion == 0x0705 || maskVersion == 0x07B0)
+                {
+                    if (false) // Has ApplicationProgram2
+                    {
+                        // PID_LOAD_STATE_CONTROL of InterfaceProgram must be loaded
+                        // InterfaceProgramId must be equal to ProductDatabase
+                    }
+                    else
+                    {
+                        // PID_LOAD_STATE_CONTROL of InterfaceProgram must be unloaded
+                    }
+                }
+                throw new NotImplementedException();
+            }
+            else
+            {
+                throw new NotImplementedException();
+            }
         }
 
         private async Task WriteApplication(AppAdditional adds)
@@ -586,15 +587,16 @@ namespace Kaenx.Classes.Bus.Actions
                         AppParameter xpara = AppParas[para.Id];
 
                         //Wenn Parameter in keiner Union ist zurück geben
-                        if(xpara.UnionId == 0)
+                        if (xpara.UnionId == 0)
                         {
                             //TODO prüfen ob auch bei neuen notwendig oder nur Namespace 11
-                            if(vis1 && vis2 && vis3)
+                            if (vis1 && vis2 && vis3)
                             {
                                 xpara.Value = para.Value;
                                 paras.Add(xpara);
                             }
-                        } else
+                        }
+                        else
                         {
                             if (!unions.ContainsKey(xpara.UnionId))
                             {
@@ -627,12 +629,12 @@ namespace Kaenx.Classes.Bus.Actions
                     }
                 }
             }
-            
-            foreach(KeyValuePair<int, List<string>> union in unions.Where(x => x.Value.Count == 0))
+
+            foreach (KeyValuePair<int, List<string>> union in unions.Where(x => x.Value.Count == 0))
             {
-                if(AppParas.Values.Any(p => p.UnionId == union.Key && p.UnionDefault))
+                if (AppParas.Values.Any(p => p.UnionId == union.Key && p.UnionDefault))
                 {
-                    if(AppParas.Values.Where(p => p.UnionId == union.Key && p.UnionDefault).Count() > 1)
+                    if (AppParas.Values.Where(p => p.UnionId == union.Key && p.UnionDefault).Count() > 1)
                     {
                         Log.Error("Applikation enthält mehrere DefaultUnionParameter: Id = " + union.Key);
                     }
@@ -1099,7 +1101,8 @@ namespace Kaenx.Classes.Bus.Actions
                         memory[para.Offset + i] = paraData[i];
                         changed.Add(para.Offset + i);
                     }
-                } else
+                }
+                else
                 {
                     List<int> masks = new List<int>() { 0b00000001, 0b00000011, 0b00000111, 0b00001111, 0b00011111, 0b00111111, 0b01111111 };
                     int dataByte = paraData[0];
@@ -1165,7 +1168,8 @@ namespace Kaenx.Classes.Bus.Actions
                             memory[defPara.Offset + i] = paraData[i];
                             changed.Add(defPara.Offset + i);
                         }
-                    } else
+                    }
+                    else
                     {
 
                     }
