@@ -5,6 +5,7 @@ using System.Reflection;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using Kaenx.Classes.Buildings;
 using Kaenx.Classes.Bus.Actions;
 using Kaenx.Classes.Project;
 using Kaenx.DataContext.Catalog;
@@ -42,6 +43,13 @@ namespace Kaenx.Test
                 device.Parent = middle;
                 device.Id = 4;
                 device.ApplicationId = "M-0188_A-0001-01";
+                DeviceComObject com1 = new DeviceComObject() { Number = 1, IsEnabled = true, Flag_Communication = true, Flag_Write = true, DataPointSubType = new Classes.DataPointSubType() { SizeInBit = 1 } };
+                com1.Groups.Add(new FunctionGroup() { Address = new MulticastAddress(7, 7, 10) });
+                device.ComObjects.Add(com1);
+                DeviceComObject com2 = new DeviceComObject() { Number = 2, IsEnabled = true, Flag_Communication = true, Flag_Read = true, Flag_Transmit = true, DataPointSubType = new Classes.DataPointSubType() { SizeInBit = 1 } };
+                com2.Groups.Add(new FunctionGroup() { Address = new MulticastAddress(7, 7, 20) });
+                com2.Groups.Add(new FunctionGroup() { Address = new MulticastAddress(7, 7, 10) });
+                device.ComObjects.Add(com2);
                 progApplication.Device = device;
             });
 
@@ -64,7 +72,33 @@ namespace Kaenx.Test
                 Id = progApplication.Device.ApplicationId,
                 Mask = "MV-07B0",
                 Manufacturer = 0x0188,
-                LoadProcedure = LoadProcedureTypes.Merge
+                Number = 1,
+                Version = 1,
+                LoadProcedure = LoadProcedureTypes.Merge,
+                Table_Group_Max = 255,
+                Table_Assosiations_Max = 255,
+            });
+            progApplication.Context.AppSegments.Add(new AppSegmentViewModel()
+            {
+                Id = "Segment1",
+                Size = 4,
+                LsmId = 4,
+            });
+            progApplication.Context.AppParameterTypes.Add(new AppParameterTypeViewModel()
+            {
+                Id = "Type1",
+                Type = ParamTypes.NumberInt,
+                Size = 32,
+            });
+            progApplication.OverrideVisibleParams = new List<AppParameter>();
+            progApplication.OverrideVisibleParams.Add(new AppParameter()
+            {
+                Id = "Param1",
+                ParameterTypeId = "Type1",
+                Value = 0x01020304.ToString(),
+                SegmentId = "Segment1",
+                SegmentType = SegmentTypes.Memory,
+                Offset = 0,
             });
             progApplication.Context.SaveChanges();
 
@@ -168,16 +202,16 @@ namespace Kaenx.Test
             connection.Expect(new MsgPropertyReadReq(GROUP_OBJECT_TABLE, PID_TABLE_REFERENCE, address));
             byte[] object_table_address = U32ToBe(0x200);
             connection.Response(ApciTypes.PropertyValueResponse, GROUP_OBJECT_TABLE, PID_TABLE_REFERENCE, 0x10, 0x01, object_table_address[0], object_table_address[1], object_table_address[2], object_table_address[3]);
-            //TODO: compute Flags 0x17, 0x07
-            connection.Expect(new MsgMemoryWriteReq(0x200, new byte[] { 0, 2, 0x17, 0x07, 0x17, 0x07 }, address));
+            connection.Expect(new MsgMemoryWriteReq(0x200, new byte[] { 0, 2, 0x17, 0x00, 0x4F, 0x00 }, address));
             connection.Response(ApciTypes.MemoryResponse, object_table_address[2], object_table_address[3], 0, 2, 0x17, 0x07, 0x17, 0x07);
 
             connection.Expect(new MsgPropertyReadReq(ASSOCIATION_TABLE, PID_TABLE_REFERENCE, address));
             byte[] association_table_address = U32ToBe(0x300);
             connection.Response(ApciTypes.PropertyValueResponse, ASSOCIATION_TABLE, PID_TABLE_REFERENCE, 0x10, 0x01, association_table_address[0], association_table_address[1], association_table_address[2], association_table_address[3]);
-            //TODO: compute Associations
-            connection.Expect(new MsgMemoryWriteReq(0x300, new byte[] { 0, 3, 1, 1, 2, 2, 1, 2 }, address));
-            connection.Response(ApciTypes.MemoryResponse, association_table_address[2], association_table_address[3], 0, 3, 1, 1, 2, 2, 1, 2);
+            //connection.Expect(new MsgMemoryWriteReq(0x300, new byte[] { 0, 3, 1, 1, 2, 2, 1, 2 }, address));
+            //connection.Response(ApciTypes.MemoryResponse, association_table_address[2], association_table_address[3], 0, 3, 1, 1, 2, 2, 1, 2);
+            connection.Expect(new MsgMemoryWriteReq(0x300, new byte[] { 0, 3, 1, 1, 1, 2, 2, 2 }, address));
+            connection.Response(ApciTypes.MemoryResponse, association_table_address[2], association_table_address[3], 0, 3, 1, 1, 1, 2, 2, 2);
 
             connection.Expect(new MsgPropertyReadReq(ADDRESS_TABLE, PID_TABLE_REFERENCE, address));
             byte[] address_table_address = U32ToBe(0x400);

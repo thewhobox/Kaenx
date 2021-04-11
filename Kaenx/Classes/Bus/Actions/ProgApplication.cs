@@ -36,12 +36,19 @@ namespace Kaenx.Classes.Bus.Actions
         private CatalogContext _context = new CatalogContext();
 
 
+        // tables are the complete image including preceding length/unicast address
+        private List<byte> dataComObjectTable = new List<byte>();
         private List<byte> dataGroupTable = new List<byte>();
         private bool useLongAssociations = false;
         private List<byte> dataAssoTable = new List<byte>();
         private Dictionary<string, AppSegmentViewModel> dataSegs = new Dictionary<string, AppSegmentViewModel>();
         private Dictionary<string, byte[]> dataMems = new Dictionary<string, byte[]>();
         private Dictionary<string, int> dataAddresses = new Dictionary<string, int>();
+
+        /// <summary>
+        /// Temporary for Unit test. If not null overrides ApplicationParams
+        /// </summary>
+        public List<AppParameter> OverrideVisibleParams = null;
 
         public string Type { get; set; }
         public LineDevice Device { get; set; }
@@ -159,12 +166,15 @@ namespace Kaenx.Classes.Bus.Actions
                         break;
                 }
 
-                XElement connect = procedure.Elements(procedure.GetDefaultNamespace() + "LdCtrlConnect").First();
                 XNamespace kaenxNS = XNamespace.Get("https://github.com/thewhobox/Kaenx");
-                connect.AddAfterSelf(new XElement(kaenxNS + "PreDownloadChecks"));
+                XElement preDownloadChecks = new XElement(kaenxNS + "PreDownloadChecks");
+                procedure.Elements(procedure.GetDefaultNamespace() + "LdCtrlConnect").First().AddAfterSelf(preDownloadChecks);
+                XElement generateImage = new XElement(kaenxNS + "GenerateImage");
+                preDownloadChecks.AddAfterSelf(generateImage);
 
                 if (true) //TODO: if !device.HasApplicationProgram2
                 {
+                    List<XElement> toRemove = new List<XElement>();
                     foreach (XElement ctrl in procedure.Elements())
                     {
                         switch (ctrl.Name.LocalName)
@@ -174,13 +184,18 @@ namespace Kaenx.Classes.Bus.Actions
                                     ctrl.SetAttributeValue("OnError", "Ignore");
                                 break;
                             case "LdCtrlLoad":
-                            case "LdCtrlWriteProp":
                             case "LdCtrlLoadCompleted":
                                 if (ctrl.Attribute("LsmIdx").Value == "5")
-                                    ctrl.Remove();
+                                    toRemove.Add(ctrl);
+                                break;
+                            case "LdCtrlWriteProp":
+                                if (ctrl.Attribute("ObjIdx").Value == "5")
+                                    toRemove.Add(ctrl);
                                 break;
                         }
                     }
+                    foreach (XElement ctrl in toRemove)
+                        ctrl.Remove();
                 }
 
                 double stepSize = 100.0 / procedure.Elements().Count();
@@ -276,6 +291,10 @@ namespace Kaenx.Classes.Bus.Actions
                                 await PreDownloadChecks();
                                 break;
 
+                            case "GenerateImage":
+                                GenerateImage(adds);
+                                break;
+
                             default:
                                 Debug.WriteLine("Unbekanntes Element: " + ctrl.Name.LocalName);
                                 break;
@@ -347,7 +366,7 @@ namespace Kaenx.Classes.Bus.Actions
                 case "3":
                     try
                     {
-                        await WriteApplication(adds);
+                        await WriteApplication();
                     }
                     catch (Exception ex)
                     {
@@ -364,34 +383,8 @@ namespace Kaenx.Classes.Bus.Actions
 
         private async Task WriteMemory(AppAdditional adds, XElement ctrl)
         {
-            if (dataMems.Count == 0)
-            {
-                TodoText = "Berechne Speicher...";
-                GenerateApplication(adds);
-            }
-
-
-            if (dataAssoTable.Count == 0 || dataGroupTable.Count == 0)
-            {
-                TodoText = "Berechne Tabellen...";
-                GenerateGroupTable();
-                GenerateAssoTable();
-                await Task.Delay(100);
-
-
-
-                dataMems[app.Table_Group][app.Table_Group_Offset] = Convert.ToByte(addedGroups.Count);
-                for (int i = 0; i < dataGroupTable.Count; i++)
-                {
-                    dataMems[app.Table_Group][i + app.Table_Group_Offset + 3] = dataGroupTable[i];
-                }
-
-                dataMems[app.Table_Assosiations][app.Table_Assosiations_Offset] = Convert.ToByte(dataAssoTable.Count / 2);
-                for (int i = 0; i < dataAssoTable.Count; i++)
-                {
-                    dataMems[app.Table_Assosiations][i + app.Table_Assosiations_Offset + 1] = dataAssoTable[i];
-                }
-            }
+            dataGroupTable.CopyTo(dataMems[app.Table_Group], app.Table_Group_Offset);
+            dataAssoTable.CopyTo(dataMems[app.Table_Assosiations], app.Table_Assosiations_Offset);
 
             TodoText = "Schreibe Speicher...";
 
@@ -501,12 +494,16 @@ namespace Kaenx.Classes.Bus.Actions
             }
         }
 
-        private async Task WriteApplication(AppAdditional adds)
+        private void GenerateImage(AppAdditional adds)
         {
-            TodoText = "Berechne Speicher...";
-
+            GenerateComObjectTable();
+            GenerateGroupTable();
+            GenerateAssoTable();
             GenerateApplication(adds);
+        }
 
+        private async Task WriteApplication()
+        {
             TodoText = "Schreibe Speicher...";
 
             switch (_type)
@@ -756,15 +753,14 @@ namespace Kaenx.Classes.Bus.Actions
             await dev.MemoryWriteSync(addr, new byte[] { 0x01 });
 
             //Gruppenadressen in Tabelle eintragen
-            GenerateGroupTable();
             Debug.WriteLine("Tabelle schreiben");
             Log.Information($"Gruppentabelle mit {addedGroups.Count} einträgen schreiben");
-            await dev.MemoryWriteSync(addr + 3, dataGroupTable.ToArray());
+            await dev.MemoryWriteSync(addr + 3, dataGroupTable.Skip(3).ToArray());
 
             await Task.Delay(100);
 
             Debug.WriteLine("Tabelle länge setzen");
-            await dev.MemoryWriteSync(addr, new byte[] { Convert.ToByte(addedGroups.Count) });
+            await dev.MemoryWriteSync(addr, new byte[] { dataGroupTable[0] });
             Log.Information($"Gruppentabelle fertig");
 
 
@@ -782,12 +778,11 @@ namespace Kaenx.Classes.Bus.Actions
             await dev.MemoryWriteSync(addr, new byte[] { 0x00 });
 
             //Schreibe Assoziationstabelle in Speicher
-            GenerateAssoTable();
-            Log.Information($"Assoziationstabelle mit {dataAddresses.Count / 2} einträgen schreiben");
-            await dev.MemoryWriteSync(addr + 1, dataAssoTable.ToArray());
+            Log.Information($"Assoziationstabelle mit {dataAssoTable[0]} einträgen schreiben");
+            await dev.MemoryWriteSync(addr + 1, dataAssoTable.Skip(1).ToArray());
 
             //Setze Länge der Tabelle
-            await dev.MemoryWriteSync(addr, new byte[] { Convert.ToByte(dataAssoTable.Count / 2) });
+            await dev.MemoryWriteSync(addr, new byte[] { dataAssoTable[0] });
             Log.Information("Assoziationstabelle fertig");
 
             _ = App._dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Low, () =>
@@ -847,9 +842,92 @@ namespace Kaenx.Classes.Bus.Actions
             }
         }
 
+        private void GenerateComObjectTable()
+        {
+            var strippedComObjects = new List<DeviceComObject>();
+            foreach (DeviceComObject com in Device.ComObjects.Where(com => com.IsEnabled))
+            {
+                int comIndex = com.Number - 1;
+                if (comIndex < strippedComObjects.Count)
+                {
+                    strippedComObjects[comIndex] = com;
+                }
+                else
+                {
+                    while (strippedComObjects.Count < comIndex)
+                        strippedComObjects.Add(null);
+                    strippedComObjects.Add(com);
+                }
+            }
+
+            dataComObjectTable = new List<byte>();
+            //Others are not supported for now
+            if ((dev.MaskVersion & 0x0fff) == 0x07B0)
+            {
+                dataComObjectTable.Add((byte)(strippedComObjects.Count >> 8));
+                dataComObjectTable.Add((byte)strippedComObjects.Count);
+                foreach (DeviceComObject com in strippedComObjects)
+                {
+                    if (com == null)
+                    {
+                        dataComObjectTable.Add(0);
+                        dataComObjectTable.Add(0);
+                    }
+                    else
+                    {
+                        byte flags = 0;
+                        if (com.Flag_Update)
+                            flags |= (1 << 7);
+                        if (com.Flag_Transmit)
+                            flags |= (1 << 6);
+                        if (com.Flag_ReadOnInit)
+                            flags |= (1 << 5);
+                        if (com.Flag_Write)
+                            flags |= (1 << 4);
+                        if (com.Flag_Read)
+                            flags |= (1 << 3);
+                        if (com.Flag_Communication)
+                            flags |= (1 << 2);
+                        const byte PRIORITY_LOW = 0b11;
+                        flags |= PRIORITY_LOW;
+
+                        byte fieldType = com.DataPointSubType.SizeInBit switch
+                        {
+                            0 => 0,
+                            1 => 0,
+                            2 => 1,
+                            3 => 2,
+                            4 => 3,
+                            5 => 4,
+                            6 => 5,
+                            7 => 6,
+                            1 * 8 => 7,
+                            2 * 8 => 8,
+                            3 * 8 => 9,
+                            4 * 8 => 10,
+                            6 * 8 => 11,
+                            8 * 8 => 12,
+                            10 * 8 => 13,
+                            14 * 8 => 14,
+                            5 * 8 => 15,
+                            7 * 8 => 16,
+                            9 * 8 => 17,
+                            11 * 8 => 18,
+                            12 * 8 => 19,
+                            13 * 8 => 20,
+                            var x when 15 * 8 < x && x < 248 * 8 => (byte)(x / 8 - 15 + 21),
+                            var x => throw new Exception($"Datenpunkte mit {x} bits werden nicht unterstützt"),
+                        };
+                        dataComObjectTable.Add(flags);
+                        dataComObjectTable.Add(fieldType);
+                    }
+                }
+            }
+        }
+
         private void GenerateGroupTable()
         {
-            addedGroups = new List<string> { "" };
+            addedGroups = new List<string>();
             foreach (DeviceComObject com in Device.ComObjects)
                 foreach (FunctionGroup group in com.Groups)
                     if (!addedGroups.Contains(group.Address.ToString()))
@@ -863,8 +941,19 @@ namespace Kaenx.Classes.Bus.Actions
             addedGroups.Sort();
 
             dataGroupTable = new List<byte>();
+            if ((dev.MaskVersion & 0x0fff) == 0x07B0)
+            {
+                dataGroupTable.Add((byte)(addedGroups.Count >> 8));
+                dataGroupTable.Add((byte)addedGroups.Count);
+            }
+            else
+            {
+                //Count includes own Physical address
+                dataGroupTable.Add((byte)(addedGroups.Count + 1));
+                dataGroupTable.AddRange(UnicastAddress.FromString(Device.LineName).GetBytes());
+            }
             foreach (string group in addedGroups) //Liste zum Datenpaket hinzufügen
-                if (group != "") dataGroupTable.AddRange(MulticastAddress.FromString(group).GetBytes());
+                dataGroupTable.AddRange(MulticastAddress.FromString(group).GetBytes());
         }
 
 
@@ -873,39 +962,65 @@ namespace Kaenx.Classes.Bus.Actions
             //Erstelle Assoziationstabelle
             dataAssoTable = new List<byte>();
 
-            Dictionary<byte, List<byte>> Table = new Dictionary<byte, List<byte>>();
+            Dictionary<ushort, List<ushort>> Table = new Dictionary<ushort, List<ushort>>();
 
             foreach (DeviceComObject com in Device.ComObjects)
             {
                 foreach (FunctionGroup group in com.Groups)
                 {
-                    int indexG = addedGroups.IndexOf(group.Address.ToString());
-                    int indexC = com.Number;
+                    ushort indexG = (ushort)(addedGroups.IndexOf(group.Address.ToString()) + 1);
+                    ushort indexC = (ushort)com.Number;
 
-                    byte bIndexG = BitConverter.GetBytes(indexG)[0];
-                    byte bIndexC = BitConverter.GetBytes(indexC)[0];
+                    if (!Table.ContainsKey(indexG))
+                        Table.Add(indexG, new List<ushort>());
 
-                    if (!Table.ContainsKey(bIndexG))
-                        Table.Add(bIndexG, new List<byte>());
-
-                    Table[bIndexG].Add(bIndexC);
+                    Table[indexG].Add(indexC);
                 }
             }
 
-            foreach (KeyValuePair<byte, List<byte>> val in Table.OrderBy(kpv => kpv.Key))
+            //Reserve Space for count
+            dataAssoTable.Add(0);
+            if ((dev.MaskVersion & 0x0fff) == 0x07B0)
+            {
+                dataAssoTable.Add(0);
+            }
+
+            int numAssociations = 0;
+            foreach (KeyValuePair<ushort, List<ushort>> val in Table.OrderBy(kpv => kpv.Key))
             {
                 val.Value.Sort();
-                foreach (byte index in val.Value)
+                foreach (ushort index in val.Value)
                 {
-                    dataAssoTable.Add(val.Key);
-                    dataAssoTable.Add(index);
+                    numAssociations++;
+                    if (useLongAssociations)
+                    {
+                        dataAssoTable.Add((byte)(val.Key >> 8));
+                        dataAssoTable.Add((byte)val.Key);
+                        dataAssoTable.Add((byte)(index >> 8));
+                        dataAssoTable.Add((byte)index);
+                    }
+                    else
+                    {
+                        dataAssoTable.Add((byte)val.Key);
+                        dataAssoTable.Add((byte)index);
+                    }
                 }
             }
 
-            if ((dataAssoTable.Count / 2) > app.Table_Assosiations_Max)
+            if ((dev.MaskVersion & 0x0fff) == 0x07B0)
             {
-                Log.Error("Die Applikation erlaubt nur " + app.Table_Assosiations_Max + " Assoziationsverbindungen. Verwendet werden " + (dataAssoTable.Count / 2) + ".");
-                throw new Exception("Die Applikation erlaubt nur " + app.Table_Assosiations_Max + " Assoziationsverbindungen. Verwendet werden " + (dataAssoTable.Count / 2) + ".");
+                dataAssoTable[0] = (byte)(numAssociations >> 8);
+                dataAssoTable[1] = (byte)numAssociations;
+            }
+            else
+            {
+                dataAssoTable[0] = (byte)numAssociations;
+            }
+
+            if (numAssociations > app.Table_Assosiations_Max)
+            {
+                Log.Error("Die Applikation erlaubt nur " + app.Table_Assosiations_Max + " Assoziationsverbindungen. Verwendet werden " + numAssociations + ".");
+                throw new Exception("Die Applikation erlaubt nur " + app.Table_Assosiations_Max + " Assoziationsverbindungen. Verwendet werden " + numAssociations + ".");
             }
         }
 
@@ -1039,7 +1154,8 @@ namespace Kaenx.Classes.Bus.Actions
             Dictionary<string, AppParameterTypeViewModel> types = new Dictionary<string, AppParameterTypeViewModel>();
             List<int> changed = new List<int>();
 
-            foreach (AppParameter para in GetVisibleParams(adds))
+            var visibleParams = OverrideVisibleParams ?? GetVisibleParams(adds);
+            foreach (AppParameter para in visibleParams)
                 paras.Add(para.Id, para);
 
             foreach (AppParameterTypeViewModel type in _context.AppParameterTypes)
