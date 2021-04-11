@@ -57,12 +57,12 @@ namespace Kaenx.Test
             {
                 Id = progApplication.Device.ApplicationId,
                 LoadProcedures = Encoding.UTF8.GetBytes(
-                    @"<LoadProcedures>
+                    @"<LoadProcedures xmlns='http://knx.org/xml/project/14'>
                         <LoadProcedure MergeId='2'>
-                            <LdCtrlRelSegment LsmIdx='4' Size='234' Mode='0' Fill='0' />
+                            <LdCtrlRelSegment LsmIdx='4' Size='4' Mode='0' Fill='0' />
                         </LoadProcedure>
                         <LoadProcedure MergeId='4'>
-                            <LdCtrlLoadImageRelMem ObjIdx='3' Offset='0' Size='234' />
+                            <LdCtrlWriteRelMem ObjIdx='4' Offset='0' Size='4' Verify='true' />
                         </LoadProcedure>
                     </LoadProcedures>"
                 )
@@ -164,26 +164,29 @@ namespace Kaenx.Test
             connection.Response(ApciTypes.PropertyValueResponse, ADDRESS_TABLE, PID_LOAD_STATE_CONTROL, 0x10, 0x01, 0);
 
             byte[] LSM_EVENT_START_LOADING = new byte[] { 0x01, 0, 0, 0, 0, 0, 0, 0, 0, 0, };
-            byte[] LSM_EVENT_ALLOCATE = new byte[] { 0x03, 0x0B, 0, 0, 0, 0, 0, 0, 0, 0 };
-            U32ToBe(4).CopyTo(LSM_EVENT_ALLOCATE, 2);
+            byte[] LSM_EVENT_ALLOCATE_APP = new byte[] { 0x03, 0x0B, 0, 0, 0, 0, 0, 0, 0, 0 };
+            U32ToBe(4).CopyTo(LSM_EVENT_ALLOCATE_APP, 2);
             connection.Expect(new MsgPropertyWriteReq(APPLICATION_PROGRAM, PID_LOAD_STATE_CONTROL, LSM_EVENT_START_LOADING, address));
             connection.Response(ApciTypes.PropertyValueResponse, APPLICATION_PROGRAM, PID_LOAD_STATE_CONTROL, 0x10, 0x01, 2);
-            connection.Expect(new MsgPropertyWriteReq(APPLICATION_PROGRAM, PID_LOAD_STATE_CONTROL, LSM_EVENT_ALLOCATE, address));
+            connection.Expect(new MsgPropertyWriteReq(APPLICATION_PROGRAM, PID_LOAD_STATE_CONTROL, LSM_EVENT_ALLOCATE_APP, address));
             connection.Response(ApciTypes.PropertyValueResponse, APPLICATION_PROGRAM, PID_LOAD_STATE_CONTROL, 0x10, 0x01, 2);
-            U32ToBe(2 + 2 * 2).CopyTo(LSM_EVENT_ALLOCATE, 2);
+            byte[] LSM_EVENT_ALLOCATE_GROUP = new byte[] { 0x03, 0x0B, 0, 0, 0, 0, 0, 0, 0, 0 };
+            U32ToBe(2 + 2 * 2).CopyTo(LSM_EVENT_ALLOCATE_GROUP, 2);
             connection.Expect(new MsgPropertyWriteReq(GROUP_OBJECT_TABLE, PID_LOAD_STATE_CONTROL, LSM_EVENT_START_LOADING, address));
             connection.Response(ApciTypes.PropertyValueResponse, GROUP_OBJECT_TABLE, PID_LOAD_STATE_CONTROL, 0x10, 0x01, 2);
-            connection.Expect(new MsgPropertyWriteReq(GROUP_OBJECT_TABLE, PID_LOAD_STATE_CONTROL, LSM_EVENT_ALLOCATE, address));
+            connection.Expect(new MsgPropertyWriteReq(GROUP_OBJECT_TABLE, PID_LOAD_STATE_CONTROL, LSM_EVENT_ALLOCATE_GROUP, address));
             connection.Response(ApciTypes.PropertyValueResponse, GROUP_OBJECT_TABLE, PID_LOAD_STATE_CONTROL, 0x10, 0x01, 2);
-            U32ToBe(2 + 2 * 2).CopyTo(LSM_EVENT_ALLOCATE, 2);
+            byte[] LSM_EVENT_ALLOCATE_ADDRESS = new byte[] { 0x03, 0x0B, 0, 0, 0, 0, 0, 0, 0, 0 };
+            U32ToBe(2 + 2 * 2).CopyTo(LSM_EVENT_ALLOCATE_ADDRESS, 2);
             connection.Expect(new MsgPropertyWriteReq(ADDRESS_TABLE, PID_LOAD_STATE_CONTROL, LSM_EVENT_START_LOADING, address));
             connection.Response(ApciTypes.PropertyValueResponse, ADDRESS_TABLE, PID_LOAD_STATE_CONTROL, 0x10, 0x01, 2);
-            connection.Expect(new MsgPropertyWriteReq(ADDRESS_TABLE, PID_LOAD_STATE_CONTROL, LSM_EVENT_ALLOCATE, address));
+            connection.Expect(new MsgPropertyWriteReq(ADDRESS_TABLE, PID_LOAD_STATE_CONTROL, LSM_EVENT_ALLOCATE_ADDRESS, address));
             connection.Response(ApciTypes.PropertyValueResponse, ADDRESS_TABLE, PID_LOAD_STATE_CONTROL, 0x10, 0x01, 2);
-            U32ToBe(2 + 2 * 3).CopyTo(LSM_EVENT_ALLOCATE, 2);
+            byte[] LSM_EVENT_ALLOCATE_ASSOCIATION = new byte[] { 0x03, 0x0B, 0, 0, 0, 0, 0, 0, 0, 0 };
+            U32ToBe(2 + 2 * 3).CopyTo(LSM_EVENT_ALLOCATE_ASSOCIATION, 2);
             connection.Expect(new MsgPropertyWriteReq(ASSOCIATION_TABLE, PID_LOAD_STATE_CONTROL, LSM_EVENT_START_LOADING, address));
             connection.Response(ApciTypes.PropertyValueResponse, ASSOCIATION_TABLE, PID_LOAD_STATE_CONTROL, 0x10, 0x01, 2);
-            connection.Expect(new MsgPropertyWriteReq(ASSOCIATION_TABLE, PID_LOAD_STATE_CONTROL, LSM_EVENT_ALLOCATE, address));
+            connection.Expect(new MsgPropertyWriteReq(ASSOCIATION_TABLE, PID_LOAD_STATE_CONTROL, LSM_EVENT_ALLOCATE_ASSOCIATION, address));
             connection.Response(ApciTypes.PropertyValueResponse, ASSOCIATION_TABLE, PID_LOAD_STATE_CONTROL, 0x10, 0x01, 2);
 
             connection.Expect(new MsgPropertyReadReq(APPLICATION_PROGRAM, PID_TABLE_REFERENCE, address));
@@ -191,10 +194,10 @@ namespace Kaenx.Test
             connection.Response(ApciTypes.PropertyValueResponse, APPLICATION_PROGRAM, PID_TABLE_REFERENCE, 0x10, 0x01, application_address[0], application_address[1], application_address[2], application_address[3]);
 
             //Enable Verify Mode (Set bit 2)
-            connection.Expect(new MsgPropertyReadReq(DEVICE, PID_DEVICE_CONTROL, address));
-            connection.Response(ApciTypes.PropertyValueResponse, DEVICE, PID_DEVICE_CONTROL, 0x10, 0x01, 0x00);
-            connection.Expect(new MsgPropertyWriteReq(DEVICE, PID_DEVICE_CONTROL, new byte[] { 0x04 }, address));
-            connection.Response(ApciTypes.PropertyValueResponse, DEVICE, PID_DEVICE_CONTROL, 0x10, 0x01, 0x04);
+            //connection.Expect(new MsgPropertyReadReq(DEVICE, PID_DEVICE_CONTROL, address));
+            //connection.Response(ApciTypes.PropertyValueResponse, DEVICE, PID_DEVICE_CONTROL, 0x10, 0x01, 0x00);
+            //connection.Expect(new MsgPropertyWriteReq(DEVICE, PID_DEVICE_CONTROL, new byte[] { 0x04 }, address));
+            //connection.Response(ApciTypes.PropertyValueResponse, DEVICE, PID_DEVICE_CONTROL, 0x10, 0x01, 0x04);
 
             connection.Expect(new MsgMemoryWriteReq(0x100, new byte[] { 1, 2, 3, 4 }, address));
             connection.Response(ApciTypes.MemoryResponse, application_address[2], application_address[3], 1, 2, 3, 4);

@@ -264,7 +264,6 @@ namespace Kaenx.Classes.Bus.Actions
 
                             case "LdCtrlRelSegment":
                                 await AllocRelSegment(adds, ctrl);
-                                // 03_05_02 - Seite 116
                                 break;
 
                             case "LdCtrlWriteProp":
@@ -276,6 +275,7 @@ namespace Kaenx.Classes.Bus.Actions
                                 break;
 
                             case "LdCtrlWriteRelMem":
+                                await WriteRelSegment(ctrl);
                                 break;
 
                             case "LdCtrlDelay":
@@ -646,35 +646,57 @@ namespace Kaenx.Classes.Bus.Actions
 
         private async Task AllocRelSegment(AppAdditional adds, XElement ctrl)
         {
-            string LsmId = ctrl.Attribute("LsmIdx").Value;
-            //switch (LsmId)
-            //{
-            //    case "1":
-            //        GenerateGroupTable();
-            //        length = dataGroupTable.Count;
-            //        break;
-            //    case "2":
-            //        GenerateAssoTable();
-            //        length = dataAssoTable.Count;
-            //        break;
-            //    case "3":
-            //        GenerateApplication(adds);
-            //        length = dataMems.Values.ElementAt(0).Length;
-            //        break;
-            //}
+            byte lsmId = byte.Parse(ctrl.Attribute("LsmIdx").Value);
+            int size = int.Parse(ctrl.Attribute("Size").Value);
+            if (size == 2)
+            {
+                switch (lsmId)
+                {
+                    case 1: size = dataGroupTable.Count; break;
+                    case 2: size = dataAssoTable.Count; break;
+                    case 3: size = dataComObjectTable.Count; break;
+                    case 4: size = dataMems.Values.ElementAt(0).Length; break;
+                }
+            }
 
+            List<byte> extraData = new List<byte>();
+            extraData.Add(0x0b);
+            byte[] sizeBytes = BitConverter.GetBytes(size);
+            extraData.AddRange(sizeBytes.Reverse());
+            extraData.Add(ctrl.Attribute("Mode").Value == "1" ? (byte)0x01 : (byte)0x00);
+            extraData.Add(byte.Parse(ctrl.Attribute("Fill").Value));
 
-            //byte[] tempBytes;
-            List<byte> data = new List<byte>() { 0x03, 0x0b };
+            await SendLsmEvent(lsmId, 0x03, 0x02, extraData: extraData.ToArray());
+        }
 
-            byte[] tempBytes = BitConverter.GetBytes(Convert.ToUInt32(ctrl.Attribute("Size").Value));
-            data.AddRange(tempBytes.Reverse()); // Length
+        private async Task WriteRelSegment(XElement ctrl)
+        {
+            byte objIdx = byte.Parse(ctrl.Attribute("ObjIdx").Value);
+            int offset = int.Parse(ctrl.Attribute("Offset").Value);
+            int size = int.Parse(ctrl.Attribute("Size").Value);
+            bool verify = bool.Parse(ctrl.Attribute("Verify").Value);
 
-            byte mode = (byte)(ctrl.Attribute("Mode").Value == "1" ? 0x01 : 0x00);
-            byte fill = byte.Parse(ctrl.Attribute("Fill").Value, System.Globalization.NumberStyles.HexNumber, System.Globalization.CultureInfo.InvariantCulture);
-            data.AddRange(new byte[] { mode, fill, 0x00, 0x00 });
+            ICollection<byte> data = objIdx switch
+            {
+                1 => dataGroupTable,
+                2 => dataAssoTable,
+                3 => dataComObjectTable,
+                _ => null,
+            };
+            if (data != null && offset == 0 && size == 0x100000)
+                size = data.Count;
 
-            await dev.PropertyWrite(Convert.ToByte(LsmId), 5, data.ToArray(), true);
+            if (data == null)
+            {
+                AppSegmentViewModel seg = dataSegs.Values.Single(seg => seg.LsmId == objIdx);
+                data = dataMems[seg.Id];
+            }
+
+            int address = await dev.PropertyRead<int>(objIdx, 7);
+            if (address == 0)
+                throw new Exception("Allocation failed");
+            //TODO: verify
+            await dev.MemoryWriteSync(address + offset, data.Skip(offset).Take(size).ToArray());
         }
 
         private async Task AllocSegment(XElement ctrl, int segType, int counter = 0)
@@ -840,6 +862,44 @@ namespace Kaenx.Classes.Bus.Actions
                 else
                     await LsmState(ctrl, counter + 1);
             }
+        }
+
+        private async Task SendLsmEvent(byte lsmIndex, byte loadEvent, byte requiredState, int intermediateState = -1, byte[] extraData = null)
+        {
+            XNamespace ns = dev.MaskXML.GetDefaultNamespace();
+            XElement propertyLsmFeature = dev.MaskXML.Element(ns + "HawkConfigurationData").Element(ns + "Features").Elements().FirstOrDefault(x => x.Attribute("Name").Value == "PropertyMappedLsms");
+            bool useProperty = propertyLsmFeature != null && propertyLsmFeature.Attribute("Value").Value == "1";
+
+            byte[] data = new byte[useProperty ? 10 : 11];
+            data[0] = loadEvent;
+            if (extraData != null)
+                extraData.CopyTo(data, 1);
+
+            byte lsmState;
+            if (useProperty)
+            {
+                lsmState = (await dev.PropertyWriteResponse(lsmIndex, 5, data))[0];
+            }
+            else
+            {
+                data[0] |= (byte)(lsmIndex << 4);
+                await dev.MemoryWriteSync(260, data);
+                await Task.Delay(50);
+                lsmState = (await dev.MemoryRead(46825 + lsmIndex, 1))[0];
+            }
+
+            while (lsmState == intermediateState)
+            {
+                if (useProperty)
+                    lsmState = (await dev.PropertyRead(lsmIndex, 5))[0];
+                else
+                    lsmState = (await dev.MemoryRead(46825 + lsmIndex, 1))[0];
+
+                await Task.Delay(50);
+            }
+
+            if (lsmState != requiredState)
+                throw new Exception($"Fehler in LoadSateMachine {lsmIndex}: Status sollte {requiredState} sein, ist aber {lsmState}");
         }
 
         private void GenerateComObjectTable()
