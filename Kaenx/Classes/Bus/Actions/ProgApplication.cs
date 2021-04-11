@@ -198,6 +198,13 @@ namespace Kaenx.Classes.Bus.Actions
                         ctrl.Remove();
                 }
 
+                foreach (XElement ctrl in procedure
+                    .Elements(procedure.GetDefaultNamespace() + "LdCtrlWriteProp")
+                    .Where(ctrl => ctrl.Attribute("ObjIdx").Value == "4" && ctrl.Attribute("PropId").Value == "13"))
+                {
+                    ctrl.Attribute("InlineData").Value = $"{app.Manufacturer:X4}{app.Number:X4}{app.Version:X2}";
+                }
+
                 double stepSize = 100.0 / procedure.Elements().Count();
                 double currentProg = 0;
                 Debug.WriteLine("StepSize: " + stepSize + " - " + procedure.Elements().Count());
@@ -267,11 +274,17 @@ namespace Kaenx.Classes.Bus.Actions
                                 break;
 
                             case "LdCtrlWriteProp":
-                                //nicht ausgereift
-                                byte[] data = new byte[2];
-                                uint num = uint.Parse(ctrl.Attribute("InlineData").Value, System.Globalization.NumberStyles.AllowHexSpecifier);
-                                byte[] floatVals = BitConverter.GetBytes(num);
-                                await dev.PropertyWrite(Convert.ToByte(ctrl.Attribute("ObjIdx").Value), Convert.ToByte(ctrl.Attribute("PropId").Value), data);
+                                byte objIdx = Convert.ToByte(ctrl.Attribute("ObjIdx").Value);
+                                byte propId = Convert.ToByte(ctrl.Attribute("PropId").Value);
+                                //Parse Hexstring
+                                string inlineData = ctrl.Attribute("InlineData").Value;
+                                byte[] data = new byte[inlineData.Length / 2];
+                                for (var i = 0; i < data.Length; i++)
+                                    data[i] = Convert.ToByte(inlineData.Substring(i * 2, 2), 16);
+
+                                byte[] response = await dev.PropertyWriteResponse<byte[]>(objIdx, propId, data);
+                                if (ctrl.Attribute("Verify").Value == "true" && !data.SequenceEqual(response))
+                                    throw new Exception($"PropertyVerify fehlgeschlagen: Objekt: {objIdx}, Property: {propId}, soll: {BitConverter.ToString(data)}, ist: {BitConverter.ToString(response)}");
                                 break;
 
                             case "LdCtrlWriteRelMem":
