@@ -262,7 +262,7 @@ namespace Kaenx.Classes.Bus.Actions
                 await dev.Connect();
                 string mask = await dev.DeviceDescriptorRead();
                 mask = "MV-" + mask;
-                await dev.PropertyWrite(mask, "ProgrammingMode", new byte[] { 0x01 });
+                await dev.RessourceWrite("ProgrammingMode", new byte[] { 0x01 });
                 dev.Disconnect();
                 BusCommon comm = new BusCommon(Connection);
                 comm.IndividualAddressWrite(UnicastAddress.FromString("15.15.255"));
@@ -379,7 +379,7 @@ namespace Kaenx.Classes.Bus.Actions
                 }
             }
 
-            await dev.MemoryWriteSync(address, value);
+            await dev.MemoryWrite(address, value);
         }
 
         private async Task WriteApplication(AppAdditional adds)
@@ -395,7 +395,7 @@ namespace Kaenx.Classes.Bus.Actions
                 case ProgAppType.Komplett:
                     foreach (AppSegmentViewModel seg in dataSegs.Values)
                     {
-                        await dev.MemoryWriteSync(seg.Address, dataMems[seg.Id]);
+                        await dev.MemoryWrite(seg.Address, dataMems[seg.Id]);
                     }
                     break;
 
@@ -610,7 +610,7 @@ namespace Kaenx.Classes.Bus.Actions
                     break;
             }
 
-            await dev.MemoryWriteSync(260, data.ToArray());
+            await dev.MemoryWrite(260, data.ToArray());
 
             byte[] data2 = await dev.MemoryRead(46825 + int.Parse(LsmId), 1);
 
@@ -633,18 +633,18 @@ namespace Kaenx.Classes.Bus.Actions
 
             //länge der Tabelle erstmal auf 1 setzen
             Debug.WriteLine("Tabelle auf 1");
-            await dev.MemoryWriteSync(addr, new byte[] { 0x01 });
+            await dev.MemoryWrite(addr, new byte[] { 0x01 });
 
             //Gruppenadressen in Tabelle eintragen
             GenerateGroupTable();
             Debug.WriteLine("Tabelle schreiben");
             Log.Information($"Gruppentabelle mit {addedGroups.Count} einträgen schreiben");
-            await dev.MemoryWriteSync(addr + 3, dataGroupTable.ToArray());
+            await dev.MemoryWrite(addr + 3, dataGroupTable.ToArray());
 
             await Task.Delay(100);
 
             Debug.WriteLine("Tabelle länge setzen");
-            await dev.MemoryWriteSync(addr, new byte[] { Convert.ToByte(addedGroups.Count) });
+            await dev.MemoryWrite(addr, new byte[] { Convert.ToByte(addedGroups.Count) });
             Log.Information($"Gruppentabelle fertig");
 
 
@@ -659,15 +659,15 @@ namespace Kaenx.Classes.Bus.Actions
             TodoText = "Schreibe Assoziationstabelle...";
 
             //Setze länge der Tabelle auf 0
-            await dev.MemoryWriteSync(addr, new byte[] { 0x00 });
+            await dev.MemoryWrite(addr, new byte[] { 0x00 });
 
             //Schreibe Assoziationstabelle in Speicher
             GenerateAssoTable();
             Log.Information($"Assoziationstabelle mit {dataAddresses.Count / 2} einträgen schreiben");
-            await dev.MemoryWriteSync(addr + 1, dataAssoTable.ToArray());
+            await dev.MemoryWrite(addr + 1, dataAssoTable.ToArray());
 
             //Setze Länge der Tabelle
-            await dev.MemoryWriteSync(addr, new byte[] { Convert.ToByte(dataAssoTable.Count / 2) });
+            await dev.MemoryWrite(addr, new byte[] { Convert.ToByte(dataAssoTable.Count / 2) });
             Log.Information("Assoziationstabelle fertig");
 
             _ = App._dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Low, () =>
@@ -705,7 +705,7 @@ namespace Kaenx.Classes.Bus.Actions
             {
                 int endU = (lsmIdx << 4) | state;
                 data[0] = Convert.ToByte(endU);
-                await dev.MemoryWriteSync(260, data);
+                await dev.MemoryWrite(260, data);
                 await Task.Delay(50);
                 data = await dev.MemoryRead(46825 + lsmIdx, 1);
             }

@@ -15,7 +15,6 @@ namespace Kaenx.Classes
         string LineName { get; }
         Symbol Icon { get; set; }
         TopologieType Type { get; set; }
-        SolidColorBrush CurrentBrush { get; set; }
 
     }
 

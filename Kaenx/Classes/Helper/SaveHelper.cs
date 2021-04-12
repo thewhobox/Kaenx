@@ -195,6 +195,8 @@ namespace Kaenx.Classes.Helper
             model.LoadedGA = dev.LoadedGroup;
             model.LoadedPA = dev.LoadedPA;
             model.Serial = dev.Serial;
+            model.IsDeactivated = dev.IsDeactivated;
+            model.LastGroupCount = dev.LastGroupCount;
 
             contextProject.LineDevices.Update(model);
             contextProject.SaveChanges();
