@@ -132,8 +132,8 @@ namespace Kaenx.Test
             connection.Response(ApciTypes.DeviceDescriptorResponse, 0x07, 0xB0);
             connection.Expect(new MsgPropertyReadReq(DEVICE, PID_MAX_APDULENGTH, address));
             connection.Response(ApciTypes.PropertyValueResponse, DEVICE, PID_MAX_APDULENGTH, 0x10, 0x01, 0x00, 254);
-            //connection.Expect(new MsgAuthorizeReq(address, level = 0, key = 0xffffffff));
-            //connection.Response(ApciTypes.AuthorizeResponse, 0);
+            connection.Expect(new MsgAuthorizeReq(0xffffffff, address));
+            connection.Response(ApciTypes.AuthorizeResponse, 0);
 
             connection.Expect(new MsgPropertyDescriptionReq(ASSOCIATION_TABLE, PID_TABLE, 0, address));
             connection.Response(ApciTypes.PropertyDescriptionResponse, ASSOCIATION_TABLE, PID_TABLE, 0x03, 0x12, 0x00, 0x01, 0x30);

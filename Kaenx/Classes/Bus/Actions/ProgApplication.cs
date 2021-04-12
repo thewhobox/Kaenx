@@ -439,7 +439,14 @@ namespace Kaenx.Classes.Bus.Actions
             int maskVersion = (ushort)dev.MaskVersion & 0x0fff;
             await dev.ReadMaxAPDULength();
 
-            //TODO: When to authorize
+            XNamespace ns = dev.MaskXML.GetDefaultNamespace();
+            bool supportsAuthorize = dev.MaskXML.Element(ns + "HawkConfigurationData").Element(ns + "Features")
+                .Elements(ns + "Feature").Any(feature => feature.Attribute("Name").Value == "AuthorizeLevels");
+            if (supportsAuthorize)
+            {
+                if (await dev.Authorize(0xffffffff) != 0)
+                    throw new Exception("Standardpasswort wurde vom Gerät nicht akzeptiert");
+            }
 
             bool programGroupObjects = _type == ProgAppType.Komplett || !Device.LoadedGroup;
             if (maskVersion == 0x07B0 && programGroupObjects)
