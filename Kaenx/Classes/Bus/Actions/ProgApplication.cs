@@ -715,8 +715,7 @@ namespace Kaenx.Classes.Bus.Actions
             int address = await dev.PropertyRead<int>(objIdx, 7);
             if (address == 0)
                 throw new Exception("Allocation failed");
-            //TODO: verify
-            await dev.MemoryWriteSync(address + offset, data.Skip(offset).Take(size).ToArray());
+            await dev.MemoryWriteSync(address + offset, data.Skip(offset).Take(size).ToArray(), verify);
         }
 
         private async Task AllocSegment(XElement ctrl, int segType, int counter = 0)

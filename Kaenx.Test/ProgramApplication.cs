@@ -194,10 +194,12 @@ namespace Kaenx.Test
             connection.Response(ApciTypes.PropertyValueResponse, APPLICATION_PROGRAM, PID_TABLE_REFERENCE, 0x10, 0x01, application_address[0], application_address[1], application_address[2], application_address[3]);
 
             //Enable Verify Mode (Set bit 2)
-            //connection.Expect(new MsgPropertyReadReq(DEVICE, PID_DEVICE_CONTROL, address));
-            //connection.Response(ApciTypes.PropertyValueResponse, DEVICE, PID_DEVICE_CONTROL, 0x10, 0x01, 0x00);
-            //connection.Expect(new MsgPropertyWriteReq(DEVICE, PID_DEVICE_CONTROL, new byte[] { 0x04 }, address));
-            //connection.Response(ApciTypes.PropertyValueResponse, DEVICE, PID_DEVICE_CONTROL, 0x10, 0x01, 0x04);
+            connection.Expect(new MsgPropertyReadReq(DEVICE, PID_DEVICE_CONTROL, address));
+            connection.Response(ApciTypes.PropertyValueResponse, DEVICE, PID_DEVICE_CONTROL, 0x10, 0x01, 0x00);
+            connection.Expect(new MsgPropertyReadReq(DEVICE, PID_DEVICE_CONTROL, address));
+            connection.Response(ApciTypes.PropertyValueResponse, DEVICE, PID_DEVICE_CONTROL, 0x10, 0x01, 0x00);
+            connection.Expect(new MsgPropertyWriteReq(DEVICE, PID_DEVICE_CONTROL, new byte[] { 0x04 }, address));
+            connection.Response(ApciTypes.PropertyValueResponse, DEVICE, PID_DEVICE_CONTROL, 0x10, 0x01, 0x04);
 
             connection.Expect(new MsgMemoryWriteReq(0x100, new byte[] { 1, 2, 3, 4 }, address));
             connection.Response(ApciTypes.MemoryResponse, application_address[2], application_address[3], 1, 2, 3, 4);
@@ -206,7 +208,7 @@ namespace Kaenx.Test
             byte[] object_table_address = U32ToBe(0x200);
             connection.Response(ApciTypes.PropertyValueResponse, GROUP_OBJECT_TABLE, PID_TABLE_REFERENCE, 0x10, 0x01, object_table_address[0], object_table_address[1], object_table_address[2], object_table_address[3]);
             connection.Expect(new MsgMemoryWriteReq(0x200, new byte[] { 0, 2, 0x17, 0x00, 0x4F, 0x00 }, address));
-            connection.Response(ApciTypes.MemoryResponse, object_table_address[2], object_table_address[3], 0, 2, 0x17, 0x07, 0x17, 0x07);
+            connection.Response(ApciTypes.MemoryResponse, object_table_address[2], object_table_address[3], 0, 2, 0x17, 0x00, 0x4F, 0x00);
 
             connection.Expect(new MsgPropertyReadReq(ASSOCIATION_TABLE, PID_TABLE_REFERENCE, address));
             byte[] association_table_address = U32ToBe(0x300);
