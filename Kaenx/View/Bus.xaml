@@ -8,6 +8,7 @@
     xmlns:bus="using:Kaenx.View.Controls.Bus"
     xmlns:toolkit="using:Microsoft.Toolkit.Uwp.UI.Controls"
     xmlns:conv="using:Microsoft.Toolkit.Uwp.UI.Converters"
+    xmlns:muxc="using:Microsoft.UI.Xaml.Controls"
     mc:Ignorable="d"
     Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
     <Page.Resources>
@@ -15,14 +16,14 @@
         <conv:BoolToVisibilityConverter x:Key="BoolToVis" />
     </Page.Resources>
 
-    <Grid Margin="0 10 0 0">
+    <Grid>
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="auto" />
+            <ColumnDefinition Width="350" />
             <ColumnDefinition />
         </Grid.ColumnDefinitions>
 
-        <toolkit:TabView>
-            <toolkit:TabViewItem x:Uid="/Bus/TabsCurrent">
+        <Pivot Background="{ThemeResource BrushAccentColorDark2}">
+            <PivotItem x:Uid="/Bus/TabsCurrent">
                 <Grid>
                     <Grid.RowDefinitions>
                         <RowDefinition Height="auto" />
@@ -31,11 +32,11 @@
                         <RowDefinition />
                     </Grid.RowDefinitions>
                     <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="200" />
-                        <ColumnDefinition Width="auto" />
+                        <ColumnDefinition />
+                        <ColumnDefinition Width="50" />
                     </Grid.ColumnDefinitions>
 
-                    <Border Grid.ColumnSpan="2" Grid.RowSpan="2"  BorderBrush="LightGray" BorderThickness="1" />
+                    <Border Grid.ColumnSpan="2" Grid.RowSpan="2"  BorderBrush="Gray" BorderThickness="1" />
 
                     <TextBlock Margin="10 0 5 0" VerticalAlignment="Center" Text="{Binding Path=CurrentAction.Device.Name}" />
 
@@ -77,9 +78,9 @@
                     </ListView>
  
                 </Grid>
-            </toolkit:TabViewItem>
+            </PivotItem>
 
-            <toolkit:TabViewItem x:Uid="/Bus/TabsHistory">
+            <PivotItem x:Uid="/Bus/TabsHistory">
                 <ListView Grid.Row="2" ItemsSource="{Binding History}" IsItemClickEnabled="False" SelectionMode="None">
                     <ListView.ItemContainerStyle>
                         <Style TargetType="ListViewItem">
@@ -97,9 +98,9 @@
                         </DataTemplate>
                     </ListView.ItemTemplate>
                 </ListView>
-            </toolkit:TabViewItem>
+            </PivotItem>
 
-            <toolkit:TabViewItem x:Name="TabConns" x:Uid="/Bus/TabsInterfaces">
+            <PivotItem x:Name="TabConns" x:Uid="/Bus/TabsInterfaces">
                 <Grid Margin="10 20">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition />
@@ -181,28 +182,28 @@
                         </DropDownButton.Flyout>
                     </DropDownButton>
                 </Grid>
-            </toolkit:TabViewItem>
-        </toolkit:TabView>
+            </PivotItem>
+        </Pivot>
 
 
-        <toolkit:TabView Grid.Column="1" Margin="5 0">
-            <toolkit:TabView.Background>
+        <muxc:TabView x:Name="InfoTab" IsAddTabButtonVisible="False" Grid.Column="1" Margin="5 0">
+            <muxc:TabView.Background>
                 <SolidColorBrush Color="#FFE0E0E0" />
-            </toolkit:TabView.Background>
+            </muxc:TabView.Background>
 
-            <toolkit:TabViewItem x:Uid="/Bus/TabsMonitor">
+            <muxc:TabViewItem x:Uid="/Bus/TabsMonitor" IsClosable="False">
                 <bus:BMonitor />
-            </toolkit:TabViewItem>
+            </muxc:TabViewItem>
 
-            <toolkit:TabViewItem x:Uid="/Bus/TabsInfo">
-                <bus:BDeviceInfo />
-            </toolkit:TabViewItem>
+            <muxc:TabViewItem x:Uid="/Bus/TabsInfo" IsClosable="False">
+                <bus:BDeviceInfo OnAddTabItem="BDeviceInfo_OnAddTabItem" />
+            </muxc:TabViewItem>
 
-            <toolkit:TabViewItem x:Uid="/Bus/TabsNew">
+            <muxc:TabViewItem x:Uid="/Bus/TabsNew" IsClosable="False">
                 <bus:BNewDevices />
-            </toolkit:TabViewItem>
-        </toolkit:TabView>
+            </muxc:TabViewItem>
+        </muxc:TabView>
 
-        <toolkit:InAppNotification x:Name="Notify" Grid.ColumnSpan="2" />
+        <StackPanel x:Name="InfoPanel" Grid.ColumnSpan="2" VerticalAlignment="Bottom" MaxWidth="800" />
     </Grid>
 </Page>

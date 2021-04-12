@@ -141,7 +141,7 @@ namespace Kaenx.Classes.Bus.Actions
             {
                 System.Diagnostics.Debug.WriteLine("Jetzt");
                 _= App._dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Normal, () => {
-                    ViewHelper.Instance.ShowNotification("main", $"Applikation für '{Device.LineName}-{Device.Name}' wurde dem physischen Gerät angepasst.", 4000, ViewHelper.MessageType.Info);
+                    ViewHelper.Instance.ShowNotification("main", $"Applikation für '{Device.LineName}-{Device.Name}' wurde dem physischen Gerät angepasst.", 4000, Microsoft.UI.Xaml.Controls.InfoBarSeverity.Informational);
                 });
                 Device.ApplicationId = _data.ApplicationId;
             }
@@ -710,7 +710,7 @@ namespace Kaenx.Classes.Bus.Actions
                 Device.ComObjects.Sort(s => s.Number);
 
                 if (flagGroups)
-                    ViewHelper.Instance.ShowNotification("main", "Es konnten einige Gruppenadressen nicht zugeordnet werden, da diese nicht im Projekt existieren.", 4000, ViewHelper.MessageType.Warning);
+                    ViewHelper.Instance.ShowNotification("main", "Es konnten einige Gruppenadressen nicht zugeordnet werden, da diese nicht im Projekt existieren.", 4000, Microsoft.UI.Xaml.Controls.InfoBarSeverity.Warning);
             });
             _contextP.SaveChanges();
         }

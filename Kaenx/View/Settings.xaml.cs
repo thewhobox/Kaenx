@@ -1,4 +1,5 @@
 ﻿using Kaenx.Classes.Helper;
+using Microsoft.UI.Xaml.Controls;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -44,22 +45,32 @@ namespace Kaenx.View
 
         
 
-        private void Instance_OnShowNotification(string view, string text, int duration, ViewHelper.MessageType type)
+        private void Instance_OnShowNotification(string view, string text, int duration, InfoBarSeverity type)
         {
             if (view != "all" && view != "settings") return;
-            try
-            {
-                object style;
-                Resources.TryGetValue("NotifyStyle" + type.ToString(), out style);
-                if(style != null)
-                    Notify.Style = (Style)style;
+            InfoBar info = new InfoBar();
+            info.Message = text;
+            info.Severity = type;
 
-                if (duration == -1)
-                    Notify.Show(text);
-                else
-                    Notify.Show(text, duration);
+            switch (type)
+            {
+                case InfoBarSeverity.Warning:
+                    info.Title = "Warnung";
+                    break;
+                case InfoBarSeverity.Error:
+                    info.Title = "Fehler";
+                    break;
+                case InfoBarSeverity.Success:
+                    info.Title = "Erfolgreich";
+                    break;
+                default:
+                    info.Title = "Info";
+                    break;
             }
-            catch { }
+
+            info.IsOpen = true;
+            info.Closed += (a, b) => InfoPanel.Children.Remove(info);
+            InfoPanel.Children.Add(info);
         }
 
         protected override void OnNavigatedTo(NavigationEventArgs e)

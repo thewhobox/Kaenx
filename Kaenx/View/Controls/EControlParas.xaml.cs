@@ -95,7 +95,7 @@ namespace Kaenx.Views.Easy.Controls
             if (!_context.Applications.Any(a => a.Id == Device.ApplicationId))
             {
                 LoadRing.Visibility = Visibility.Collapsed;
-                ViewHelper.Instance.ShowNotification("main", "Achtung!!! Applikation konnte nicht gefunden werden. Bitte importieren Sie das Produkt erneut.", 4000, ViewHelper.MessageType.Error);
+                ViewHelper.Instance.ShowNotification("main", "Achtung!!! Applikation konnte nicht gefunden werden. Bitte importieren Sie das Produkt erneut.", 4000, Microsoft.UI.Xaml.Controls.InfoBarSeverity.Error);
                 return;
             }
 
@@ -139,7 +139,7 @@ namespace Kaenx.Views.Easy.Controls
             catch (Exception ex)
             {
                 Log.Error(ex, "Laden der Parameter fehlgeschlagen!");
-                ViewHelper.Instance.ShowNotification("main", ex.Message, 4000, ViewHelper.MessageType.Error);
+                ViewHelper.Instance.ShowNotification("main", ex.Message, 4000, Microsoft.UI.Xaml.Controls.InfoBarSeverity.Error);
             }
         }
 

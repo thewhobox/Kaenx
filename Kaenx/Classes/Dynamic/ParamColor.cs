@@ -28,7 +28,7 @@ namespace Kaenx.Classes.Dynamic
                     Color = ColorHelper.ToColor("#" + value);
                 } catch
                 {
-                    Kaenx.Classes.Helper.ViewHelper.Instance.ShowNotification("main", "Eingegebene Farbe ist inkorrekt!", 3000, Helper.ViewHelper.MessageType.Error);
+                    Kaenx.Classes.Helper.ViewHelper.Instance.ShowNotification("main", "Eingegebene Farbe ist inkorrekt!", 3000, Microsoft.UI.Xaml.Controls.InfoBarSeverity.Error);
                     return;
                 }
                 PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Value"));

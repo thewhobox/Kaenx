@@ -10,8 +10,6 @@
     xmlns:animations="using:Microsoft.Toolkit.Uwp.UI.Animations"
     xmlns:test="using:Kaenx.View.Controls"
     Background="{ThemeResource ApplicationPageBackgroundThemeBrush}"
-    extensions:ApplicationViewExtensions.Title="Startseite"
-    extensions:ApplicationViewExtensions.BackButtonVisibility="Collapsed"
     mc:Ignorable="d">
 
     <Grid>
@@ -277,6 +275,6 @@
             <ProgressRing IsActive="True" Foreground="Black" Height="100" Width="100" />
         </toolkit:Loading>
 
-        <toolkit:InAppNotification Grid.Row="2"  x:Name="Notify" />
+        <StackPanel x:Name="InfoPanel" Grid.RowSpan="2" VerticalAlignment="Bottom" MaxWidth="800" />
     </Grid>
 </Page>

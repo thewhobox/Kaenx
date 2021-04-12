@@ -80,7 +80,7 @@ namespace Kaenx.View.Controls.Bus
 
             if(BusConnection.Instance.SelectedInterface == null)
             {
-                ViewHelper.Instance.ShowNotification("main", "Bitte wählen Sie erst eine Schnittstelle aus", 3000, ViewHelper.MessageType.Error);
+                ViewHelper.Instance.ShowNotification("main", "Bitte wählen Sie erst eine Schnittstelle aus", 3000, Microsoft.UI.Xaml.Controls.InfoBarSeverity.Error);
                 return;
             }
 
@@ -91,7 +91,7 @@ namespace Kaenx.View.Controls.Bus
                 await conn.Connect();
             }catch(Exception ex)
             {
-                ViewHelper.Instance.ShowNotification("main", "Probleme beim Verbinden mit der Schnittstelle!\r\n" + ex.Message, 3000, ViewHelper.MessageType.Error);
+                ViewHelper.Instance.ShowNotification("main", "Probleme beim Verbinden mit der Schnittstelle!\r\n" + ex.Message, 3000, Microsoft.UI.Xaml.Controls.InfoBarSeverity.Error);
                 return;
             }
 

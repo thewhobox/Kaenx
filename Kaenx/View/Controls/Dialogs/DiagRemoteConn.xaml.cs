@@ -39,6 +39,7 @@ namespace Kaenx.View.Controls.Dialogs
         private void ClickConnect(object sender, RoutedEventArgs e)
         {
             LocalRemote local = (LocalRemote)InRemote.SelectedItem;
+            if (local == null) return;
             _ = BusRemoteConnection.Instance.Remote.Connect(local.Host, local.Authentification, local.IsSecure, local.Group, local.Code);
         }
 

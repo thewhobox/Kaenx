@@ -103,14 +103,14 @@ namespace Kaenx.View.Controls.Settings
         {
             if (!onlyTest && string.IsNullOrEmpty(InInterName.Text))
             {
-                ViewHelper.Instance.ShowNotification("settings", "Bitte gib einen Namen ein.", 3000, ViewHelper.MessageType.Error);
+                ViewHelper.Instance.ShowNotification("settings", "Bitte gib einen Namen ein.", 3000, Microsoft.UI.Xaml.Controls.InfoBarSeverity.Error);
                 return false;
             }
 
             string[] ip = InInterAddress.Text.Split(".");
             if (ip.Count() != 4)
             {
-                ViewHelper.Instance.ShowNotification("settings", "Bitte gib eine gültige IP Adresse ein.", 3000, ViewHelper.MessageType.Error);
+                ViewHelper.Instance.ShowNotification("settings", "Bitte gib eine gültige IP Adresse ein.", 3000, Microsoft.UI.Xaml.Controls.InfoBarSeverity.Error);
                 return false;
             }
             else
@@ -124,7 +124,7 @@ namespace Kaenx.View.Controls.Settings
 
                 if (fail)
                 {
-                    ViewHelper.Instance.ShowNotification("settings", "Bitte gib eine gültige IP Adresse ein.", 3000, ViewHelper.MessageType.Error);
+                    ViewHelper.Instance.ShowNotification("settings", "Bitte gib eine gültige IP Adresse ein.", 3000, Microsoft.UI.Xaml.Controls.InfoBarSeverity.Error);
                     return false;
                 }
             }
@@ -133,7 +133,7 @@ namespace Kaenx.View.Controls.Settings
             int port;
             if (!int.TryParse(InInterPort.Text, out port))
             {
-                ViewHelper.Instance.ShowNotification("settings", "Bitte gib einen gültige Port ein.", 3000, ViewHelper.MessageType.Error);
+                ViewHelper.Instance.ShowNotification("settings", "Bitte gib einen gültige Port ein.", 3000, Microsoft.UI.Xaml.Controls.InfoBarSeverity.Error);
                 return false;
             }
 
@@ -155,7 +155,7 @@ namespace Kaenx.View.Controls.Settings
             catch { 
             }
 
-            ViewHelper.Instance.ShowNotification("settings", "Schnittstelle erfolgreich gelöscht.", 3000, ViewHelper.MessageType.Success);
+            ViewHelper.Instance.ShowNotification("settings", "Schnittstelle erfolgreich gelöscht.", 3000, Microsoft.UI.Xaml.Controls.InfoBarSeverity.Success);
         }
 
         private void ClickDeleteData(object sender, RoutedEventArgs e)
@@ -186,11 +186,11 @@ namespace Kaenx.View.Controls.Settings
             }
             catch(Exception ex)
             {
-                ViewHelper.Instance.ShowNotification("settings", "Fehler bei der Verbindung!\r\n" + ex.Message, 3000, ViewHelper.MessageType.Error);
+                ViewHelper.Instance.ShowNotification("settings", "Fehler bei der Verbindung!\r\n" + ex.Message, 3000, Microsoft.UI.Xaml.Controls.InfoBarSeverity.Error);
                 return;
             }
             
-            ViewHelper.Instance.ShowNotification("settings", "Schnittstelle ist erreichbar und hat eine Verbindung zum Bus (" + conn.PhysicalAddress.ToString() + ")", 3000, ViewHelper.MessageType.Error);
+            ViewHelper.Instance.ShowNotification("settings", "Schnittstelle ist erreichbar und hat eine Verbindung zum Bus (" + conn.PhysicalAddress.ToString() + ")", 3000, Microsoft.UI.Xaml.Controls.InfoBarSeverity.Error);
             //await conn.Disconnect();
         }
 
@@ -267,7 +267,7 @@ namespace Kaenx.View.Controls.Settings
         {
             if (string.IsNullOrEmpty(InFileName.Text))
             {
-                ViewHelper.Instance.ShowNotification("settings", "Bitte gib einen Namen ein.", 3000, ViewHelper.MessageType.Success);
+                ViewHelper.Instance.ShowNotification("settings", "Bitte gib einen Namen ein.", 3000, Microsoft.UI.Xaml.Controls.InfoBarSeverity.Success);
                 return;
             }
 
@@ -291,17 +291,17 @@ namespace Kaenx.View.Controls.Settings
         {
             if (string.IsNullOrEmpty(InRemoteName.Text))
             {
-                ViewHelper.Instance.ShowNotification("settings", "Bitte gib einen Namen ein.", 3000, ViewHelper.MessageType.Success);
+                ViewHelper.Instance.ShowNotification("settings", "Bitte gib einen Namen ein.", 3000, Microsoft.UI.Xaml.Controls.InfoBarSeverity.Success);
                 return;
             }
             if (string.IsNullOrEmpty(InRemoteHost.Text))
             {
-                ViewHelper.Instance.ShowNotification("settings", "Bitte gib einen Hostnamen ein.", 3000, ViewHelper.MessageType.Success);
+                ViewHelper.Instance.ShowNotification("settings", "Bitte gib einen Hostnamen ein.", 3000, Microsoft.UI.Xaml.Controls.InfoBarSeverity.Success);
                 return;
             }
             if (string.IsNullOrEmpty(InRemoteAuth.Text))
             {
-                ViewHelper.Instance.ShowNotification("settings", "Bitte gib einen gültigen Authentifizierungskey ein.", 3000, ViewHelper.MessageType.Success);
+                ViewHelper.Instance.ShowNotification("settings", "Bitte gib einen gültigen Authentifizierungskey ein.", 3000, Microsoft.UI.Xaml.Controls.InfoBarSeverity.Success);
                 return;
             }
 

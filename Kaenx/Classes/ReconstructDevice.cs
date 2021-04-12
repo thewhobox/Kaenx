@@ -13,7 +13,10 @@ namespace Kaenx.Classes
     {
         public UnicastAddress Address { get; set; }
 
-        public int StateId = 0;
+
+        public int StateId { get; set; } = 0;
+        public bool CanRead { get; set; } = false;
+
 
         private string _status;
         public string Status

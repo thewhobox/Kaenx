@@ -64,7 +64,7 @@ namespace Kaenx.View.Controls.Bus
             {
                 if (BusConnection.Instance.SelectedInterface == null)
                 {
-                    ViewHelper.Instance.ShowNotification("main", "Bitte wählen Sie erst eine Schnittstelle aus", 3000, ViewHelper.MessageType.Error);
+                    ViewHelper.Instance.ShowNotification("main", "Bitte wählen Sie erst eine Schnittstelle aus", 3000, Microsoft.UI.Xaml.Controls.InfoBarSeverity.Error);
                     return;
                 }
 
@@ -76,7 +76,7 @@ namespace Kaenx.View.Controls.Bus
                     await _conn.Connect();
                 } catch(Exception ex)
                 {
-                    ViewHelper.Instance.ShowNotification("main", ex.Message, 3000, ViewHelper.MessageType.Error);
+                    ViewHelper.Instance.ShowNotification("main", ex.Message, 3000, Microsoft.UI.Xaml.Controls.InfoBarSeverity.Error);
                     return;
                 }
                 MonitorTelegram tel = new MonitorTelegram();
@@ -134,7 +134,7 @@ namespace Kaenx.View.Controls.Bus
             }
             catch
             {
-                ViewHelper.Instance.ShowNotification("main", "Gruppenadresse ist ungültig!", 3000, ViewHelper.MessageType.Error);
+                ViewHelper.Instance.ShowNotification("main", "Gruppenadresse ist ungültig!", 3000, Microsoft.UI.Xaml.Controls.InfoBarSeverity.Error);
                 return;
             }
             _comm.GroupValueWrite(dest, ConvertHexStringToByteArray(InData.Text));
@@ -149,7 +149,7 @@ namespace Kaenx.View.Controls.Bus
             }
             catch
             {
-                ViewHelper.Instance.ShowNotification("main", "Gruppenadresse ist ungültig!", 3000, ViewHelper.MessageType.Error);
+                ViewHelper.Instance.ShowNotification("main", "Gruppenadresse ist ungültig!", 3000, Microsoft.UI.Xaml.Controls.InfoBarSeverity.Error);
                 return;
             }
 

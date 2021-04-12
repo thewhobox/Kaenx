@@ -1,6 +1,7 @@
 ﻿using Kaenx.Classes.Helper;
 using Microsoft.AppCenter;
 using Microsoft.AppCenter.Crashes;
+using Microsoft.UI.Xaml.Controls;
 using Serilog;
 using System;
 using System.Collections.Generic;
@@ -119,23 +120,33 @@ namespace Kaenx.View
             App.Navigate(typeof(MainPage));
         }
 
-        private void Instance_OnShowNotification(string view, string text, int duration, ViewHelper.MessageType type)
+        private void Instance_OnShowNotification(string view, string text, int duration, InfoBarSeverity type)
         {
             if (view != "all" && view != "main") return;
 
-            try
-            {
-                object style;
-                Resources.TryGetValue("NotifyStyle" + type.ToString(), out style);
-                if(style != null)
-                    Notify.Style = (Style)style;
+            InfoBar info = new InfoBar();
+            info.Message = text;
+            info.Severity = type;
 
-                if (duration == -1)
-                    Notify.Show(text);
-                else
-                    Notify.Show(text, duration);
+            switch (type)
+            {
+                case InfoBarSeverity.Warning:
+                    info.Title = "Warnung";
+                    break;
+                case InfoBarSeverity.Error:
+                    info.Title = "Fehler";
+                    break;
+                case InfoBarSeverity.Success:
+                    info.Title = "Erfolgreich";
+                    break;
+                default:
+                    info.Title = "Info";
+                    break;
             }
-            catch { }
+
+            info.IsOpen = true;
+            info.Closed += (a, b) => InfoPanel.Children.Remove(info);
+            InfoPanel.Children.Add(info);
         }
 
         private void ContentFrame_Navigated(object sender, NavigationEventArgs e)
@@ -143,12 +154,12 @@ namespace Kaenx.View
             NavView.IsBackEnabled = ContentFrame.CanGoBack;
         }
 
-        private void ItemChanged(NavigationView sender, NavigationViewSelectionChangedEventArgs args)
+        private void ItemChanged(Windows.UI.Xaml.Controls.NavigationView sender, Windows.UI.Xaml.Controls.NavigationViewSelectionChangedEventArgs args)
         {
             try
             {
                 ContentFrame.BackStack.Clear();
-                string tag = ((NavigationViewItem)args.SelectedItem).Tag?.ToString();
+                string tag = ((Windows.UI.Xaml.Controls.NavigationViewItem)args.SelectedItem).Tag?.ToString();
 
                 if (args.IsSettingsSelected)
                     tag = "settings";

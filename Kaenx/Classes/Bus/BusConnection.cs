@@ -104,7 +104,7 @@ namespace Kaenx.Classes.Bus
             catch
             {
                 searchConn = null;
-                ViewHelper.Instance.ShowNotification("main", "Es besteht keine Verbindung zu einenm lokalen Netzwerk, somit können auch keine IP-Schnittstellen gefunden werden.", 6000, ViewHelper.MessageType.Error);
+                ViewHelper.Instance.ShowNotification("main", "Es besteht keine Verbindung zu einenm lokalen Netzwerk, somit können auch keine IP-Schnittstellen gefunden werden.", 6000, Microsoft.UI.Xaml.Controls.InfoBarSeverity.Error);
             }
 
             searchTimer.Tick += (a, b) => SearchForDevices();
@@ -294,7 +294,7 @@ namespace Kaenx.Classes.Bus
                 {
                     if (!alreadyShowedWarning)
                     {
-                        ViewHelper.Instance.ShowNotification("all", loader.GetString("NoInterfaceSelected"), 3000, ViewHelper.MessageType.Error);
+                        ViewHelper.Instance.ShowNotification("all", loader.GetString("NoInterfaceSelected"), 3000, Microsoft.UI.Xaml.Controls.InfoBarSeverity.Error);
                         alreadyShowedWarning = true;
                     }
                     continue;

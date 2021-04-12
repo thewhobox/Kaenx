@@ -317,7 +317,6 @@ namespace Kaenx.View
 
         private async Task ReadDevice(ReconstructDevice device, IKnxConnection _conn)
         {
-            device.StateId = 1;
             device.Status = "Lese Info...";
             BusDevice dev = new BusDevice(device.Address, _conn);
             await dev.Connect(true);
@@ -344,6 +343,7 @@ namespace Kaenx.View
                 device.ApplicationId = h2a.ApplicationId;
                 DeviceViewModel devm = _context.Devices.First(d => d.HardwareId == h2a.HardwareId);
                 device.DeviceName = devm.Name;
+                device.CanRead = true;
             }
             catch
             {
@@ -462,7 +462,7 @@ namespace Kaenx.View
                 return;
             }
 
-            IEnumerable<ReconstructDevice> devices = Devices.Where(d => d.StateId >= 3);
+            IEnumerable<ReconstructDevice> devices = Devices.Where(d => d.CanRead);
             foreach (ReconstructDevice device in devices)
             {
                 Action = device.Address + " - Lese Konfiguration";
