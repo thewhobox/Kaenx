@@ -11,7 +11,7 @@
     <AssemblyName>Kaenx</AssemblyName>
     <DefaultLanguage>de-DE</DefaultLanguage>
     <TargetPlatformIdentifier>UAP</TargetPlatformIdentifier>
-    <TargetPlatformVersion>10.0.18362.0</TargetPlatformVersion>
+    <TargetPlatformVersion>10.0.19041.0</TargetPlatformVersion>
     <TargetPlatformMinVersion>10.0.18362.0</TargetPlatformMinVersion>
     <MinimumVisualStudioVersion>14</MinimumVisualStudioVersion>
     <FileAlignment>512</FileAlignment>
@@ -146,6 +146,9 @@
     <Compile Include="Classes\Bus\Data\IBusData.cs" />
     <Compile Include="Classes\Bus\Data\NewDeviceData.cs" />
     <Compile Include="Classes\Bus\RemoteConnection.cs" />
+    <Compile Include="Classes\Converter\StateBrushConverter.cs" />
+    <Compile Include="Classes\Converter\InterfaceTooltipConverter.cs" />
+    <Compile Include="Classes\Converter\InterfaceGlyphConverter.cs" />
     <Compile Include="Classes\Converter\ValueCheckBoxConverter.cs" />
     <Compile Include="Classes\DataPointSubType.cs" />
     <Compile Include="Classes\Device.cs" />
@@ -180,6 +183,7 @@
     <Compile Include="Classes\Helper\StoreHelper.cs" />
     <Compile Include="Classes\MonitorTelegram.cs" />
     <Compile Include="Classes\Project\DeviceComObject.cs" />
+    <Compile Include="Classes\Project\LineState.cs" />
     <Compile Include="Classes\ReconstructDevice.cs" />
     <Compile Include="Classes\SaveConfigHelper.cs" />
     <Compile Include="Classes\Save\ISaveHelper.cs" />

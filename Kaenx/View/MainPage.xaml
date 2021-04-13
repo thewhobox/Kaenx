@@ -6,12 +6,16 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:toolkit="using:Microsoft.Toolkit.Uwp.UI.Controls"
-    xmlns:extensions="using:Microsoft.Toolkit.Uwp.UI.Extensions"
+    xmlns:conv="using:Microsoft.Toolkit.Uwp.UI.Converters"
     xmlns:animations="using:Microsoft.Toolkit.Uwp.UI.Animations"
     xmlns:test="using:Kaenx.View.Controls"
+    xmlns:konn="using:Kaenx.DataContext.Local"
     Background="{ThemeResource ApplicationPageBackgroundThemeBrush}"
     mc:Ignorable="d">
-
+    <Page.Resources>
+        <conv:BoolToVisibilityConverter x:Key="BoolToVis" />
+    </Page.Resources>
+    
     <Grid>
         <VisualStateManager.VisualStateGroups>
             <VisualStateGroup>
@@ -193,6 +197,11 @@
                                 </Border.Background>
                                 <TextBlock x:Name="Rofl" Text="{Binding Name}" TextWrapping="WrapWholeWords" />
                             </Border>
+
+
+                            <StackPanel VerticalAlignment="Top" HorizontalAlignment="Right" Background="Black" BorderBrush="LightGray" BorderThickness="1 0 0 1" ToolTipService.ToolTip="Typ: Rekonstruieren" Visibility="{Binding IsReconstruct, Converter={StaticResource BoolToVis}}">
+                                <FontIcon Glyph="&#xE9F5;" Foreground="White" Margin="4" />
+                            </StackPanel>
                         </Grid>
                     </DataTemplate>
                 </GridView.ItemTemplate>
@@ -200,8 +209,7 @@
 
 
 
-            <TextBlock x:Name="AppVersion" VerticalAlignment="Top" HorizontalAlignment="Right" Margin="20"/>
-
+            <TextBlock x:Name="AppVersion" VerticalAlignment="Top" HorizontalAlignment="Right" Margin="20" d:Text="0.0.0.0" />
         </Grid>
 
 
