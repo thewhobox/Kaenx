@@ -15,6 +15,7 @@ using Kaenx.Konnect.Interfaces;
 using Kaenx.Konnect.Messages.Request;
 using Kaenx.View.Controls.Dialogs;
 using Microsoft.EntityFrameworkCore.Diagnostics;
+using Microsoft.UI.Xaml.Controls;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -154,6 +155,7 @@ namespace Kaenx.View
                         dev.ApplicationName = names[1];
                         dev.ApplicationId = ldev.ApplicationId;
 
+                        //Todod check ändern und auf aktuellen Stand bringen
                         if(dev.ApplicationName.Contains(" 0x"))
                         {
                             dev.StateId = 2;
@@ -187,7 +189,7 @@ namespace Kaenx.View
         {
             if(conn.SelectedInterface == null)
             {
-                Notify.Show("Bitte wählen Sie erst eine Schnittstelle aus.", 3000);
+                ShowNotification("Bitte wählen Sie erst eine Schnittstelle aus.", InfoBarSeverity.Warning);
                 return;
             }
             DoScan();
@@ -222,7 +224,7 @@ namespace Kaenx.View
                 await _conn.Connect();
             } catch(Exception ex)
             {
-                Notify.Show(ex.Message, 3000);
+                ShowNotification(ex.Message, InfoBarSeverity.Error);
                 CanDo = true;
                 return;
             }
@@ -454,7 +456,7 @@ namespace Kaenx.View
             }
             catch (Exception ex)
             {
-                Notify.Show(ex.Message, 3000);
+                ShowNotification(ex.Message, InfoBarSeverity.Error);
                 CanDo = true;
                 return;
             }
@@ -504,6 +506,41 @@ namespace Kaenx.View
             if (file == null) return null;
 
             return XDocument.Load(await file.OpenStreamForReadAsync());
+        }
+
+        private void ShowNotification(string text, InfoBarSeverity severity)
+        {
+            InfoBar info = new InfoBar
+            {
+                Severity = severity,
+                Message = text,
+                Title = "Information",
+                IsOpen = true
+            };
+            info.CloseButtonClick += Info_CloseButtonClick;
+
+            switch (severity)
+            {
+                case InfoBarSeverity.Error:
+                    info.Title = "Fehler!";
+                    break;
+
+                case InfoBarSeverity.Success:
+                    info.Title = "Erfolgreich";
+                    break;
+
+                case InfoBarSeverity.Warning:
+                    info.Title = "Warnung";
+                    break;
+            }
+
+            InfoPanel.Children.Add(info);
+        }
+
+        private void Info_CloseButtonClick(InfoBar sender, object args)
+        {
+            sender.CloseButtonClick -= Info_CloseButtonClick;
+            InfoPanel.Children.Remove(sender);
         }
 
 

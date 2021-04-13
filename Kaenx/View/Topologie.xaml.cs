@@ -557,11 +557,13 @@ namespace Kaenx.View
 
                 EControlLine present = new EControlLine(line);
                 ParamPresenter.Content = present;
+                SelectedDevice = null;
             }
             else if (data is Line)
             {
                 InNumber.Minimum = 0;
                 InNumber.Maximum = 15;
+                SelectedDevice = null;
             }
         }
 

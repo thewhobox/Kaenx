@@ -124,29 +124,32 @@ namespace Kaenx.View
         {
             if (view != "all" && view != "main") return;
 
-            InfoBar info = new InfoBar();
-            info.Message = text;
-            info.Severity = type;
+            _ = App._dispatcher.RunAsync(CoreDispatcherPriority.Normal, () =>
+              {
+                  InfoBar info = new InfoBar();
+                  info.Message = text;
+                  info.Severity = type;
 
-            switch (type)
-            {
-                case InfoBarSeverity.Warning:
-                    info.Title = "Warnung";
-                    break;
-                case InfoBarSeverity.Error:
-                    info.Title = "Fehler";
-                    break;
-                case InfoBarSeverity.Success:
-                    info.Title = "Erfolgreich";
-                    break;
-                default:
-                    info.Title = "Info";
-                    break;
-            }
+                  switch (type)
+                  {
+                      case InfoBarSeverity.Warning:
+                          info.Title = "Warnung";
+                          break;
+                      case InfoBarSeverity.Error:
+                          info.Title = "Fehler";
+                          break;
+                      case InfoBarSeverity.Success:
+                          info.Title = "Erfolgreich";
+                          break;
+                      default:
+                          info.Title = "Info";
+                          break;
+                  }
 
-            info.IsOpen = true;
-            info.Closed += (a, b) => InfoPanel.Children.Remove(info);
-            InfoPanel.Children.Add(info);
+                  info.IsOpen = true;
+                  info.Closed += (a, b) => InfoPanel.Children.Remove(a);
+                  InfoPanel.Children.Add(info);
+              });
         }
 
         private void ContentFrame_Navigated(object sender, NavigationEventArgs e)
