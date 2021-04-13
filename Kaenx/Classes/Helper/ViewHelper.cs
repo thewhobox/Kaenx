@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.UI.Xaml.Controls;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -23,16 +24,8 @@ namespace Kaenx.Classes.Helper
 
 
         // Notification Helper
-        public delegate void ShowNotificationHandler(string view, string text, int duration, MessageType type);
+        public delegate void ShowNotificationHandler(string view, string text, int duration, InfoBarSeverity type);
         public event ShowNotificationHandler OnShowNotification;
-        public void ShowNotification(string view, string text, int duration = -1, MessageType type = MessageType.Success) { OnShowNotification?.Invoke(view, text, duration, type); }
-
-        public enum MessageType
-        {
-            Success,
-            Warning,
-            Error,
-            Info
-        }
+        public void ShowNotification(string view, string text, int duration = -1, InfoBarSeverity type = InfoBarSeverity.Success) { OnShowNotification?.Invoke(view, text, duration, type); }
     }
 }

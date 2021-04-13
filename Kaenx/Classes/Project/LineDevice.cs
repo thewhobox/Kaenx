@@ -18,15 +18,15 @@ namespace Kaenx.Classes.Project
     {
         public bool IsInit = false;
 
-        private int _id;
         private string _name;
         private ObservableCollection<DeviceComObject> _comObjects = new ObservableCollection<DeviceComObject>();
 
-
+        private int _id;
         private bool _loadedGroups = false;
         private bool _loadedApplication = false;
         private bool _loadedPA = false;
         private bool _isDeactivated = false;
+        private int _lastGroupCount = -1;
         public bool LoadedGroup { 
             get { return _loadedGroups; } 
             set {
@@ -60,9 +60,18 @@ namespace Kaenx.Classes.Project
                 if (_isDeactivated == value) return;
                 _isDeactivated = value;
                 Changed("IsDeactivated");
-                Changed("CurrentBackBrush");
                 if (!IsInit) SaveHelper.UpdateDevice(this); 
-            } 
+            }
+        }
+        public int LastGroupCount
+        {
+            get { return _lastGroupCount; }
+            set
+            {
+                _lastGroupCount = value;
+                Changed("LastGroupCount");
+                if (!IsInit) SaveHelper.UpdateDevice(this);
+            }
         }
         public bool IsExpanded { get { return false; } }
         public List<string> Subs { get; }
@@ -74,26 +83,22 @@ namespace Kaenx.Classes.Project
             set { _serial = value; Changed("Serial"); Changed("SerialText"); }
         }
         public string SerialText { get { return Serial == null ? "" : BitConverter.ToString(Serial).Replace("-", ""); } }
-
-        //TODO speichern ändern! Nicht immer das ganze Projekt!
-
-        [XmlIgnore]
-        public SolidColorBrush CurrentBrush { get; set; } = new SolidColorBrush(Windows.UI.Colors.White);
-        [XmlIgnore]
-        public SolidColorBrush CurrentBackBrush { get { if (_isDeactivated) return new SolidColorBrush(Windows.UI.Colors.DarkGray); else return new SolidColorBrush(Windows.UI.Colors.Transparent); } }
         public int Id
         {
             get { return _id; }
-            set {
+            set
+            {
                 if (_id == value) return;
-                _id = value; 
-                Changed("Id"); 
-                Changed("LineName"); 
-                LoadedPA = false; 
-                Parent?.Subs.Sort(x => x.Id); 
-                if (!IsInit) SaveHelper.UpdateDevice(this); 
+                _id = value;
+                Changed("Id");
+                Changed("LineName");
+                LoadedPA = false;
+                Parent?.Subs.Sort(x => x.Id);
+                if (!IsInit) SaveHelper.UpdateDevice(this);
             }
         }
+        //TODO speichern ändern! Nicht immer das ganze Projekt!
+
         public ObservableCollection<DeviceComObject> ComObjects
         {
             get { return _comObjects; }

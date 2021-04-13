@@ -153,71 +153,76 @@ namespace Kaenx.Classes.Helper
                 await Task.Delay(10);
                 ProgressChanged?.Invoke(1);
 
-                if (!loadedIds.Contains(device.ApplicationId))
+                if (device.ApplicationId != null)
                 {
-                    OnDeviceChanged?.Invoke(resourceLoader.GetString("StateApp"));
-                    Log.Information("---- Applikation wird importiert");
-                    Log.Information(device.ApplicationId);
 
-                    string manuId = device.ApplicationId.Substring(0, device.ApplicationId.IndexOf('_'));
-                    ZipArchiveEntry appEntry = Imports.Archive.GetEntry(manuId + "/" + device.ApplicationId + ".xml");
-                    List<string> errs = new List<string>();
-                    bool isOk = CheckApplication(XmlReader.Create(appEntry.Open()), errs);
-
-                    if (!isOk)
+                    if (!loadedIds.Contains(device.ApplicationId))
                     {
-                        Log.Warning("Check mit Warnungen bestanden! " + string.Join(",", errs));
-                        OnWarning?.Invoke(device.ApplicationId + ": Die Applikation hat die Überprüfung nicht bestanden. (evtl. Plugin benötigt) " + string.Join(",", errs));
-                        //_ = App._dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Normal, () => device.Icon = Symbol.ReportHacked);
-                        //continue;
-                    }
+                        OnDeviceChanged?.Invoke(resourceLoader.GetString("StateApp"));
+                        Log.Information("---- Applikation wird importiert");
+                        Log.Information(device.ApplicationId);
 
-                    if (errs.Count > 0)
-                    {
-                        Log.Error("Check mit Warnungen bestanden! " + string.Join(",", errs));
-                        OnWarning?.Invoke(device.ApplicationId + ": Die Applikation hat die Überprüfung nicht bestanden. (evtl. Plugin benötigt) " + string.Join(",", errs));
-                    }
+                        string manuId = device.ApplicationId.Substring(0, device.ApplicationId.IndexOf('_'));
+                        ZipArchiveEntry appEntry = Imports.Archive.GetEntry(manuId + "/" + device.ApplicationId + ".xml");
+                        List<string> errs = new List<string>();
+                        bool isOk = CheckApplication(XmlReader.Create(appEntry.Open()), errs);
 
-                    await Task.Delay(10);
+                        if (!isOk)
+                        {
+                            Log.Warning("Check mit Warnungen bestanden! " + string.Join(",", errs));
+                            OnWarning?.Invoke(device.ApplicationId + ": Die Applikation hat die Überprüfung nicht bestanden. (evtl. Plugin benötigt) " + string.Join(",", errs));
+                            //_ = App._dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Normal, () => device.Icon = Symbol.ReportHacked);
+                            //continue;
+                        }
 
-                    try
-                    {
-                        XElement doc = XDocument.Load(appEntry.Open()).Root;
-                        OnDeviceChanged?.Invoke(resourceLoader.GetString("StateTranslate"));
-                        Stopwatch sw = new Stopwatch();
-                        sw.Start();
-                        TranslateXml(doc, Imports.SelectedLanguage);
-                        sw.Stop();
-                        Debug.WriteLine("Translate: " + sw.Elapsed.TotalSeconds);
-                        ProgressChanged?.Invoke(2);
-                        XElement appXml = doc.Descendants(XName.Get("ApplicationProgram", doc.Name.Namespace.NamespaceName)).First();
-                        OnDeviceChanged?.Invoke(resourceLoader.GetString("StateAppImport"));
-                        await ImportApplications(appXml, device);
-                    }
-                    catch (Exception e)
-                    {
-                        Log.Error(e, "Applikation Fehler!");
-                        _ = App._dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Normal, () => {
-                            OnError?.Invoke(device.ApplicationId + ": " + e.Message);
-                            device.Icon = Symbol.ReportHacked;
-                        });
-                        continue;
-                    }
-                    Log.Information("Import Applikationen abgeschlossen");
-                    loadedIds.Add(device.ApplicationId);
-                }
-                else
-                {
-                    Hardware2AppModel hard2App = _context.Hardware2App.Single(h => h.ApplicationId == device.ApplicationId && h.Name != null);
+                        if (errs.Count > 0)
+                        {
+                            Log.Error("Check mit Warnungen bestanden! " + string.Join(",", errs));
+                            OnWarning?.Invoke(device.ApplicationId + ": Die Applikation hat die Überprüfung nicht bestanden. (evtl. Plugin benötigt) " + string.Join(",", errs));
+                        }
 
-                    foreach(Hardware2AppModel model in _context.Hardware2App.Where(h => h.ApplicationId == device.ApplicationId && h.Name == null))
-                    {
-                        model.Name = hard2App.Name;
-                        model.Version = hard2App.Version;
-                        model.Number = hard2App.Number;
-                        _context.Hardware2App.Update(model);
+                        await Task.Delay(10);
+
+                        try
+                        {
+                            XElement doc = XDocument.Load(appEntry.Open()).Root;
+                            OnDeviceChanged?.Invoke(resourceLoader.GetString("StateTranslate"));
+                            Stopwatch sw = new Stopwatch();
+                            sw.Start();
+                            TranslateXml(doc, Imports.SelectedLanguage);
+                            sw.Stop();
+                            Debug.WriteLine("Translate: " + sw.Elapsed.TotalSeconds);
+                            ProgressChanged?.Invoke(2);
+                            XElement appXml = doc.Descendants(XName.Get("ApplicationProgram", doc.Name.Namespace.NamespaceName)).First();
+                            OnDeviceChanged?.Invoke(resourceLoader.GetString("StateAppImport"));
+                            await ImportApplications(appXml, device);
+                        }
+                        catch (Exception e)
+                        {
+                            Log.Error(e, "Applikation Fehler!");
+                            _ = App._dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Normal, () =>
+                            {
+                                OnError?.Invoke(device.ApplicationId + ": " + e.Message);
+                                device.Icon = Symbol.ReportHacked;
+                            });
+                            continue;
+                        }
+                        Log.Information("Import Applikationen abgeschlossen");
+                        loadedIds.Add(device.ApplicationId);
                     }
-                    _context.SaveChanges();
+                    else
+                    {
+                        Hardware2AppModel hard2App = _context.Hardware2App.Single(h => h.ApplicationId == device.ApplicationId && h.Name != null);
+
+                        foreach (Hardware2AppModel model in _context.Hardware2App.Where(h => h.ApplicationId == device.ApplicationId && h.Name == null))
+                        {
+                            model.Name = hard2App.Name;
+                            model.Version = hard2App.Version;
+                            model.Number = hard2App.Number;
+                            _context.Hardware2App.Update(model);
+                        }
+                        _context.SaveChanges();
+                    }
                 }
                 ProgressChanged?.Invoke(5);
 
@@ -444,14 +449,21 @@ namespace Kaenx.Classes.Helper
                     device.Info = "Gerät benötigt ein Plugin!";
                 } else
                 {
-                    XElement app = hardXML.Descendants(XName.Get("ApplicationProgramRef", hardXML.Name.NamespaceName)).Single(ap => ap.Parent.Attribute("Id").Value == device.Hardware2ProgramRefId);
-                    entry = Import.Archive.GetEntry(device.Id.Substring(0, 6) + "/" + app.Attribute("RefId").Value + ".xml");
-                    XElement appXML = XDocument.Load(entry.Open()).Root;
+                    XElement app = null;
+                    try
+                    {
+                        app = hardXML.Descendants(XName.Get("ApplicationProgramRef", hardXML.Name.NamespaceName)).Single(ap => ap.Parent.Attribute("Id").Value == device.Hardware2ProgramRefId);
+                        entry = Import.Archive.GetEntry(device.Id.Substring(0, 6) + "/" + app.Attribute("RefId").Value + ".xml");
+                        XElement appXML = XDocument.Load(entry.Open()).Root;
 
-                    List<string> errors = new List<string>();
-                    device.IsEnabled = CheckApplication(appXML.CreateReader(), errors);
-                    device.Info = string.Join(", ", errors);
-
+                        List<string> errors = new List<string>();
+                        device.IsEnabled = CheckApplication(appXML.CreateReader(), errors);
+                        device.Info = string.Join(", ", errors);
+                    }
+                    catch
+                    {
+                        device.IsEnabled = true;
+                    }
                 }
 
 
@@ -568,12 +580,14 @@ namespace Kaenx.Classes.Helper
             else
                 _context.Devices.Add(device);
 
+            if (device.HasApplicationProgram)
+            {
+                deviceInfo.ApplicationId = hardware2ProgXml.Element(GetXName("ApplicationProgramRef")).Attribute("RefId").Value;
+                deviceInfo.HardwareId = device.HardwareId;
 
-            deviceInfo.ApplicationId = hardware2ProgXml.Element(GetXName("ApplicationProgramRef")).Attribute("RefId").Value;
-            deviceInfo.HardwareId = device.HardwareId;
-
-            if (!_context.Hardware2App.Any(h => h.HardwareId == device.HardwareId && h.ApplicationId == deviceInfo.ApplicationId.Substring(0,16)))
-                _context.Hardware2App.Add(new Hardware2AppModel { HardwareId = device.HardwareId, ApplicationId = deviceInfo.ApplicationId.Substring(0,16) });
+                if (!_context.Hardware2App.Any(h => h.HardwareId == device.HardwareId && h.ApplicationId == deviceInfo.ApplicationId.Substring(0, 16)))
+                    _context.Hardware2App.Add(new Hardware2AppModel { HardwareId = device.HardwareId, ApplicationId = deviceInfo.ApplicationId.Substring(0, 16) });
+            }
 
             _context.SaveChanges();
         }

@@ -5,6 +5,7 @@ using Kaenx.Classes.Helper;
 using Kaenx.Classes.Project;
 using Kaenx.Konnect.Connections;
 using Kaenx.Konnect.Interfaces;
+using Microsoft.UI.Xaml.Controls;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -29,6 +30,11 @@ namespace Kaenx.View.Controls.Bus
     {
         public ObservableCollection<IBusData> ReadList { get; } = new ObservableCollection<IBusData>();
         public static ICollectionView CurrentDetailsView { get; set; }
+
+        public delegate void AddTabItemHandler(string text);
+        public event AddTabItemHandler OnAddTabItem;
+
+
 
         public BDeviceInfo()
         {
@@ -118,11 +124,11 @@ namespace Kaenx.View.Controls.Bus
             LineDevice dev = null;
 
 
-            bool valid = Microsoft.Toolkit.Uwp.UI.Extensions.TextBoxRegex.GetIsValid(InAddress2);
+            bool valid = true; //Todo add check Microsoft.Toolkit.Uwp.UI.Extensions.TextBoxRegex.GetIsValid(InAddress2);
 
             if (!valid)
             {
-                ViewHelper.Instance.ShowNotification("main", "Ungültige Adresse!", 3000, ViewHelper.MessageType.Error);
+                ViewHelper.Instance.ShowNotification("main", "Ungültige Adresse!", 3000, Microsoft.UI.Xaml.Controls.InfoBarSeverity.Error);
                 return null;
             }
 
@@ -147,7 +153,7 @@ namespace Kaenx.View.Controls.Bus
 
             if (dev == null)
             {
-                ViewHelper.Instance.ShowNotification("main", "Adresse konnte keinem Gerät zugewiesen werden.", 3000, ViewHelper.MessageType.Warning);
+                ViewHelper.Instance.ShowNotification("main", "Adresse konnte keinem Gerät zugewiesen werden.", 3000, Microsoft.UI.Xaml.Controls.InfoBarSeverity.Warning);
                 Line dM = new Line { IsInit = true, Id = int.Parse(address[0]) };
                 LineMiddle dL = new LineMiddle { IsInit = true, Id = int.Parse(address[1]), Parent = dM };
                 dev = new LineDevice(true) { Name = "Unbekannt", Id = int.Parse(address[2]), Parent = dL };
@@ -200,10 +206,21 @@ namespace Kaenx.View.Controls.Bus
             Konnect.Classes.BusDevice dev = new Konnect.Classes.BusDevice(ldev.LineName, conn);
             await dev.Connect(true);
             int resp = await dev.PropertyRead<int>(0, 56);
-            ViewHelper.Instance.ShowNotification("main", "MaxAPDU: " + resp, 3000, ViewHelper.MessageType.Info);
+            ViewHelper.Instance.ShowNotification("main", "MaxAPDU: " + resp, 3000, Microsoft.UI.Xaml.Controls.InfoBarSeverity.Informational);
             dev.Disconnect();
             await System.Threading.Tasks.Task.Delay(200);
             await conn.Disconnect();
+        }
+
+        private void GridReads_LoadingRow(object sender, Microsoft.Toolkit.Uwp.UI.Controls.DataGridRowEventArgs e)
+        {
+            e.Row.DoubleTapped += Row_DoubleTapped;
+        }
+
+        private void Row_DoubleTapped(object sender, DoubleTappedRoutedEventArgs e)
+        {
+            ViewHelper.Instance.ShowNotification("main", "Doppelklick gemacht!", 3000, Microsoft.UI.Xaml.Controls.InfoBarSeverity.Informational);
+            OnAddTabItem?.Invoke("Hallo");
         }
     }
 }

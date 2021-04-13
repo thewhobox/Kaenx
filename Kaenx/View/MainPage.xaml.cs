@@ -7,6 +7,7 @@ using Kaenx.Konnect.Connections;
 using Kaenx.View.Controls.Dialogs;
 using Microsoft.AppCenter.Analytics;
 using Microsoft.AppCenter.Crashes;
+using Microsoft.UI.Xaml.Controls;
 using Serilog;
 using System;
 using System.Collections.ObjectModel;
@@ -84,7 +85,11 @@ namespace Kaenx.View
             
             if(e.Parameter != null && e.Parameter is string && !string.IsNullOrEmpty(e.Parameter.ToString()))
             {
-                Notify.Show(e.Parameter.ToString());
+                InfoBar info = new InfoBar();
+                info.Title = "Information";
+                info.Message = e.Parameter.ToString();
+                info.IsOpen = true;
+                InfoPanel.Children.Add(info);
             }
         }
 
@@ -126,7 +131,12 @@ namespace Kaenx.View
             {
                 ErrorReport report = await Crashes.GetLastSessionCrashReportAsync();
                 Log.Error("App ist in letzter Sitzung abgestürzt!" + Environment.NewLine + report.StackTrace.Substring(0, report.StackTrace.IndexOf(Environment.NewLine)));
-                Notify.Show(loader.GetString("AppCrashed") + Environment.NewLine + report.StackTrace.Substring(0, report.StackTrace.IndexOf(Environment.NewLine)));
+                InfoBar info = new InfoBar();
+                info.Title = "Fehler!";
+                info.Severity = InfoBarSeverity.Error;
+                info.Message = report.StackTrace.Substring(0, report.StackTrace.IndexOf(Environment.NewLine));
+                info.IsOpen = true;
+                InfoPanel.Children.Add(info);
             }
         }
 
@@ -179,7 +189,11 @@ namespace Kaenx.View
             }
             catch (Exception ex)
             {
-                Notify.Show("Das Projekt konnte nicht geladen werden:" + Environment.NewLine + ex.Message, 4000);
+                InfoBar info = new InfoBar();
+                info.Title = "Fehler!";
+                info.Severity = InfoBarSeverity.Error;
+                info.Message = ex.Message;
+                InfoPanel.Children.Add(info);
                 Log.Error(ex.Message, "Verbindung fehlgeschlagen!");
                 LoadScreen.IsLoading = false;
                 return;
@@ -250,7 +264,11 @@ namespace Kaenx.View
             _contextL.SaveChanges();
 
             SaveHelper.DeleteProject(proj);
-            Notify.Show(loader.GetString("MsgProjectDeleted"), 3000);
+            InfoBar info = new InfoBar();
+            info.Title = "Information";
+            info.Message = loader.GetString("MsgProjectDeleted");
+            info.IsOpen = true;
+            InfoPanel.Children.Add(info);
 
             Serilog.Log.Information("Projekt wurde gelöscht: " + proj.Id + " - " + proj.Name);
         }
@@ -341,7 +359,6 @@ namespace Kaenx.View
                 await image.SetSourceAsync(stream);
 
             }
-
 
 
             byte[] pixels;

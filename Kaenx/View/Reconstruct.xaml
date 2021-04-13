@@ -84,6 +84,6 @@
         </Grid>
 
 
-        <toolkit:InAppNotification x:Name="Notify" Grid.RowSpan="3" />
+        <StackPanel x:Name="InfoPanel" VerticalAlignment="Bottom" MaxWidth="900" Grid.RowSpan="3" />
     </Grid>
 </Page>

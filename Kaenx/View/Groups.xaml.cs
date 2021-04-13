@@ -201,7 +201,7 @@ namespace Kaenx.View
         {
             if(SelectedGroup.Address == null)
             {
-                ViewHelper.Instance.ShowNotification("main", "Bitte wählen Sie erst eine Gruppe aus.", 3000, ViewHelper.MessageType.Error);
+                ViewHelper.Instance.ShowNotification("main", "Bitte wählen Sie erst eine Gruppe aus.", 3000, Microsoft.UI.Xaml.Controls.InfoBarSeverity.Error);
                 return;
             }
 
@@ -365,7 +365,7 @@ namespace Kaenx.View
                         main++;
                         if(main > 15)
                         {
-                            ViewHelper.Instance.ShowNotification("main", "Es sind keine Gruppenadressen mehr frei!", 10000, ViewHelper.MessageType.Error);
+                            ViewHelper.Instance.ShowNotification("main", "Es sind keine Gruppenadressen mehr frei!", 10000, Microsoft.UI.Xaml.Controls.InfoBarSeverity.Error);
                         }
                     }
                 }

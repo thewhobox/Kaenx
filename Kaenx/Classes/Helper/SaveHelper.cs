@@ -7,7 +7,6 @@ using Kaenx.DataContext.Project;
 using Kaenx.Views.Easy.Controls;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Toolkit.Uwp.Helpers;
-using Microsoft.Toolkit.Uwp.UI.Extensions;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Bson;
 using Serilog;
@@ -196,6 +195,8 @@ namespace Kaenx.Classes.Helper
             model.LoadedGA = dev.LoadedGroup;
             model.LoadedPA = dev.LoadedPA;
             model.Serial = dev.Serial;
+            model.IsDeactivated = dev.IsDeactivated;
+            model.LastGroupCount = dev.LastGroupCount;
 
             contextProject.LineDevices.Update(model);
             contextProject.SaveChanges();
@@ -329,7 +330,7 @@ namespace Kaenx.Classes.Helper
                 catch
                 {
                     Serilog.Log.Error($"Project-Verbindung {helper.Local.ConnectionId} konnte nicht gefunden werden.");
-                    ViewHelper.Instance.ShowNotification("all", "Die Verbindung wo das Projekt gespeichert sein soll konnt enicht gefunden werden.", 3000, ViewHelper.MessageType.Error);
+                    ViewHelper.Instance.ShowNotification("all", "Die Verbindung wo das Projekt gespeichert sein soll konnt enicht gefunden werden.", 3000, Microsoft.UI.Xaml.Controls.InfoBarSeverity.Error);
                     return null;
                 }
                 connProject = lconn;
@@ -481,7 +482,7 @@ namespace Kaenx.Classes.Helper
                 catch
                 {
                     Serilog.Log.Error($"Project-Verbindung {helper.Local.ConnectionId} konnte nicht gefunden werden.");
-                    ViewHelper.Instance.ShowNotification("all", "Die Verbindung wo das Projekt gespeichert sein soll konnt enicht gefunden werden.", 3000, ViewHelper.MessageType.Error);
+                    ViewHelper.Instance.ShowNotification("all", "Die Verbindung wo das Projekt gespeichert sein soll konnt enicht gefunden werden.", 3000, Microsoft.UI.Xaml.Controls.InfoBarSeverity.Error);
                     return;
                 }
                 contextProject = new ProjectContext(lconn);
@@ -1705,23 +1706,36 @@ namespace Kaenx.Classes.Helper
         public static void CalculateLineCurrent(LineMiddle line, bool noNotify = false)
         {
             if (!contextC.Devices.AsEnumerable().Any(d => d.IsPowerSupply && line.Subs.Any(l => l.DeviceId == d.Id)))
+            {
+                line.State = LineState.Normal;
                 return;
+            }
 
             int maxCurrent = CalculateLineCurrentAvailible(line);
             int current = CalculateLineCurrentUsed(line);
 
+            //Todo schwelle EInstellbar machen
+
+
+            ApplicationDataContainer container = ApplicationData.Current.LocalSettings;
+            if(container.Values["minLineCurrent"] == null)
+            {
+                container.Values["minLineCurrent"] = 80;
+            }
+            int minCurrent = (int)container.Values["minLineCurrent"];
+
             if ((maxCurrent - current) <= 0)
             {
-                line.CurrentBrush = new Windows.UI.Xaml.Media.SolidColorBrush(Windows.UI.Colors.Red);
-                if (!noNotify) ViewHelper.Instance.ShowNotification("main", "Die Spannungsquelle der Linie ist möglicherweise nicht ausreichend.\r\n(Verfügbar: " + maxCurrent + " Berechnet: " + current, 5000, ViewHelper.MessageType.Warning);
+                line.State = LineState.Overloaded;
+                if (!noNotify) ViewHelper.Instance.ShowNotification("main", $"Die Spannungsquelle der Linie {line.LineName} ist möglicherweise nicht ausreichend.\r\n(Verfügbar: {maxCurrent} Berechnet: {current}", 5000, Microsoft.UI.Xaml.Controls.InfoBarSeverity.Warning);
             }
             else if ((maxCurrent - current) < 80)
             {
-                line.CurrentBrush = new Windows.UI.Xaml.Media.SolidColorBrush(Windows.UI.Colors.Orange);
-                if (!noNotify) ViewHelper.Instance.ShowNotification("main", "In der Linie sind nur noch " + (maxCurrent - current) + " mA Reserve verfügbar.", 5000, ViewHelper.MessageType.Info);
+                line.State = LineState.Warning;
+                if (!noNotify) ViewHelper.Instance.ShowNotification("main", "In der Linie " + line.LineName + " sind nur noch " + (maxCurrent - current) + " mA Reserve verfügbar.", 5000, Microsoft.UI.Xaml.Controls.InfoBarSeverity.Informational);
             }
             else
-                line.CurrentBrush = new Windows.UI.Xaml.Media.SolidColorBrush(Windows.UI.Colors.White);
+                line.State = LineState.Normal;
 
         }
 

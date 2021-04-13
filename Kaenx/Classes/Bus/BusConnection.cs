@@ -101,10 +101,20 @@ namespace Kaenx.Classes.Bus
                 searchConn = new KnxIpTunneling(new IPEndPoint(IPAddress.Parse("224.0.23.12"), 3671), true);
                 searchConn.OnSearchResponse += SearchConn_OnSearchResponse;
             }
+            catch(System.Net.Sockets.SocketException ex)
+            {
+                searchConn = null;
+                string errorText = "Es besteht keine Verbindung zu einenm lokalen Netzwerk, somit können auch keine IP-Schnittstellen gefunden werden.";
+
+                if (ex.ErrorCode == 10013)
+                    errorText = "Kaenx kann keinen Socket aufbauen. Bitte starten Sie den Rechner neu.";
+
+                ViewHelper.Instance.ShowNotification("main", errorText, 6000, Microsoft.UI.Xaml.Controls.InfoBarSeverity.Error);
+            }
             catch
             {
                 searchConn = null;
-                ViewHelper.Instance.ShowNotification("main", "Es besteht keine Verbindung zu einenm lokalen Netzwerk, somit können auch keine IP-Schnittstellen gefunden werden.", 6000, ViewHelper.MessageType.Error);
+                ViewHelper.Instance.ShowNotification("main", "Es besteht keine Verbindung zu einenm lokalen Netzwerk, somit können auch keine IP-Schnittstellen gefunden werden.", 6000, Microsoft.UI.Xaml.Controls.InfoBarSeverity.Error);
             }
 
             searchTimer.Tick += (a, b) => SearchForDevices();
@@ -294,7 +304,7 @@ namespace Kaenx.Classes.Bus
                 {
                     if (!alreadyShowedWarning)
                     {
-                        ViewHelper.Instance.ShowNotification("all", loader.GetString("NoInterfaceSelected"), 3000, ViewHelper.MessageType.Error);
+                        ViewHelper.Instance.ShowNotification("all", loader.GetString("NoInterfaceSelected"), 3000, Microsoft.UI.Xaml.Controls.InfoBarSeverity.Error);
                         alreadyShowedWarning = true;
                     }
                     continue;

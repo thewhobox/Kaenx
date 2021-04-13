@@ -84,6 +84,11 @@ namespace Kaenx.View
             {
                 PrepareImport(e.Parameter as StorageFile);
                 Import.wasFromMain = true;
+                ApplicationView.GetForCurrentView().Title = loader.GetString("WindowTitle");
+
+                var currentView = SystemNavigationManager.GetForCurrentView();
+                currentView.AppViewBackButtonVisibility = AppViewBackButtonVisibility.Visible;
+                currentView.BackRequested += CurrentView_BackRequested;
             } else if(e.Parameter is string && e.Parameter.ToString() == "main") 
             {
                 Import.wasFromMain = true;
@@ -143,7 +148,7 @@ namespace Kaenx.View
             if (!success)
             {
                 //todo blabla
-                ViewHelper.Instance.ShowNotification("main", "Es trat ein Fehler beim auslesen der Geräte auf.", 3000, ViewHelper.MessageType.Error);
+                ViewHelper.Instance.ShowNotification("main", "Es trat ein Fehler beim auslesen der Geräte auf.", 3000, Microsoft.UI.Xaml.Controls.InfoBarSeverity.Error);
                 return;
             }
 

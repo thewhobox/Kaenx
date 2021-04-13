@@ -132,6 +132,6 @@
             </Button>
         </Grid>
 
-        <toolkit:InAppNotification Grid.RowSpan="3" x:Name="Notify" />
+        <StackPanel x:Name="InfoPanel" Grid.RowSpan="2" VerticalAlignment="Bottom" MaxWidth="800" />
     </Grid>
 </Page>

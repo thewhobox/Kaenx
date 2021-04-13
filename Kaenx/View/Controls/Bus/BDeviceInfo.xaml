@@ -38,7 +38,7 @@
                         <TextBlock Text="{Binding Additional}" Visibility="{Binding ShowAdditional}" />
                     </StackPanel>
 
-                    
+
                     <toolkit:HeaderedContentControl Grid.Row="1" Header="Applikations Id" Margin="0 5" HorizontalAlignment="Center" VerticalAlignment="Center" Width="200">
                         <TextBlock Text="{Binding ApplicationId}" />
                     </toolkit:HeaderedContentControl>
@@ -57,31 +57,7 @@
 
                     <Button Grid.Row="1" Grid.Column="2" Content="Erweiterte Ansicht"  HorizontalAlignment="Stretch"/>
                     <Button Grid.Row="2" Grid.Column="2" Content="Aller verbundenen Gruppenadressen anzeigen"  HorizontalAlignment="Stretch"/>
-
-
-                    <!--<toolkit:DataGrid Grid.Row="2" LoadingRowGroup="DataGrid_LoadingRowGroup" Grid.ColumnSpan="2" ItemsSource="{x:Bind OtherResources }" IsReadOnly="True" AutoGenerateColumns="True">
-                        <toolkit:DataGrid.RowGroupHeaderStyles>
-                            <Style TargetType="toolkit:DataGridRowGroupHeader">
-                                <Setter Property="Background" Value="LightGray" />
-                            </Style>
-                        </toolkit:DataGrid.RowGroupHeaderStyles>
-                        --><!--<toolkit:DataGrid.Columns>
-                            <toolkit:DataGridTextColumn Header="Name" Binding="{Binding Name}" />
-                            <toolkit:DataGridTextColumn Header="Wert" Binding="{Binding Value}" />
-                            <toolkit:DataGridTextColumn Header="Raw" Binding="{Binding ValueRaw}" />
-                        </toolkit:DataGrid.Columns>--><!--
-                    </toolkit:DataGrid>-->
                 </Grid>
-
-
-                <!--<toolkit:DataGrid Grid.Column="1" ItemsSource="{Binding AssociationTable}" AutoGenerateColumns="False" IsReadOnly="True">
-                    <toolkit:DataGrid.Columns>
-                        <toolkit:DataGridTextColumn Header="Gruppenadresse" Binding="{Binding GroupIndex}" />
-                        <toolkit:DataGridTextColumn Header="KO Nr." Binding="{Binding ObjectIndex}" />
-                        <toolkit:DataGridTextColumn Header="KO Desc." Binding="{Binding ObjectInfo}" />
-                        <toolkit:DataGridTextColumn Header="KO Func." Binding="{Binding ObjectFunc}" />
-                    </toolkit:DataGrid.Columns>
-                </toolkit:DataGrid>-->
             </Grid>
         </DataTemplate>
         <DataTemplate x:Key="RowDetailsConfigTemplate">
@@ -104,8 +80,7 @@
 
         <StackPanel Orientation="Horizontal" Margin="10">
             <TextBlock x:Uid="/Bus/TabsInfoAddr" Margin="10 0 10 0" VerticalAlignment="Center" />
-            <TextBox x:Name="InAddress2" Width="200" CornerRadius="2 0 0 2" 
-                                 extensions:TextBoxRegex.Regex="(^[0-9]{1,1}|1[0-5]{1,1})\.([0-9]{1}|1[0-5]{1})\.(1[0-9]{1,2}|2[0-4]{1}[0-9]{1}|25[0-5]{1}|[0-9]{1,2})$" />
+            <TextBox x:Name="InAddress2" Width="200" CornerRadius="2 0 0 2" />
             <DropDownButton x:Uid="/Bus/TabsInfoRead">
                 <DropDownButton.Flyout>
                     <MenuFlyout Placement="BottomEdgeAlignedRight">
@@ -120,7 +95,7 @@
             </DropDownButton>
         </StackPanel>
 
-        <toolkit:DataGrid x:Name="GridReads" Grid.Row="1" ItemsSource="{Binding}" IsReadOnly="True" AutoGenerateColumns="False" AreRowDetailsFrozen="True" LoadingRowDetails="GridReads_LoadingRowDetails" RowDetailsVisibilityMode="VisibleWhenSelected">
+        <toolkit:DataGrid x:Name="GridReads" Grid.Row="1" ItemsSource="{Binding}" IsReadOnly="True" LoadingRow="GridReads_LoadingRow" AutoGenerateColumns="False" AreRowDetailsFrozen="False" LoadingRowDetails="GridReads_LoadingRowDetails" RowDetailsVisibilityMode="Collapsed">
             <toolkit:DataGrid.RowDetailsTemplate>
                 <DataTemplate>
                     <ContentPresenter Content="{Binding}" />

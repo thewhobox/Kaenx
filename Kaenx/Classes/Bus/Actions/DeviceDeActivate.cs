@@ -52,34 +52,20 @@ namespace Kaenx.Classes.Bus.Actions
             BusDevice dev = new BusDevice(Device.LineName, Connection);
             await dev.Connect();
 
-
-            CatalogContext context = new CatalogContext();
-            ApplicationViewModel app = context.Applications.Single(a => a.Id == Device.ApplicationId);
-            AppSegmentViewModel seg = context.AppSegments.Single(s => s.Id == app.Table_Group);
-            int addr = seg.Address;
-
             if (Device.IsDeactivated)
             {
-                //Alle verbundenen GAs finden und sortieren
-                List<string> addedGroups = new List<string> { "" };
-                foreach (DeviceComObject com in Device.ComObjects)
-                    foreach (FunctionGroup group in com.Groups)
-                        if (!addedGroups.Contains(group.Address.ToString()))
-                            addedGroups.Add(group.Address.ToString());
-
-                addedGroups.Sort();
-
-                //länge der Tabelle erstmal auf 1 setzen
-                await dev.MemoryWriteSync(addr, new byte[] { Convert.ToByte(addedGroups.Count) });
+                await dev.RessourceWrite("GroupAddressTable", new byte[] { (byte)Device.LastGroupCount });
             } else
             {
-                //länge der Tabelle erstmal auf 1 setzen
-                await dev.MemoryWriteSync(addr, new byte[] { 0x01 });
+                int size = await dev.RessourceRead<int>("GroupAddressTable");
+                Device.LastGroupCount = size;
+                await dev.RessourceWrite("GroupAddressTable", new byte[] { 0x01 });
             }
 
 
+
             TodoText = "Gerät neu starten...";
-            dev.Restart();
+            await dev.Restart();
 
             Device.IsDeactivated = !Device.IsDeactivated;
 
@@ -101,16 +87,6 @@ namespace Kaenx.Classes.Bus.Actions
                     PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
                 });
             }
-        }
-
-
-        private enum LoadStateMachineState
-        {
-            Undefined,
-            Loading,
-            Loaded,
-            Error,
-            Unloaded
         }
     }
 }

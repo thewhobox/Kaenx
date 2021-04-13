@@ -15,6 +15,7 @@
         <converter:Checked2VisibilityConverter x:Key="CheckedConverter" />
         <converter:NumberConverter x:Key="NumberConverter" />
         <SolidColorBrush  x:Key="NavigationViewTopPaneBackground" Color="{Binding Source={ThemeResource BrushAccentColor1}, Path=Color}" />
+        <converter:StateBrushConverter x:Key="StateToBrush" />
     </Page.Resources>
 
     <Grid x:Name="GridDevices">
@@ -102,7 +103,7 @@
                 </TreeView.ItemContainerStyle>
                 <TreeView.ItemTemplate>
                     <DataTemplate x:DataType="localP:Line">
-                        <TreeViewItem Margin="-20 0 0 0" Padding="0 0 5 0" VerticalAlignment="Stretch" GlyphBrush="White" ToolTipService.ToolTip="{Binding Name}" DoubleTapped="TreeViewItem_DoubleTapped" Background="{Binding CurrentBackBrush}" BorderThickness="0" Content="{Binding}" ItemsSource="{Binding Subs}" IsExpanded="{Binding IsExpanded, Mode=TwoWay}">
+                        <TreeViewItem Margin="-20 0 0 0" Padding="0 0 5 0" VerticalAlignment="Stretch" GlyphBrush="White" ToolTipService.ToolTip="{Binding Name}" DoubleTapped="TreeViewItem_DoubleTapped" Background="{Binding State, Converter={StaticResource StateToBrush}}" BorderThickness="0" Content="{Binding}" ItemsSource="{Binding Subs}" IsExpanded="{Binding IsExpanded, Mode=TwoWay}">
                             <TreeViewItem.ContextFlyout>
                                 <MenuFlyout x:Name="MenuDevice"  Opening="MenuFlyout_Opening">
                                     <MenuFlyoutItem x:Name="MFI_AddLine" x:Uid="/Topologie/MenAddLine" Icon="Add" Click="ClickAdd" />

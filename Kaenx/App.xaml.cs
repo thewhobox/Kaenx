@@ -158,7 +158,7 @@ namespace Kaenx
                         Navigate(typeof(View.MainPage), errMsg);
                     } else
                     {
-                        Classes.Helper.ViewHelper.Instance.ShowNotification("main", errMsg, 3000, Classes.Helper.ViewHelper.MessageType.Error);
+                        Classes.Helper.ViewHelper.Instance.ShowNotification("main", errMsg, 3000, Microsoft.UI.Xaml.Controls.InfoBarSeverity.Error);
                     }
                     Log.Warning(errMsg);
                     break;

@@ -20,14 +20,13 @@ namespace Kaenx.Classes.Project
         private bool _isExpanded;
         private int _id;
         private string _name;
-        private SolidColorBrush _currentBrush = new SolidColorBrush(Windows.UI.Colors.White);
+        private LineState _state;
 
-        public SolidColorBrush CurrentBrush
+        public LineState State
         {
-            get { return _currentBrush; }
-            set { _currentBrush = value; Changed("CurrentBrush"); }
+            get { return _state; }
+            set { _state = value; Changed("State"); }
         }
-        public SolidColorBrush CurrentBackBrush { get; set; } = new SolidColorBrush(Windows.UI.Colors.Transparent);
         public int Id
         {
             get { return _id; }

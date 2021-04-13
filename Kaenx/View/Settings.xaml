@@ -20,6 +20,6 @@
             </PivotItem>
         </Pivot>
 
-        <toolkit:InAppNotification x:Name="Notify" />
+        <StackPanel x:Name="InfoPanel" VerticalAlignment="Bottom" MaxWidth="800" />
     </Grid>
 </Page>

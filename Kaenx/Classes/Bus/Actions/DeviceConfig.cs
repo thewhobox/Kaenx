@@ -78,40 +78,10 @@ namespace Kaenx.Classes.Bus.Actions
 
             _data.MaskVersion = "MV-" + await dev.DeviceDescriptorRead();
 
-
-            //if(Device.Serial == null)
-            //{
-            //    ProgressValue = 10;
-            //    TodoText = "Lese Seriennummer...";
-            //    await Task.Delay(500);
-
-            //    byte[] serial = new byte[0];
-            //    try
-            //    {
-            //        serial = await dev.PropertyRead(0, 11);
-            //        _data.SerialNumber = BitConverter.ToString(serial).Replace("-", "");
-            //    }
-            //    catch (Exception e)
-            //    {
-            //        _data.SerialNumber = e.Message;
-            //        Log.Error(e, "Fehler beim holen der Seirennummer");
-            //    }
-
-            //    if (serial.Length > 0)
-            //    {
-            //        _ = App._dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Normal, () =>
-            //        {
-            //            Device.Serial = serial;
-            //            SaveHelper.UpdateDevice(Device);
-            //        });
-            //    }
-            //}
-
-
             ProgressValue = 20;
             TodoText = "Lese Applikations Id...";
             await Task.Delay(500);
-            string appId = await dev.PropertyRead<string>(_data.MaskVersion, "ApplicationId");
+            string appId = await dev.RessourceRead<string>("ApplicationId");
             if (appId.Length == 8) appId = "00" + appId;
             appId = "M-" + appId.Substring(0, 4) + "_A-" + appId.Substring(4, 4) + "-" + appId.Substring(8, 2);
 
@@ -141,7 +111,7 @@ namespace Kaenx.Classes.Bus.Actions
             {
                 System.Diagnostics.Debug.WriteLine("Jetzt");
                 _= App._dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Normal, () => {
-                    ViewHelper.Instance.ShowNotification("main", $"Applikation für '{Device.LineName}-{Device.Name}' wurde dem physischen Gerät angepasst.", 4000, ViewHelper.MessageType.Info);
+                    ViewHelper.Instance.ShowNotification("main", $"Applikation für '{Device.LineName}-{Device.Name}' wurde dem physischen Gerät angepasst.", 4000, Microsoft.UI.Xaml.Controls.InfoBarSeverity.Informational);
                 });
                 Device.ApplicationId = _data.ApplicationId;
             }
@@ -710,7 +680,7 @@ namespace Kaenx.Classes.Bus.Actions
                 Device.ComObjects.Sort(s => s.Number);
 
                 if (flagGroups)
-                    ViewHelper.Instance.ShowNotification("main", "Es konnten einige Gruppenadressen nicht zugeordnet werden, da diese nicht im Projekt existieren.", 4000, ViewHelper.MessageType.Warning);
+                    ViewHelper.Instance.ShowNotification("main", "Es konnten einige Gruppenadressen nicht zugeordnet werden, da diese nicht im Projekt existieren.", 4000, Microsoft.UI.Xaml.Controls.InfoBarSeverity.Warning);
             });
             _contextP.SaveChanges();
         }

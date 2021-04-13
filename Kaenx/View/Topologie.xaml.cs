@@ -90,11 +90,11 @@ namespace Kaenx.View
             {
                 if(obj is Kaenx.Classes.Bus.Data.ErrorData)
                 {
-                    ViewHelper.Instance.ShowNotification("main", "Konfig auslesen Fehler: " + Environment.NewLine + (obj as ErrorData).Message, 5000, ViewHelper.MessageType.Error);
+                    ViewHelper.Instance.ShowNotification("main", "Konfig auslesen Fehler: " + Environment.NewLine + (obj as ErrorData).Message, 5000, Microsoft.UI.Xaml.Controls.InfoBarSeverity.Error);
                 }
                 else
                 {
-                    ViewHelper.Instance.ShowNotification("main", "Konfig auslesen Erfolgreich", 3000, ViewHelper.MessageType.Success);
+                    ViewHelper.Instance.ShowNotification("main", "Konfig auslesen Erfolgreich", 3000, Microsoft.UI.Xaml.Controls.InfoBarSeverity.Success);
                 }
             };
             BusConnection.Instance.AddAction(action);
@@ -303,18 +303,26 @@ namespace Kaenx.View
             {
                 if (line.Subs.Any(s => s.Id == 0))
                 {
-                    ViewHelper.Instance.ShowNotification("main", loader.GetString("ErrMsgCoupler"), 4000, ViewHelper.MessageType.Error);
+                    ViewHelper.Instance.ShowNotification("main", loader.GetString("ErrMsgCoupler"), 4000, Microsoft.UI.Xaml.Controls.InfoBarSeverity.Error);
                     return;
                 }
                 device.Id = 0;
             }
             else if (model.IsPowerSupply)
             {
-                if (_context.Devices.Any(d => d.IsPowerSupply && line.Subs.Any(l => l.DeviceId == d.Id)))
+                foreach(DeviceViewModel mod in _context.Devices.Where(d => d.IsPowerSupply))
                 {
-                    ViewHelper.Instance.ShowNotification("main", loader.GetString("ErrMsgPowerSupply"), 4000, ViewHelper.MessageType.Error);
-                    return;
+                    if(line.Subs.Any(l => l.DeviceId == mod.Id))
+                    {
+                        ViewHelper.Instance.ShowNotification("main", loader.GetString("ErrMsgPowerSupply"), 4000, Microsoft.UI.Xaml.Controls.InfoBarSeverity.Error);
+                        return;
+                    }
                 }
+                //if (_context.Devices.Any(d => d.IsPowerSupply && line.Subs.Any(l => l.DeviceId == d.Id)))
+                //{
+                //    ViewHelper.Instance.ShowNotification("main", loader.GetString("ErrMsgPowerSupply"), 4000, Microsoft.UI.Xaml.Controls.InfoBarSeverity.Error);
+                //    return;
+                //}
                 device.Id = -1;
             }
             else
@@ -323,7 +331,7 @@ namespace Kaenx.View
                 {
                     if (line.Subs.Count(s => s.Id != -1) > 255)
                     {
-                        ViewHelper.Instance.ShowNotification("main", loader.GetString("ErrMsgMaxDevices"), 4000, ViewHelper.MessageType.Error);
+                        ViewHelper.Instance.ShowNotification("main", loader.GetString("ErrMsgMaxDevices"), 4000, Microsoft.UI.Xaml.Controls.InfoBarSeverity.Error);
                         return;
                     }
                     device.Id = getFirstFreeIdDev(line);
@@ -557,11 +565,13 @@ namespace Kaenx.View
 
                 EControlLine present = new EControlLine(line);
                 ParamPresenter.Content = present;
+                SelectedDevice = null;
             }
             else if (data is Line)
             {
                 InNumber.Minimum = 0;
                 InNumber.Maximum = 15;
+                SelectedDevice = null;
             }
         }
 

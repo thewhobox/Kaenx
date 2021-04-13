@@ -80,7 +80,7 @@ namespace Kaenx.View.Controls.Bus
 
             if(BusConnection.Instance.SelectedInterface == null)
             {
-                ViewHelper.Instance.ShowNotification("main", "Bitte wählen Sie erst eine Schnittstelle aus", 3000, ViewHelper.MessageType.Error);
+                ViewHelper.Instance.ShowNotification("main", "Bitte wählen Sie erst eine Schnittstelle aus", 3000, Microsoft.UI.Xaml.Controls.InfoBarSeverity.Error);
                 return;
             }
 
@@ -91,7 +91,7 @@ namespace Kaenx.View.Controls.Bus
                 await conn.Connect();
             }catch(Exception ex)
             {
-                ViewHelper.Instance.ShowNotification("main", "Probleme beim Verbinden mit der Schnittstelle!\r\n" + ex.Message, 3000, ViewHelper.MessageType.Error);
+                ViewHelper.Instance.ShowNotification("main", "Probleme beim Verbinden mit der Schnittstelle!\r\n" + ex.Message, 3000, Microsoft.UI.Xaml.Controls.InfoBarSeverity.Error);
                 return;
             }
 
@@ -145,7 +145,7 @@ namespace Kaenx.View.Controls.Bus
 
                 string mask = "MV-" + await dev.DeviceDescriptorRead();
 
-                string appId = await dev.PropertyRead<string>(mask, "ApplicationId");
+                string appId = await dev.RessourceRead<string>("ApplicationId");
                 if (appId.Length == 8) appId = "00" + appId;
                 data.ApplicationId = "M-" + appId.Substring(0, 4) + "_A-" + appId.Substring(4, 4) + "-" + appId.Substring(8, 2) ;
 
