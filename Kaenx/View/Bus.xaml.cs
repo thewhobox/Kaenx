@@ -159,7 +159,8 @@ namespace Kaenx.View
 
         private void BDeviceInfo_OnAddTabItem(string text)
         {
-            TabViewItem tab = new TabViewItem() { Header = "Test" };
+            TabViewItem tab = new TabViewItem() { Header = text };
+            tab.CloseRequested += (sender, e) => InfoTab.TabItems.Remove(sender);
             InfoTab.TabItems.Add(tab);
             InfoTab.SelectedItem = tab;
         }

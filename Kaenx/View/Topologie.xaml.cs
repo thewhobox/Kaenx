@@ -310,11 +310,19 @@ namespace Kaenx.View
             }
             else if (model.IsPowerSupply)
             {
-                if (_context.Devices.Any(d => d.IsPowerSupply && line.Subs.Any(l => l.DeviceId == d.Id)))
+                foreach(DeviceViewModel mod in _context.Devices.Where(d => d.IsPowerSupply))
                 {
-                    ViewHelper.Instance.ShowNotification("main", loader.GetString("ErrMsgPowerSupply"), 4000, Microsoft.UI.Xaml.Controls.InfoBarSeverity.Error);
-                    return;
+                    if(line.Subs.Any(l => l.DeviceId == mod.Id))
+                    {
+                        ViewHelper.Instance.ShowNotification("main", loader.GetString("ErrMsgPowerSupply"), 4000, Microsoft.UI.Xaml.Controls.InfoBarSeverity.Error);
+                        return;
+                    }
                 }
+                //if (_context.Devices.Any(d => d.IsPowerSupply && line.Subs.Any(l => l.DeviceId == d.Id)))
+                //{
+                //    ViewHelper.Instance.ShowNotification("main", loader.GetString("ErrMsgPowerSupply"), 4000, Microsoft.UI.Xaml.Controls.InfoBarSeverity.Error);
+                //    return;
+                //}
                 device.Id = -1;
             }
             else

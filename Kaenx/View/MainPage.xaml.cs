@@ -361,7 +361,6 @@ namespace Kaenx.View
             }
 
 
-
             byte[] pixels;
             using (Stream stream = image.PixelBuffer.AsStream())
             {

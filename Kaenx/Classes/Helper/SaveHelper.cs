@@ -1706,23 +1706,36 @@ namespace Kaenx.Classes.Helper
         public static void CalculateLineCurrent(LineMiddle line, bool noNotify = false)
         {
             if (!contextC.Devices.AsEnumerable().Any(d => d.IsPowerSupply && line.Subs.Any(l => l.DeviceId == d.Id)))
+            {
+                line.State = LineState.Normal;
                 return;
+            }
 
             int maxCurrent = CalculateLineCurrentAvailible(line);
             int current = CalculateLineCurrentUsed(line);
 
+            //Todo schwelle EInstellbar machen
+
+
+            ApplicationDataContainer container = ApplicationData.Current.LocalSettings;
+            if(container.Values["minLineCurrent"] == null)
+            {
+                container.Values["minLineCurrent"] = 80;
+            }
+            int minCurrent = (int)container.Values["minLineCurrent"];
+
             if ((maxCurrent - current) <= 0)
             {
-                line.CurrentBrush = new Windows.UI.Xaml.Media.SolidColorBrush(Windows.UI.Colors.Red);
-                if (!noNotify) ViewHelper.Instance.ShowNotification("main", "Die Spannungsquelle der Linie ist möglicherweise nicht ausreichend.\r\n(Verfügbar: " + maxCurrent + " Berechnet: " + current, 5000, Microsoft.UI.Xaml.Controls.InfoBarSeverity.Warning);
+                line.State = LineState.Overloaded;
+                if (!noNotify) ViewHelper.Instance.ShowNotification("main", $"Die Spannungsquelle der Linie {line.LineName} ist möglicherweise nicht ausreichend.\r\n(Verfügbar: {maxCurrent} Berechnet: {current}", 5000, Microsoft.UI.Xaml.Controls.InfoBarSeverity.Warning);
             }
             else if ((maxCurrent - current) < 80)
             {
-                line.CurrentBrush = new Windows.UI.Xaml.Media.SolidColorBrush(Windows.UI.Colors.Orange);
-                if (!noNotify) ViewHelper.Instance.ShowNotification("main", "In der Linie sind nur noch " + (maxCurrent - current) + " mA Reserve verfügbar.", 5000, Microsoft.UI.Xaml.Controls.InfoBarSeverity.Informational);
+                line.State = LineState.Warning;
+                if (!noNotify) ViewHelper.Instance.ShowNotification("main", "In der Linie " + line.LineName + " sind nur noch " + (maxCurrent - current) + " mA Reserve verfügbar.", 5000, Microsoft.UI.Xaml.Controls.InfoBarSeverity.Informational);
             }
             else
-                line.CurrentBrush = new Windows.UI.Xaml.Media.SolidColorBrush(Windows.UI.Colors.White);
+                line.State = LineState.Normal;
 
         }
 

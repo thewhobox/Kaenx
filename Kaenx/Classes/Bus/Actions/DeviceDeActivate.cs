@@ -88,15 +88,5 @@ namespace Kaenx.Classes.Bus.Actions
                 });
             }
         }
-
-
-        private enum LoadStateMachineState
-        {
-            Undefined,
-            Loading,
-            Loaded,
-            Error,
-            Unloaded
-        }
     }
 }

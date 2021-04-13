@@ -8,12 +8,23 @@
     xmlns:bus="using:Kaenx.View.Controls.Bus"
     xmlns:toolkit="using:Microsoft.Toolkit.Uwp.UI.Controls"
     xmlns:conv="using:Microsoft.Toolkit.Uwp.UI.Converters"
+    xmlns:conv2="using:Kaenx.Classes.Converter"
     xmlns:muxc="using:Microsoft.UI.Xaml.Controls"
     mc:Ignorable="d"
     Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
     <Page.Resources>
         <conv:BoolNegationConverter x:Key="BoolNegator" />
         <conv:BoolToVisibilityConverter x:Key="BoolToVis" />
+        <conv:BoolToObjectConverter x:Key="BoolToBrush">
+            <conv:BoolToObjectConverter.TrueValue>
+                <SolidColorBrush Color="Orange" />
+            </conv:BoolToObjectConverter.TrueValue>
+            <conv:BoolToObjectConverter.FalseValue>
+                <SolidColorBrush Color="Green" />
+            </conv:BoolToObjectConverter.FalseValue>
+        </conv:BoolToObjectConverter>
+        <conv2:InterfaceGlyphConverter x:Key="TypeToGlyph" />
+        <conv2:InterfaceTooltipConverter x:Key="TypeToTooltip" />
     </Page.Resources>
 
     <Grid>
@@ -131,8 +142,8 @@
                             <TextBlock Text="{Binding Name}" />
                             <TextBlock Text="{Binding Description}" FontSize="10" Foreground="Gray" />
                         </StackPanel>
-                        <Border Grid.Column="1" BorderThickness="5 0" Background="DarkOrange" Visibility="{Binding IsRemote, Converter={StaticResource BoolToVis}}">
-                            <FontIcon Glyph="&#xE8AF;" Margin="8 0" Foreground="White" />
+                        <Border Grid.Column="1" Background="{Binding IsRemote, Converter={StaticResource BoolToBrush}}" ToolTipService.ToolTip="{Binding InterfaceType, Converter={StaticResource TypeToTooltip}}">
+                            <FontIcon Glyph="{Binding InterfaceType, Converter={StaticResource TypeToGlyph}}" Margin="8 0" Foreground="White" />
                         </Border>
                     </Grid>
 
@@ -155,12 +166,12 @@
                                     
                                     <StackPanel Orientation="Vertical" Padding="10 5 0 5">
                                         <TextBlock Text="{Binding Name}" />
-                                        <TextBlock Text="{Binding Description}" FontSize="10" Foreground="Gray" />
+                                        <TextBlock Text="{Binding Description}" FontSize="10" />
                                     </StackPanel>
 
 
-                                    <Border Grid.Column="1" BorderThickness="5 0" Background="DarkOrange" Visibility="{Binding IsRemote, Converter={StaticResource BoolToVis}}">
-                                        <FontIcon Glyph="&#xE8AF;" Margin="8 0" Foreground="White" />
+                                    <Border Grid.Column="1" Background="{Binding IsRemote, Converter={StaticResource BoolToBrush}}" ToolTipService.ToolTip="{Binding InterfaceType, Converter={StaticResource TypeToTooltip}}">
+                                        <FontIcon Glyph="{Binding InterfaceType, Converter={StaticResource TypeToGlyph}}" Margin="8 0" Foreground="White" />
                                     </Border>
                                 </Grid>
                             </DataTemplate>
