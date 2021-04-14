@@ -370,7 +370,7 @@ namespace Kaenx.Classes.Bus
             Task runner = Task.Run(() => CurrentAction.Run(_cancelTokenSource.Token), _cancelTokenSource.Token);
             try
             {
-                await Task.Delay(60000, _cancelTokenSource.Token);
+                await Task.Delay(60000000, _cancelTokenSource.Token);
             } catch { }
 
 

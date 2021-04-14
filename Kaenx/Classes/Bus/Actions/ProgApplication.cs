@@ -148,6 +148,8 @@ namespace Kaenx.Classes.Bus.Actions
 
 
 
+
+
                 double stepSize = 100.0 / procedure.Elements().Count();
                 double currentProg = 0;
                 Debug.WriteLine("StepSize: " + stepSize + " - " + procedure.Elements().Count());
@@ -379,6 +381,7 @@ namespace Kaenx.Classes.Bus.Actions
                 }
             }
 
+            Debug.WriteLine($"Schreibe Addresse: {address} mit {value.Count()} Bytes");
             await dev.MemoryWrite(address, value);
         }
 
@@ -612,7 +615,12 @@ namespace Kaenx.Classes.Bus.Actions
 
             await dev.MemoryWrite(260, data.ToArray());
 
-            byte[] data2 = await dev.MemoryRead(46825 + int.Parse(LsmId), 1);
+            byte[] data2 = new byte[] { 0xFF };
+            try
+            {
+                data2 = await dev.MemoryRead(46825 + int.Parse(LsmId), 1);
+            }
+            catch { }
 
             Dictionary<int, byte> map = new Dictionary<int, byte>() { { 4, 0x00 }, { 3, 0x02 }, { 2, 0x02 }, { 1, 0x02 } };
             if (data2[0] != map[int.Parse(LsmId)])
