@@ -733,8 +733,8 @@ namespace Kaenx.Classes.Bus.Actions
             foreach (int group in addedGroups) //Liste zum Datenpaket hinzufügen
                 if (group != -1)
                 {
-                    dataGroupTable.Add((byte)(group & 0xFF));
                     dataGroupTable.Add((byte)((group & 0xFF00) >> 8));
+                    dataGroupTable.Add((byte)(group & 0xFF));
                 }
         }
 
