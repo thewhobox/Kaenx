@@ -69,7 +69,7 @@ namespace Kaenx.Classes.Bus.Actions
 
                 //_data.Description = await dev.PropertyRead<string>(0, 21);
                 _data.SupportsEF = dev.SupportsExtendedFrames;
-                _data.MaskVersion = "MV-" + await dev.DeviceDescriptorRead();
+                _data.MaskVersion = await dev.DeviceDescriptorRead();
 
 
 

@@ -610,9 +610,24 @@ namespace Kaenx.Classes.Bus.Actions
                     break;
             }
 
-            await dev.MemoryWrite(260, data.ToArray());
+            try
+            {
+                await dev.MemoryWrite(260, data.ToArray());
+            } catch(Exception ex)
+            {
 
-            byte[] data2 = await dev.MemoryRead(46825 + int.Parse(LsmId), 1);
+            }
+
+            byte[] data2 = new byte[3];
+            try
+            {
+                data2 = await dev.MemoryRead(46825 + int.Parse(LsmId), 1);
+            }
+            catch (Exception ex)
+            {
+
+            }
+
 
             Dictionary<int, byte> map = new Dictionary<int, byte>() { { 4, 0x00 }, { 3, 0x02 }, { 2, 0x02 }, { 1, 0x02 } };
             if (data2[0] != map[int.Parse(LsmId)])
