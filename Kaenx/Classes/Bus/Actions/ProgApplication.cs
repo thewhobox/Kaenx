@@ -174,7 +174,7 @@ namespace Kaenx.Classes.Bus.Actions
                                 break;
 
                             case "LdCtrlDisconnect":
-                                dev.Disconnect();
+                                await dev.Disconnect();
                                 break;
 
                             case "LdCtrlRestart":
@@ -190,7 +190,7 @@ namespace Kaenx.Classes.Bus.Actions
                                 if (!dataCP.StartsWith(BitConverter.ToString(prop).Replace("-", "")))
                                 {
                                     TodoText = "Fehler beim schreiben! PAx01";
-                                    dev.Disconnect();
+                                    await dev.Disconnect();
                                     if (!_alreadyFinished)
                                     {
                                         _alreadyFinished = true;
@@ -261,18 +261,19 @@ namespace Kaenx.Classes.Bus.Actions
 
             if(Helper != null && (Helper.UnloadAddress || Helper.UnloadBoth))
             {
-                await dev.Connect();
+                await Task.Delay(1000); //warten, da sonst DisconnectResp erst nach dem Connect kommt!
+                await dev.Connect(true);
                 string mask = await dev.DeviceDescriptorRead();
                 mask = "MV-" + mask;
                 await dev.RessourceWrite("ProgrammingMode", new byte[] { 0x01 });
-                dev.Disconnect();
+                await dev .Disconnect();
                 BusCommon comm = new BusCommon(Connection);
                 comm.IndividualAddressWrite(UnicastAddress.FromString("15.15.255"));
                 await Task.Delay(200);
                 BusDevice dev2 = new BusDevice("15.15.255", Connection);
                 await dev2.Connect();
                 await dev2.Restart();
-                dev2.Disconnect();
+                await dev2.Disconnect();
             }
 
 
@@ -598,15 +599,19 @@ namespace Kaenx.Classes.Bus.Actions
             try
             {
                 await dev.MemoryWrite(260, data.ToArray());
-            } catch(Exception ex)
+            }
+            catch (Exception ex)
             {
+
+            }
 
             byte[] data2 = new byte[] { 0xFF };
             try
             {
                 data2 = await dev.MemoryRead(46825 + int.Parse(LsmId), 1);
             }
-            catch { }
+            catch { 
+            }
 
             Dictionary<int, byte> map = new Dictionary<int, byte>() { { 4, 0x00 }, { 3, 0x02 }, { 2, 0x02 }, { 1, 0x02 } };
             if (data2[0] != map[int.Parse(LsmId)])
@@ -620,6 +625,7 @@ namespace Kaenx.Classes.Bus.Actions
                     await AllocSegment(ctrl, segType, counter + 1);
             }
         }
+
 
         private async Task WriteTableGroup(int addr)
         {
@@ -719,7 +725,7 @@ namespace Kaenx.Classes.Bus.Actions
 
         private void GenerateGroupTable()
         {
-            addedGroups = new List<string> { "" };
+            addedGroups = new List<int> { -1 };
             foreach (DeviceComObject com in Device.ComObjects)
                 foreach (FunctionGroup group in com.Groups)
                     if (!addedGroups.Contains(group.Address.AsUInt16()))

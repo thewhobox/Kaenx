@@ -31,7 +31,7 @@ namespace Kaenx.View.Controls.Bus
         public ObservableCollection<IBusData> ReadList { get; } = new ObservableCollection<IBusData>();
         public static ICollectionView CurrentDetailsView { get; set; }
 
-        public delegate void AddTabItemHandler(string text);
+        public delegate void AddTabItemHandler(string text, IBusData data);
         public event AddTabItemHandler OnAddTabItem;
 
 
@@ -94,7 +94,7 @@ namespace Kaenx.View.Controls.Bus
             {
                 case DeviceInfoData info:
                     e.Row.DetailsTemplate = Resources["RowDetailsInfoTemplate"] as DataTemplate;
-                    CurrentDetailsView = info.OtherResources;
+                    CurrentDetailsView = info.OtherRessources;
                     break;
 
                 case DeviceConfigData conf:
@@ -219,8 +219,9 @@ namespace Kaenx.View.Controls.Bus
 
         private void Row_DoubleTapped(object sender, DoubleTappedRoutedEventArgs e)
         {
-            ViewHelper.Instance.ShowNotification("main", "Doppelklick gemacht!", 3000, Microsoft.UI.Xaml.Controls.InfoBarSeverity.Informational);
-            OnAddTabItem?.Invoke("Hallo");
+            //ViewHelper.Instance.ShowNotification("main", "Doppelklick gemacht!", 3000, Microsoft.UI.Xaml.Controls.InfoBarSeverity.Informational);
+            IBusData data = (sender as Microsoft.Toolkit.Uwp.UI.Controls.DataGridRow).DataContext as IBusData;
+            OnAddTabItem?.Invoke("Info", data);//data.Device.LineName + " Info", data);
         }
     }
 }
