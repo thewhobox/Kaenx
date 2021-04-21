@@ -31,7 +31,7 @@ namespace Kaenx.Classes.Bus.Actions
         private bool _alreadyFinished = false;
         private string _todoText;
         private CancellationToken _token;
-        private List<string> addedGroups;
+        private List<int> addedGroups;
         private CatalogContext _context = new CatalogContext();
 
 
@@ -145,6 +145,8 @@ namespace Kaenx.Classes.Bus.Actions
                         procedure = temp;
                         break;
                 }
+
+
 
 
 
@@ -379,6 +381,7 @@ namespace Kaenx.Classes.Bus.Actions
                 }
             }
 
+            Debug.WriteLine($"Schreibe Addresse: {address} mit {value.Count()} Bytes");
             await dev.MemoryWrite(address, value);
         }
 
@@ -530,24 +533,6 @@ namespace Kaenx.Classes.Bus.Actions
         private async Task AllocRelSegment(AppAdditional adds, XElement ctrl)
         {
             string LsmId = ctrl.Attribute("LsmIdx").Value;
-            //switch (LsmId)
-            //{
-            //    case "1":
-            //        GenerateGroupTable();
-            //        length = dataGroupTable.Count;
-            //        break;
-            //    case "2":
-            //        GenerateAssoTable();
-            //        length = dataAssoTable.Count;
-            //        break;
-            //    case "3":
-            //        GenerateApplication(adds);
-            //        length = dataMems.Values.ElementAt(0).Length;
-            //        break;
-            //}
-
-
-            //byte[] tempBytes;
             List<byte> data = new List<byte>() { 0x03, 0x0b };
 
             byte[] tempBytes = BitConverter.GetBytes(Convert.ToUInt32(ctrl.Attribute("Size").Value));
@@ -616,18 +601,12 @@ namespace Kaenx.Classes.Bus.Actions
             } catch(Exception ex)
             {
 
-            }
-
-            byte[] data2 = new byte[3];
+            byte[] data2 = new byte[] { 0xFF };
             try
             {
                 data2 = await dev.MemoryRead(46825 + int.Parse(LsmId), 1);
             }
-            catch (Exception ex)
-            {
-
-            }
-
+            catch { }
 
             Dictionary<int, byte> map = new Dictionary<int, byte>() { { 4, 0x00 }, { 3, 0x02 }, { 2, 0x02 }, { 1, 0x02 } };
             if (data2[0] != map[int.Parse(LsmId)])
@@ -743,8 +722,9 @@ namespace Kaenx.Classes.Bus.Actions
             addedGroups = new List<string> { "" };
             foreach (DeviceComObject com in Device.ComObjects)
                 foreach (FunctionGroup group in com.Groups)
-                    if (!addedGroups.Contains(group.Address.ToString()))
-                        addedGroups.Add(group.Address.ToString());
+                    if (!addedGroups.Contains(group.Address.AsUInt16()))
+                        addedGroups.Add(group.Address.AsUInt16());
+
             if (addedGroups.Count > app.Table_Group_Max)
             {
                 Log.Error("Die Applikation erlaubt nur " + app.Table_Group_Max + " Gruppenverbindungen. Verwendet werden " + addedGroups.Count + ".");
@@ -754,14 +734,17 @@ namespace Kaenx.Classes.Bus.Actions
             addedGroups.Sort();
 
             dataGroupTable = new List<byte>();
-            foreach (string group in addedGroups) //Liste zum Datenpaket hinzufügen
-                if (group != "") dataGroupTable.AddRange(MulticastAddress.FromString(group).GetBytes());
+            foreach (int group in addedGroups) //Liste zum Datenpaket hinzufügen
+                if (group != -1)
+                {
+                    dataGroupTable.Add((byte)((group & 0xFF00) >> 8));
+                    dataGroupTable.Add((byte)(group & 0xFF));
+                }
         }
 
 
         private void GenerateAssoTable()
         {
-            //Erstelle Assoziationstabelle
             dataAssoTable = new List<byte>();
 
             Dictionary<byte, List<byte>> Table = new Dictionary<byte, List<byte>>();
@@ -770,7 +753,7 @@ namespace Kaenx.Classes.Bus.Actions
             {
                 foreach (FunctionGroup group in com.Groups)
                 {
-                    int indexG = addedGroups.IndexOf(group.Address.ToString());
+                    int indexG = addedGroups.IndexOf(group.Address.AsUInt16());
                     int indexC = com.Number;
 
                     byte bIndexG = BitConverter.GetBytes(indexG)[0];

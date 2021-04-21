@@ -84,6 +84,11 @@ namespace Kaenx.View
             {
                 PrepareImport(e.Parameter as StorageFile);
                 Import.wasFromMain = true;
+                ApplicationView.GetForCurrentView().Title = loader.GetString("WindowTitle");
+
+                var currentView = SystemNavigationManager.GetForCurrentView();
+                currentView.AppViewBackButtonVisibility = AppViewBackButtonVisibility.Visible;
+                currentView.BackRequested += CurrentView_BackRequested;
             } else if(e.Parameter is string && e.Parameter.ToString() == "main") 
             {
                 Import.wasFromMain = true;
