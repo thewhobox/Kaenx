@@ -16,6 +16,7 @@ namespace Kaenx.Classes.Project
         public int Id { get; set; }
         public string Name { get; set; }
         public byte[] Image { get; set; }
+        public GroupTypes GroupType { get; set; } = GroupTypes.Function;
         public LocalConnectionProject Connection { get; set; }
         public Area Area { get; set; } = new Area();
         public ObservableCollection<Line> Lines { get; set; } = new ObservableCollection<Line>();
@@ -51,6 +52,12 @@ namespace Kaenx.Classes.Project
             }
 
             SaveHelper.Init(this);
+        }
+
+        public enum GroupTypes
+        {
+            Function,
+            GroupAddresses
         }
     }
 }
