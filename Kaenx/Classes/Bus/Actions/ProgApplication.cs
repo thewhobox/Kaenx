@@ -600,6 +600,7 @@ namespace Kaenx.Classes.Bus.Actions
                         bool vis3 = SaveHelper.CheckConditions(para.Conditions, Id2Param);
 
 
+                        if (para is ParamSeperator || para is ParamSeperatorBox) continue;
                         AppParameter xpara = AppParas[para.Id];
 
                         //Wenn Parameter in keiner Union ist zurück geben
@@ -1267,6 +1268,7 @@ namespace Kaenx.Classes.Bus.Actions
                 {
                     case ParamTypes.Enum:
                     case ParamTypes.NumberUInt:
+                    case ParamTypes.Time:
                         paraData = BitConverter.GetBytes(Convert.ToUInt32(para.Value)).Take(paraDataLength).ToArray();
                         Array.Reverse(paraData);
                         break;
