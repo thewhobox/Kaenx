@@ -857,7 +857,7 @@ namespace Kaenx.Classes.Bus.Actions
             if (useProperty)
             {
                 data[0] = Convert.ToByte(state);
-                await dev.PropertyWrite(BitConverter.GetBytes(lsmIdx)[0], 5, data);
+                await dev.PropertyWrite(BitConverter.GetBytes(lsmIdx)[0], 5, data, true);
                 data = null;
             }
             else
