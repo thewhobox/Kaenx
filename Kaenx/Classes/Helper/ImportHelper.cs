@@ -609,6 +609,7 @@ namespace Kaenx.Classes.Helper
             app.Version = int.Parse(appXml.Attribute("ApplicationVersion").Value);
             app.Mask = appXml.Attribute("MaskVersion").Value;
             app.Name = appXml.Attribute("Name").Value;
+            app.Manufacturer = int.Parse(appXml.Parent.Parent.Attribute("RefId").Value.Substring(2), System.Globalization.NumberStyles.HexNumber);
 
             switch (appXml.Attribute("LoadProcedureStyle").Value)
             {
