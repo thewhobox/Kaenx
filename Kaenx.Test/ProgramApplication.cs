@@ -127,6 +127,9 @@ namespace Kaenx.Test
             const byte PID_MAX_APDULENGTH = 56;
             const byte PID_HARDWARE_TYPE = 78;
 
+            connection.Expect(new MsgPropertyReadReq(DEVICE, PID_MAX_APDULENGTH, address));
+            connection.Response(ApciTypes.PropertyValueResponse, DEVICE, PID_MAX_APDULENGTH, 0x10, 0x01, 0x00, 254);
+
             // Pre download checks
             connection.Expect(new MsgDescriptorReadReq(address));
             connection.Response(ApciTypes.DeviceDescriptorResponse, 0x07, 0xB0);
@@ -332,6 +335,10 @@ namespace Kaenx.Test
             expected.SequenceNumber = message.SequenceNumber;
             Assert.AreEqual(expected.DestinationAddress.ToString(), message.DestinationAddress.ToString());
             Assert.AreEqual(expected.ApciType, message.ApciType);
+            if (!Enumerable.SequenceEqual(expected.GetBytesCemi(), message.GetBytesCemi()))
+            {
+                Assert.Fail("Messages are not equal. Expected: {0}, got: {1}", BitConverter.ToString(expected.GetBytesCemi()), BitConverter.ToString(message.GetBytesCemi()));
+            }
             CollectionAssert.AreEqual(expected.GetBytesCemi(), message.GetBytesCemi());
             OnTunnelAck?.Invoke(new MsgAckRes()
             {

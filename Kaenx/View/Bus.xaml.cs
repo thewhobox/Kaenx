@@ -157,10 +157,11 @@ namespace Kaenx.View
             _ = diag.ShowAsync();
         }
 
-        private void BDeviceInfo_OnAddTabItem(string text)
+        private void BDeviceInfo_OnAddTabItem(string text, IBusData data)
         {
             TabViewItem tab = new TabViewItem() { Header = text };
             tab.CloseRequested += (sender, e) => InfoTab.TabItems.Remove(sender);
+            tab.Content = new Controls.Bus.Data.DataInfo(data);
             InfoTab.TabItems.Add(tab);
             InfoTab.SelectedItem = tab;
         }

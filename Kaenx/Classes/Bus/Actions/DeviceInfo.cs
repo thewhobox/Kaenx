@@ -69,7 +69,7 @@ namespace Kaenx.Classes.Bus.Actions
 
                 //_data.Description = await dev.PropertyRead<string>(0, 21);
                 _data.SupportsEF = dev.SupportsExtendedFrames;
-                _data.MaskVersion = "MV-" + await dev.DeviceDescriptorRead();
+                _data.MaskVersion = await dev.DeviceDescriptorRead();
 
 
 
@@ -307,7 +307,7 @@ namespace Kaenx.Classes.Bus.Actions
                 }
                 _ = App._dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Normal, () =>
                 {
-                    _data.OtherResources = (new CollectionViewSource() { IsSourceGrouped = true, Source = new ObservableCollection<GroupInfoCollection<OtherResource>>(dic.Values) }).View;
+                    _data.OtherRessources = (new CollectionViewSource() { IsSourceGrouped = true, Source = new ObservableCollection<GroupInfoCollection<OtherResource>>(dic.Values) }).View;
                 });
             } catch(OperationCanceledException)
             {

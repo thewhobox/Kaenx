@@ -1,0 +1,101 @@
+﻿<UserControl
+    x:Class="Kaenx.View.Controls.Bus.Data.DataInfo"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:Kaenx.View.Controls.Bus.Data"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:tools="using:Microsoft.Toolkit.Uwp.UI.Controls"
+    xmlns:conv="using:Microsoft.Toolkit.Uwp.UI.Converters"
+    mc:Ignorable="d"
+    d:DesignHeight="300"
+    d:DesignWidth="400">
+    <UserControl.Resources>
+        <conv:BoolToObjectConverter x:Key="BoolToString" FalseValue="Nicht untersützt" TrueValue="Wird unterstützt" />
+    </UserControl.Resources>
+
+    <Pivot>
+        <PivotItem Header="Allgemein">
+            <Grid>
+                <Grid.Resources>
+                    <Style TargetType="tools:HeaderedContentControl">
+                        <Setter Property="Margin" Value="20 10" />
+                    </Style>
+                </Grid.Resources>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition />
+                    <ColumnDefinition Width="0" />
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="auto" />
+                    <RowDefinition Height="auto" />
+                    <RowDefinition Height="auto" />
+                    <RowDefinition Height="auto" />
+                    <RowDefinition Height="auto" />
+                    <RowDefinition Height="auto" />
+                    <RowDefinition Height="auto" />
+                    <RowDefinition Height="auto" />
+                    <RowDefinition Height="auto" />
+                </Grid.RowDefinitions>
+
+
+                <TextBlock Text="{Binding Additional}" Visibility="{Binding ShowAdditional}" />
+
+
+                <tools:HeaderedContentControl Header="Applikations Id" Grid.Row="1">
+                    <TextBlock Text="{Binding ApplicationId}" />
+                </tools:HeaderedContentControl>
+
+                <tools:HeaderedContentControl Header="Applikations Name" Grid.Row="2">
+                    <TextBlock Text="{Binding ApplicationName}" />
+                </tools:HeaderedContentControl>
+
+                <tools:HeaderedContentControl Header="Hersteller" Grid.Row="3">
+                    <TextBlock Text="{Binding Manufacturer}" />
+                </tools:HeaderedContentControl>
+
+                <tools:HeaderedContentControl Header="Maskenversion" Grid.Row="4">
+                    <TextBlock Text="{Binding MaskVersion}" />
+                </tools:HeaderedContentControl>
+
+                <tools:HeaderedContentControl Header="Seriennummer" Grid.Row="5">
+                    <TextBlock Text="{Binding SerialNumber}" />
+                </tools:HeaderedContentControl>
+
+                <tools:HeaderedContentControl Header="Geräte Name" Grid.Row="6">
+                    <TextBlock Text="{Binding DeviceName}" />
+                </tools:HeaderedContentControl>
+
+                <tools:HeaderedContentControl Header="Extended Frame" Grid.Row="7">
+                    <TextBlock Text="{Binding SupportsEF, Converter={StaticResource BoolToString}}" />
+                </tools:HeaderedContentControl>
+
+                <!--<tools:DataGrid x:Name="ViewRess" AutoGenerateColumns="False" Grid.Row="8" LoadingRowGroup="DataGrid_LoadingRowGroup" IsReadOnly="True">
+                    <tools:DataGrid.Columns>
+                        <tools:DataGridTextColumn Header="Name" Binding="{Binding Name}" />
+                        <tools:DataGridTextColumn Header="Wert" Binding="{Binding Value}" />
+                        <tools:DataGridTextColumn Header="Raw Data" Binding="{Binding ValueRaw}" />
+                    </tools:DataGrid.Columns>
+                </tools:DataGrid>-->
+            </Grid>
+        </PivotItem>
+
+        <PivotItem Header="Gruppenkommunikation">
+            <tools:DataGrid Grid.Column="1" ItemsSource="{Binding AssociationTable}" AutoGenerateColumns="False" IsReadOnly="True">
+                <tools:DataGrid.Columns>
+                    <tools:DataGridTextColumn Header="Gruppenadresse" Binding="{Binding GroupIndex}" />
+                    <tools:DataGridTextColumn Header="KO Nr." Binding="{Binding ObjectIndex}" />
+                    <tools:DataGridTextColumn Header="KO Desc." Binding="{Binding ObjectInfo}" />
+                    <tools:DataGridTextColumn Header="KO Func." Binding="{Binding ObjectFunc}" />
+                </tools:DataGrid.Columns>
+            </tools:DataGrid>
+        </PivotItem>
+
+        <PivotItem Header="Ressourcen">
+            
+        </PivotItem>
+    </Pivot>
+    
+    
+    
+</UserControl>

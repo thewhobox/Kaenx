@@ -5,7 +5,6 @@
     xmlns:local="using:Kaenx.View.Controls.Bus"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    xmlns:extensions="using:Microsoft.Toolkit.Uwp.UI.Extensions"
     xmlns:toolkit="using:Microsoft.Toolkit.Uwp.UI.Controls"
     xmlns:convert="using:Microsoft.Toolkit.Uwp.UI.Converters"
     xmlns:data="using:Kaenx.Classes.Bus.Data"

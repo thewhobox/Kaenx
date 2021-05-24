@@ -32,7 +32,7 @@ namespace Kaenx.Classes.Bus.Data
 
         public List<AssociationHelper> AssociationTable { get; set; }
 
-        public ICollectionView OtherResources { get; set; }
+        public ICollectionView OtherRessources { get; set; }
     }
 
 

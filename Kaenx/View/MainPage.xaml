@@ -97,7 +97,7 @@
                         <Viewbox x:Name="VB1" Height="70">
                             <SymbolIcon Symbol="Page2" />
                         </Viewbox>
-                        <TextBlock x:Uid="/MainPage/BtnNewProject" />
+                        <TextBlock x:Uid="/MainPage/BtnNewProject" d:Text="Erstellen" />
                     </StackPanel>
                 </Button>
 
@@ -106,7 +106,7 @@
                         <Viewbox x:Name="VB2" Height="70">
                             <SymbolIcon Symbol="OpenFile" />
                         </Viewbox>
-                        <TextBlock x:Uid="/MainPage/BtnOpen" />
+                        <TextBlock x:Uid="/MainPage/BtnOpen" d:Text="Öffnen" />
                     </StackPanel>
                 </Button>
 
@@ -115,7 +115,7 @@
                         <Viewbox x:Name="VB3" Height="70">
                             <SymbolIcon Symbol="Shop" />
                         </Viewbox>
-                        <TextBlock x:Uid="/MainPage/BtnCatalog" />
+                        <TextBlock x:Uid="/MainPage/BtnCatalog" d:Text="Katalog" />
                     </StackPanel>
                 </Button>
 
@@ -133,7 +133,7 @@
                         <Viewbox x:Name="VB5" Height="70">
                             <SymbolIcon Symbol="Setting" />
                         </Viewbox>
-                        <TextBlock x:Uid="/MainPage/BtnSettings" />
+                        <TextBlock x:Uid="/MainPage/BtnSettings" d:Text="Einstellungen" />
                     </StackPanel>
                 </Button>
 
@@ -214,7 +214,7 @@
 
 
 
-        <Border x:Name="DiagNew" Visibility="Collapsed">
+        <Border x:Name="DiagNew" Visibility="Visible">
             <Border.Background>
                 <SolidColorBrush Color="Gray" Opacity="0.7" />
             </Border.Background>
@@ -233,24 +233,31 @@
                     <RowDefinition Height="auto" />
                     <RowDefinition Height="auto" />
                     <RowDefinition Height="auto" />
+                    <RowDefinition Height="auto" />
                     <RowDefinition  />
                     <RowDefinition Height="auto" />
                     <RowDefinition Height="auto" />
                 </Grid.RowDefinitions>
 
-                <TextBlock x:Uid="/MainPage/NewTitle" Grid.ColumnSpan="2" FontSize="24" Margin="0 0 0 30" />
+                <TextBlock x:Uid="/MainPage/NewTitle" d:Text="Neues Projekt erstellen" Grid.ColumnSpan="2" FontSize="24" Margin="0 0 0 30" />
 
-                <TextBlock x:Uid="/MainPage/NewName" Grid.Row="1" />
+                <TextBlock x:Uid="/MainPage/NewName" d:Text="Name" Grid.Row="1" />
                 <TextBox x:Uid="/MainPage/NewNameIn" Grid.Row="1" Grid.Column="1" x:Name="InName" />
 
-                <TextBlock x:Uid="/MainPage/NewPath" Grid.Row="2" />
+                <TextBlock x:Uid="/MainPage/NewPath" d:Text="Speicherort" Grid.Row="2" />
                 <ComboBox  Grid.Row="2" Grid.Column="1" x:Name="InConn" Margin="0 5" ItemsSource="{Binding ConnectionsList}" DisplayMemberPath="Name" HorizontalAlignment="Stretch" />
 
-                <TextBlock x:Uid="/MainPage/NewImage" Grid.Row="3" />
+                <TextBlock x:Uid="/MainPage/NewGroupType" d:Text="Gruppentyp:" Grid.Row="3" />
                 <StackPanel Grid.Row="3" Grid.Column="1" Orientation="Horizontal">
-                    <Button x:Uid="/MainPage/NewImageFile" Click="ClickChangePicFile" Margin="0 0 10 0" />
+                    <RadioButton Name="GTgas" Content="Gruppenadressen" GroupName="groupType" Margin="0 0 10 0" />
+                    <RadioButton Name="GTfunc" Content="Funktionen" GroupName="groupType" Margin="0 0 10 0" IsChecked="True" />
+                </StackPanel>
+                
+                <TextBlock x:Uid="/MainPage/NewImage" d:Text="Projektbild" Grid.Row="4" />
+                <StackPanel Grid.Row="4" Grid.Column="1" Orientation="Horizontal">
+                    <Button x:Uid="/MainPage/NewImageFile" d:Content="Aus Bild" Click="ClickChangePicFile" Margin="0 0 10 0" />
                     <!--<Button x:Uid="/MainPage/NewImageStandard" Click="ClickChangePicStandard" Margin="0 0 10 0" />-->
-                    <TextBlock x:Uid="/MainPage/NewCombo" Margin="20 0 10 0" />
+                    <TextBlock x:Uid="/MainPage/NewCombo" d:Text="Aus Icon:" Margin="20 0 10 0" />
                     <ComboBox x:Name="DiagStandard" SelectionChanged="DiagStandard_SelectionChanged">
                         <ComboBoxItem x:Uid="/MainPage/NewImageHouse" Tag="home" IsSelected="True" />
                         <ComboBoxItem x:Uid="/MainPage/NewImageSkyline" Tag="skyline" />
@@ -258,10 +265,10 @@
                     </ComboBox>
                 </StackPanel>
 
-                <toolkit:ImageCropper x:Name="Cropper" Grid.Row="4" Grid.ColumnSpan="2" AspectRatio="1" Margin="0 20" Visibility="Collapsed" />
-                <Image x:Name="CropperStandard" Grid.Row="4" Grid.ColumnSpan="2" Source="/Assets/ProjectImgs/home.png" MaxHeight="300" />
+                <toolkit:ImageCropper x:Name="Cropper" Grid.Row="5" Grid.ColumnSpan="2" AspectRatio="1" Margin="0 20" Visibility="Collapsed" />
+                <Image x:Name="CropperStandard" Grid.Row="5" Grid.ColumnSpan="2" Source="/Assets/ProjectImgs/home.png" MaxHeight="300" />
 
-                <Grid Grid.Row="5" Grid.ColumnSpan="2" VerticalAlignment="Bottom">
+                <Grid Grid.Row="6" Grid.ColumnSpan="2" VerticalAlignment="Bottom">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition />
                         <ColumnDefinition Width="20" />

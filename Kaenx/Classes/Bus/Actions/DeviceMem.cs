@@ -62,6 +62,8 @@ namespace Kaenx.Classes.Bus.Actions
             dev = new BusDevice(Device.LineName, Connection);
             await dev.Connect();
 
+            TodoText = "Lege los";
+
             CatalogContext context = new CatalogContext();
             ApplicationViewModel appModel = null;
 

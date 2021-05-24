@@ -180,4 +180,7 @@
   <data name="NewCombo.Text" xml:space="preserve">
     <value>Aus Standard-Icons:</value>
   </data>
+  <data name="NewGroupType.Text" xml:space="preserve">
+    <value>Gruppentyp:</value>
+  </data>
 </root>

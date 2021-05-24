@@ -51,19 +51,24 @@ namespace Kaenx.View.Controls.Bus
 
         private void Conn_OnTunnelResponse(IMessageResponse response)
         {
-            if (response.ApciType == ApciTypes.PropertyValueResponse)
+            if (response is MsgPropertyReadRes)
             {
-                byte[] serialb = response.Raw.Skip(4).ToArray();
-                string serial = BitConverter.ToString(serialb).Replace("-", "");
-                if (!DeviceList.Any(d => d.SerialText == serial))
+                MsgPropertyReadRes resp = response as MsgPropertyReadRes;
+
+                if (resp.ObjectIndex == 0 && resp.PropertyId == 11)
                 {
-                    _= App._dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Normal, () =>
+                    byte[] serialb = response.Raw.Skip(4).ToArray();
+                    string serial = BitConverter.ToString(serialb).Replace("-", "");
+                    if (!DeviceList.Any(d => d.SerialText == serial))
                     {
-                        DeviceList.Add(new NewDeviceData() { Serial = serialb });
-                    });
+                        _ = App._dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Normal, () =>
+                        {
+                            DeviceList.Add(new NewDeviceData() { Serial = serialb });
+                        });
+                    }
+
+                    Debug.WriteLine("Neues Gerät: " + serial);
                 }
-                    
-                Debug.WriteLine("Neues Gerät: " + serial);
             } else
             {
 
@@ -102,11 +107,12 @@ namespace Kaenx.View.Controls.Bus
             _ = dev.PropertyRead<string>(0, 11);
 
             await Task.Delay(2000);
-            dev.Disconnect();
-            await Task.Delay(200);
+            await dev.Disconnect();
 
             if (!isReading)
-                ReadInfos();
+                await ReadInfos();
+
+            await conn .Disconnect();
 
             BtnSearch.IsEnabled = true;
             BtnSearch.Content = "Suche starten";
@@ -115,7 +121,7 @@ namespace Kaenx.View.Controls.Bus
         }
 
 
-        private async void ReadInfos()
+        private async Task ReadInfos()
         {
             BusCommon comm = new BusCommon(conn);
 
@@ -127,23 +133,16 @@ namespace Kaenx.View.Controls.Bus
                 data.Status = "Wird gelesen...";
 
                 Debug.WriteLine("Ändere Gerät: " + data.SerialText);
-                comm.IndividualAddressWrite(UnicastAddress.FromString("15.15.254"), data.Serial);
+                await comm .IndividualAddressWrite(UnicastAddress.FromString("15.15.254"), data.Serial);
                 
-
-                Debug.WriteLine("Disconnecting");
-                await Task.Delay(4000);
-
-
 
                 Debug.WriteLine("New Connection");
 
-                IKnxConnection conn2 = await KnxInterfaceHelper.GetConnection(BusConnection.Instance.SelectedInterface, BusRemoteConnection.Instance.Remote, BusConnection.Instance.GetDevice);
-                await conn2.Connect();
+                //IKnxConnection conn2 = await KnxInterfaceHelper.GetConnection(BusConnection.Instance.SelectedInterface, BusRemoteConnection.Instance.Remote, BusConnection.Instance.GetDevice);
+                //await conn2.Connect();
 
-                BusDevice dev = new BusDevice(UnicastAddress.FromString("15.15.254"), conn2);
+                BusDevice dev = new BusDevice(UnicastAddress.FromString("15.15.254"), conn);
                 await dev.Connect(true);
-
-                string mask = "MV-" + await dev.DeviceDescriptorRead();
 
                 string appId = await dev.RessourceRead<string>("ApplicationId");
                 if (appId.Length == 8) appId = "00" + appId;
@@ -171,14 +170,12 @@ namespace Kaenx.View.Controls.Bus
                 }
 
 
-                dev.Disconnect();
+                await dev.Disconnect();
 
-                comm.IndividualAddressWrite(UnicastAddress.FromString("15.15.255"), data.Serial);
+                await comm.IndividualAddressWrite(UnicastAddress.FromString("15.15.255"), data.Serial);
                 data.Status = "Fertig";
                 data.finished = true;
             }
-
-            await conn.Disconnect();
         }
 
 

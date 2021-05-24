@@ -63,6 +63,54 @@ namespace Kaenx.View.Controls.Dialogs
                 f.Subs.Add(new FunctionGroup(f) { Name = "Dimmen Wert", DPST = DPSTs["5"]["1"] });
                 functions.Add(f);
 
+                f = new Function() { Name = "Rollladen" };
+                f.Subs.Add(new FunctionGroup(f) { Name = "Auf/Ab", DPST = DPSTs["1"]["8"] });
+                f.Subs.Add(new FunctionGroup(f) { Name = "Stopp", DPST = DPSTs["1"]["17"] });
+                f.Subs.Add(new FunctionGroup(f) { Name = "Position", DPST = DPSTs["5"]["1"] });
+                f.Subs.Add(new FunctionGroup(f) { Name = "Position Status", DPST = DPSTs["5"]["1"] });
+                functions.Add(f);
+
+                f = new Function() { Name = "Jallousie" };
+                f.Subs.Add(new FunctionGroup(f) { Name = "Auf/Ab", DPST = DPSTs["1"]["8"] });
+                f.Subs.Add(new FunctionGroup(f) { Name = "Lamellen/Stopp", DPST = DPSTs["1"]["17"] });
+                f.Subs.Add(new FunctionGroup(f) { Name = "Position", DPST = DPSTs["5"]["1"] });
+                f.Subs.Add(new FunctionGroup(f) { Name = "Position Status", DPST = DPSTs["5"]["1"] });
+                functions.Add(f);
+
+                f = new Function() { Name = "Farbe RGB" };
+                f.Subs.Add(new FunctionGroup(f) { Name = "Schalten", DPST = DPSTs["1"]["1"] });
+                f.Subs.Add(new FunctionGroup(f) { Name = "Schalten Status", DPST = DPSTs["1"]["1"] });
+                f.Subs.Add(new FunctionGroup(f) { Name = "Dimmen Relativ", DPST = DPSTs["3"]["7"] });
+                f.Subs.Add(new FunctionGroup(f) { Name = "Dimmen Absolut", DPST = DPSTs["5"]["1"] });
+                f.Subs.Add(new FunctionGroup(f) { Name = "Dimmen Wert", DPST = DPSTs["5"]["1"] });
+                f.Subs.Add(new FunctionGroup(f) { Name = "RGB", DPST = DPSTs["232"]["600"] });
+                f.Subs.Add(new FunctionGroup(f) { Name = "RGB Wert", DPST = DPSTs["232"]["600"] });
+                f.Subs.Add(new FunctionGroup(f) { Name = "HSV", DPST = DPSTs["232"]["600"] });
+                f.Subs.Add(new FunctionGroup(f) { Name = "HSV Wert", DPST = DPSTs["232"]["600"] });
+                functions.Add(f);
+
+                f = new Function() { Name = "Farbe RGB +Einzeln" };
+                f.Subs.Add(new FunctionGroup(f) { Name = "Schalten", DPST = DPSTs["1"]["1"] });
+                f.Subs.Add(new FunctionGroup(f) { Name = "Schalten Status", DPST = DPSTs["1"]["1"] });
+                f.Subs.Add(new FunctionGroup(f) { Name = "Dimmen Relativ", DPST = DPSTs["3"]["7"] });
+                f.Subs.Add(new FunctionGroup(f) { Name = "Dimmen Absolut", DPST = DPSTs["5"]["1"] });
+                f.Subs.Add(new FunctionGroup(f) { Name = "Dimmen Wert", DPST = DPSTs["5"]["1"] });
+                f.Subs.Add(new FunctionGroup(f) { Name = "RGB", DPST = DPSTs["232"]["600"] });
+                f.Subs.Add(new FunctionGroup(f) { Name = "RGB Wert", DPST = DPSTs["232"]["600"] });
+                f.Subs.Add(new FunctionGroup(f) { Name = "HSV", DPST = DPSTs["232"]["600"] });
+                f.Subs.Add(new FunctionGroup(f) { Name = "HSV Wert", DPST = DPSTs["232"]["600"] });
+
+                f.Subs.Add(new FunctionGroup(f) { Name = "H (Farbton) Absolut", DPST = DPSTs["5"]["3"] });
+                f.Subs.Add(new FunctionGroup(f) { Name = "H (Farbton) Relativ", DPST = DPSTs["3"]["7"] });
+                f.Subs.Add(new FunctionGroup(f) { Name = "H (Farbton) Wert", DPST = DPSTs["5"]["3"] });
+                f.Subs.Add(new FunctionGroup(f) { Name = "S (Sättigung) Absolut", DPST = DPSTs["5"]["1"] });
+                f.Subs.Add(new FunctionGroup(f) { Name = "S (Sättigung) Relativ", DPST = DPSTs["3"]["7"] });
+                f.Subs.Add(new FunctionGroup(f) { Name = "S (Sättigung) Wert", DPST = DPSTs["5"]["1"] });
+                f.Subs.Add(new FunctionGroup(f) { Name = "V (Helligkeit) Absolut", DPST = DPSTs["5"]["1"] });
+                f.Subs.Add(new FunctionGroup(f) { Name = "V (Helligkeit) Relativ", DPST = DPSTs["3"]["7"] });
+                f.Subs.Add(new FunctionGroup(f) { Name = "V (Helligkeit) Wert", DPST = DPSTs["5"]["1"] });
+                functions.Add(f);
+
                 string jsonList = Newtonsoft.Json.JsonConvert.SerializeObject(functions);
                 await FileIO.WriteTextAsync(file, jsonList);
             }

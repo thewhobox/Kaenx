@@ -190,6 +190,7 @@
     <Compile Include="Classes\Save\SaverAuto.cs" />
     <Compile Include="Classes\Save\SaverManu.cs" />
     <Compile Include="Classes\SearchPattern.cs" />
+    <Compile Include="Classes\TemplateSelectors\InfoSelector.cs" />
     <Compile Include="Classes\TemplateSelectors\BlockSelector.cs" />
     <Compile Include="Classes\TemplateSelectors\ControlParamsSelector.cs" />
     <Compile Include="Classes\TemplateSelectors\ControlsParamTypesSelector.cs" />
@@ -204,6 +205,9 @@
     </Compile>
     <Compile Include="View\Controls\Bus\BNewDevices.xaml.cs">
       <DependentUpon>BNewDevices.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="View\Controls\Bus\Data\DataInfo.xaml.cs">
+      <DependentUpon>DataInfo.xaml</DependentUpon>
     </Compile>
     <Compile Include="View\Controls\Dialogs\DiagAddDevice.xaml.cs">
       <DependentUpon>DiagAddDevice.xaml</DependentUpon>
@@ -428,6 +432,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="View\Controls\Bus\BNewDevices.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="View\Controls\Bus\Data\DataInfo.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

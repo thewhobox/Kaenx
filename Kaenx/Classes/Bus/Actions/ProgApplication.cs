@@ -32,7 +32,7 @@ namespace Kaenx.Classes.Bus.Actions
         private bool _alreadyFinished = false;
         private string _todoText;
         private CancellationToken _token;
-        private List<string> addedGroups;
+        private List<int> addedGroups;
         private CatalogContext _context = new CatalogContext();
 
 
@@ -205,6 +205,8 @@ namespace Kaenx.Classes.Bus.Actions
                     ctrl.Attribute("InlineData").Value = $"{app.Manufacturer:X4}{app.Number:X4}{app.Version:X2}";
                 }
 
+
+
                 double stepSize = 100.0 / procedure.Elements().Count();
                 double currentProg = 0;
                 Debug.WriteLine("StepSize: " + stepSize + " - " + procedure.Elements().Count());
@@ -229,7 +231,7 @@ namespace Kaenx.Classes.Bus.Actions
                                 break;
 
                             case "LdCtrlDisconnect":
-                                dev.Disconnect();
+                                await dev.Disconnect();
                                 break;
 
                             case "LdCtrlRestart":
@@ -245,7 +247,7 @@ namespace Kaenx.Classes.Bus.Actions
                                 if (!dataCP.StartsWith(BitConverter.ToString(prop).Replace("-", "")))
                                 {
                                     TodoText = "Fehler beim schreiben! PAx01";
-                                    dev.Disconnect();
+                                    await dev.Disconnect();
                                     if (!_alreadyFinished)
                                     {
                                         _alreadyFinished = true;
@@ -330,18 +332,19 @@ namespace Kaenx.Classes.Bus.Actions
 
             if (Helper != null && (Helper.UnloadAddress || Helper.UnloadBoth))
             {
-                await dev.Connect();
+                await Task.Delay(1000); //warten, da sonst DisconnectResp erst nach dem Connect kommt!
+                await dev.Connect(true);
                 string mask = await dev.DeviceDescriptorRead();
                 mask = "MV-" + mask;
                 await dev.RessourceWrite("ProgrammingMode", new byte[] { 0x01 });
-                dev.Disconnect();
+                await dev.Disconnect();
                 BusCommon comm = new BusCommon(Connection);
                 comm.IndividualAddressWrite(UnicastAddress.FromString("15.15.255"));
                 await Task.Delay(200);
                 BusDevice dev2 = new BusDevice("15.15.255", Connection);
                 await dev2.Connect();
                 await dev2.Restart();
-                dev2.Disconnect();
+                await dev2.Disconnect();
             }
 
 
@@ -426,6 +429,7 @@ namespace Kaenx.Classes.Bus.Actions
                 }
             }
 
+            Debug.WriteLine($"Schreibe Addresse: {address} mit {value.Count()} Bytes");
             await dev.MemoryWrite(address, value);
         }
 
@@ -768,9 +772,23 @@ namespace Kaenx.Classes.Bus.Actions
                     break;
             }
 
-            await dev.MemoryWrite(260, data.ToArray());
+            try
+            {
+                await dev.MemoryWrite(260, data.ToArray());
+            }
+            catch (Exception ex)
+            {
 
-            byte[] data2 = await dev.MemoryRead(46825 + int.Parse(LsmId), 1);
+            }
+
+            byte[] data2 = new byte[] { 0xFF };
+            try
+            {
+                data2 = await dev.MemoryRead(46825 + int.Parse(LsmId), 1);
+            }
+            catch
+            {
+            }
 
             Dictionary<int, byte> map = new Dictionary<int, byte>() { { 4, 0x00 }, { 3, 0x02 }, { 2, 0x02 }, { 1, 0x02 } };
             if (data2[0] != map[int.Parse(LsmId)])
@@ -784,6 +802,7 @@ namespace Kaenx.Classes.Bus.Actions
                     await AllocSegment(ctrl, segType, counter + 1);
             }
         }
+
 
         private async Task WriteTableGroup(int addr)
         {
@@ -1006,11 +1025,12 @@ namespace Kaenx.Classes.Bus.Actions
 
         private void GenerateGroupTable()
         {
-            addedGroups = new List<string>();
+            addedGroups = new List<int>();
             foreach (DeviceComObject com in Device.ComObjects)
                 foreach (FunctionGroup group in com.Groups)
-                    if (!addedGroups.Contains(group.Address.ToString()))
-                        addedGroups.Add(group.Address.ToString());
+                    if (!addedGroups.Contains(group.Address.AsUInt16()))
+                        addedGroups.Add(group.Address.AsUInt16());
+
             if (addedGroups.Count > app.Table_Group_Max)
             {
                 Log.Error("Die Applikation erlaubt nur " + app.Table_Group_Max + " Gruppenverbindungen. Verwendet werden " + addedGroups.Count + ".");
@@ -1031,14 +1051,16 @@ namespace Kaenx.Classes.Bus.Actions
                 dataGroupTable.Add((byte)(addedGroups.Count + 1));
                 dataGroupTable.AddRange(UnicastAddress.FromString(Device.LineName).GetBytes());
             }
-            foreach (string group in addedGroups) //Liste zum Datenpaket hinzufügen
-                dataGroupTable.AddRange(MulticastAddress.FromString(group).GetBytes());
+            foreach (int group in addedGroups) //Liste zum Datenpaket hinzufügen
+            {
+                dataGroupTable.Add((byte)((group & 0xFF00) >> 8));
+                dataGroupTable.Add((byte)(group & 0xFF));
+            }
         }
 
 
         private void GenerateAssoTable()
         {
-            //Erstelle Assoziationstabelle
             dataAssoTable = new List<byte>();
 
             Dictionary<ushort, List<ushort>> Table = new Dictionary<ushort, List<ushort>>();
@@ -1047,7 +1069,7 @@ namespace Kaenx.Classes.Bus.Actions
             {
                 foreach (FunctionGroup group in com.Groups)
                 {
-                    ushort indexG = (ushort)(addedGroups.IndexOf(group.Address.ToString()) + 1);
+                    ushort indexG = (ushort)(addedGroups.IndexOf(group.Address.AsUInt16()) + 1);
                     ushort indexC = (ushort)com.Number;
 
                     if (!Table.ContainsKey(indexG))
