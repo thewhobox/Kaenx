@@ -90,7 +90,7 @@ namespace Kaenx.View
             {
                 if(obj is Kaenx.Classes.Bus.Data.ErrorData)
                 {
-                    ViewHelper.Instance.ShowNotification("main", "Konfig auslesen Fehler: " + Environment.NewLine + (obj as ErrorData).Message, 5000, Microsoft.UI.Xaml.Controls.InfoBarSeverity.Error);
+                    ViewHelper.Instance.ShowNotification("main", "Konfig auslesen Fehler: " + Environment.NewLine + (obj as ErrorData).Additional, 5000, Microsoft.UI.Xaml.Controls.InfoBarSeverity.Error);
                 }
                 else
                 {

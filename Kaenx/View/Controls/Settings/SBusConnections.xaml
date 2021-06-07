@@ -217,7 +217,7 @@
                         <ComboBoxItem Content="MySQL" Tag="mysql"  />
                     </ComboBox>
                     <TextBlock x:Name="InProjPath" Margin="0 5 0 0" Text="Hier steht der SPeicherortddddddddddddddddddddddddddddddddd ae fwqefe fef" VerticalAlignment="Center" ToolTipService.ToolTip="Hier steht der SPeicherortddddddddddddddddddddddddddddddddd ae fwqefe fef" />
-                    <HyperlinkButton Padding="0" Margin="0 0 10 0" Content="Speicherort ändern" Click="ClickChangePath" IsEnabled="False"/>
+                    <HyperlinkButton Padding="0" Margin="0 0 10 0" Content="Speicherort ändern" Click="ClickChangePath" IsEnabled="True"/>
                     <TextBox Name="InProjHost" HorizontalAlignment="Stretch" Header="Host" Visibility="Collapsed" />
                     <TextBox Name="InProjDbName" HorizontalAlignment="Stretch" Header="Datenbankname" />
                     <TextBox Name="InProjUser" HorizontalAlignment="Stretch" Header="Benutzername" Visibility="Collapsed" />

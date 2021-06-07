@@ -321,7 +321,6 @@
     <AppxManifest Include="Package.appxmanifest">
       <SubType>Designer</SubType>
     </AppxManifest>
-    <None Include="Data\Logos\kænx.odg" />
     <PRIResource Include="Strings\en\Bus.resw" />
     <PRIResource Include="Strings\de-de\Bus.resw" />
     <PRIResource Include="Strings\en\Topologie.resw" />
@@ -398,12 +397,6 @@
     <Content Include="Data\knx_dps.xml" />
     <EmbeddedResource Include="Data\knx_interfaces.xml" />
     <Content Include="Data\knx_master.xml" />
-    <Content Include="Data\Logos\full.svg">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Data\Logos\house.svg" />
-    <Content Include="Data\Logos\small2.svg" />
-    <Content Include="Data\Logos\small3.svg" />
     <None Include="Kaenx_TemporaryKey.pfx" />
     <None Include="Package.StoreAssociation.xml" />
     <Content Include="Properties\Default.rd.xml" />

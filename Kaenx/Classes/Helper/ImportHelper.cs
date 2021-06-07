@@ -1163,6 +1163,9 @@ namespace Kaenx.Classes.Helper
                     case "Read":
                         access = AccessType.Read;
                         break;
+                    case "ReadWrite":
+                        access = AccessType.Full;
+                        break;
                 }
                 final.Access = access == AccessType.Null ? old.Access : access;
 

@@ -70,13 +70,6 @@
                     <TextBlock Text="{Binding SupportsEF, Converter={StaticResource BoolToString}}" />
                 </tools:HeaderedContentControl>
 
-                <!--<tools:DataGrid x:Name="ViewRess" AutoGenerateColumns="False" Grid.Row="8" LoadingRowGroup="DataGrid_LoadingRowGroup" IsReadOnly="True">
-                    <tools:DataGrid.Columns>
-                        <tools:DataGridTextColumn Header="Name" Binding="{Binding Name}" />
-                        <tools:DataGridTextColumn Header="Wert" Binding="{Binding Value}" />
-                        <tools:DataGridTextColumn Header="Raw Data" Binding="{Binding ValueRaw}" />
-                    </tools:DataGrid.Columns>
-                </tools:DataGrid>-->
             </Grid>
         </PivotItem>
 
@@ -92,7 +85,13 @@
         </PivotItem>
 
         <PivotItem Header="Ressourcen">
-            
+            <tools:DataGrid x:Name="ViewRess" ItemsSource="{Binding OtherResources}" AutoGenerateColumns="False" Grid.Row="8" LoadingRowGroup="DataGrid_LoadingRowGroup" IsReadOnly="True">
+                <tools:DataGrid.Columns>
+                    <tools:DataGridTextColumn Header="Name" Binding="{Binding Name}" />
+                    <tools:DataGridTextColumn Header="Wert" Binding="{Binding Value}" />
+                    <tools:DataGridTextColumn Header="Raw Data" Binding="{Binding ValueRaw}" />
+                </tools:DataGrid.Columns>
+            </tools:DataGrid>
         </PivotItem>
     </Pivot>
     

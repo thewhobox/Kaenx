@@ -164,6 +164,7 @@ namespace Kaenx.View
                         {
                             dev.StateId = 3;
                             dev.Status = "In Projekt";
+                            dev.CanRead = true;
                         }
 
                         dev.LineDevice = ldev;

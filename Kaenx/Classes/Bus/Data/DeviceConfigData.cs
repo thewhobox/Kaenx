@@ -11,12 +11,13 @@ namespace Kaenx.Classes.Bus.Data
     public class DeviceConfigData : IBusData
     {
         public Dictionary<string, AppParameter> Parameters { get; set; }
-        public string Type { get; set; } = "Konfiguration";
+        public string Type { get; } = "Konfiguration";
         public LineDevice Device { get; set; }
         public string Manufacturer { get; set; }
         public string SerialNumber { get; set; }
         public string ApplicationName { get; set; }
         public string ApplicationId { get; set; }
         public string MaskVersion { get; set; }
+        public string Additional { get; set; }
     }
 }

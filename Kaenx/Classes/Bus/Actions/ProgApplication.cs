@@ -241,6 +241,7 @@ namespace Kaenx.Classes.Bus.Actions
 
                             default:
                                 Debug.WriteLine("Unbekanntes Element: " + ctrl.Name.LocalName);
+                                Log.Warning("Unbekanntes Element in Prozedur: " + ctrl.Name.LocalName);
                                 break;
                         }
                     }
@@ -255,6 +256,10 @@ namespace Kaenx.Classes.Bus.Actions
                         Finished?.Invoke(this, null);
                     }
                 }
+                catch(Exception ex)
+                {
+                    Log.Error("Fehler bei Applikation prgrammieren: " + ex.Message);
+                }
             }
 
 
@@ -268,8 +273,7 @@ namespace Kaenx.Classes.Bus.Actions
                 await dev.RessourceWrite("ProgrammingMode", new byte[] { 0x01 });
                 await dev .Disconnect();
                 BusCommon comm = new BusCommon(Connection);
-                comm.IndividualAddressWrite(UnicastAddress.FromString("15.15.255"));
-                await Task.Delay(200);
+                await comm.IndividualAddressWrite(UnicastAddress.FromString("15.15.255"));
                 BusDevice dev2 = new BusDevice("15.15.255", Connection);
                 await dev2.Connect();
                 await dev2.Restart();
@@ -328,40 +332,12 @@ namespace Kaenx.Classes.Bus.Actions
 
         private async Task WriteMemory(AppAdditional adds, XElement ctrl)
         {
-            if (dataMems.Count == 0)
-            {
-                TodoText = "Berechne Speicher...";
-                GenerateApplication(adds);
-            }
-
-
-            if (dataAssoTable.Count == 0 || dataGroupTable.Count == 0)
-            {
-                TodoText = "Berechne Tabellen...";
-                GenerateGroupTable();
-                GenerateAssoTable();
-                await Task.Delay(100);
-
-
-
-                dataMems[app.Table_Group][app.Table_Group_Offset] = Convert.ToByte(addedGroups.Count);
-                for (int i = 0; i < dataGroupTable.Count; i++)
-                {
-                    dataMems[app.Table_Group][i + app.Table_Group_Offset + 3] = dataGroupTable[i];
-                }
-
-                dataMems[app.Table_Assosiations][app.Table_Assosiations_Offset] = Convert.ToByte(dataAssoTable.Count / 2);
-                for (int i = 0; i < dataAssoTable.Count; i++)
-                {
-                    dataMems[app.Table_Assosiations][i + app.Table_Assosiations_Offset + 1] = dataAssoTable[i];
-                }
-            }
-
             TodoText = "Schreibe Speicher...";
+
+
 
             byte[] value;
             int address = int.Parse(ctrl.Attribute("Address").Value);
-            int offset = dataAddresses.ElementAt(0).Value;
 
             if (ctrl.Attribute("InlineData") != null)
             {
@@ -370,6 +346,67 @@ namespace Kaenx.Classes.Bus.Actions
             else
             {
                 int size = int.Parse(ctrl.Attribute("Size").Value);
+                int maxAddress = address + size;
+
+                if (dataMems.Count == 0)
+                {
+                    TodoText = "Berechne Speicher...";
+                    GenerateApplication(adds);
+                }
+
+
+
+                if (dataGroupTable.Count == 0)
+                {
+                    TodoText = "Berechne Gruppenadressen-Tabelle...";
+                    GenerateGroupTable();
+                }
+                dataMems[app.Table_Group][app.Table_Group_Offset] = Convert.ToByte(addedGroups.Count);
+                for (int i = 0; i < dataGroupTable.Count; i++)
+                {
+                    dataMems[app.Table_Group][i + app.Table_Group_Offset + 3] = dataGroupTable[i];
+                }
+
+                if (dataAssoTable.Count == 0)
+                {
+                    TodoText = "Berechne Assozaitions-Tabelle...";
+                    GenerateAssoTable();
+                }
+                dataMems[app.Table_Assosiations][app.Table_Assosiations_Offset] = Convert.ToByte(dataAssoTable.Count / 2);
+                for (int i = 0; i < dataAssoTable.Count; i++)
+                {
+                    dataMems[app.Table_Assosiations][i + app.Table_Assosiations_Offset + 1] = dataAssoTable[i];
+                }
+
+
+
+
+                int addr = dataAddresses[app.Table_Group] + app.Table_Group_Offset + 1;
+                if (addr > address && addr < maxAddress)
+                {
+                    _ = App._dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Normal, () =>
+                    {
+                        Device.LoadedGroup = true;
+                    });
+                }
+
+
+
+                addr = dataAddresses[app.Table_Assosiations] + app.Table_Assosiations_Offset + 1;
+                if (addr > address && addr < maxAddress)
+                {
+                    _ = App._dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Normal, () =>
+                    {
+                        Device.LoadedGroup = true;
+                    });
+                }
+
+
+
+
+
+
+                int offset = dataAddresses.ElementAt(0).Value;
                 value = new byte[size];
                 for (int i = 0; i < size; i++)
                 {
@@ -382,6 +419,8 @@ namespace Kaenx.Classes.Bus.Actions
                 }
             }
 
+
+            TodoText = "Schreibe in den Speicher...";
             Debug.WriteLine($"Schreibe Addresse: {address} mit {value.Count()} Bytes");
             await dev.MemoryWrite(address, value);
         }
@@ -710,16 +749,28 @@ namespace Kaenx.Classes.Bus.Actions
                 data = await dev.MemoryRead(46825 + lsmIdx, 1);
             }
 
-            Dictionary<int, byte> map = new Dictionary<int, byte>() { { 4, 0x00 }, { 3, 0x02 }, { 2, 0x01 }, { 1, 0x02 } };
-            if (data != null && data[0] != map[(int)state])
+            try
             {
-                if (counter > 2)
+
+
+                Dictionary<int, byte> map = new Dictionary<int, byte>() { { 5, 0x00 }, { 4, 0x00 }, { 3, 0x02 }, { 2, 0x01 }, { 1, 0x02 } };
+                if (data != null && (data.Length == 0 || data[0] != map[(int)state]))
                 {
-                    Debug.WriteLine("Fehlgeschlagen!");
-                    Log.Error($"LsmState fehlgeschlagen: Idx = {lsmIdx}, State = {state}, Response = {Convert.ToString(data)}");
+                    if (counter > 2)
+                    {
+                        Debug.WriteLine("Fehlgeschlagen!");
+                        Log.Error($"LsmState fehlgeschlagen: Idx = {lsmIdx}, State = {state}, Response = {Convert.ToString(data)}");
+                    }
+                    else
+                    {
+                        Log.Error($"LsmState Abfrage fehlgeschlagen. Schreibe erneut: Idx = {lsmIdx}, State = {state}, Response = {Convert.ToString(data)}");
+                        await LsmState(ctrl, counter + 1);
+                    }
                 }
-                else
-                    await LsmState(ctrl, counter + 1);
+            }
+            catch
+            {
+
             }
         }
 

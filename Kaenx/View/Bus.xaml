@@ -34,6 +34,12 @@
         </Grid.ColumnDefinitions>
 
         <Pivot Background="{ThemeResource BrushAccentColorDark2}">
+            <Pivot.HeaderTemplate>
+                <DataTemplate>
+                    <TextBlock Text="{Binding}" FontSize="17" />
+                </DataTemplate>
+            </Pivot.HeaderTemplate>
+            
             <PivotItem x:Uid="/Bus/TabsCurrent">
                 <Grid>
                     <Grid.RowDefinitions>
@@ -134,13 +140,16 @@
                     </Button>
 
                     <Grid Grid.Row="1" Grid.ColumnSpan="2" Margin="0 10 0 0" DataContext="{Binding SelectedInterface}">
+                        <Grid.Background>
+                            <SolidColorBrush Color="Gray" Opacity="0.2" />
+                        </Grid.Background>
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition />
                             <ColumnDefinition Width="auto" />
                         </Grid.ColumnDefinitions>
                         <StackPanel Orientation="Vertical" Margin="10 5">
                             <TextBlock Text="{Binding Name}" />
-                            <TextBlock Text="{Binding Description}" FontSize="10" Foreground="Gray" />
+                            <TextBlock Text="{Binding Description}" FontSize="10" />
                         </StackPanel>
                         <Border Grid.Column="1" Background="{Binding IsRemote, Converter={StaticResource BoolToBrush}}" ToolTipService.ToolTip="{Binding InterfaceType, Converter={StaticResource TypeToTooltip}}">
                             <FontIcon Glyph="{Binding InterfaceType, Converter={StaticResource TypeToGlyph}}" Margin="8 0" Foreground="White" />
@@ -158,7 +167,10 @@
                         </ListView.Resources>
                         <ListView.ItemTemplate>
                             <DataTemplate>
-                                <Grid>
+                                <Grid Margin="0 1">
+                                    <Grid.Background>
+                                        <SolidColorBrush Color="Gray" Opacity="0.2" />
+                                    </Grid.Background>
                                     <Grid.ColumnDefinitions>
                                         <ColumnDefinition />
                                         <ColumnDefinition Width="auto" />
@@ -197,20 +209,29 @@
         </Pivot>
 
 
-        <muxc:TabView x:Name="InfoTab" IsAddTabButtonVisible="False" Grid.Column="1" Margin="5 0">
+        <muxc:TabView x:Name="InfoTab" IsAddTabButtonVisible="False" Grid.Column="1" Margin="5 0" TabWidthMode="SizeToContent">
             <muxc:TabView.Background>
                 <SolidColorBrush Color="#FFE0E0E0" />
             </muxc:TabView.Background>
 
             <muxc:TabViewItem x:Uid="/Bus/TabsMonitor" IsClosable="False">
+                <muxc:TabViewItem.IconSource>
+                    <muxc:FontIconSource Glyph="&#xE8FD;" />
+                </muxc:TabViewItem.IconSource>
                 <bus:BMonitor />
             </muxc:TabViewItem>
 
             <muxc:TabViewItem x:Uid="/Bus/TabsInfo" IsClosable="False">
+                <muxc:TabViewItem.IconSource>
+                    <muxc:FontIconSource Glyph="&#xE946;" />
+                </muxc:TabViewItem.IconSource>
                 <bus:BDeviceInfo OnAddTabItem="BDeviceInfo_OnAddTabItem" />
             </muxc:TabViewItem>
 
             <muxc:TabViewItem x:Uid="/Bus/TabsNew" IsClosable="False">
+                <muxc:TabViewItem.IconSource>
+                    <muxc:FontIconSource Glyph="&#xE836;" />
+                </muxc:TabViewItem.IconSource>
                 <bus:BNewDevices />
             </muxc:TabViewItem>
         </muxc:TabView>
