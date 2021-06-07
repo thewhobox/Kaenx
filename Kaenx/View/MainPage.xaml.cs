@@ -301,11 +301,18 @@ namespace Kaenx.View
                 Connection = (LocalConnectionProject)InConn.SelectedItem
             };
 
+            if (GTgas.IsChecked == true)
+            {
+                proj.GroupType = Project.GroupTypes.GroupAddresses;
+            }
+
             if (tag == "new")
             {
                 Line Backbone = new Line(1, loaderG.GetString("Area"));
                 Backbone.Subs.Add(new LineMiddle(1, loaderG.GetString("Line") + " 1", Backbone));
                 proj.Lines.Add(Backbone);
+
+                //TODO Create first Area and Building
             }
 
             WriteableBitmap image;

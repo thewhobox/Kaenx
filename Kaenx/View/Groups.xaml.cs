@@ -222,7 +222,6 @@ namespace Kaenx.View
             ShowAssociatedComs();
 
             SelectedDevice.LoadedGroup = false;
-            //SaveHelper.UpdateDevice(SelectedDevice);
         }
 
         private void ShowAssociatedComs()
