@@ -37,9 +37,9 @@ namespace Kaenx.Classes.Bus.Actions
 
         private List<byte> dataGroupTable = new List<byte>();
         private List<byte> dataAssoTable = new List<byte>();
-        private Dictionary<string, AppSegmentViewModel> dataSegs = new Dictionary<string, AppSegmentViewModel>();
-        private Dictionary<string, byte[]> dataMems = new Dictionary<string, byte[]>();
-        private Dictionary<string, int> dataAddresses = new Dictionary<string, int>();
+        private Dictionary<int, AppSegmentViewModel> dataSegs = new Dictionary<int, AppSegmentViewModel>();
+        private Dictionary<int, byte[]> dataMems = new Dictionary<int, byte[]>();
+        private Dictionary<int, int> dataAddresses = new Dictionary<int , int>();
 
         public string Type { get; set; }
         public LineDevice Device { get; set; }
@@ -453,8 +453,8 @@ namespace Kaenx.Classes.Bus.Actions
 
         private List<AppParameter> GetVisibleParams(AppAdditional adds)
         {
-            Dictionary<string, AppParameter> AppParas = new Dictionary<string, AppParameter>();
-            Dictionary<string, ChangeParamModel> ParaChanges = new Dictionary<string, ChangeParamModel>();
+            Dictionary<int, AppParameter> AppParas = new Dictionary<int, AppParameter>();
+            Dictionary<int, ChangeParamModel> ParaChanges = new Dictionary<int, ChangeParamModel>();
             List<AppParameter> paras = new List<AppParameter>();
 
             foreach (AppParameter para in _context.AppParameters.Where(p => p.ApplicationId == Device.ApplicationId))
@@ -472,7 +472,7 @@ namespace Kaenx.Classes.Bus.Actions
                 }
             }
 
-            Dictionary<string, ViewParamModel> Id2Param = new Dictionary<string, ViewParamModel>();
+            Dictionary<int, ViewParamModel> Id2Param = new Dictionary<int, ViewParamModel>();
             List<IDynChannel> Channels = SaveHelper.ByteArrayToObject<List<IDynChannel>>(adds.ParamsHelper, true);
 
             foreach (IDynChannel ch in Channels)
@@ -493,7 +493,7 @@ namespace Kaenx.Classes.Bus.Actions
             }
 
 
-            Dictionary<int, List<string>> unions = new Dictionary<int, List<string>>();
+            Dictionary<int, List<int>> unions = new Dictionary<int, List<int>>();
 
             foreach (IDynChannel ch in Channels)
             {
@@ -523,7 +523,7 @@ namespace Kaenx.Classes.Bus.Actions
                         {
                             if (!unions.ContainsKey(xpara.UnionId))
                             {
-                                unions.Add(xpara.UnionId, new List<string>());
+                                unions.Add(xpara.UnionId, new List<int>());
                             }
 
                             if (vis1 && vis2 && vis3)
@@ -553,7 +553,7 @@ namespace Kaenx.Classes.Bus.Actions
                 }
             }
             
-            foreach(KeyValuePair<int, List<string>> union in unions.Where(x => x.Value.Count == 0))
+            foreach(KeyValuePair<int, List<int>> union in unions.Where(x => x.Value.Count == 0))
             {
                 if(AppParas.Values.Any(p => p.UnionId == union.Key && p.UnionDefault))
                 {
@@ -617,7 +617,8 @@ namespace Kaenx.Classes.Bus.Actions
                     data.AddRange(tempBytes.Reverse()); // Start Address
                     data.Add(0x01); //PEI Type //TODO check to find out
 
-                    string[] appid = Device.ApplicationId.Split('-');
+                    //TODO check changed where to get app id
+                    string[] appid = "".Split(""); // Device.ApplicationId.Split('-');
                     int version = int.Parse(appid[3], System.Globalization.NumberStyles.HexNumber);
                     int appnr = int.Parse(appid[2], System.Globalization.NumberStyles.HexNumber);
                     int manu = int.Parse(appid[1].Substring(0, 4), System.Globalization.NumberStyles.HexNumber);
@@ -966,8 +967,8 @@ namespace Kaenx.Classes.Bus.Actions
 
         private void GenerateApplication(AppAdditional adds)
         {
-            Dictionary<string, AppParameter> paras = new Dictionary<string, AppParameter>();
-            Dictionary<string, AppParameterTypeViewModel> types = new Dictionary<string, AppParameterTypeViewModel>();
+            Dictionary<int, AppParameter> paras = new Dictionary<int, AppParameter>();
+            Dictionary<int, AppParameterTypeViewModel> types = new Dictionary<int, AppParameterTypeViewModel>();
             List<int> changed = new List<int>();
 
             foreach (AppParameter para in GetVisibleParams(adds))
@@ -978,6 +979,7 @@ namespace Kaenx.Classes.Bus.Actions
 
             foreach (AppParameter para in paras.Values)
             {
+                //TODO change
                 if (para.SegmentId == null) continue;
                 if (!dataSegs.ContainsKey(para.SegmentId))
                 {

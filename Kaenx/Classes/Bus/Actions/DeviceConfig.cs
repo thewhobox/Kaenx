@@ -31,16 +31,17 @@ namespace Kaenx.Classes.Bus.Actions
 {
     public class DeviceConfig : IBusAction, INotifyPropertyChanged
     {
+        private int applicationId = -1;
         private int _progress;
         private bool _progressIsIndeterminate;
         private string _todoText;
         private DeviceConfigData _data = new DeviceConfigData();
-        private Dictionary<string, byte[]> mems = new Dictionary<string, byte[]>();
+        private Dictionary<int, byte[]> mems = new Dictionary<int, byte[]>();
         private CancellationToken _token;
         private CatalogContext _context = new CatalogContext();
         private BusDevice dev;
         private List<int> connectedCOs = new List<int>();
-        private Dictionary<string, string> defParas = new Dictionary<string, string>();
+        private Dictionary<int, string> defParas = new Dictionary<int, string>();
         private Dictionary<int, List<string>> CO2GA = new Dictionary<int, List<string>>();
 
         public string Type { get; } = "Geräte Konfiguration";
@@ -94,10 +95,11 @@ namespace Kaenx.Classes.Bus.Actions
 
             try
             {
-                h2a = context.Hardware2App.First(h => h.ApplicationId == appId);
-                DeviceViewModel dvm = context.Devices.First(d => d.HardwareId == h2a.HardwareId);
-                _data.ApplicationName = h2a.Name + " " + h2a.VersionString;
-                _data.ApplicationId = h2a.ApplicationId;
+                //TODO implement it!
+                //h2a = context.Hardware2App.First(h => h.ApplicationId == appId);
+                //DeviceViewModel dvm = context.Devices.First(d => d.HardwareId == h2a.HardwareId);
+                //_data.ApplicationName = h2a.Name + " " + h2a.VersionString;
+                //_data.ApplicationId = h2a.ApplicationId;
             }
             catch { }
 
@@ -107,6 +109,8 @@ namespace Kaenx.Classes.Bus.Actions
                 return;
             }
 
+            //TODO check change
+            /*
             if(Device.ApplicationId != _data.ApplicationId)
             {
                 System.Diagnostics.Debug.WriteLine("Jetzt");
@@ -115,7 +119,7 @@ namespace Kaenx.Classes.Bus.Actions
                 });
                 Device.ApplicationId = _data.ApplicationId;
             }
-
+            */
 
             #endregion
 
@@ -125,15 +129,17 @@ namespace Kaenx.Classes.Bus.Actions
 
             ApplicationViewModel appModel = null;
 
-            if (context.Applications.Any(a => a.Id == appId))
+            //TODO check change
+            if (context.Applications.Any(a => true)) //a.Id == appId))
             {
-                appModel = context.Applications.Single(a => a.Id == appId);
+                appModel = context.Applications.Single(a => true); // a.Id == appId);
+                applicationId = appModel.Id;
             }
 
             if(appModel != null)
             {
                 List<string> addresses = new List<string>();
-                if (!string.IsNullOrEmpty(appModel.Table_Group))
+                if (appModel.Table_Group != -1)
                 {
                     AppSegmentViewModel segmentModel = context.AppSegments.Single(s => s.Id == appModel.Table_Group);
                     int groupAddr = segmentModel.Address;
@@ -149,7 +155,7 @@ namespace Kaenx.Classes.Bus.Actions
                     }
                 }
                 
-                if (!string.IsNullOrEmpty(appModel.Table_Assosiations))
+                if (appModel.Table_Assosiations != -1)
                 {
                     AppSegmentViewModel segmentModel = context.AppSegments.Single(s => s.Id == appModel.Table_Assosiations);
                     int assoAddr = segmentModel.Address;
@@ -195,13 +201,17 @@ namespace Kaenx.Classes.Bus.Actions
             Dictionary<string, AppParameter> paras = new Dictionary<string, AppParameter>();
             Dictionary<string, AppParameterTypeViewModel> types = new Dictionary<string, AppParameterTypeViewModel>();
 
-            foreach (AppParameter param in _context.AppParameters.Where(p => p.ApplicationId == h2a.ApplicationId))
+            //TODO check changed reimplement
+            /*
+            //TODO2 change this motherfucking hack to test faster!
+            foreach (AppParameter param in _context.AppParameters.Where(p => p.ApplicationId == h2a.Id.ToString())) //no tostring
             {
                 paras.Add(param.Id, param);
                 defParas.Add(param.Id, param.Value);
             }
 
-            AppAdditional adds = _context.AppAdditionals.Single(a => a.Id == h2a.ApplicationId);
+            //TODO2 also this!
+            AppAdditional adds = _context.AppAdditionals.Single(a => a.ApplicationId == h2a.ApplicationId); //no tostring
 
             foreach(AppParameter para in paras.Values)
             {
@@ -233,10 +243,13 @@ namespace Kaenx.Classes.Bus.Actions
 
             _data.Parameters = paras;
             SaveConfig(adds);
+            */
+            SaveConfig(null);
         }
 
         private void SaveConfig(AppAdditional adds)
         {
+            /*
             TodoText = "Speichere Konfiguration...";
 
             Dictionary<string, ViewParamModel> Id2Param = new Dictionary<string, ViewParamModel>();
@@ -335,6 +348,8 @@ namespace Kaenx.Classes.Bus.Actions
 
             GenerateComs(Id2Param);
 
+
+            */
             Finish();
         }
 
@@ -343,7 +358,7 @@ namespace Kaenx.Classes.Bus.Actions
             XDocument dynamic = XDocument.Parse(Encoding.UTF8.GetString(adds.Dynamic));
 
             string ns = dynamic.Root.Name.NamespaceName;
-            IEnumerable<XElement> chooses = dynamic.Descendants(XName.Get("choose", ns)).Where(c => c.Attribute("ParamRefId") != null && SaveHelper.ShortId(c.Attribute("ParamRefId").Value) == para.Id);
+            IEnumerable<XElement> chooses = dynamic.Descendants(XName.Get("choose", ns)).Where(c => c.Attribute("ParamRefId") != null && SaveHelper.GetItemId(c.Attribute("ParamRefId").Value) == para.Id);
 
             foreach(XElement choose in chooses)
             {
@@ -361,7 +376,8 @@ namespace Kaenx.Classes.Bus.Actions
                     IEnumerable<XElement> tlist = when.Descendants(XName.Get("ComObjectRefRef", ns));
                     foreach (XElement comx in tlist)
                     {
-                        string id = SaveHelper.ShortId(comx.Attribute("RefId").Value);
+                        //TODO check changed Kontext auch mit AppID!
+                        int id = SaveHelper.GetItemId(comx.Attribute("RefId").Value);
                         AppComObject com = _context.AppComObjects.Single(c => c.Id == id);
 
                         if (!value2Coms[val].Contains(com.Number))
@@ -429,8 +445,8 @@ namespace Kaenx.Classes.Bus.Actions
         private async Task HandleParamGhost2(AppParameter para, AppParameterTypeViewModel paraT, AppAdditional adds, XElement choose)
         {
             string ns = choose.Name.NamespaceName;
-            Dictionary<string, List<string>> value2Paras = new Dictionary<string, List<string>>();
-            Dictionary<string, string> test = new Dictionary<string, string>();
+            Dictionary<string, List<int>> value2Paras = new Dictionary<string, List<int>>();
+            Dictionary<int, string> test = new Dictionary<int, string>();
 
             #region Get ParaIds and remove duplicates
             foreach (XElement when in choose.Elements())
@@ -439,12 +455,13 @@ namespace Kaenx.Classes.Bus.Actions
                 string val = when.Attribute("test").Value;
 
                 if (val.Contains(">") || val.Contains("<") || val.Contains("=") || val.Contains(" ")) continue;
-                if (!value2Paras.ContainsKey(val)) value2Paras[val] = new List<string>();
+                if (!value2Paras.ContainsKey(val)) value2Paras[val] = new List<int>();
 
                 IEnumerable<XElement> tlist = when.Descendants(XName.Get("ParameterRefRef", ns));
                 foreach (XElement comx in tlist)
                 {
-                    string id = SaveHelper.ShortId(comx.Attribute("RefId").Value);
+                    //TODO check changed Kontext auch mit AppID
+                    int id = SaveHelper.GetItemId(comx.Attribute("RefId").Value);
                     AppParameter par = _context.AppParameters.Single(c => c.Id == id);
                     if (par.Access != AccessType.Full || par.SegmentId == null) continue;
 
@@ -463,17 +480,17 @@ namespace Kaenx.Classes.Bus.Actions
                 }
             }
 
-            List<string> toDelete = new List<string>();
+            List<int> toDelete = new List<int>();
             foreach (string keyval in value2Paras.Keys)
             {
-                List<string> xids = value2Paras[keyval];
+                List<int> xids = value2Paras[keyval];
 
 
-                foreach (string xid in xids)
+                foreach (int xid in xids)
                 {
                     bool flag = false;
 
-                    foreach (KeyValuePair<string, List<string>> otherids in value2Paras.Where(x => x.Key != keyval))
+                    foreach (KeyValuePair<string, List<int>> otherids in value2Paras.Where(x => x.Key != keyval))
                         if (otherids.Value.Contains(xid))
                             flag = true;
 
@@ -482,9 +499,9 @@ namespace Kaenx.Classes.Bus.Actions
             }
 
 
-            foreach (string xid in toDelete)
+            foreach (int xid in toDelete)
             {
-                foreach (KeyValuePair<string, List<string>> otherids in value2Paras)
+                foreach (KeyValuePair<string, List<int>> otherids in value2Paras)
                     otherids.Value.Remove(xid);
             }
             #endregion
@@ -492,7 +509,7 @@ namespace Kaenx.Classes.Bus.Actions
 
             Dictionary<string, bool> val2success = new Dictionary<string, bool>();
 
-            foreach (KeyValuePair<string, List<string>> coms in value2Paras)
+            foreach (KeyValuePair<string, List<int>> coms in value2Paras)
             {
                 val2success[coms.Key] = coms.Value.Count > 0;
             }
@@ -507,10 +524,10 @@ namespace Kaenx.Classes.Bus.Actions
 
         private async Task<string> GetValueFromMem(AppParameter para, AppParameterTypeViewModel paraT)
         {
-            if (para.SegmentId == null) return "";
+            if (para.SegmentId == -1) return "";
             if (!mems.ContainsKey(para.SegmentId))
             {
-                AppSegmentViewModel seg = _context.AppSegments.Single(s => s.Id == para.SegmentId);
+                AppSegmentViewModel seg = _context.AppSegments.Single(s => s.ApplicationId == applicationId && s.Id == para.SegmentId);
                 byte[] temp = await dev.MemoryRead(seg.Address, seg.Size);
                 mems.Add(para.SegmentId, temp);
             }
@@ -582,7 +599,7 @@ namespace Kaenx.Classes.Bus.Actions
         }
 
 
-        private async void GenerateComs(Dictionary<string, ViewParamModel> Id2Param)
+        private async void GenerateComs(Dictionary<int, ViewParamModel> Id2Param)
         {
             AppAdditional adds = _context.AppAdditionals.Single(a => a.Id == Device.ApplicationId);
             List<DeviceComObject> comObjects = SaveHelper.ByteArrayToObject<List<DeviceComObject>>(adds.ComsAll);
@@ -611,7 +628,7 @@ namespace Kaenx.Classes.Bus.Actions
                     toAdd.Add(cobj);
             }
 
-            Dictionary<string, ComObject> coms = new Dictionary<string, ComObject>();
+            Dictionary<int, ComObject> coms = new Dictionary<int, ComObject>();
             foreach (ComObject com in _contextP.ComObjects)
                 if (!coms.ContainsKey(com.ComId))
                     coms.Add(com.ComId, com);

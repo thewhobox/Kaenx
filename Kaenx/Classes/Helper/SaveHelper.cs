@@ -35,9 +35,9 @@ namespace Kaenx.Classes.Helper
         public static LocalConnectionProject connProject;
         private static CatalogContext contextC = new CatalogContext(new LocalConnectionCatalog() { DbHostname = "Catalog.db", Type = LocalConnectionCatalog.DbConnectionType.SqlLite });
 
-        private static Dictionary<string, AppParameter> AppParas;
-        private static Dictionary<string, AppParameterTypeViewModel> AppParaTypes;
-        private static Dictionary<string, AppComObject> ComObjects;
+        private static Dictionary<int, AppParameter> AppParas;
+        private static Dictionary<int, AppParameterTypeViewModel> AppParaTypes;
+        private static Dictionary<int, AppComObject> ComObjects;
 
         public static ProjectModel SaveProject(Project.Project _pro = null)
         {
@@ -415,7 +415,8 @@ namespace Kaenx.Classes.Helper
                                 }
                             }
 
-                            if (!string.IsNullOrEmpty(dcom.BindedId) && dcom.Name.Contains("{{dyn}}"))
+                            //TODO check changed really -2?
+                            if (dcom.BindedId != -2 && dcom.Name.Contains("{{dyn}}"))
                             {
                                 string value = "";
                                 try
@@ -599,8 +600,8 @@ namespace Kaenx.Classes.Helper
 
 
         private static Dictionary<string, ParamBinding> Hash2Bindings;
-        private static Dictionary<string, List<ParamBinding>> Ref2Bindings;
-        private static List<string> updatedComs;
+        private static Dictionary<int, List<ParamBinding>> Ref2Bindings;
+        private static List<int> updatedComs;
         private static List<AssignParameter> Assignments;
 
         //Nochmal in ImportHelper
@@ -621,28 +622,32 @@ namespace Kaenx.Classes.Helper
             return temp;
         }
 
+        public static int GetItemId(string id)
+        {
+            return int.Parse(id.Substring(id.LastIndexOf("-") + 1));
+        }
 
-        public static Dictionary<string, ViewParamModel> GenerateDynamic(AppAdditional adds)
+        public static Dictionary<int, ViewParamModel> GenerateDynamic(AppAdditional adds)
         {
             XDocument dynamic = XDocument.Parse(Encoding.UTF8.GetString(adds.Dynamic));
             XmlReader reader = dynamic.CreateReader();
 
-            updatedComs = new List<string>();
+            updatedComs = new List<int>();
             Hash2Bindings = new Dictionary<string, ParamBinding>();
-            Ref2Bindings = new Dictionary<string, List<ParamBinding>>();
+            Ref2Bindings = new Dictionary<int, List<ParamBinding>>();
             Assignments = new List<AssignParameter>();
-            Dictionary<string, XElement> Id2Element = new Dictionary<string, XElement>();
-            Dictionary<string, ParameterBlock> Id2ParamBlock = new Dictionary<string, ParameterBlock>();
+            Dictionary<int, XElement> Id2Element = new Dictionary<int, XElement>();
+            Dictionary<int, ParameterBlock> Id2ParamBlock = new Dictionary<int, ParameterBlock>();
             List<IDynChannel> Channels = new List<IDynChannel>();
             IDynChannel currentChannel = null;
 
             foreach(XElement ele in dynamic.Root.Descendants(XName.Get("ParameterBlock", dynamic.Root.Name.NamespaceName)))
             {
-                Id2Element.Add(ShortId(ele.Attribute("Id").Value), ele);
+                Id2Element.Add(GetItemId(ele.Attribute("Id").Value), ele);
             }
             foreach(XElement ele in dynamic.Root.Descendants(XName.Get("Channel", dynamic.Root.Name.NamespaceName)))
             {
-                Id2Element.Add(ShortId(ele.Attribute("Id").Value), ele);
+                Id2Element.Add(GetItemId(ele.Attribute("Id").Value), ele);
             }
 
             while (reader.Read())
@@ -678,7 +683,7 @@ namespace Kaenx.Classes.Helper
                         {
                             ChannelBlock cb = new ChannelBlock
                             {
-                                Id = ShortId(reader.GetAttribute("Id")),
+                                Id = GetItemId(reader.GetAttribute("Id")),
                                 Name = reader.GetAttribute("Name")
                             };
                             if (reader.GetAttribute("Access") == "None")
@@ -706,16 +711,16 @@ namespace Kaenx.Classes.Helper
                                     if (m.Groups[2].Value == "0")
                                     {
                                         string textId = reader.GetAttribute("TextParameterRefId");
-                                        if (string.IsNullOrEmpty(textId)) bind.SourceId = "parent";
+                                        if (string.IsNullOrEmpty(textId)) bind.SourceId = -1;
                                         else
                                         {
-                                            bind.SourceId = cb.Id.Substring(0, 16) + "_R-" + textId.Substring(textId.LastIndexOf("-") + 1);
+                                            bind.SourceId = GetItemId(textId);
                                         }
                                     }
                                     else
                                     {
                                         string refid = m.Groups[2].Value;
-                                        bind.SourceId = cb.Id.Substring(0, 16) + "_R-" + m.Groups[2].Value;
+                                        bind.SourceId = int.Parse(m.Groups[2].Value);
                                     }
                                 }
                                 else
@@ -729,16 +734,16 @@ namespace Kaenx.Classes.Helper
                                         if (m.Groups[1].Value == "0")
                                         {
                                             string textId = reader.GetAttribute("TextParameterRefId");
-                                            if (string.IsNullOrEmpty(textId)) bind.SourceId = "parent";
+                                            if (string.IsNullOrEmpty(textId)) bind.SourceId = -1;
                                             else
                                             {
-                                                bind.SourceId = cb.Id.Substring(0, 16) + "_R-" +  textId.Substring(textId.LastIndexOf("-")+1);
+                                                bind.SourceId = GetItemId(textId);
                                             }
                                         }
                                         else
                                         {
                                             string refid = m.Groups[2].Value;
-                                            bind.SourceId = cb.Id.Substring(0, 16) + "_R" + m.Groups[2].Value;
+                                            bind.SourceId = int.Parse(m.Groups[2].Value);
                                         }
                                     }
                                 }
@@ -756,7 +761,7 @@ namespace Kaenx.Classes.Helper
 
 
                     case "ParameterBlock":
-                        ParameterBlock pb = new ParameterBlock { Id = ShortId(reader.GetAttribute("Id")) };
+                        ParameterBlock pb = new ParameterBlock { Id = GetItemId(reader.GetAttribute("Id")) };
                         if (reader.GetAttribute("Access") == "None")
                         {
                             pb.HasAccess = false;
@@ -766,7 +771,7 @@ namespace Kaenx.Classes.Helper
                         {
                             try
                             {
-                                string paramId = ShortId(reader.GetAttribute("ParamRefId"));
+                                int paramId = GetItemId(reader.GetAttribute("ParamRefId"));
                                 AppParameter para = contextC.AppParameters.Single(p => p.Id == paramId);
                                 text = para.Text;
                                 if (para.Access == AccessType.None)
@@ -775,9 +780,9 @@ namespace Kaenx.Classes.Helper
                                     pb.Visible = Visibility.Collapsed;
                                 }
                             }
-                            catch
+                            catch (Exception ex)
                             {
-
+                                Log.Error("Parameterblock TextRef Fehler!", ex);
                             }
                         }
                         else
@@ -800,15 +805,15 @@ namespace Kaenx.Classes.Helper
                                 if (m.Groups[2].Value == "0")
                                 {
                                     string textId = reader.GetAttribute("TextParameterRefId");
-                                    if (string.IsNullOrEmpty(textId)) bind.SourceId = "parent";
+                                    if (string.IsNullOrEmpty(textId)) bind.SourceId = -1;
                                     else
                                     {
-                                        bind.SourceId = pb.Id.Substring(0, 16) + "_R-" + textId.Substring(textId.LastIndexOf("-") + 1);
+                                        bind.SourceId = GetItemId(textId);
                                     }
                                 }
                                 else
                                 {
-                                    bind.SourceId = pb.Id.Substring(0, 16) + "_R-" + m.Groups[2].Value;
+                                    bind.SourceId = int.Parse(m.Groups[2].Value);
                                 }
                             }
                             else
@@ -822,15 +827,15 @@ namespace Kaenx.Classes.Helper
                                     if (m.Groups[1].Value == "0")
                                     {
                                         string textId = reader.GetAttribute("TextParameterRefId");
-                                        if (string.IsNullOrEmpty(textId)) bind.SourceId = "parent";
+                                        if (string.IsNullOrEmpty(textId)) bind.SourceId = -1;
                                         else
                                         {
-                                            bind.SourceId = pb.Id.Substring(0, 16) + "_R-" + textId.Substring(textId.LastIndexOf("-") + 1);
+                                            bind.SourceId = GetItemId(textId);
                                         }
                                     }
                                     else
                                     {
-                                        bind.SourceId = pb.Id.Substring(0, 16) + "_R-" + m.Groups[1].Value;
+                                        bind.SourceId = int.Parse(m.Groups[1].Value);
                                     }
                                 }
                             }
@@ -861,18 +866,19 @@ namespace Kaenx.Classes.Helper
                 }
             }
 
-            string appId = Id2Element.Keys.ElementAt(0).Substring(0, Id2Element.Keys.ElementAt(0).LastIndexOf("_"));
-            AppParas = new Dictionary<string, AppParameter>();
-            AppParaTypes = new Dictionary<string, AppParameterTypeViewModel>();
-            ComObjects = new Dictionary<string, AppComObject>();
+            //TODO check changed get right appid
+            //string appId = Id2Element.Keys.ElementAt(0).Substring(0, Id2Element.Keys.ElementAt(0).LastIndexOf("_"));
+            AppParas = new Dictionary<int, AppParameter>();
+            AppParaTypes = new Dictionary<int, AppParameterTypeViewModel>();
+            ComObjects = new Dictionary<int, AppComObject>();
 
-            foreach (AppParameter para in contextC.AppParameters.Where(p => p.ApplicationId == appId))
+            foreach (AppParameter para in contextC.AppParameters.Where(p => p.ApplicationId == adds.ApplicationId))
                 AppParas.Add(para.Id, para);
 
-            foreach (AppParameterTypeViewModel type in contextC.AppParameterTypes.Where(t => t.ApplicationId == appId))
+            foreach (AppParameterTypeViewModel type in contextC.AppParameterTypes.Where(t => t.ApplicationId == adds.ApplicationId))
                 AppParaTypes.Add(type.Id, type);
 
-            foreach (AppComObject co in contextC.AppComObjects.Where(t => t.ApplicationId == appId))
+            foreach (AppComObject co in contextC.AppComObjects.Where(t => t.ApplicationId == adds.ApplicationId))
                 ComObjects.Add(co.Id, co);
 
 
@@ -884,31 +890,31 @@ namespace Kaenx.Classes.Helper
                 string groupText = eleCH.Attribute("Text")?.Value;
                 foreach (XElement elePB in eleCH.Descendants(XName.Get("ParameterBlock", dynamic.Root.Name.NamespaceName)))
                 {
-                    string textRefId = null;
+                    int textRefId = -2;
                     if (elePB.Attribute("TextParameterRefId") != null)
                     {
-                        textRefId = ShortId(elePB.Attribute("TextParameterRefId").Value);
+                        textRefId = GetItemId(elePB.Attribute("TextParameterRefId").Value);
                     }
                     else
                     {
                         XElement temp = elePB.Parent;
-                        while (textRefId != null || temp.Name.LocalName == "Dynamic")
+                        while (textRefId != -2 || temp.Name.LocalName == "Dynamic")
                         {
                             temp = temp.Parent;
-                            textRefId = temp.Attribute("TextParameterRefId")?.Value;
+                            textRefId = GetItemId(temp.Attribute("TextParameterRefId")?.Value);
                         }
                     }
-                    ParameterBlock block = Id2ParamBlock[ShortId(elePB.Attribute("Id").Value)];
+                    ParameterBlock block = Id2ParamBlock[GetItemId(elePB.Attribute("Id").Value)];
                     GetChildItems(elePB, block, textRefId, groupText);
                 }
             }
-            contextC.SaveChanges();
+             contextC.SaveChanges();
 
             Id2Element.Clear();
             Id2ParamBlock.Clear();
             #region Brechne Standard sichtbarkeit
 
-            Dictionary<string, ViewParamModel> Id2Param = new Dictionary<string, ViewParamModel>();
+            Dictionary<int, ViewParamModel> Id2Param = new Dictionary<int, ViewParamModel>();
 
             foreach (IDynChannel ch in Channels)
             {
@@ -960,7 +966,7 @@ namespace Kaenx.Classes.Helper
             return Id2Param;
         }
 
-        private static void GetChildItems(XElement parent, ParameterBlock block, string textRefId, string groupText)
+        private static void GetChildItems(XElement parent, ParameterBlock block, int textRefId, string groupText)
         {
             foreach(XElement ele in parent.Elements())
             {
@@ -982,16 +988,16 @@ namespace Kaenx.Classes.Helper
                     case "Assign":
                         AssignParameter assign = new AssignParameter
                         {
-                            Target = ShortId(ele.Attribute("TargetParamRefRef").Value),
+                            Target = GetItemId(ele.Attribute("TargetParamRefRef").Value),
                             Conditions = GetConditions(ele)
                         };
                         if (ele.Attribute("SourceParamRefRef") != null)
                         {
-                            assign.Source = ShortId(ele.Attribute("SourceParamRefRef").Value);
+                            assign.Source = GetItemId(ele.Attribute("SourceParamRefRef").Value);
                         }
                         else
                         {
-                            assign.Source = "Value";
+                            assign.Source = -1;
                             assign.Value = ele.Attribute("Value").Value;
                         }
                         Assignments.Add(assign);
@@ -1000,17 +1006,17 @@ namespace Kaenx.Classes.Helper
             }
         }
 
-        private static void ParseComObject(XElement xele, string textRefId, string groupText)
+        private static void ParseComObject(XElement xele, int textRefId, string groupText)
         {
-            if (updatedComs.Contains(ShortId(xele.Attribute("RefId").Value))) return;
+            if (updatedComs.Contains(GetItemId(xele.Attribute("RefId").Value))) return;
 
             bool changed = false;
-            AppComObject com = ComObjects[ShortId(xele.Attribute("RefId").Value)];
+            AppComObject com = ComObjects[GetItemId(xele.Attribute("RefId").Value)];
 
 
-            if (com.BindedId == null && string.IsNullOrEmpty(textRefId) && string.IsNullOrEmpty(groupText)) return;
+            if (com.BindedId == -2 && textRefId == -2 && string.IsNullOrEmpty(groupText)) return;
 
-            if (com.BindedId == "parent")
+            if (com.BindedId == -1)
             {
                 com.BindedId = textRefId;
                 changed = true;
@@ -1022,7 +1028,7 @@ namespace Kaenx.Classes.Helper
                 changed = true;
             }
 
-            if(com.BindedId != null)
+            if(com.BindedId != -2)
             {
                 ParamBinding bind = new ParamBinding()
                 {
@@ -1069,7 +1075,7 @@ namespace Kaenx.Classes.Helper
             {
                 ParamSeperator sepe = new ParamSeperator
                 {
-                    Id = ShortId(xele.Attribute("Id").Value),
+                    Id = GetItemId(xele.Attribute("Id").Value),
                     Text = xele.Attribute("Text").Value,
                     Conditions = Conds,
                     Hash = Hash
@@ -1107,25 +1113,25 @@ namespace Kaenx.Classes.Helper
 
             sep.Conditions = Conds;
             sep.Hash = Hash;
-            sep.Id = ShortId(xele.Attribute("Id").Value);
+            sep.Id = GetItemId(xele.Attribute("Id").Value);
             sep.Text = xele.Attribute("Text").Value;
             block.Parameters.Add(sep);
         }
 
-        private static void ParseParameterRefRef(XElement xele, ParameterBlock block, string textRefId)
+        private static void ParseParameterRefRef(XElement xele, ParameterBlock block, int textRefId)
         {
-            AppParameter para = AppParas[ShortId(xele.Attribute("RefId").Value)];
+            AppParameter para = AppParas[GetItemId(xele.Attribute("RefId").Value)];
             //TODO überprüfen
             AppParameterTypeViewModel paraType = AppParaTypes[para.ParameterTypeId];
             var (paramList, hash) = GetConditions(xele, true);
 
-            string refid = para.Id.Substring(para.Id.LastIndexOf("-") + 1);
+            int refid = para.Id;
 
             if (Ref2Bindings.ContainsKey(refid))
             {
                 foreach (ParamBinding bind in Ref2Bindings[refid])
                 {
-                    if (bind.SourceId == "parent")
+                    if (bind.SourceId == -1)
                         bind.SourceId = textRefId;
                     else
                         bind.SourceId = para.Id;
@@ -1216,7 +1222,7 @@ namespace Kaenx.Classes.Helper
 
                 case ParamTypes.Enum:
                     List<ParamEnumOption> options = new List<ParamEnumOption>();
-                    foreach(AppParameterTypeEnumViewModel enu in contextC.AppParameterTypeEnums.Where(e => e.ParameterId == paraType.Id).OrderBy(e => e.Order))
+                    foreach(AppParameterTypeEnumViewModel enu in contextC.AppParameterTypeEnums.Where(e => e.TypeId == paraType.Id).OrderBy(e => e.Order))
                     {
                         options.Add(new ParamEnumOption() { Text = enu.Text, Value = enu.Value });
                     }
@@ -1377,12 +1383,12 @@ namespace Kaenx.Classes.Helper
         }
 
 
-        public static async Task GenerateDefaultComs(AppAdditional adds, Dictionary<string, Dynamic.ViewParamModel> Id2Param)
+        public static async Task GenerateDefaultComs(AppAdditional adds, Dictionary<int, ViewParamModel> Id2Param)
         {
             List<DeviceComObject> comObjects = new List<DeviceComObject>();
             XDocument dynamic = XDocument.Parse(System.Text.Encoding.UTF8.GetString(adds.Dynamic));
             IEnumerable<XElement> elements = dynamic.Root.Descendants(XName.Get("ComObjectRefRef", dynamic.Root.Name.NamespaceName));
-            Dictionary<string, AppComObject> comobjects = new Dictionary<string, AppComObject>();
+            Dictionary<int, AppComObject> comobjects = new Dictionary<int, AppComObject>();
             Dictionary<string, Dictionary<string, DataPointSubType>> DPST = await SaveHelper.GenerateDatapoints();
 
             foreach (AppComObject com in contextC.AppComObjects)
@@ -1390,7 +1396,7 @@ namespace Kaenx.Classes.Helper
 
             foreach (XElement xcom in elements)
             {
-                AppComObject appCom = comobjects[ShortId(xcom.Attribute("RefId").Value)];
+                AppComObject appCom = comobjects[GetItemId(xcom.Attribute("RefId").Value)];
                 if (appCom.Text == "Dummy") continue;
 
                 DeviceComObject comobject = new DeviceComObject(appCom);
@@ -1422,9 +1428,9 @@ namespace Kaenx.Classes.Helper
         }
 
         //TODO Id2Param notwendig machen!
-        public static bool CheckConditions(List<ParamCondition> conds, Dictionary<string, ViewParamModel> Id2Param)
+        public static bool CheckConditions(List<ParamCondition> conds, Dictionary<int, ViewParamModel> Id2Param)
         {
-            Dictionary<string, string> tempValues = new Dictionary<string, string>();
+            Dictionary<int, string> tempValues = new Dictionary<int, string>();
             bool flag = true;
 
             foreach (ParamCondition cond in conds)
@@ -1445,7 +1451,7 @@ namespace Kaenx.Classes.Helper
                         }
                     } else
                     {
-                        if (model.Assign.Source == "Value")
+                        if (model.Assign.Source == -1)
                             paraValue = model.Assign.Value;
                         else
                             paraValue = Id2Param[model.Assign.Source].Value;
@@ -1659,7 +1665,7 @@ namespace Kaenx.Classes.Helper
                                 Log.Warning("Unbekanntes when! " + attrs);
                             }
 
-                            cond.SourceId = ShortId(xele.Parent.Attribute("ParamRefId").Value);
+                            cond.SourceId = GetItemId(xele.Parent.Attribute("ParamRefId").Value);
                             conds.Add(cond);
 
                             ids = "|" + cond.SourceId + "." + cond.Values + "|" + ids;
@@ -1683,9 +1689,8 @@ namespace Kaenx.Classes.Helper
             return (conds, "");
         }
 
-        private static List<DeviceComObject> GetDefaultComs(List<DeviceComObject> comObjects, Dictionary<string, ViewParamModel>  Id2Param)
+        private static List<DeviceComObject> GetDefaultComs(List<DeviceComObject> comObjects, Dictionary<int, ViewParamModel>  Id2Param)
         {
-            Dictionary<string, string> tempValues = new Dictionary<string, string>();
             ObservableCollection<DeviceComObject> defObjs = new ObservableCollection<DeviceComObject>();
 
             foreach (DeviceComObject obj in comObjects)
@@ -1705,11 +1710,12 @@ namespace Kaenx.Classes.Helper
 
         public static void CalculateLineCurrent(LineMiddle line, bool noNotify = false)
         {
-            if (!contextC.Devices.AsEnumerable().Any(d => d.IsPowerSupply && line.Subs.Any(l => l.DeviceId == d.Id)))
+            /*if (!contextC.Devices.AsEnumerable().Any(d => d.IsPowerSupply && line.Subs.Any(l => l.DeviceId == d.Id)))
             {
                 line.State = LineState.Normal;
                 return;
-            }
+            }*/
+            //TODO wieder implementieren!!
 
             int maxCurrent = CalculateLineCurrentAvailible(line);
             int current = CalculateLineCurrentUsed(line);
@@ -1743,7 +1749,7 @@ namespace Kaenx.Classes.Helper
         {
             int maxCurrent = 0;
 
-            foreach (LineDevice dev in line.Subs)
+            /*foreach (LineDevice dev in line.Subs)
             {
                 if (!contextC.Devices.Any(s => s.Id == dev.DeviceId)) continue;
 
@@ -1751,7 +1757,8 @@ namespace Kaenx.Classes.Helper
 
                 if (model.IsPowerSupply)
                     maxCurrent += model.BusCurrent;
-            }
+            }*/
+            //TODO wieder implementieren
 
             return maxCurrent;
         }
@@ -1760,7 +1767,7 @@ namespace Kaenx.Classes.Helper
         {
             int current = 0;
 
-            foreach (LineDevice dev in line.Subs)
+            /*foreach (LineDevice dev in line.Subs)
             {
                 if (!contextC.Devices.Any(s => s.Id == dev.DeviceId)) continue;
 
@@ -1768,7 +1775,8 @@ namespace Kaenx.Classes.Helper
 
                 if (!model.IsPowerSupply)
                     current += model.BusCurrent;
-            }
+            }*/
+            //Todo wieder implementieren
 
             return current;
         }

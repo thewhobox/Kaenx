@@ -57,11 +57,11 @@ namespace Kaenx.Classes.Project
         private string _dname;
 
         [JsonProperty("i")]
-        public string Id { get; set; }
+        public int Id { get; set; }
         [JsonProperty("pd")]
         public LineDevice ParentDevice { get; set; }
         [JsonProperty("bi")]
-        public string BindedId { get; set; }
+        public int BindedId { get; set; }
         [JsonProperty("nu")]
         public int Number { get; set; }
         [JsonProperty("na")]

@@ -48,7 +48,7 @@ namespace Kaenx.Classes
             set { _devname = value; Changed("DeviceName"); }
         }
 
-        public string ApplicationId;
+        public int ApplicationId;
 
         private string _appName;
         public string ApplicationName

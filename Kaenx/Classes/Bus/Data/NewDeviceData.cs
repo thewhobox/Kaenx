@@ -31,7 +31,7 @@ namespace Kaenx.Classes.Bus.Data
             get { return _name; }
             set { _name = value; Changed("DeviceName"); }
         }
-        public string ApplicationId { get; set; }
+        public int ApplicationId { get; set; }
         public bool finished { get; set; } = false;
 
         public List<DeviceViewModel> DeviceModels { get; set; } = new List<DeviceViewModel>();

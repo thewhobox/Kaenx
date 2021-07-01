@@ -146,7 +146,7 @@ namespace Kaenx.View.Controls.Bus
 
                 string appId = await dev.RessourceRead<string>("ApplicationId");
                 if (appId.Length == 8) appId = "00" + appId;
-                data.ApplicationId = "M-" + appId.Substring(0, 4) + "_A-" + appId.Substring(4, 4) + "-" + appId.Substring(8, 2) ;
+                //data.ApplicationId = "M-" + appId.Substring(0, 4) + "_A-" + appId.Substring(4, 4) + "-" + appId.Substring(8, 2) ;
 
                 XElement master = (await GetKnxMaster()).Root;
                 XElement manu = master.Descendants(XName.Get("Manufacturer", master.Name.NamespaceName)).Single(m => m.Attribute("Id").Value == "M-" + appId.Substring(0, 4));
@@ -154,10 +154,10 @@ namespace Kaenx.View.Controls.Bus
 
                 try
                 {
-                    Hardware2AppModel h2a = _context.Hardware2App.Single(h => h.ApplicationId == data.ApplicationId);
+                    Hardware2AppModel h2a = null; //TODO richtig machen _context.Hardware2App.Single(h => h.ApplicationId == data.ApplicationId);
 
                     List<string> names = new List<string>();
-                    foreach (DeviceViewModel model in _context.Devices.Where(d => d.HardwareId == h2a.HardwareId))
+                    foreach (DeviceViewModel model in _context.Devices.Where(d => d.HardwareId == h2a.Id))
                     {
                         names.Add(model.Name);
                         data.DeviceModels.Add(model);

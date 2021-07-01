@@ -11,7 +11,7 @@ namespace Kaenx.Classes.Dynamic
     {
 
         [JsonProperty("s")]
-        public string SourceId { get; set; }
+        public int SourceId { get; set; }
         [JsonProperty("v")]
         public string Values { get; set; }
         [JsonProperty("o")]
