@@ -28,7 +28,7 @@ namespace Kaenx.Classes.Controls
 
             CatalogContext context = new CatalogContext();
 
-            IEnumerable<Hardware2AppModel> apps = context.Hardware2App.Where(h => h.Id == hardwareId).OrderByDescending(h => h.Version);
+            IEnumerable<ApplicationViewModel> apps = context.Applications.Where(h => h.HardwareId == hardwareId).OrderByDescending(h => h.Version);
             Apps.ItemsSource = apps;
             Apps.SelectedIndex = 0;
         }

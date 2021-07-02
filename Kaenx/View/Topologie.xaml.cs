@@ -344,20 +344,18 @@ namespace Kaenx.View
 
             if (model.HasApplicationProgram)
             {
-                int apps = _context.Hardware2App.Count(h => h.Id == model.HardwareId);
+                int apps = _context.Applications.Count(h => h.HardwareId == model.HardwareId);
                 if (apps == 1)
                 {
-                    Hardware2AppModel app = _context.Hardware2App.First(h => h.Id == model.HardwareId);
-                    //device.ApplicationId = app.Id;
-                    //TODO check what to do
+                    ApplicationViewModel app = _context.Applications.Single(h => h.HardwareId == model.HardwareId);
+                    device.ApplicationId = app.Id;
                 }
                 else
                 {
                     DiagSelectApp diag = new DiagSelectApp(model.Id);
                     await diag.ShowAsync();
                     if (diag.ApplicationId == -1) return;
-                    //device.ApplicationId = diag.ApplicationId;
-                    //TODO do right applicationid
+                    device.ApplicationId = diag.ApplicationId;
                 }
             }
 

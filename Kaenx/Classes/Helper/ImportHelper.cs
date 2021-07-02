@@ -43,10 +43,9 @@ namespace Kaenx.Classes.Helper
         private string currentNamespace;
         private CatalogContext _context = new CatalogContext();
         private ResourceLoader resourceLoader = ResourceLoader.GetForCurrentView("Import");
+        private Dictionary<int, int> app2hard = new Dictionary<int, int>();
 
         private string currentAppName;
-
-        private Dictionary<string, int> HardwareIds = new Dictionary<string, int>();
 
         public static void TranslateXml(XElement xml, string selectedLang)
         {
@@ -527,6 +526,10 @@ namespace Kaenx.Classes.Helper
                         DeviceImportInfo device = devicesList.Single(d => d.Id == xele.Attribute("Id").Value);
                         device.CatalogId = parent.Id;
 
+                        int manuId = int.Parse(xele.Attribute("Id").Value.Substring(2, 4), System.Globalization.NumberStyles.HexNumber);
+                        ManufacturerViewModel manu = _context.Manufacturers.Single(m => m.ImportType == ImportTypes.ETS && m.ManuId == manuId);
+                        device.ManuId = manu.Id;
+
                         string strId = xele.Attribute("Hardware2ProgramRefId").Value.Split("_")[1];
                         strId = strId.Substring(strId.LastIndexOf("H-") + 2);
 
@@ -555,6 +558,7 @@ namespace Kaenx.Classes.Helper
                     {
                         section = new CatalogViewModel
                         {
+                            ImportType = ImportTypes.ETS,
                             Key = key,
                             Name = xele.Attribute("Name")?.Value,
                             ParentId = parent.Id
@@ -591,19 +595,29 @@ namespace Kaenx.Classes.Helper
             XElement hardwareXml = productXml.Parent.Parent;
             XElement hardware2ProgXml = hardXML.Descendants(GetXName("Hardware2Program")).Single(p => p.Attribute("Id").Value == deviceInfo.HardwareRef.Additional);
 
+            int snum = GetAttributeAsInt(hardwareXml, "SerialNumber");
+            int vnum = GetAttributeAsInt(hardwareXml, "VersionNumber");
             Hardware2AppModel hard = null;
-            if (_context.Hardware2App.Any(h => h.ManuId == deviceInfo.ManuId
-                 && h.Number == GetAttributeAsInt(hardwareXml, "SerialNumber")
-                 && h.Version == GetAttributeAsInt(hardwareXml, "VersionNumber")))
+            if (_context.Hardware2App.Any(h => h.ManuId == deviceInfo.ManuId && h.Number == snum && h.Version == vnum))
             {
-                hard = _context.Hardware2App.Single(h => h.ManuId == deviceInfo.ManuId
-                     && h.Number == GetAttributeAsInt(hardwareXml, "SerialNumber")
-                     && h.Version == GetAttributeAsInt(hardwareXml, "VersionNumber"));
-
-                if (!HardwareIds.ContainsKey(GetAttributeAsString(hardwareXml, "Id")))
+                hard = _context.Hardware2App.Single(h => h.ManuId == deviceInfo.ManuId && h.Number == snum && h.Version == vnum);
+            } else
+            {
+                hard = new Hardware2AppModel()
                 {
-                    HardwareIds.Add(GetAttributeAsString(hardwareXml, "Id"), hard.Id);
-                }
+                    ManuId = deviceInfo.ManuId,
+                    Number = snum,
+                    Version = vnum
+                };
+                _context.Hardware2App.Add(hard);
+                _context.SaveChanges();
+            }
+
+            foreach(XElement xapp in hardwareXml.Descendants(GetXName("ApplicationProgramRef")))
+            {
+                string appidstr = GetItemIdAsString(xapp.Attribute("RefId").Value);
+                int appid = int.Parse(appidstr, System.Globalization.NumberStyles.HexNumber);
+                app2hard.Add(appid, hard.Id);
             }
 
 
@@ -629,14 +643,12 @@ namespace Kaenx.Classes.Helper
             device.HasApplicationProgram = GetAttributeAsBool(hardwareXml, "HasApplicationProgram");
             device.HasIndividualAddress = GetAttributeAsBool(hardwareXml, "HasIndividualAddress");
             device.CatalogId = deviceInfo.CatalogId;
-            device.HardwareId = -1;
+            device.HardwareId = hard.Id;
 
             if (device.BusCurrent == 0 && device.HasApplicationProgram)
                 device.BusCurrent = 10;
 
-
-
-                if (device.HasApplicationProgram)
+            if (device.HasApplicationProgram)
             {
                 string strId = hardware2ProgXml.Element(GetXName("ApplicationProgramRef")).Attribute("RefId").Value;
                 strId = strId.Substring(strId.IndexOf("_A-") + 3);
@@ -649,37 +661,12 @@ namespace Kaenx.Classes.Helper
                     Id = int.Parse(strId, System.Globalization.NumberStyles.HexNumber),
                     Version = int.Parse(strVer, System.Globalization.NumberStyles.HexNumber)
                 };
-                   
-
-                if(hard == null)
-                {
-                    hard = new Hardware2AppModel()
-                    {
-                        Number = GetAttributeAsInt(hardwareXml, "SerialNumber"),
-                        Version = GetAttributeAsInt(hardwareXml, "VersionNumber")
-                    };
-                    _context.Hardware2App.Add(hard);
-                    _context.SaveChanges();
-                    
-                    if(!HardwareIds.ContainsKey(GetAttributeAsString(hardwareXml, "Id")))
-                    {
-                        HardwareIds.Add(GetAttributeAsString(hardwareXml, "Id"), hard.Id);
-                    }
-                }
-                device.HardwareId = hard.Id;
             }
-
-
-
-
-
 
             if (existed)
                 _context.Devices.Update(device);
             else
                 _context.Devices.Add(device);
-
-            
 
             _context.SaveChanges();
         }
@@ -699,10 +686,14 @@ namespace Kaenx.Classes.Helper
                 app = new ApplicationViewModel() { Hash = device.ApplicationRef.Additional };
 
 
+            string appidstr = GetItemIdAsString(appXml.Attribute("Id").Value);
+            int appid = int.Parse(appidstr, System.Globalization.NumberStyles.HexNumber);
+
             app.Number = int.Parse(appXml.Attribute("ApplicationNumber").Value);
             app.Version = int.Parse(appXml.Attribute("ApplicationVersion").Value);
             app.Mask = appXml.Attribute("MaskVersion").Value;
             app.Name = appXml.Attribute("Name").Value;
+            app.HardwareId = app2hard[appid];
 
             int manuid = int.Parse(appXml.Attribute("Id").Value.Substring(2, 4), System.Globalization.NumberStyles.HexNumber);
             ManufacturerViewModel manu = _context.Manufacturers.Single(m => m.ImportType == ImportTypes.ETS && m.ManuId == manuid);
@@ -732,14 +723,6 @@ namespace Kaenx.Classes.Helper
                 _context.Applications.Update(app);
             else
                 _context.Applications.Add(app);
-
-
-            //TODO ändern
-            Hardware2AppModel hard2App = new Hardware2AppModel(); //_context.Hardware2App.Single(h => h.ApplicationId == app.Id && h.HardwareId == device.HardwareId);
-            hard2App.Name = app.Name;
-            hard2App.Version = app.Version;
-            hard2App.Number = app.Number;
-            _context.Hardware2App.Update(hard2App);
             _context.SaveChanges();
 
 

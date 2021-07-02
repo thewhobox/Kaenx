@@ -232,7 +232,7 @@ namespace Kaenx.View
             }
 
 
-            foreach(DeviceViewModel model in _context.Devices.Where(dev => cats.Contains(dev.Id)).ToList().OrderBy(dev => dev.Name))
+            foreach(DeviceViewModel model in _context.Devices.Where(dev => cats.Contains(dev.CatalogId)).ToList().OrderBy(dev => dev.Name))
             {
                 CatalogDevices.Add(model);
                 _items.Add(model);
