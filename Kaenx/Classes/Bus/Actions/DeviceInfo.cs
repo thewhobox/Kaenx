@@ -175,9 +175,8 @@ namespace Kaenx.Classes.Bus.Actions
 
                     if (appModel.Table_Group != -1)
                     {
-                        //TODO check changed
-                        //AppSegmentViewModel segmentModel = context.AppSegments.Single(s => s.Id == appModel.Table_Group);
-                        //grpAddr = segmentModel.Address + appModel.Table_Group_Offset;
+                        AppSegmentViewModel segmentModel = context.AppSegments.Single(s => s.Id == appModel.Table_Group);
+                        grpAddr = segmentModel.Address + appModel.Table_Group_Offset;
                     }
                 }
 

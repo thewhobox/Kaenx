@@ -415,7 +415,6 @@ namespace Kaenx.Classes.Helper
                                 }
                             }
 
-                            //TODO check changed really -2?
                             if (dcom.BindedId != -2 && dcom.Name.Contains("{{dyn}}"))
                             {
                                 string value = "";
@@ -866,8 +865,6 @@ namespace Kaenx.Classes.Helper
                 }
             }
 
-            //TODO check changed get right appid
-            //string appId = Id2Element.Keys.ElementAt(0).Substring(0, Id2Element.Keys.ElementAt(0).LastIndexOf("_"));
             AppParas = new Dictionary<int, AppParameter>();
             AppParaTypes = new Dictionary<int, AppParameterTypeViewModel>();
             ComObjects = new Dictionary<int, AppComObject>();
@@ -1710,12 +1707,11 @@ namespace Kaenx.Classes.Helper
 
         public static void CalculateLineCurrent(LineMiddle line, bool noNotify = false)
         {
-            /*if (!contextC.Devices.AsEnumerable().Any(d => d.IsPowerSupply && line.Subs.Any(l => l.DeviceId == d.Id)))
+            if (!contextC.Devices.AsEnumerable().Any(d => d.IsPowerSupply && line.Subs.Any(l => l.DeviceId == d.Id)))
             {
                 line.State = LineState.Normal;
                 return;
-            }*/
-            //TODO wieder implementieren!!
+            }
 
             int maxCurrent = CalculateLineCurrentAvailible(line);
             int current = CalculateLineCurrentUsed(line);
@@ -1749,7 +1745,7 @@ namespace Kaenx.Classes.Helper
         {
             int maxCurrent = 0;
 
-            /*foreach (LineDevice dev in line.Subs)
+            foreach (LineDevice dev in line.Subs)
             {
                 if (!contextC.Devices.Any(s => s.Id == dev.DeviceId)) continue;
 
@@ -1757,8 +1753,7 @@ namespace Kaenx.Classes.Helper
 
                 if (model.IsPowerSupply)
                     maxCurrent += model.BusCurrent;
-            }*/
-            //TODO wieder implementieren
+            }
 
             return maxCurrent;
         }
@@ -1767,7 +1762,7 @@ namespace Kaenx.Classes.Helper
         {
             int current = 0;
 
-            /*foreach (LineDevice dev in line.Subs)
+            foreach (LineDevice dev in line.Subs)
             {
                 if (!contextC.Devices.Any(s => s.Id == dev.DeviceId)) continue;
 
@@ -1775,8 +1770,7 @@ namespace Kaenx.Classes.Helper
 
                 if (!model.IsPowerSupply)
                     current += model.BusCurrent;
-            }*/
-            //Todo wieder implementieren
+            }
 
             return current;
         }

@@ -237,8 +237,7 @@ namespace Kaenx.Views.Easy.Controls
 
 
                 CatalogContext co = new CatalogContext();
-                //TODO check changed
-                foreach (AppParameter para in co.AppParameters.Where(p => true)) //p.ApplicationId == adds.ApplicationId))
+                foreach (AppParameter para in co.AppParameters.Where(p => p.ApplicationId == adds.ApplicationId))
                 {
                     if (!Id2Param.ContainsKey(para.Id))
                     {

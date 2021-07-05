@@ -1216,8 +1216,6 @@ namespace Kaenx.Classes.Helper
                 {
                     ParameterId = GetItemId(para.Attribute("Id").Value),
                     Text = para.Attribute("Text").Value,
-                    //TODO check changed first ParamTypes so we can get there IDs
-                    //ParameterTypeId = GetItemId(para.Attribute("ParameterType").Value),
                     Value = para.Attribute("Value")?.Value,
                 };
                 param.ParameterTypeId = paramTypeIds[GetItemIdAsString(para.Attribute("ParameterType").Value)];
@@ -1294,8 +1292,8 @@ namespace Kaenx.Classes.Helper
                         t2 = int.Parse(mem.Attribute("Offset").Value);
                         t3 = int.Parse(mem.Attribute("BitOffset").Value);
                         segType = SegmentTypes.Property;
-                        throw new Exception("Änderung nicht implementiert! Importhelper->1302");
-                        Log.Error("Änderung nicht implementiert! Importhelper->1302 " + union.ToString());
+                        Log.Error("Änderung nicht implementiert! Importhelper->1295 " + union.ToString());
+                        throw new Exception("Änderung nicht implementiert! Importhelper->1295");
                     } else
                     {
                         msg = "Union hat keinen bekannten Speicher! " + union.ToString();

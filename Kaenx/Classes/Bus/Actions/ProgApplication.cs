@@ -40,6 +40,9 @@ namespace Kaenx.Classes.Bus.Actions
         private Dictionary<int, AppSegmentViewModel> dataSegs = new Dictionary<int, AppSegmentViewModel>();
         private Dictionary<int, byte[]> dataMems = new Dictionary<int, byte[]>();
         private Dictionary<int, int> dataAddresses = new Dictionary<int , int>();
+        private ApplicationViewModel app;
+        private BusDevice dev;
+        private int ManuId;
 
         public string Type { get; set; }
         public LineDevice Device { get; set; }
@@ -61,9 +64,7 @@ namespace Kaenx.Classes.Bus.Actions
 
         public UnloadHelper Helper;
         public IKnxConnection Connection { get; set; }
-        private ApplicationViewModel app;
 
-        private BusDevice dev;
         public event ActionFinishedHandler Finished;
         public event PropertyChangedEventHandler PropertyChanged;
 
@@ -86,12 +87,13 @@ namespace Kaenx.Classes.Bus.Actions
             dev = new BusDevice(Device.LineName, Connection);
             TodoText = ProcedureType == ProcedureTypes.Load ? "Applikation schreiben" : "Gerät entladen";
 
+            CatalogContext _context = new CatalogContext();
+            AppAdditional adds = _context.AppAdditionals.Single(a => a.Id == Device.ApplicationId);
+            app = _context.Applications.Single(a => a.Id == Device.ApplicationId);
+            ManuId = _context.Manufacturers.Single(m => m.Id == app.Manufacturer).ManuId;
 
             if (ProcedureType == ProcedureTypes.Load || (Helper != null && (Helper.UnloadApplication || Helper.UnloadBoth)))
             {
-                CatalogContext _context = new CatalogContext();
-                AppAdditional adds = _context.AppAdditionals.Single(a => a.Id == Device.ApplicationId);
-                app = _context.Applications.Single(a => a.Id == Device.ApplicationId);
 
                 XElement temp;
                 XElement procedure = null;
@@ -413,8 +415,9 @@ namespace Kaenx.Classes.Bus.Actions
                     try
                     {
                         value[i] = dataMems.Values.ElementAt(0)[address - offset + i];
-                    } catch{
-
+                    } catch(Exception ex)
+                    {
+                        Log.Error(ex, "Fehler beim zusammenstellen des Speichers");
                     }
                 }
             }
@@ -617,17 +620,18 @@ namespace Kaenx.Classes.Bus.Actions
                     data.AddRange(tempBytes.Reverse()); // Start Address
                     data.Add(0x01); //PEI Type //TODO check to find out
 
-                    //TODO check changed where to get app id
-                    string[] appid = "".Split(""); // Device.ApplicationId.Split('-');
-                    int version = int.Parse(appid[3], System.Globalization.NumberStyles.HexNumber);
-                    int appnr = int.Parse(appid[2], System.Globalization.NumberStyles.HexNumber);
-                    int manu = int.Parse(appid[1].Substring(0, 4), System.Globalization.NumberStyles.HexNumber);
+                    //string[] appid = "".Split(""); // Device.ApplicationId.Split('-');
+                    //int version = int.Parse(appid[3], System.Globalization.NumberStyles.HexNumber);
+                    //int appnr = int.Parse(appid[2], System.Globalization.NumberStyles.HexNumber);
+                    //int manu = int.Parse(appid[1].Substring(0, 4), System.Globalization.NumberStyles.HexNumber);
 
-                    tempBytes = BitConverter.GetBytes(Convert.ToUInt16(manu));
+
+
+                    tempBytes = BitConverter.GetBytes(Convert.ToUInt16(ManuId));
                     data.AddRange(tempBytes.Reverse());
-                    tempBytes = BitConverter.GetBytes(Convert.ToUInt16(appnr));
+                    tempBytes = BitConverter.GetBytes(Convert.ToUInt16(app.Number));
                     data.AddRange(tempBytes.Reverse());
-                    data.Add(Convert.ToByte(version));
+                    data.Add(Convert.ToByte(app.Version));
                     break;
 
                 default:
@@ -642,7 +646,7 @@ namespace Kaenx.Classes.Bus.Actions
             }
             catch (Exception ex)
             {
-
+                Log.Error(ex, "Failed to write memory: " + ctrl.Attribute("SegType").Value);
             }
 
             byte[] data2 = new byte[] { 0xFF };
@@ -650,7 +654,9 @@ namespace Kaenx.Classes.Bus.Actions
             {
                 data2 = await dev.MemoryRead(46825 + int.Parse(LsmId), 1);
             }
-            catch { 
+            catch (Exception ex)
+            {
+                Log.Error(ex, "Failed to read memory: " + ctrl.Attribute("SegType").Value);
             }
 
             Dictionary<int, byte> map = new Dictionary<int, byte>() { { 4, 0x00 }, { 3, 0x02 }, { 2, 0x02 }, { 1, 0x02 } };
