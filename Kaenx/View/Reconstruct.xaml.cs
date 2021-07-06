@@ -1082,7 +1082,7 @@ namespace Kaenx.View
                     continue;
                 }
 
-                bool flag = SaveHelper.CheckConditions(obj.Conditions, Id2Param);
+                bool flag = SaveHelper.CheckConditions(_currentDevice.ApplicationId, obj.Conditions, Id2Param);
                 if (flag)
                     newObjs.Add(obj);
             }

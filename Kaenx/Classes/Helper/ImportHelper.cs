@@ -964,7 +964,7 @@ namespace Kaenx.Classes.Helper
                 contextIds.Add("com" + x.Id);
 
             foreach (AppParameter x in context.AppParameters.Where(p => p.ApplicationId == app.Id))
-                contextIds.Add("par" + x.Id);
+                contextIds.Add("par" + x.ParameterId);
 
 
             foreach (AppParameterTypeViewModel x in context.AppParameterTypes.Where(pt => pt.ApplicationId == app.Id))
@@ -1342,14 +1342,14 @@ namespace Kaenx.Classes.Helper
                 AppParameter final;
                 if (existed)
                 {
-                    final = context.AppParameters.Single(p => p.Id == pId);
+                    final = context.AppParameters.Single(p => p.ParameterId == pId && p.ApplicationId == app.Id);
                 } else
                 {
                     final = new AppParameter();
                     final.LoadPara(old);
                 }
 
-                final.Id = pId;
+                final.ParameterId = pId;
                 final.ApplicationId = app.Id;
 
                 string text = pref.Attribute("Text")?.Value;
@@ -1383,7 +1383,7 @@ namespace Kaenx.Classes.Helper
 
 
 
-
+            context.SaveChanges();
             Log.Information("ComObjectTable wird eingelesen");
             if(doc.Descendants(GetXName("ComObjectTable")).Count() != 0)
             {
@@ -1647,17 +1647,7 @@ namespace Kaenx.Classes.Helper
 
 
             Log.Information("Applikation in Datenbank speichern");
-            //try
-            //{
-            //    if (!contextIds.Contains(app.Hash))
-            //        context.Applications.Add(app);
-            //    else
-            //        context.Applications.Update(app);
-            //} catch
-            //{
-            //    context.SaveChanges();
-            //    context.Applications.Update(app);
-            //}
+            context.Applications.Update(app);
 
             try
             {

@@ -615,7 +615,7 @@ namespace Kaenx.Classes.Bus.Actions
                     continue;
                 }
 
-                bool flag = SaveHelper.CheckConditions(obj.Conditions, Id2Param);
+                bool flag = SaveHelper.CheckConditions(Device.ApplicationId, obj.Conditions, Id2Param);
                 if (flag)
                     newObjs.Add(obj);
             }

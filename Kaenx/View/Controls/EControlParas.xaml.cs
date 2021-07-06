@@ -254,7 +254,7 @@ namespace Kaenx.Views.Easy.Controls
 
                 foreach (AssignParameter assign in Assignments)
                 {
-                    bool test = SaveHelper.CheckConditions(assign.Conditions, Id2Param);
+                    bool test = SaveHelper.CheckConditions(Device.ApplicationId, assign.Conditions, Id2Param);
                     try
                     {
                         Id2Param[assign.Target].Assign = test ? assign : null;
@@ -390,7 +390,7 @@ namespace Kaenx.Views.Easy.Controls
 
             foreach (AssignParameter assign in Assignments)
             {
-                bool test = SaveHelper.CheckConditions(assign.Conditions, Id2Param);
+                bool test = SaveHelper.CheckConditions(Device.ApplicationId, assign.Conditions, Id2Param);
                 if (test)
                 {
                     Id2Param[assign.Target].Assign = assign;
@@ -404,16 +404,16 @@ namespace Kaenx.Views.Easy.Controls
             IEnumerable<IDynParameter> list3 = Hash2Param.Values.Where(p => p.Conditions.Any(c => c.SourceId == para.Id || list5.Contains(c.SourceId)));
             foreach (IDynParameter par in list3)
                 if(par.HasAccess)
-                    par.Visible = SaveHelper.CheckConditions(par.Conditions, Id2Param) ? Visibility.Visible : Visibility.Collapsed;
+                    par.Visible = SaveHelper.CheckConditions(Device.ApplicationId, par.Conditions, Id2Param) ? Visibility.Visible : Visibility.Collapsed;
 
             foreach (IDynChannel ch in Channels)
             {
                 if(ch.HasAccess)
-                    ch.Visible = SaveHelper.CheckConditions(ch.Conditions, Id2Param) ? Visibility.Visible : Visibility.Collapsed;
+                    ch.Visible = SaveHelper.CheckConditions(Device.ApplicationId, ch.Conditions, Id2Param) ? Visibility.Visible : Visibility.Collapsed;
 
                 foreach (ParameterBlock block in ch.Blocks)
                     if (block.HasAccess)
-                        block.Visible = SaveHelper.CheckConditions(block.Conditions, Id2Param) ? Visibility.Visible : Visibility.Collapsed;
+                        block.Visible = SaveHelper.CheckConditions(Device.ApplicationId, block.Conditions, Id2Param) ? Visibility.Visible : Visibility.Collapsed;
                     else
                         block.Visible = Visibility.Collapsed;
             }
@@ -505,7 +505,7 @@ namespace Kaenx.Views.Easy.Controls
                     continue;
                 }
 
-                bool flag = SaveHelper.CheckConditions(obj.Conditions, Id2Param);
+                bool flag = SaveHelper.CheckConditions(Device.ApplicationId, obj.Conditions, Id2Param);
                 if (flag)
                     newObjs.Add(obj);
             }
@@ -534,7 +534,7 @@ namespace Kaenx.Views.Easy.Controls
                         continue;
                     }
 
-                    bool flag = SaveHelper.CheckConditions(obj.Conditions, Id2Param);
+                    bool flag = SaveHelper.CheckConditions(Device.ApplicationId, obj.Conditions, Id2Param);
                     if (flag)
                         newObjs.Add(obj);
                 }

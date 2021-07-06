@@ -500,15 +500,15 @@ namespace Kaenx.Classes.Bus.Actions
 
             foreach (IDynChannel ch in Channels)
             {
-                bool vis1 = SaveHelper.CheckConditions(ch.Conditions, Id2Param);
+                bool vis1 = SaveHelper.CheckConditions(adds.ApplicationId, ch.Conditions, Id2Param);
 
                 foreach (ParameterBlock block in ch.Blocks)
                 {
-                    bool vis2 = SaveHelper.CheckConditions(block.Conditions, Id2Param);
+                    bool vis2 = SaveHelper.CheckConditions(adds.ApplicationId, block.Conditions, Id2Param);
 
                     foreach (IDynParameter para in block.Parameters)
                     {
-                        bool vis3 = SaveHelper.CheckConditions(para.Conditions, Id2Param);
+                        bool vis3 = SaveHelper.CheckConditions(adds.ApplicationId, para.Conditions, Id2Param);
 
 
                         AppParameter xpara = AppParas[para.Id];

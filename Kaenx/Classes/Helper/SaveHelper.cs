@@ -771,7 +771,7 @@ namespace Kaenx.Classes.Helper
                             try
                             {
                                 int paramId = GetItemId(reader.GetAttribute("ParamRefId"));
-                                AppParameter para = contextC.AppParameters.Single(p => p.Id == paramId);
+                                AppParameter para = contextC.AppParameters.Single(p => p.ParameterId == paramId && p.ApplicationId == adds.ApplicationId);
                                 text = para.Text;
                                 if (para.Access == AccessType.None)
                                 {
@@ -870,7 +870,7 @@ namespace Kaenx.Classes.Helper
             ComObjects = new Dictionary<int, AppComObject>();
 
             foreach (AppParameter para in contextC.AppParameters.Where(p => p.ApplicationId == adds.ApplicationId))
-                AppParas.Add(para.Id, para);
+                AppParas.Add(para.ParameterId, para);
 
             foreach (AppParameterTypeViewModel type in contextC.AppParameterTypes.Where(t => t.ApplicationId == adds.ApplicationId))
                 AppParaTypes.Add(type.Id, type);
@@ -930,17 +930,17 @@ namespace Kaenx.Classes.Helper
             foreach (IDynChannel ch in Channels)
             {
                 if(ch.HasAccess)
-                    ch.Visible = SaveHelper.CheckConditions(ch.Conditions, Id2Param) ? Visibility.Visible : Visibility.Collapsed;
+                    ch.Visible = SaveHelper.CheckConditions(adds.ApplicationId, ch.Conditions, Id2Param) ? Visibility.Visible : Visibility.Collapsed;
 
                 foreach (ParameterBlock block in ch.Blocks)
                 {
                     if(block.HasAccess)
-                        block.Visible = SaveHelper.CheckConditions(block.Conditions, Id2Param) ? Visibility.Visible : Visibility.Collapsed;
+                        block.Visible = SaveHelper.CheckConditions(adds.ApplicationId, block.Conditions, Id2Param) ? Visibility.Visible : Visibility.Collapsed;
 
                     foreach (IDynParameter para in block.Parameters)
                     {
                         if(block.HasAccess)
-                            para.Visible = SaveHelper.CheckConditions(para.Conditions, Id2Param) ? Visibility.Visible : Visibility.Collapsed;
+                            para.Visible = SaveHelper.CheckConditions(adds.ApplicationId, para.Conditions, Id2Param) ? Visibility.Visible : Visibility.Collapsed;
                     }
                 }
             }
@@ -1142,7 +1142,7 @@ namespace Kaenx.Classes.Helper
             {
                 case ParamTypes.None:
                     IDynParameter paran = new ParamNone();
-                    paran.Id = para.Id;
+                    paran.Id = para.ParameterId;
                     paran.Text = para.Text;
                     paran.SuffixText = para.SuffixText;
                     paran.Default = para.Value;
@@ -1160,7 +1160,7 @@ namespace Kaenx.Classes.Helper
                         pip = new Dynamic.ParamTextRead();
                     else
                         pip = new Dynamic.ParamText();
-                    pip.Id = para.Id;
+                    pip.Id = para.ParameterId;
                     pip.Text = para.Text;
                     pip.SuffixText = para.SuffixText;
                     pip.Default = para.Value;
@@ -1177,7 +1177,7 @@ namespace Kaenx.Classes.Helper
                 case ParamTypes.Float9:
                     Dynamic.ParamNumber pnu = new Dynamic.ParamNumber
                     {
-                        Id = para.Id,
+                        Id = para.ParameterId,
                         Text = para.Text,
                         SuffixText = para.SuffixText,
                         Value = para.Value,
@@ -1205,7 +1205,7 @@ namespace Kaenx.Classes.Helper
                         pte = new Dynamic.ParamTextRead();
                     else
                         pte = new Dynamic.ParamText();
-                    pte.Id = para.Id;
+                    pte.Id = para.ParameterId;
                     pte.Text = para.Text;
                     pte.SuffixText = para.SuffixText;
                     pte.Default = para.Value;
@@ -1229,7 +1229,7 @@ namespace Kaenx.Classes.Helper
                     {
                         Dynamic.ParamEnum pen = new Dynamic.ParamEnum
                         {
-                            Id = para.Id,
+                            Id = para.ParameterId,
                             Text = para.Text,
                             SuffixText = para.SuffixText,
                             Default = para.Value,
@@ -1245,7 +1245,7 @@ namespace Kaenx.Classes.Helper
                     {
                         Dynamic.ParamEnumTwo pent = new ParamEnumTwo
                         {
-                            Id = para.Id,
+                            Id = para.ParameterId,
                             Text = para.Text,
                             SuffixText = para.SuffixText,
                             Default = para.Value,
@@ -1264,7 +1264,7 @@ namespace Kaenx.Classes.Helper
                 case ParamTypes.CheckBox:
                     ParamCheckBox pch = new ParamCheckBox
                     {
-                        Id = para.Id,
+                        Id = para.ParameterId,
                         Text = para.Text,
                         SuffixText = para.SuffixText,
                         Default = para.Value,
@@ -1280,7 +1280,7 @@ namespace Kaenx.Classes.Helper
                 case ParamTypes.Color:
                     ParamColor pco = new ParamColor
                     {
-                        Id = para.Id,
+                        Id = para.ParameterId,
                         Text = para.Text,
                         SuffixText = para.SuffixText,
                         Default = para.Value,
@@ -1297,7 +1297,7 @@ namespace Kaenx.Classes.Helper
                     string[] tags = paraType.Tag1.Split(";");
                     ParamTime pti = new ParamTime()
                     {
-                        Id = para.Id,
+                        Id = para.ParameterId,
                         Text = para.Text,
                         Default = para.Value,
                         Value = para.Value,
@@ -1388,7 +1388,7 @@ namespace Kaenx.Classes.Helper
             Dictionary<int, AppComObject> comobjects = new Dictionary<int, AppComObject>();
             Dictionary<string, Dictionary<string, DataPointSubType>> DPST = await SaveHelper.GenerateDatapoints();
 
-            foreach (AppComObject com in contextC.AppComObjects)
+            foreach (AppComObject com in contextC.AppComObjects.Where(c => c.ApplicationId == adds.ApplicationId))
                 comobjects.Add(com.Id, com);
 
             foreach (XElement xcom in elements)
@@ -1421,11 +1421,11 @@ namespace Kaenx.Classes.Helper
             }
 
             adds.ComsAll = ObjectToByteArray(comObjects);
-            adds.ComsDefault = ObjectToByteArray(GetDefaultComs(comObjects, Id2Param));
+            adds.ComsDefault = ObjectToByteArray(GetDefaultComs(adds.ApplicationId, comObjects, Id2Param));
         }
 
         //TODO Id2Param notwendig machen!
-        public static bool CheckConditions(List<ParamCondition> conds, Dictionary<int, ViewParamModel> Id2Param)
+        public static bool CheckConditions(int applicationId, List<ParamCondition> conds, Dictionary<int, ViewParamModel> Id2Param)
         {
             Dictionary<int, string> tempValues = new Dictionary<int, string>();
             bool flag = true;
@@ -1469,7 +1469,7 @@ namespace Kaenx.Classes.Helper
                         paraValue = tempValues[cond.SourceId];
                     else
                     {
-                        AppParameter pbPara = contextC.AppParameters.Single(p => p.Id == cond.SourceId);
+                        AppParameter pbPara = contextC.AppParameters.Single(p => p.ParameterId == cond.SourceId && p.ApplicationId == applicationId);
                         paraValue = pbPara.Value;
                         tempValues.Add(cond.SourceId, paraValue);
                     }
@@ -1686,7 +1686,7 @@ namespace Kaenx.Classes.Helper
             return (conds, "");
         }
 
-        private static List<DeviceComObject> GetDefaultComs(List<DeviceComObject> comObjects, Dictionary<int, ViewParamModel>  Id2Param)
+        private static List<DeviceComObject> GetDefaultComs(int applicationId, List<DeviceComObject> comObjects, Dictionary<int, ViewParamModel>  Id2Param)
         {
             ObservableCollection<DeviceComObject> defObjs = new ObservableCollection<DeviceComObject>();
 
@@ -1698,7 +1698,7 @@ namespace Kaenx.Classes.Helper
                     continue;
                 }
 
-                if (CheckConditions(obj.Conditions, Id2Param)) //TODO ID2Param iwie generieren
+                if (CheckConditions(applicationId, obj.Conditions, Id2Param)) //TODO ID2Param iwie generieren
                     defObjs.Add(obj);
             }
             defObjs.Sort(s => s.Number);
