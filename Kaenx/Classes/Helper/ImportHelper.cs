@@ -1241,7 +1241,7 @@ namespace Kaenx.Classes.Helper
                     XElement mem = para.Elements(GetXName("Memory")).ElementAt(0);
                     string codesegment = mem.Attribute("CodeSegment").Value.Substring(mem.Attribute("CodeSegment").Value.LastIndexOf("-") + 1);
                     int segId = int.Parse(codesegment, System.Globalization.NumberStyles.HexNumber);
-                    param.SegmentId = segId;
+                    param.SegmentId = SegmentIds[segId];
                     param.Offset = int.Parse(mem.Attribute("Offset").Value);
                     param.OffsetBit = int.Parse(mem.Attribute("BitOffset").Value);
                     param.SegmentType = SegmentTypes.Memory;
@@ -1292,8 +1292,8 @@ namespace Kaenx.Classes.Helper
                         t2 = int.Parse(mem.Attribute("Offset").Value);
                         t3 = int.Parse(mem.Attribute("BitOffset").Value);
                         segType = SegmentTypes.Property;
-                        Log.Error("Änderung nicht implementiert! Importhelper->1295 " + union.ToString());
-                        throw new Exception("Änderung nicht implementiert! Importhelper->1295");
+                        Log.Error("Änderung nicht implementiert! Importhelper->1295 - Parameter in Property " + union.ToString());
+                        throw new Exception("Änderung nicht implementiert! Importhelper->1295 - Parameter in Property");
                     } else
                     {
                         msg = "Union hat keinen bekannten Speicher! " + union.ToString();

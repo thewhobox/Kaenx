@@ -461,7 +461,7 @@ namespace Kaenx.Classes.Bus.Actions
             List<AppParameter> paras = new List<AppParameter>();
 
             foreach (AppParameter para in _context.AppParameters.Where(p => p.ApplicationId == Device.ApplicationId))
-                AppParas.Add(para.Id, para);
+                AppParas.Add(para.ParameterId, para);
 
             ProjectContext _c = new ProjectContext(SaveHelper.connProject);
 
@@ -646,7 +646,7 @@ namespace Kaenx.Classes.Bus.Actions
             }
             catch (Exception ex)
             {
-                Log.Error(ex, "Failed to write memory: " + ctrl.Attribute("SegType").Value);
+                Log.Error(ex, "AllocSegment Failed to write memory: " + ctrl.Attribute("Address").Value);
             }
 
             byte[] data2 = new byte[] { 0xFF };
@@ -656,7 +656,7 @@ namespace Kaenx.Classes.Bus.Actions
             }
             catch (Exception ex)
             {
-                Log.Error(ex, "Failed to read memory: " + ctrl.Attribute("SegType").Value);
+                Log.Error(ex, "AllocSegment Failed to read memory: " + ctrl.Attribute("Address").Value);
             }
 
             Dictionary<int, byte> map = new Dictionary<int, byte>() { { 4, 0x00 }, { 3, 0x02 }, { 2, 0x02 }, { 1, 0x02 } };
@@ -986,7 +986,7 @@ namespace Kaenx.Classes.Bus.Actions
             foreach (AppParameter para in paras.Values)
             {
                 //TODO change
-                if (para.SegmentId == null) continue;
+                if (para.SegmentId == -1) continue;
                 if (!dataSegs.ContainsKey(para.SegmentId))
                 {
                     AppSegmentViewModel seg = _context.AppSegments.Single(a => a.Id == para.SegmentId);

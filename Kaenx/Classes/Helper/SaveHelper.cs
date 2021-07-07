@@ -401,7 +401,7 @@ namespace Kaenx.Classes.Helper
 
                         foreach (ComObject com in contextProject.ComObjects.Where(co => co.DeviceId == ld.UId))
                         {
-                            AppComObject comObj = contextC.AppComObjects.Single(c => c.Id == com.ComId);
+                            AppComObject comObj = contextC.AppComObjects.Single(c => c.Id == com.ComId && c.ApplicationId == ldm.ApplicationId);
                             DeviceComObject dcom = new DeviceComObject(comObj) { ParentDevice = ld };
 
                             if (!string.IsNullOrEmpty(com.Groups))
