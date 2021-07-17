@@ -201,7 +201,14 @@ namespace Kaenx.View
             bool fin = false;
             await Task.Run(async () =>
             {
-                await Helper.StartImport(DevicesList);
+                try
+                {
+                    await Helper.StartImport(DevicesList);
+                }
+                catch
+                {
+
+                }
             });
 
             BtnBack.IsEnabled = true;

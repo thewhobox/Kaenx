@@ -112,15 +112,31 @@ namespace Kaenx.Classes.Bus.Actions
 
                 CatalogContext context = new CatalogContext();
 
-                XElement manu = master.Descendants(XName.Get("Manufacturer", master.Name.NamespaceName)).Single(m => m.Attribute("Id").Value == appId.Substring(0, 6));
-                _data.Manufacturer = manu.Attribute("Name").Value;
+                XElement xmanu = master.Descendants(XName.Get("Manufacturer", master.Name.NamespaceName)).Single(m => m.Attribute("Id").Value == appId.Substring(0, 6));
+                _data.Manufacturer = xmanu.Attribute("Name").Value;
 
                 try
                 {
-                    Hardware2AppModel h2a = context.Hardware2App.First(h => h.ApplicationId == appId);
-                    DeviceViewModel dvm = context.Devices.First(d => d.HardwareId == h2a.HardwareId);
-                    _data.DeviceName = dvm.Name;
-                    _data.ApplicationName = h2a.Name + " " + h2a.VersionString;
+                    ApplicationViewModel app = null;
+
+                    try
+                    {
+                        int manu = int.Parse(appId.Substring(0, 4), System.Globalization.NumberStyles.HexNumber);
+                        int number = int.Parse(appId.Substring(4, 4), System.Globalization.NumberStyles.HexNumber);
+                        int version = int.Parse(appId.Substring(8, 2), System.Globalization.NumberStyles.HexNumber);
+                        app = context.Applications.Single(a => a.Manufacturer == manu && a.Number == number && a.Version == version);
+                    }
+                    catch { }
+
+                    if(app != null)
+                    {
+                        Hardware2AppModel h2a = context.Hardware2App.First(h => h.Id == app.HardwareId);
+                        DeviceViewModel dvm = context.Devices.First(d => d.HardwareId == h2a.Id);
+                        _data.DeviceName = dvm.Name;
+                        _data.ApplicationName = h2a.Name + " " + h2a.VersionString;
+                    }
+
+                    
                 }
                 catch
                 {
@@ -128,7 +144,8 @@ namespace Kaenx.Classes.Bus.Actions
                     _data.ApplicationName = "Applikation nicht im Katalog";
                 }
 
-                if (Device != null && !Device.ApplicationId?.StartsWith(appId) == true)
+                //TODO check change
+                if (Device != null && true) // !Device.ApplicationId?.StartsWith(appId) == true)
                 {
                     _data.Additional = "Warnung! Applikations Id im Gerät stimmt nicht mit dem im Projekt überein!";
                 }
@@ -145,9 +162,10 @@ namespace Kaenx.Classes.Bus.Actions
 
                 List<byte[]> datas = new List<byte[]>();
 
-                if (context.Applications.Any(a => a.Id == appId))
+                //TODO check change
+                if (context.Applications.Any(a => true)) //a.Id == appId))
                 {
-                    appModel = context.Applications.Single(a => a.Id == appId); //TODO check if now complete appid is returned
+                    appModel = context.Applications.Single(a => true); // a.Id == appId); //TODO check if now complete appid is returned
 
                     if (appModel.IsRelativeSegment)
                     {
@@ -155,7 +173,7 @@ namespace Kaenx.Classes.Bus.Actions
                         return;
                     }
 
-                    if (!string.IsNullOrEmpty(appModel.Table_Group))
+                    if (appModel.Table_Group != -1)
                     {
                         AppSegmentViewModel segmentModel = context.AppSegments.Single(s => s.Id == appModel.Table_Group);
                         grpAddr = segmentModel.Address + appModel.Table_Group_Offset;
@@ -197,10 +215,11 @@ namespace Kaenx.Classes.Bus.Actions
                 int assoAddr = -1;
                 if (appModel != null)
                 {
-                    if (!string.IsNullOrEmpty(appModel.Table_Assosiations))
+                    if (appModel.Table_Assosiations != null)
                     {
-                        AppSegmentViewModel segmentModel = context.AppSegments.Single(s => s.Id == appModel.Table_Assosiations);
-                        assoAddr = segmentModel.Address + appModel.Table_Assosiations_Offset;
+                        //TODO check change
+                        //AppSegmentViewModel segmentModel = context.AppSegments.Single(s => s.ApplicationId == appModel.Table_Assosiations);
+                        //assoAddr = segmentModel.Address + appModel.Table_Assosiations_Offset;
                     }
                 }
 
@@ -273,8 +292,8 @@ namespace Kaenx.Classes.Bus.Actions
                             for (int i = dmanu.Length; i < 4; i++) {
                                 dmanu = "0" + dmanu;
                             }
-                            XElement xmanu = master.Descendants(XName.Get("Manufacturer", master.Name.NamespaceName)).Single(m => m.Attribute("Id")?.Value == "M-" + dmanu);
-                            resx.Value = xmanu.Attribute("Name").Value;
+                            XElement xmanu2 = master.Descendants(XName.Get("Manufacturer", master.Name.NamespaceName)).Single(m => m.Attribute("Id")?.Value == "M-" + dmanu);
+                            resx.Value = xmanu2.Attribute("Name").Value;
                             break;
 
                         case "IndividualAddress":
@@ -345,7 +364,7 @@ namespace Kaenx.Classes.Bus.Actions
                 return;
             }
 
-            if(!string.IsNullOrEmpty(Device.ApplicationId))
+            if(Device.ApplicationId >= 0)
             {
                 Device.LoadedPA = true;
                 _ = App._dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Normal, () => SaveHelper.UpdateDevice(Device));

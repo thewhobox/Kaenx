@@ -12,7 +12,7 @@ namespace Kaenx.Classes.Dynamic
     public interface IDynParameter: INotifyPropertyChanged
     {
         [JsonProperty("i")]
-        public string Id { get; set; }
+        public int Id { get; set; }
         [JsonProperty("t")]
         public string Text { get; set; }
         [JsonProperty("h")]

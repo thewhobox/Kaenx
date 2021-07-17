@@ -190,6 +190,7 @@ namespace Kaenx.View
             catch (Exception ex)
             {
                 InfoBar info = new InfoBar();
+                info.IsOpen = true;
                 info.Title = "Fehler!";
                 info.Severity = InfoBarSeverity.Error;
                 info.Message = ex.Message;

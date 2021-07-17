@@ -10,7 +10,7 @@ namespace Kaenx.Classes.Dynamic
 {
     public interface IDynChannel
     {
-        public string Id { get; set; }
+        public int Id { get; set; }
         [JsonProperty("ha")]
         public bool HasAccess { get; set; }
         [JsonProperty("bl")]

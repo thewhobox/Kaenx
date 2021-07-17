@@ -129,8 +129,8 @@ namespace Kaenx.Classes.Project
             }
         }
 
-        public string DeviceId { get; set; }
-        public string ApplicationId { get; set; }
+        public int DeviceId { get; set; }
+        public int ApplicationId { get; set; }
 
         public LineDevice(bool isInit = false) => IsInit = isInit;
 

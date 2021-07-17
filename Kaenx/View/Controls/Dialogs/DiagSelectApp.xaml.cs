@@ -20,15 +20,15 @@ namespace Kaenx.Classes.Controls
 {
     public sealed partial class DiagSelectApp : ContentDialog
     {
-        public string ApplicationId { get; set; }
+        public int ApplicationId { get; set; }
 
-        public DiagSelectApp(string hardwareId)
+        public DiagSelectApp(int hardwareId)
         {
             this.InitializeComponent();
 
             CatalogContext context = new CatalogContext();
 
-            IEnumerable<Hardware2AppModel> apps = context.Hardware2App.Where(h => h.HardwareId == hardwareId).OrderByDescending(h => h.Version);
+            IEnumerable<ApplicationViewModel> apps = context.Applications.Where(h => h.HardwareId == hardwareId).OrderByDescending(h => h.Version);
             Apps.ItemsSource = apps;
             Apps.SelectedIndex = 0;
         }
@@ -40,7 +40,7 @@ namespace Kaenx.Classes.Controls
 
         private void ContentDialog_SecondaryButtonClick(ContentDialog sender, ContentDialogButtonClickEventArgs args)
         {
-            ApplicationId = null;
+            ApplicationId = -1;
         }
     }
 }

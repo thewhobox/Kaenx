@@ -214,7 +214,7 @@
 
 
 
-        <Border x:Name="DiagNew" Visibility="Visible">
+        <Border x:Name="DiagNew" Visibility="Collapsed">
             <Border.Background>
                 <SolidColorBrush Color="Gray" Opacity="0.7" />
             </Border.Background>

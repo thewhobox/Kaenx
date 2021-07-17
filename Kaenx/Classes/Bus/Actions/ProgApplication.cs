@@ -37,9 +37,12 @@ namespace Kaenx.Classes.Bus.Actions
 
         private List<byte> dataGroupTable = new List<byte>();
         private List<byte> dataAssoTable = new List<byte>();
-        private Dictionary<string, AppSegmentViewModel> dataSegs = new Dictionary<string, AppSegmentViewModel>();
-        private Dictionary<string, byte[]> dataMems = new Dictionary<string, byte[]>();
-        private Dictionary<string, int> dataAddresses = new Dictionary<string, int>();
+        private Dictionary<int, AppSegmentViewModel> dataSegs = new Dictionary<int, AppSegmentViewModel>();
+        private Dictionary<int, byte[]> dataMems = new Dictionary<int, byte[]>();
+        private Dictionary<int, int> dataAddresses = new Dictionary<int , int>();
+        private ApplicationViewModel app;
+        private BusDevice dev;
+        private int ManuId;
 
         public string Type { get; set; }
         public LineDevice Device { get; set; }
@@ -61,9 +64,7 @@ namespace Kaenx.Classes.Bus.Actions
 
         public UnloadHelper Helper;
         public IKnxConnection Connection { get; set; }
-        private ApplicationViewModel app;
 
-        private BusDevice dev;
         public event ActionFinishedHandler Finished;
         public event PropertyChangedEventHandler PropertyChanged;
 
@@ -86,12 +87,13 @@ namespace Kaenx.Classes.Bus.Actions
             dev = new BusDevice(Device.LineName, Connection);
             TodoText = ProcedureType == ProcedureTypes.Load ? "Applikation schreiben" : "Gerät entladen";
 
+            CatalogContext _context = new CatalogContext();
+            AppAdditional adds = _context.AppAdditionals.Single(a => a.Id == Device.ApplicationId);
+            app = _context.Applications.Single(a => a.Id == Device.ApplicationId);
+            ManuId = _context.Manufacturers.Single(m => m.Id == app.Manufacturer).ManuId;
 
             if (ProcedureType == ProcedureTypes.Load || (Helper != null && (Helper.UnloadApplication || Helper.UnloadBoth)))
             {
-                CatalogContext _context = new CatalogContext();
-                AppAdditional adds = _context.AppAdditionals.Single(a => a.Id == Device.ApplicationId);
-                app = _context.Applications.Single(a => a.Id == Device.ApplicationId);
 
                 XElement temp;
                 XElement procedure = null;
@@ -413,8 +415,9 @@ namespace Kaenx.Classes.Bus.Actions
                     try
                     {
                         value[i] = dataMems.Values.ElementAt(0)[address - offset + i];
-                    } catch{
-
+                    } catch(Exception ex)
+                    {
+                        Log.Error(ex, "Fehler beim zusammenstellen des Speichers");
                     }
                 }
             }
@@ -453,12 +456,12 @@ namespace Kaenx.Classes.Bus.Actions
 
         private List<AppParameter> GetVisibleParams(AppAdditional adds)
         {
-            Dictionary<string, AppParameter> AppParas = new Dictionary<string, AppParameter>();
-            Dictionary<string, ChangeParamModel> ParaChanges = new Dictionary<string, ChangeParamModel>();
+            Dictionary<int, AppParameter> AppParas = new Dictionary<int, AppParameter>();
+            Dictionary<int, ChangeParamModel> ParaChanges = new Dictionary<int, ChangeParamModel>();
             List<AppParameter> paras = new List<AppParameter>();
 
             foreach (AppParameter para in _context.AppParameters.Where(p => p.ApplicationId == Device.ApplicationId))
-                AppParas.Add(para.Id, para);
+                AppParas.Add(para.ParameterId, para);
 
             ProjectContext _c = new ProjectContext(SaveHelper.connProject);
 
@@ -472,7 +475,7 @@ namespace Kaenx.Classes.Bus.Actions
                 }
             }
 
-            Dictionary<string, ViewParamModel> Id2Param = new Dictionary<string, ViewParamModel>();
+            Dictionary<int, ViewParamModel> Id2Param = new Dictionary<int, ViewParamModel>();
             List<IDynChannel> Channels = SaveHelper.ByteArrayToObject<List<IDynChannel>>(adds.ParamsHelper, true);
 
             foreach (IDynChannel ch in Channels)
@@ -493,19 +496,19 @@ namespace Kaenx.Classes.Bus.Actions
             }
 
 
-            Dictionary<int, List<string>> unions = new Dictionary<int, List<string>>();
+            Dictionary<int, List<int>> unions = new Dictionary<int, List<int>>();
 
             foreach (IDynChannel ch in Channels)
             {
-                bool vis1 = SaveHelper.CheckConditions(ch.Conditions, Id2Param);
+                bool vis1 = SaveHelper.CheckConditions(adds.ApplicationId, ch.Conditions, Id2Param);
 
                 foreach (ParameterBlock block in ch.Blocks)
                 {
-                    bool vis2 = SaveHelper.CheckConditions(block.Conditions, Id2Param);
+                    bool vis2 = SaveHelper.CheckConditions(adds.ApplicationId, block.Conditions, Id2Param);
 
                     foreach (IDynParameter para in block.Parameters)
                     {
-                        bool vis3 = SaveHelper.CheckConditions(para.Conditions, Id2Param);
+                        bool vis3 = SaveHelper.CheckConditions(adds.ApplicationId, para.Conditions, Id2Param);
 
 
                         AppParameter xpara = AppParas[para.Id];
@@ -523,7 +526,7 @@ namespace Kaenx.Classes.Bus.Actions
                         {
                             if (!unions.ContainsKey(xpara.UnionId))
                             {
-                                unions.Add(xpara.UnionId, new List<string>());
+                                unions.Add(xpara.UnionId, new List<int>());
                             }
 
                             if (vis1 && vis2 && vis3)
@@ -553,7 +556,7 @@ namespace Kaenx.Classes.Bus.Actions
                 }
             }
             
-            foreach(KeyValuePair<int, List<string>> union in unions.Where(x => x.Value.Count == 0))
+            foreach(KeyValuePair<int, List<int>> union in unions.Where(x => x.Value.Count == 0))
             {
                 if(AppParas.Values.Any(p => p.UnionId == union.Key && p.UnionDefault))
                 {
@@ -617,16 +620,18 @@ namespace Kaenx.Classes.Bus.Actions
                     data.AddRange(tempBytes.Reverse()); // Start Address
                     data.Add(0x01); //PEI Type //TODO check to find out
 
-                    string[] appid = Device.ApplicationId.Split('-');
-                    int version = int.Parse(appid[3], System.Globalization.NumberStyles.HexNumber);
-                    int appnr = int.Parse(appid[2], System.Globalization.NumberStyles.HexNumber);
-                    int manu = int.Parse(appid[1].Substring(0, 4), System.Globalization.NumberStyles.HexNumber);
+                    //string[] appid = "".Split(""); // Device.ApplicationId.Split('-');
+                    //int version = int.Parse(appid[3], System.Globalization.NumberStyles.HexNumber);
+                    //int appnr = int.Parse(appid[2], System.Globalization.NumberStyles.HexNumber);
+                    //int manu = int.Parse(appid[1].Substring(0, 4), System.Globalization.NumberStyles.HexNumber);
 
-                    tempBytes = BitConverter.GetBytes(Convert.ToUInt16(manu));
+
+
+                    tempBytes = BitConverter.GetBytes(Convert.ToUInt16(ManuId));
                     data.AddRange(tempBytes.Reverse());
-                    tempBytes = BitConverter.GetBytes(Convert.ToUInt16(appnr));
+                    tempBytes = BitConverter.GetBytes(Convert.ToUInt16(app.Number));
                     data.AddRange(tempBytes.Reverse());
-                    data.Add(Convert.ToByte(version));
+                    data.Add(Convert.ToByte(app.Version));
                     break;
 
                 default:
@@ -641,7 +646,7 @@ namespace Kaenx.Classes.Bus.Actions
             }
             catch (Exception ex)
             {
-
+                Log.Error(ex, "AllocSegment Failed to write memory: " + ctrl.Attribute("Address").Value);
             }
 
             byte[] data2 = new byte[] { 0xFF };
@@ -649,7 +654,9 @@ namespace Kaenx.Classes.Bus.Actions
             {
                 data2 = await dev.MemoryRead(46825 + int.Parse(LsmId), 1);
             }
-            catch { 
+            catch (Exception ex)
+            {
+                Log.Error(ex, "AllocSegment Failed to read memory: " + ctrl.Attribute("Address").Value);
             }
 
             Dictionary<int, byte> map = new Dictionary<int, byte>() { { 4, 0x00 }, { 3, 0x02 }, { 2, 0x02 }, { 1, 0x02 } };
@@ -966,8 +973,8 @@ namespace Kaenx.Classes.Bus.Actions
 
         private void GenerateApplication(AppAdditional adds)
         {
-            Dictionary<string, AppParameter> paras = new Dictionary<string, AppParameter>();
-            Dictionary<string, AppParameterTypeViewModel> types = new Dictionary<string, AppParameterTypeViewModel>();
+            Dictionary<int, AppParameter> paras = new Dictionary<int, AppParameter>();
+            Dictionary<int, AppParameterTypeViewModel> types = new Dictionary<int, AppParameterTypeViewModel>();
             List<int> changed = new List<int>();
 
             foreach (AppParameter para in GetVisibleParams(adds))
@@ -978,7 +985,8 @@ namespace Kaenx.Classes.Bus.Actions
 
             foreach (AppParameter para in paras.Values)
             {
-                if (para.SegmentId == null) continue;
+                //TODO change
+                if (para.SegmentId == -1) continue;
                 if (!dataSegs.ContainsKey(para.SegmentId))
                 {
                     AppSegmentViewModel seg = _context.AppSegments.Single(a => a.Id == para.SegmentId);

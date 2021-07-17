@@ -28,6 +28,7 @@ using Windows.UI.Core;
 using Windows.ApplicationModel.Resources;
 using Windows.UI.ViewManagement;
 using Kaenx.DataContext.Export;
+using Kaenx.DataContext.Import;
 
 // The Blank Page item template is documented at http://go.microsoft.com/fwlink/?LinkId=234238
 
@@ -38,7 +39,8 @@ namespace Kaenx.View
     /// </summary>
     public sealed partial class Catalog : Page, INotifyPropertyChanged
     {
-        private string lastCategorie = "main";
+        private int lastCategorie = -1;
+        private ImportTypes lastType = ImportTypes.Undefined;
         private ResourceLoader loader = ResourceLoader.GetForCurrentView("Catalog");
         private ObservableCollection<DeviceViewModel> _items = new ObservableCollection<DeviceViewModel>();
         private ObservableCollection<DeviceViewModel> _catalogDevices = new ObservableCollection<DeviceViewModel>();
@@ -59,19 +61,36 @@ namespace Kaenx.View
 
             Import = new ImportDevices();
 
-            LoadDevices("main");
 
 
             var mainNode = new Classes.TVNode();
             mainNode.Content = loader.GetString("MansListAll");
-            mainNode.SectionId = "main";
+            mainNode.SectionId = -2;
             mainNode.IsExpanded = true;
-
             TreeV.RootNodes.Add(mainNode);
 
 
-            LoadSections(mainNode.SectionId, mainNode);
-            
+            var subNode = new TVNode()
+            {
+                Content = "ETS",
+                SectionId = -1,
+                ImportType = ImportTypes.ETS,
+                IsExpanded = true
+            };
+            mainNode.Children.Add(subNode);
+            subNode = new TVNode()
+            {
+                Content = "Konnekting",
+                SectionId = -1,
+                ImportType = ImportTypes.Konnekting,
+                IsExpanded = true
+            };
+            mainNode.Children.Add(subNode);
+
+            LoadDevices(-1, ImportTypes.ETS);
+            LoadDevices(-1, ImportTypes.Konnekting);
+            LoadSections(mainNode);
+
             this.DataContext = this;
 
 
@@ -191,19 +210,27 @@ namespace Kaenx.View
         private void TreeV_ItemInvoked(TreeView sender, TreeViewItemInvokedEventArgs args)
         {
             Classes.TVNode node = (Classes.TVNode)args.InvokedItem;
-            LoadDevices(node.SectionId);
+            LoadDevices(node.SectionId, node.ImportType);
         }
 
-        private async void LoadDevices(string section)
+        private async void LoadDevices(int section, ImportTypes type)
         {
             lastCategorie = section;
             CatalogDevices.Clear();
             _items.Clear();
-            List<string> cats = new List<string>();
+            List<int> cats = new List<int>();
             cats.Add(section);
             await Task.Delay(290);
 
-            GetSubSection(cats, section);
+            if (section == -2)
+            {
+                GetSubSection(cats, -1, ImportTypes.ETS);
+                GetSubSection(cats, -1, ImportTypes.Konnekting);
+            } else
+            {
+                GetSubSection(cats, section, type);
+            }
+
 
             foreach(DeviceViewModel model in _context.Devices.Where(dev => cats.Contains(dev.CatalogId)).ToList().OrderBy(dev => dev.Name))
             {
@@ -212,19 +239,19 @@ namespace Kaenx.View
             }
         }
 
-        private void GetSubSection(List<string> list, string section)
+        private void GetSubSection(List<int> list, int section, ImportTypes type)
         {
-            IEnumerable<CatalogViewModel> sections = _context.Sections.Where(sec => sec.ParentId == section);
+            IEnumerable<CatalogViewModel> sections = _context.Sections.Where(sec => sec.ImportType == type && sec.ParentId == section);
             foreach (CatalogViewModel cat in sections)
             {
                 if (!list.Contains(cat.Id)) list.Add(cat.Id);
-                GetSubSection(list, cat.Id);
+                GetSubSection(list, cat.Id, type);
             }
         }
 
-        private void LoadSections(string section, TreeViewNode node)
+        private void LoadSections(TVNode node)
         {
-            IEnumerable<CatalogViewModel> sections = _context.Sections.Where(sec => sec.ParentId == section);
+            IEnumerable<CatalogViewModel> sections = _context.Sections.Where(sec => sec.ParentId == node.SectionId);
 
             foreach(CatalogViewModel sec in sections)
             {
@@ -232,7 +259,7 @@ namespace Kaenx.View
                 secNode.Content = sec.Name;
                 secNode.SectionId = sec.Id;
                 node.Children.Add(secNode);
-                LoadSections(sec.Id, secNode);
+                LoadSections(secNode);
             }
         }
 
@@ -248,7 +275,7 @@ namespace Kaenx.View
             BarDelete.IsEnabled = true;
 
             List<string> apps = new List<string>();
-            IEnumerable<Hardware2AppModel> models = _context.Hardware2App.Where(h => h.HardwareId == device.HardwareId).OrderByDescending(h => h.Version);
+            IEnumerable<Hardware2AppModel> models = _context.Hardware2App.Where(h => h.Id == device.HardwareId).OrderByDescending(h => h.Version);
 
             foreach(Hardware2AppModel model in models)
             {
@@ -319,7 +346,9 @@ namespace Kaenx.View
 
         private void ClickDelete(object sender, RoutedEventArgs e)
         {
-            foreach(DeviceViewModel device in CatalogDeviceList.SelectedItems)
+
+            //TODO richtig machen!
+            /*foreach(DeviceViewModel device in CatalogDeviceList.SelectedItems)
             {
                 _context.Devices.Remove(device);
 
@@ -375,7 +404,15 @@ namespace Kaenx.View
             }
 
             _context.SaveChanges();
-            LoadDevices(lastCategorie);
+            if(lastType == ImportTypes.Undefined)
+            {
+                LoadDevices(lastCategorie, ImportTypes.ETS);
+                LoadDevices(lastCategorie, ImportTypes.Konnekting);
+            } else
+            {
+                LoadDevices(lastCategorie, lastType);
+            }
+            */
         }
 
         private async void HyperlinkChangeLang_Click(Windows.UI.Xaml.Documents.Hyperlink sender, Windows.UI.Xaml.Documents.HyperlinkClickEventArgs args)
