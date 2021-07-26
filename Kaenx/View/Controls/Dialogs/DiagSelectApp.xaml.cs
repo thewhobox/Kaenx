@@ -35,7 +35,7 @@ namespace Kaenx.Classes.Controls
 
         private void ContentDialog_PrimaryButtonClick(ContentDialog sender, ContentDialogButtonClickEventArgs args)
         {
-            ApplicationId = ((Hardware2AppModel)Apps.SelectedItem).ApplicationId;
+            //ApplicationId = ((Hardware2AppModel)Apps.SelectedItem).ApplicationId;
         }
 
         private void ContentDialog_SecondaryButtonClick(ContentDialog sender, ContentDialogButtonClickEventArgs args)
