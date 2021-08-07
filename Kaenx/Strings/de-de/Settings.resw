@@ -123,6 +123,9 @@
   <data name="TabConnections.Header" xml:space="preserve">
     <value>Verbindungen</value>
   </data>
+  <data name="TabCredits.Header" xml:space="preserve">
+    <value>Credits</value>
+  </data>
   <data name="TabGeneral.Header" xml:space="preserve">
     <value>Allgemein</value>
   </data>

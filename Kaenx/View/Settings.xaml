@@ -18,6 +18,9 @@
             <PivotItem x:Uid="/Settings/TabConnections">
                 <ctrl:SBusConnections />
             </PivotItem>
+            <PivotItem x:Uid="/Settings/TabCredits">
+                <ctrl:SCredits />
+            </PivotItem>
         </Pivot>
 
         <StackPanel x:Name="InfoPanel" VerticalAlignment="Bottom" MaxWidth="800" />
