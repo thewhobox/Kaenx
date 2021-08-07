@@ -29,6 +29,7 @@ using Windows.ApplicationModel.Resources;
 using Windows.UI.ViewManagement;
 using Kaenx.DataContext.Export;
 using Kaenx.DataContext.Import;
+using Kaenx.DataContext.Import.Manager;
 
 // The Blank Page item template is documented at http://go.microsoft.com/fwlink/?LinkId=234238
 
@@ -39,6 +40,7 @@ namespace Kaenx.View
     /// </summary>
     public sealed partial class Catalog : Page, INotifyPropertyChanged
     {
+        private bool wasFromMain = false;
         private int lastCategorie = -1;
         private ImportTypes lastType = ImportTypes.Undefined;
         private ResourceLoader loader = ResourceLoader.GetForCurrentView("Catalog");
@@ -49,7 +51,8 @@ namespace Kaenx.View
             get { return _catalogDevices; }
             set { _catalogDevices = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("CatalogDevices")); }
         }
-        public ImportDevices Import { get; set; }
+
+        public ObservableCollection<ImportDevice> DeviceList { get; set; } = new ObservableCollection<ImportDevice>();
 
         private CatalogContext _context = new CatalogContext();
 
@@ -58,10 +61,6 @@ namespace Kaenx.View
         public Catalog()
         {
             this.InitializeComponent();
-
-            Import = new ImportDevices();
-
-
 
             var mainNode = new Classes.TVNode();
             mainNode.Content = loader.GetString("MansListAll");
@@ -102,7 +101,7 @@ namespace Kaenx.View
             if(e.Parameter is StorageFile)
             {
                 PrepareImport(e.Parameter as StorageFile);
-                Import.wasFromMain = true;
+                wasFromMain = true;
                 ApplicationView.GetForCurrentView().Title = loader.GetString("WindowTitle");
 
                 var currentView = SystemNavigationManager.GetForCurrentView();
@@ -110,7 +109,7 @@ namespace Kaenx.View
                 currentView.BackRequested += CurrentView_BackRequested;
             } else if(e.Parameter is string && e.Parameter.ToString() == "main") 
             {
-                Import.wasFromMain = true;
+                wasFromMain = true;
                 ApplicationView.GetForCurrentView().Title = loader.GetString("WindowTitle");
 
                 var currentView = SystemNavigationManager.GetForCurrentView();
@@ -138,6 +137,7 @@ namespace Kaenx.View
         {
             FileOpenPicker picker = new FileOpenPicker();
             picker.FileTypeFilter.Add(".knxprod");
+            picker.FileTypeFilter.Add(".xml");
             StorageFile file = await picker.PickSingleFileAsync();
             PrepareImport(file);
         }
@@ -146,9 +146,10 @@ namespace Kaenx.View
         {
             if (file == null) return;
 
+
             try
-            {    
-                await file.CopyAsync(ApplicationData.Current.TemporaryFolder, "temp.knxprod", NameCollisionOption.ReplaceExisting);
+            {
+                await file.CopyAsync(ApplicationData.Current.TemporaryFolder, file.Name, NameCollisionOption.ReplaceExisting);
             }
             catch (Exception ex)
             {
@@ -159,52 +160,62 @@ namespace Kaenx.View
                 return;
             }
             
-            StorageFile file2 = await ApplicationData.Current.TemporaryFolder.GetFileAsync("temp.knxprod");
-            Import.Archive = ZipFile.Open(file2.Path, ZipArchiveMode.Read);
-            ImportHelper helper = new ImportHelper();
-            bool success = await helper.GetDeviceList(Import);
+            StorageFile file2 = await ApplicationData.Current.TemporaryFolder.GetFileAsync(file.Name);
 
-            if (!success)
+            IManager manager = ImportManager.GetImportManager(file2.Path);
+            manager.Begin();
+            DeviceList.Clear();
+            foreach(ImportDevice dev in manager.GetDeviceList())
             {
-                //todo blabla
-                ViewHelper.Instance.ShowNotification("main", "Es trat ein Fehler beim auslesen der Geräte auf.", 3000, Microsoft.UI.Xaml.Controls.InfoBarSeverity.Error);
-                return;
+                DeviceList.Add(dev);
             }
+
+
+            //Import.Archive = ZipFile.Open(file2.Path, ZipArchiveMode.Read);
+            //ImportHelper helper = new ImportHelper();
+            //bool success = await helper.GetDeviceList(Import);
+
+            //if (!success)
+            //{
+            //    //todo blabla
+            //    ViewHelper.Instance.ShowNotification("main", "Es trat ein Fehler beim auslesen der Geräte auf.", 3000, Microsoft.UI.Xaml.Controls.InfoBarSeverity.Error);
+            //    return;
+            //}
 
             GridImportDevices.Visibility = Visibility.Visible;
 
-            if (!string.IsNullOrEmpty(Import.SelectedLanguage))
-                OutSelectedLang.Text = new System.Globalization.CultureInfo(Import.SelectedLanguage).DisplayName;
+            //if (!string.IsNullOrEmpty(Import.SelectedLanguage))
+            //    OutSelectedLang.Text = new System.Globalization.CultureInfo(Import.SelectedLanguage).DisplayName;
 
         }
 
         private async void ClickCancel(object sender, RoutedEventArgs e)
         {
-            Import.Archive.Dispose();
-            GridImportDevices.Visibility = Visibility.Collapsed;
-            try
-            {
-                StorageFile file = await ApplicationData.Current.TemporaryFolder.GetFileAsync("temp.knxprod");
-                await file.DeleteAsync();
-            }
-            catch { }
+            //Import.Archive.Dispose();
+            //GridImportDevices.Visibility = Visibility.Collapsed;
+            //try
+            //{
+            //    StorageFile file = await ApplicationData.Current.TemporaryFolder.GetFileAsync("temp.knxprod");
+            //    await file.DeleteAsync();
+            //}
+            //catch { }
         }
 
         private void ClickSelectAll(object sender, RoutedEventArgs e)
         {
-            foreach(Kaenx.Classes.Device device in Import.DeviceList)
-            {
-                device.SlideSettings.IsSelected = true;
-            }
+            //foreach(Kaenx.Classes.Device device in Import.DeviceList)
+            //{
+            //    device.SlideSettings.IsSelected = true;
+            //}
 
-            Frame rootFrame = this.Parent as Frame;
-            rootFrame.Navigate(typeof(Import), Import);
+            //Frame rootFrame = this.Parent as Frame;
+            //rootFrame.Navigate(typeof(Import), Import);
         }
 
         private void ClickSelected(object sender, RoutedEventArgs e)
         {
-            Frame rootFrame = this.Parent as Frame;
-            rootFrame.Navigate(typeof(Import), Import);
+            //Frame rootFrame = this.Parent as Frame;
+            //rootFrame.Navigate(typeof(Import), Import);
         }
 
         private void TreeV_ItemInvoked(TreeView sender, TreeViewItemInvokedEventArgs args)
@@ -417,25 +428,25 @@ namespace Kaenx.View
 
         private async void HyperlinkChangeLang_Click(Windows.UI.Xaml.Documents.Hyperlink sender, Windows.UI.Xaml.Documents.HyperlinkClickEventArgs args)
         {
-            Import.SelectedLanguage = null;
-            ImportHelper helper = new ImportHelper();
-            await helper.GetDeviceList(Import, true);
+            //Import.SelectedLanguage = null;
+            //ImportHelper helper = new ImportHelper();
+            //await helper.GetDeviceList(Import, true);
         }
 
         private void ImportList_ItemClick(object sender, ItemClickEventArgs e)
         {
-            if (e.ClickedItem is Kaenx.Classes.Device)
-            {
-                Kaenx.Classes.Device device = (Kaenx.Classes.Device)e.ClickedItem;
-                device.SlideSettings.IsSelected = !device.SlideSettings.IsSelected;
+            //if (e.ClickedItem is Kaenx.Classes.Device)
+            //{
+            //    Kaenx.Classes.Device device = (Kaenx.Classes.Device)e.ClickedItem;
+            //    device.SlideSettings.IsSelected = !device.SlideSettings.IsSelected;
 
-                int count = Import.DeviceList.Where<Kaenx.Classes.Device>(d => d.SlideSettings.IsSelected == true).Count();
+            //    int count = Import.DeviceList.Where<Kaenx.Classes.Device>(d => d.SlideSettings.IsSelected == true).Count();
 
-                if (count == 0)
-                    ButtonImportSelected.IsEnabled = false;
-                else
-                    ButtonImportSelected.IsEnabled = true;
-            }
+            //    if (count == 0)
+            //        ButtonImportSelected.IsEnabled = false;
+            //    else
+            //        ButtonImportSelected.IsEnabled = true;
+            //}
         }
 
         private async void ClickExport(object sender, RoutedEventArgs e)

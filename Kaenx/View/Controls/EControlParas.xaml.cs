@@ -3,6 +3,7 @@ using Kaenx.Classes.Dynamic;
 using Kaenx.Classes.Helper;
 using Kaenx.Classes.Project;
 using Kaenx.DataContext.Catalog;
+using Kaenx.DataContext.Import;
 using Kaenx.DataContext.Project;
 using Kaenx.View.Controls;
 using Serilog;
@@ -135,15 +136,7 @@ namespace Kaenx.Views.Easy.Controls
                 }
             }
 
-            try
-            {
-                _ = Load();
-            }
-            catch (Exception ex)
-            {
-                Log.Error(ex, "Laden der Parameter fehlgeschlagen!");
-                ViewHelper.Instance.ShowNotification("main", ex.Message, 4000, Microsoft.UI.Xaml.Controls.InfoBarSeverity.Error);
-            }
+            _ = Load();
         }
 
         public void StartRead()
@@ -160,8 +153,8 @@ namespace Kaenx.Views.Easy.Controls
 
                 await Task.Delay(1);
                 AppAdditional adds = _context.AppAdditionals.Single(a => a.Id == Device.ApplicationId);
-                comObjects = SaveHelper.ByteArrayToObject<List<DeviceComObject>>(adds.ComsAll);
-                Channels = SaveHelper.ByteArrayToObject<List<IDynChannel>>(adds.ParamsHelper, true);
+                //comObjects = SaveHelper.ByteArrayToObject<List<DeviceComObject>>(adds.ComsAll);
+                Channels = FunctionHelper.ByteArrayToObject<List<IDynChannel>>(adds.ParamsHelper, "Kaenx.DataContext.Import.Dynamic");
                 Bindings = SaveHelper.ByteArrayToObject<List<ParamBinding>>(adds.Bindings);
                 Assignments = SaveHelper.ByteArrayToObject<List<AssignParameter>>(adds.Assignments);
 
@@ -295,9 +288,10 @@ namespace Kaenx.Views.Easy.Controls
                 ViewHelper.Instance.ShowNotification("main", "Geladen nach: " + watch.Elapsed.TotalSeconds + "s", 3000);
 
             }
-            catch
+            catch (Exception ex)
             {
-
+                Log.Error(ex, "Laden der Parameter fehlgeschlagen!");
+                ViewHelper.Instance.ShowNotification("main", ex.Message, 4000, Microsoft.UI.Xaml.Controls.InfoBarSeverity.Error);
             }
         }
 

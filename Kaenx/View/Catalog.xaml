@@ -169,7 +169,7 @@
                     </TextBlock>
                 </StackPanel>
 
-                <ListView Grid.Row="1" Grid.ColumnSpan="3" x:Name="ImportList" ItemsSource="{Binding Import.DeviceList}" SelectionMode="None" ItemClick="ImportList_ItemClick" IsItemClickEnabled="True" >
+                <ListView Grid.Row="1" Grid.ColumnSpan="3" x:Name="ImportList" ItemsSource="{Binding DeviceList}" SelectionMode="None" ItemClick="ImportList_ItemClick" IsItemClickEnabled="True" >
                     <ListView.ItemContainerStyle>
                         <Style TargetType="ListViewItem">
                             <Setter Property="HorizontalContentAlignment" Value="Stretch" />

@@ -380,9 +380,13 @@ namespace Kaenx.View
             if (_context.AppAdditionals.Any(a => a.Id == device.ApplicationId))
             {
                 AppAdditional adds = _context.AppAdditionals.Single(a => a.Id == device.ApplicationId);
-                device.ComObjects = SaveHelper.ByteArrayToObject<ObservableCollection<DeviceComObject>>(adds.ComsDefault);
-                foreach (DeviceComObject com in device.ComObjects)
-                    com.DisplayName = com.Name;
+                List<int> comNumbers = SaveHelper.ByteArrayToObject<List<int>>(adds.ComsDefault);
+
+                foreach(AppComObject acom in _context.AppComObjects.Where(a => a.ApplicationId == adds.ApplicationId && comNumbers.Contains(a.Id)))
+                {
+                    DeviceComObject dcom = new DeviceComObject(acom) { ParentDevice = device };
+                    dcom.DisplayName = dcom.Name;
+                }
             }
             else
             {
