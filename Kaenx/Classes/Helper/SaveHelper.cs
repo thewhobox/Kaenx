@@ -635,18 +635,18 @@ namespace Kaenx.Classes.Helper
             Hash2Bindings = new Dictionary<string, ParamBinding>();
             Ref2Bindings = new Dictionary<int, List<ParamBinding>>();
             Assignments = new List<AssignParameter>();
-            Dictionary<int, XElement> Id2Element = new Dictionary<int, XElement>();
+            Dictionary<string, XElement> Id2Element = new Dictionary<string, XElement>();
             Dictionary<int, ParameterBlock> Id2ParamBlock = new Dictionary<int, ParameterBlock>();
             List<IDynChannel> Channels = new List<IDynChannel>();
             IDynChannel currentChannel = null;
 
             foreach(XElement ele in dynamic.Root.Descendants(XName.Get("ParameterBlock", dynamic.Root.Name.NamespaceName)))
             {
-                Id2Element.Add(GetItemId(ele.Attribute("Id").Value), ele);
+                Id2Element.Add("pb" + GetItemId(ele.Attribute("Id").Value), ele);
             }
             foreach(XElement ele in dynamic.Root.Descendants(XName.Get("Channel", dynamic.Root.Name.NamespaceName)))
             {
-                Id2Element.Add(GetItemId(ele.Attribute("Id").Value), ele);
+                Id2Element.Add("ch" + GetItemId(ele.Attribute("Id").Value), ele);
             }
 
             while (reader.Read())
@@ -752,7 +752,7 @@ namespace Kaenx.Classes.Helper
                             else
                                 cb.Text = text;
 
-                            cb.Conditions = GetConditions(Id2Element[cb.Id]);
+                            cb.Conditions = GetConditions(Id2Element["ch" + cb.Id]);
                             Channels.Add(cb);
                             currentChannel = cb;
                         }
@@ -844,7 +844,7 @@ namespace Kaenx.Classes.Helper
                         else
                             pb.Text = text;
 
-                        pb.Conditions = GetConditions(Id2Element[pb.Id]);
+                        pb.Conditions = GetConditions(Id2Element["pb" + pb.Id]);
                         currentChannel.Blocks.Add(pb);
                         Id2ParamBlock.Add(pb.Id, pb);
                         break;

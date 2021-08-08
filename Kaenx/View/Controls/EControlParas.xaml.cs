@@ -159,7 +159,7 @@ namespace Kaenx.Views.Easy.Controls
             {
 
                 await Task.Delay(1);
-                AppAdditional adds = _context.AppAdditionals.Single(a => a.Id == Device.ApplicationId);
+                AppAdditional adds = _context.AppAdditionals.Single(a => a.ApplicationId == Device.ApplicationId);
                 comObjects = SaveHelper.ByteArrayToObject<List<DeviceComObject>>(adds.ComsAll);
                 Channels = SaveHelper.ByteArrayToObject<List<IDynChannel>>(adds.ParamsHelper, true);
                 Bindings = SaveHelper.ByteArrayToObject<List<ParamBinding>>(adds.Bindings);
