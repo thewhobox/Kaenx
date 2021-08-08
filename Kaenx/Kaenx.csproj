@@ -146,6 +146,7 @@
     <Compile Include="Classes\Bus\Data\IBusData.cs" />
     <Compile Include="Classes\Bus\Data\NewDeviceData.cs" />
     <Compile Include="Classes\Bus\RemoteConnection.cs" />
+    <Compile Include="Classes\Catalog\DeviceListItem.cs" />
     <Compile Include="Classes\Converter\StateBrushConverter.cs" />
     <Compile Include="Classes\Converter\InterfaceTooltipConverter.cs" />
     <Compile Include="Classes\Converter\InterfaceGlyphConverter.cs" />

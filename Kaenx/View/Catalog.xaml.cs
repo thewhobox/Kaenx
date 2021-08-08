@@ -30,6 +30,7 @@ using Windows.UI.ViewManagement;
 using Kaenx.DataContext.Export;
 using Kaenx.DataContext.Import;
 using Kaenx.DataContext.Import.Manager;
+using Kaenx.Classes.Catalog;
 
 // The Blank Page item template is documented at http://go.microsoft.com/fwlink/?LinkId=234238
 
@@ -52,7 +53,7 @@ namespace Kaenx.View
             set { _catalogDevices = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("CatalogDevices")); }
         }
 
-        public ObservableCollection<ImportDevice> DeviceList { get; set; } = new ObservableCollection<ImportDevice>();
+        public ObservableCollection<DeviceListItem> DeviceList { get; set; } = new ObservableCollection<DeviceListItem>();
 
         private CatalogContext _context = new CatalogContext();
 
@@ -164,10 +165,18 @@ namespace Kaenx.View
 
             IManager manager = ImportManager.GetImportManager(file2.Path);
             manager.Begin();
+
+            var x = manager.GetLanguages();
+
+
             DeviceList.Clear();
             foreach(ImportDevice dev in manager.GetDeviceList())
             {
-                DeviceList.Add(dev);
+                DeviceList.Add(new DeviceListItem()
+                {
+                    Name = dev.Name,
+                    Description = dev.Description
+                }); ;
             }
 
 
@@ -184,8 +193,8 @@ namespace Kaenx.View
 
             GridImportDevices.Visibility = Visibility.Visible;
 
-            //if (!string.IsNullOrEmpty(Import.SelectedLanguage))
-            //    OutSelectedLang.Text = new System.Globalization.CultureInfo(Import.SelectedLanguage).DisplayName;
+            if (x.Count > 0)
+                OutSelectedLang.Text = new System.Globalization.CultureInfo(x[0]).DisplayName;
 
         }
 
@@ -435,18 +444,18 @@ namespace Kaenx.View
 
         private void ImportList_ItemClick(object sender, ItemClickEventArgs e)
         {
-            //if (e.ClickedItem is Kaenx.Classes.Device)
-            //{
-            //    Kaenx.Classes.Device device = (Kaenx.Classes.Device)e.ClickedItem;
-            //    device.SlideSettings.IsSelected = !device.SlideSettings.IsSelected;
+            if (e.ClickedItem is DeviceListItem)
+            {
+                DeviceListItem device = (DeviceListItem)e.ClickedItem;
+                device.SlideSettings.IsSelected = !device.SlideSettings.IsSelected;
 
-            //    int count = Import.DeviceList.Where<Kaenx.Classes.Device>(d => d.SlideSettings.IsSelected == true).Count();
+                int count = DeviceList.Where<DeviceListItem>(d => d.SlideSettings.IsSelected == true).Count();
 
-            //    if (count == 0)
-            //        ButtonImportSelected.IsEnabled = false;
-            //    else
-            //        ButtonImportSelected.IsEnabled = true;
-            //}
+                if (count == 0)
+                    ButtonImportSelected.IsEnabled = false;
+                else
+                    ButtonImportSelected.IsEnabled = true;
+            }
         }
 
         private async void ClickExport(object sender, RoutedEventArgs e)

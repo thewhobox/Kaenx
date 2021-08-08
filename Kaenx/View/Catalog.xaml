@@ -189,7 +189,7 @@
 
                                 <StackPanel Grid.Column="1" Margin="15">
                                     <TextBlock Text="{Binding Name}" FontSize="20" />
-                                    <TextBlock Text="{Binding VisibleDescription}" Foreground="{ThemeResource SystemControlForegroundBaseMediumBrush}" />
+                                    <TextBlock Text="{Binding Description}" Foreground="{ThemeResource SystemControlForegroundBaseMediumBrush}" />
                                     <TextBlock Visibility="{Binding InfoVisible}" Foreground="OrangeRed">
                                         <Run Text="Das Gerät benötigt Eigenschaften die möglicherweise nicht komplett unterstützt werden:" />
                                         <LineBreak />
