@@ -642,6 +642,7 @@ namespace Kaenx.Classes.Helper
 
             foreach(XElement ele in dynamic.Root.Descendants(XName.Get("ParameterBlock", dynamic.Root.Name.NamespaceName)))
             {
+                if(ele.Attribute("Inline")?.Value == "true") continue; //Tabellen überspringen
                 Id2Element.Add("pb" + GetItemId(ele.Attribute("Id").Value), ele);
             }
             foreach(XElement ele in dynamic.Root.Descendants(XName.Get("Channel", dynamic.Root.Name.NamespaceName)))
@@ -760,6 +761,8 @@ namespace Kaenx.Classes.Helper
 
 
                     case "ParameterBlock":
+                        if(reader.GetAttribute("Inline") == "true") continue; //Tabellen überspringen
+
                         ParameterBlock pb = new ParameterBlock { Id = GetItemId(reader.GetAttribute("Id")) };
                         if (reader.GetAttribute("Access") == "None")
                         {
@@ -998,6 +1001,54 @@ namespace Kaenx.Classes.Helper
                             assign.Value = ele.Attribute("Value").Value;
                         }
                         Assignments.Add(assign);
+                        break;
+
+                    case "ParameterBlock":
+                        if(ele.Attribute("Inline")?.Value != "true") continue; //Nur Tabellen bearbeiten
+                        ParameterBlock fakeBlock = new ParameterBlock();
+                        GetChildItems(ele, fakeBlock, textRefId, groupText);
+                        ParameterTable table = new ParameterTabe() {
+                            Id = GetItemId(ele.Attribute("Id").Value),
+                            Conditions = GetConditions(ele)
+                        };
+                        table.Parameters = fakeBlock.Parameters;
+                        
+                        foreach(XElement xrow in ele.Element(XName.Get("Rows", ele.Name.NamespaceName))) {
+                            string height = xcol.Attribute("Height")?.Value;
+                            TableRow row = new TableRow();
+                            if(!string.IsNullOrEmpty(width)) {
+                                if(width.Contains("%")){
+                                    row.Unit = UnitTypes.Percentage;
+                                    row.Width = int.Parse(width.Replace("%", ""));
+                                }
+                            }
+                            table.Rows.Add(row);
+                        }
+
+                        foreach(XElement xcol in ele.Element(XName.Get("Columns", ele.Name.NamespaceName))) {
+                            string width = xcol.Attribute("Width")?.Value;
+                            TableColumn col = new TableColumn();
+                            if(!string.IsNullOrEmpty(width)) {
+                                if(width.Contains("%")){
+                                    col.Unit = UnitTypes.Percentage;
+                                    col.Width = int.Parse(width.Replace("%", ""));
+                                }
+                            }
+                            table.Columns.Add(col);
+                        }
+
+                        foreach(XElement position in ele.Elements()){
+                            if(position.Name.LocalName == "Rows" || position.Name.LocalName == "Columns") continue;
+
+                            TablePosition pos = new TablePosition();
+                            string[] posStr = position.Attribute("Cell").Value.Split(',');
+                            pos.Row = int.Parse(posStr[0]);
+                            pos.Column = int.Parse(posStr[1]);
+                            table.Positions.Add(pos);
+                        }
+
+
+                        block.Parameters.Add(table);
                         break;
                 }
             }
