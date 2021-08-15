@@ -422,10 +422,26 @@ namespace Kaenx.View
             _ = Launcher.LaunchFolderPathAsync(ApplicationData.Current.LocalFolder.Path + "\\Logs");
         }
 
-        private void GridTemplate_RightTapped(object sender, RightTappedRoutedEventArgs e)
+        private async void GridTemplate_RightTapped(object sender, RightTappedRoutedEventArgs e)
         {
+            Debug.WriteLine("Klicked right");
+            if (_currentFlyout != null)
+            {
+                _currentFlyout.AreOpenCloseAnimationsEnabled = false;
+                _currentFlyout.Hide();
+                _currentFlyout.AreOpenCloseAnimationsEnabled = true;
+                await Task.Delay(50);
+            }
             _currentFlyout = FlyoutBase.GetAttachedFlyout((FrameworkElement)sender);
             _currentFlyout.ShowAt((FrameworkElement)sender);
+            int counter = 0;
+            while(!_currentFlyout.IsOpen && counter < 10)
+            {
+                await Task.Delay(100);
+                _currentFlyout.ShowAt((FrameworkElement)sender);
+                counter++;
+            }
+
         }
 
         //private void GridItemTapped(object sender, TappedRoutedEventArgs e)

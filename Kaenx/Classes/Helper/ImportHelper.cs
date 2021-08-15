@@ -505,7 +505,13 @@ namespace Kaenx.Classes.Helper
                 currentNamespace = catalog.Name.NamespaceName;
                 catalog = catalog.Element(GetXName("ManufacturerData")).Element(GetXName("Manufacturer")).Element(GetXName("Catalog"));
 
-                await GetSubItems(catalog, parent, devicesList);
+                try
+                {
+                    await GetSubItems(catalog, parent, devicesList);
+                }catch(Exception ex)
+                {
+
+                }
 
             }
 
@@ -537,13 +543,18 @@ namespace Kaenx.Classes.Helper
 
                         strId = strId.Substring(0, strId.LastIndexOf("-"));
 
-
-                        device.HardwareRef = new Reference()
+                        try
+                        {
+                            device.HardwareRef = new Reference()
                             {
                                 Additional = xele.Attribute("Hardware2ProgramRefId").Value,
                                 Id = int.Parse(strId),
                                 Version = int.Parse(strVer)
                             };
+                        }catch(Exception ex)
+                        {
+
+                        }
 
                         device.ProductRef = xele.Attribute("ProductRefId").Value;
                         flagHasItem = true;

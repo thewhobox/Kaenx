@@ -295,9 +295,10 @@ namespace Kaenx.Views.Easy.Controls
                 ViewHelper.Instance.ShowNotification("main", "Geladen nach: " + watch.Elapsed.TotalSeconds + "s", 3000);
 
             }
-            catch
+            catch (Exception ex)
             {
-
+                Log.Error(ex, "Laden der Parameter fehlgeschlagen!");
+                ViewHelper.Instance.ShowNotification("main", ex.Message, 4000, Microsoft.UI.Xaml.Controls.InfoBarSeverity.Error);
             }
         }
 

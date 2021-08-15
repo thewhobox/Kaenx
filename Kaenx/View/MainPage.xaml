@@ -174,16 +174,16 @@
                             <FlyoutBase.AttachedFlyout>
                                 <Flyout>
                                     <StackPanel Orientation="Horizontal" Margin="-9">
-                                        <Button Background="Transparent" BorderThickness="0" Click="OpenProject">
+                                        <Button Background="Transparent" BorderThickness="0" Click="OpenProject" ToolTipService.ToolTip="Öffnen">
                                             <SymbolIcon Symbol="OpenFile" Margin="5" />
                                         </Button>
-                                        <Button Background="Transparent" BorderThickness="0">
+                                        <Button Background="Transparent" BorderThickness="0" IsEnabled="False">
                                             <SymbolIcon Symbol="Setting" Margin="5" />
                                         </Button>
-                                        <Button Background="Transparent" BorderThickness="0">
+                                        <Button Background="Transparent" BorderThickness="0" IsEnabled="False">
                                             <SymbolIcon Symbol="Library" Margin="5" />
                                         </Button>
-                                        <Button Background="Transparent" BorderThickness="0" Click="DeleteProject">
+                                        <Button Background="Transparent" BorderThickness="0" Click="DeleteProject" ToolTipService.ToolTip="Löschen">
                                             <SymbolIcon Symbol="Delete" Margin="5" />
                                         </Button>
                                     </StackPanel>

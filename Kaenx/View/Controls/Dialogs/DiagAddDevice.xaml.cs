@@ -71,8 +71,8 @@ namespace Kaenx.View.Controls
 
             foreach (DeviceViewModel model in _context.Devices)
             {
-                if (_context.Manufacturers.Any(m => m.ManuId == model.ManufacturerId && m.ImportType == model.ImportType))
-                    model.ManufacturerName = _context.Manufacturers.Single(m => m.ManuId == model.ManufacturerId && m.ImportType == model.ImportType).Name;
+                if (_context.Manufacturers.Any(m => m.Id == model.ManufacturerId))
+                    model.ManufacturerName = _context.Manufacturers.Single(m => m.Id == model.ManufacturerId).Name;
                 else
                     model.ManufacturerName = loader.GetString("AddDeviceNoManu");
                 Devices.Add(model);
