@@ -890,6 +890,7 @@ namespace Kaenx.Classes.Helper
                 string groupText = eleCH.Attribute("Text")?.Value;
                 foreach (XElement elePB in eleCH.Descendants(XName.Get("ParameterBlock", dynamic.Root.Name.NamespaceName)))
                 {
+                    if (elePB.Attribute("Inline")?.Value == "true") continue;
                     int textRefId = -2;
                     if (elePB.Attribute("TextParameterRefId") != null)
                     {
@@ -1007,25 +1008,26 @@ namespace Kaenx.Classes.Helper
                         if(ele.Attribute("Inline")?.Value != "true") continue; //Nur Tabellen bearbeiten
                         ParameterBlock fakeBlock = new ParameterBlock();
                         GetChildItems(ele, fakeBlock, textRefId, groupText);
-                        ParameterTable table = new ParameterTabe() {
+                        ParameterTable table = new ParameterTable() {
                             Id = GetItemId(ele.Attribute("Id").Value),
                             Conditions = GetConditions(ele)
                         };
                         table.Parameters = fakeBlock.Parameters;
+                        table.Hash = "table:" + table.Id;
                         
-                        foreach(XElement xrow in ele.Element(XName.Get("Rows", ele.Name.NamespaceName))) {
-                            string height = xcol.Attribute("Height")?.Value;
+                        foreach(XElement xrow in ele.Element(XName.Get("Rows", ele.Name.NamespaceName)).Elements()) {
+                            string height = xrow.Attribute("Height")?.Value;
                             TableRow row = new TableRow();
-                            if(!string.IsNullOrEmpty(width)) {
-                                if(width.Contains("%")){
+                            if(!string.IsNullOrEmpty(height)) {
+                                if(height.Contains("%")){
                                     row.Unit = UnitTypes.Percentage;
-                                    row.Width = int.Parse(width.Replace("%", ""));
+                                    row.Height = int.Parse(height.Replace("%", ""));
                                 }
                             }
                             table.Rows.Add(row);
                         }
 
-                        foreach(XElement xcol in ele.Element(XName.Get("Columns", ele.Name.NamespaceName))) {
+                        foreach(XElement xcol in ele.Element(XName.Get("Columns", ele.Name.NamespaceName)).Elements()) {
                             string width = xcol.Attribute("Width")?.Value;
                             TableColumn col = new TableColumn();
                             if(!string.IsNullOrEmpty(width)) {

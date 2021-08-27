@@ -21,7 +21,7 @@
     <GenerateAppInstallerFile>True</GenerateAppInstallerFile>
     <AppxAutoIncrementPackageRevision>False</AppxAutoIncrementPackageRevision>
     <AppxBundle>Always</AppxBundle>
-    <AppxBundlePlatforms>x86|x64</AppxBundlePlatforms>
+    <AppxBundlePlatforms>x64</AppxBundlePlatforms>
     <AppInstallerUpdateFrequency>0</AppInstallerUpdateFrequency>
     <AppInstallerCheckForUpdateFrequency>OnApplicationRun</AppInstallerCheckForUpdateFrequency>
     <AppxPackageSigningTimestampDigestAlgorithm>SHA256</AppxPackageSigningTimestampDigestAlgorithm>
@@ -163,6 +163,7 @@
     <Compile Include="Classes\Dynamic\IDynParameter.cs" />
     <Compile Include="Classes\Dynamic\ParamBinding.cs" />
     <Compile Include="Classes\Dynamic\ParamCondition.cs" />
+    <Compile Include="Classes\Dynamic\ParameterTable.cs" />
     <Compile Include="Classes\Dynamic\ParamNone.cs" />
     <Compile Include="Classes\Dynamic\ParamEnum.cs" />
     <Compile Include="Classes\Dynamic\ParamEnumOption.cs" />
@@ -258,6 +259,9 @@
     <Compile Include="View\Controls\ListChannelModel.cs" />
     <Compile Include="View\Controls\NumberBox.xaml.cs">
       <DependentUpon>NumberBox.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="View\Controls\Parameter\TemplateTable.xaml.cs">
+      <DependentUpon>TemplateTable.xaml</DependentUpon>
     </Compile>
     <Compile Include="View\Controls\Settings\SBusConnections.xaml.cs">
       <DependentUpon>SBusConnections.xaml</DependentUpon>
@@ -508,6 +512,10 @@
       <SubType>Designer</SubType>
     </Page>
     <Page Include="View\Controls\EControlBusAction.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="View\Controls\Parameter\TemplateTable.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

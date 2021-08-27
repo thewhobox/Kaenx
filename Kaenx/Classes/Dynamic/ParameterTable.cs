@@ -37,7 +37,7 @@ namespace Kaenx.Classes.Dynamic
         public bool IsEnabled { get; set; }
 
         private Visibility _visible;
-        [JsonProperty("v")]
+        [JsonProperty("vi")]
         public Visibility Visible
         {
             get { return _visible; }
@@ -48,7 +48,7 @@ namespace Kaenx.Classes.Dynamic
         }
 
         public List<TableColumn> Columns {get;set;} = new List<TableColumn>();
-        public List<TableRow> Rows {get;set;} = new List<Rows>();
+        public List<TableRow> Rows {get;set;} = new List<TableRow>();
 
         [JsonProperty("c")]
         public List<ParamCondition> Conditions { get; set; } = new List<ParamCondition>();

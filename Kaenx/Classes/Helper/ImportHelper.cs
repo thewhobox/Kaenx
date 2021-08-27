@@ -553,7 +553,7 @@ namespace Kaenx.Classes.Helper
                             };
                         }catch(Exception ex)
                         {
-
+                            OnError?.Invoke("Fehler bei Hard2ProgID: " + ex.Message);
                         }
 
                         device.ProductRef = xele.Attribute("ProductRefId").Value;
@@ -1672,9 +1672,9 @@ namespace Kaenx.Classes.Helper
 
 
             AppAdditional adds;
-            bool existedAdds = context.AppAdditionals.Any(a => a.Id == app.Id);
+            bool existedAdds = context.AppAdditionals.Any(a => a.ApplicationId == app.Id);
             if (existedAdds)
-                adds = context.AppAdditionals.Single(a => a.Id == app.Id);
+                adds = context.AppAdditionals.Single(a => a.ApplicationId == app.Id);
             else
             {
                 adds = new AppAdditional() { ApplicationId = app.Id };
