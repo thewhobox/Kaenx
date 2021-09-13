@@ -9,10 +9,11 @@ namespace Kaenx.Classes.Bus.Data
 {
     public interface IBusData
     {
-        public string Type { get; set; }
+        public string Type { get; }
         public LineDevice Device { get; set; }
         public string Manufacturer { get; set; }
         public string SerialNumber { get; set; }
         public string ApplicationName { get; set; }
+        public string Additional { get; set; }
     }
 }

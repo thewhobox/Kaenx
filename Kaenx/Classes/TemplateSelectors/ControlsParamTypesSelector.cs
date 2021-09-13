@@ -22,6 +22,7 @@ namespace Kaenx.Classes.TemplateSelectors
         public DataTemplate Seperator { get; set; }
         public DataTemplate SeperatorBox { get; set; }
         public DataTemplate Time { get; set; }
+        public DataTemplate Table { get; set; }
         public DataTemplate None { get; set; }
 
         protected override DataTemplate SelectTemplateCore(object item)
@@ -57,6 +58,9 @@ namespace Kaenx.Classes.TemplateSelectors
 
                 case ParamTime pti:
                     return Time;
+
+                case ParameterTable ptable:
+                    return Table;
 
                 case ParamNone pnon:
                     return None;

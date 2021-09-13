@@ -20,6 +20,7 @@ using System.IO;
 using System.Text;
 using System.Text.RegularExpressions;
 using Kaenx.View;
+using Kaenx.DataContext.Import;
 
 namespace Kaenx.Classes.Helper
 {
@@ -40,13 +41,11 @@ namespace Kaenx.Classes.Helper
         public ImportDevices Imports = null;
 
         private string currentNamespace;
-        private List<ManufacturerViewModel> tempManus;
         private CatalogContext _context = new CatalogContext();
         private ResourceLoader resourceLoader = ResourceLoader.GetForCurrentView("Import");
+        private Dictionary<int, int> app2hard = new Dictionary<int, int>();
 
         private string currentAppName;
-
-
 
         public static void TranslateXml(XElement xml, string selectedLang)
         {
@@ -110,7 +109,7 @@ namespace Kaenx.Classes.Helper
 
             await ImportCatalog(deviceList);
 
-            List<string> loadedIds = new List<string>();
+            List<Reference> loadedIds = new List<Reference>();
             Dictionary<string, XElement> hards = new Dictionary<string, XElement>();
 
             foreach (DeviceImportInfo device in deviceList)
@@ -142,7 +141,7 @@ namespace Kaenx.Classes.Helper
                     catch (Exception e)
                     {
                         Log.Error(e, "Hardware Fehler!");
-                        OnError?.Invoke(device.ApplicationId + ": " + e.Message + Environment.NewLine + e.StackTrace);
+                        OnError?.Invoke(device.ApplicationRef.Additional + ": " + e.Message + Environment.NewLine + e.StackTrace);
                         device.Icon = Symbol.ReportHacked;
                         continue;
                     }
@@ -153,24 +152,22 @@ namespace Kaenx.Classes.Helper
                 await Task.Delay(10);
                 ProgressChanged?.Invoke(1);
 
-                if (device.ApplicationId != null)
+                if (device.ApplicationRef != null)
                 {
-
-                    if (!loadedIds.Contains(device.ApplicationId))
+                    if (!loadedIds.Any(l => l.Equals(device.ApplicationRef)))
                     {
                         OnDeviceChanged?.Invoke(resourceLoader.GetString("StateApp"));
                         Log.Information("---- Applikation wird importiert");
-                        Log.Information(device.ApplicationId);
+                        Log.Information($"Manu:{device.ApplicationRef.Manufacturer:X2} - AppId:{device.ApplicationRef.Id:X4} - Version:{device.ApplicationRef.Version:X2}");
 
-                        string manuId = device.ApplicationId.Substring(0, device.ApplicationId.IndexOf('_'));
-                        ZipArchiveEntry appEntry = Imports.Archive.GetEntry(manuId + "/" + device.ApplicationId + ".xml");
+                        ZipArchiveEntry appEntry = Imports.Archive.GetEntry($"{device.ApplicationRef.Additional.Substring(0,6)}/" + device.ApplicationRef.Additional + ".xml");
                         List<string> errs = new List<string>();
                         bool isOk = CheckApplication(XmlReader.Create(appEntry.Open()), errs);
 
                         if (!isOk)
                         {
                             Log.Warning("Check mit Warnungen bestanden! " + string.Join(",", errs));
-                            OnWarning?.Invoke(device.ApplicationId + ": Die Applikation hat die Überprüfung nicht bestanden. (evtl. Plugin benötigt) " + string.Join(",", errs));
+                            OnWarning?.Invoke(device.ApplicationRef.Additional + ": Die Applikation hat die Überprüfung nicht bestanden. (evtl. Plugin benötigt) " + string.Join(",", errs));
                             //_ = App._dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Normal, () => device.Icon = Symbol.ReportHacked);
                             //continue;
                         }
@@ -178,7 +175,7 @@ namespace Kaenx.Classes.Helper
                         if (errs.Count > 0)
                         {
                             Log.Error("Check mit Warnungen bestanden! " + string.Join(",", errs));
-                            OnWarning?.Invoke(device.ApplicationId + ": Die Applikation hat die Überprüfung nicht bestanden. (evtl. Plugin benötigt) " + string.Join(",", errs));
+                            OnWarning?.Invoke(device.ApplicationRef.Additional + ": Die Applikation hat die Überprüfung nicht bestanden. (evtl. Plugin benötigt) " + string.Join(",", errs));
                         }
 
                         await Task.Delay(10);
@@ -202,17 +199,18 @@ namespace Kaenx.Classes.Helper
                             Log.Error(e, "Applikation Fehler!");
                             _ = App._dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Normal, () =>
                             {
-                                OnError?.Invoke(device.ApplicationId + ": " + e.Message);
+                                OnError?.Invoke(device.ApplicationRef.Additional + ": " + e.Message);
                                 device.Icon = Symbol.ReportHacked;
                             });
                             continue;
                         }
                         Log.Information("Import Applikationen abgeschlossen");
-                        loadedIds.Add(device.ApplicationId);
+                        loadedIds.Add(device.ApplicationRef);
                     }
                     else
                     {
-                        Hardware2AppModel hard2App = _context.Hardware2App.Single(h => h.ApplicationId == device.ApplicationId && h.Name != null);
+                        //TODO check what to do here
+                        /*Hardware2AppModel hard2App = _context.Hardware2App.Single(h => h.ApplicationId == device.ApplicationRef.Additional && h.Name != null);
 
                         foreach (Hardware2AppModel model in _context.Hardware2App.Where(h => h.ApplicationId == device.ApplicationId && h.Name == null))
                         {
@@ -221,7 +219,7 @@ namespace Kaenx.Classes.Helper
                             model.Number = hard2App.Number;
                             _context.Hardware2App.Update(model);
                         }
-                        _context.SaveChanges();
+                        _context.SaveChanges();*/
                     }
                 }
                 ProgressChanged?.Invoke(5);
@@ -480,20 +478,26 @@ namespace Kaenx.Classes.Helper
             {
                 if (entry.Name != "Catalog.xml") continue;
 
-                string manu = entry.FullName.Substring(0, 6);
+                string manu = entry.FullName.Substring(2, 4);
+                int manuId = int.Parse(manu, System.Globalization.NumberStyles.HexNumber);
 
-                if (!_context.Sections.Any(s => s.Id == manu))
+                CatalogViewModel parent = null;
+
+                if (!_context.Sections.Any(s => s.ImportType == DataContext.Import.ImportTypes.ETS && s.Key == "M-" + manuId))
                 {
-                    CatalogViewModel section = null;
-                    ManufacturerViewModel man = tempManus.Find(e => e.Id == manu);
-                    section = new CatalogViewModel
+                    ManufacturerViewModel man = _context.Manufacturers.Single(m => m.ImportType == DataContext.Import.ImportTypes.ETS && m.ManuId == manuId);
+                    parent = new CatalogViewModel
                     {
-                        Id = manu,
+                        ImportType = DataContext.Import.ImportTypes.ETS,
                         Name = man.Name,
-                        ParentId = "main"
+                        ParentId = -1,
+                        Key = "M-" + man.ManuId
                     };
-                    _context.Sections.Add(section);
+                    _context.Sections.Add(parent);
                     _context.SaveChanges();
+                } else
+                {
+                    parent = _context.Sections.Single(s => s.ImportType == DataContext.Import.ImportTypes.ETS && s.Key == "M-" + manuId);
                 }
 
                 XElement catalog = XDocument.Load(entry.Open()).Root;
@@ -501,7 +505,13 @@ namespace Kaenx.Classes.Helper
                 currentNamespace = catalog.Name.NamespaceName;
                 catalog = catalog.Element(GetXName("ManufacturerData")).Element(GetXName("Manufacturer")).Element(GetXName("Catalog"));
 
-                await GetSubItems(catalog, manu, devicesList);
+                try
+                {
+                    await GetSubItems(catalog, parent, devicesList);
+                }catch(Exception ex)
+                {
+
+                }
 
             }
 
@@ -509,7 +519,7 @@ namespace Kaenx.Classes.Helper
         }
 
 
-        private async Task<bool> GetSubItems(XElement xparent, string parentSub, ObservableCollection<DeviceImportInfo> devicesList)
+        private async Task<bool> GetSubItems(XElement xparent, CatalogViewModel parent, ObservableCollection<DeviceImportInfo> devicesList)
         {
             bool flagHasItem = false;
 
@@ -520,25 +530,67 @@ namespace Kaenx.Classes.Helper
                     if(devicesList.Any(d => d.Id == xele.Attribute("Id").Value))
                     {
                         DeviceImportInfo device = devicesList.Single(d => d.Id == xele.Attribute("Id").Value);
-                        device.CatalogId = parentSub;
-                        device.HardwareRefId = xele.Attribute("Hardware2ProgramRefId").Value;
-                        device.ProductRefId = xele.Attribute("ProductRefId").Value;
+                        device.CatalogId = parent.Id;
+
+                        int manuId = int.Parse(xele.Attribute("Id").Value.Substring(2, 4), System.Globalization.NumberStyles.HexNumber);
+                        ManufacturerViewModel manu = _context.Manufacturers.Single(m => m.ImportType == ImportTypes.ETS && m.ManuId == manuId);
+                        device.ManuId = manu.Id;
+
+                        string strId = xele.Attribute("Hardware2ProgramRefId").Value.Split("_")[1];
+                        strId = strId.Substring(strId.LastIndexOf("H-") + 2);
+
+                        string strVer = strId.Substring(strId.LastIndexOf("-") + 1);
+
+                        strId = strId.Substring(0, strId.LastIndexOf("-"));
+
+                        try
+                        {
+                            device.HardwareRef = new Reference()
+                            {
+                                Additional = xele.Attribute("Hardware2ProgramRefId").Value,
+                                Id = int.Parse(strId),
+                                Version = int.Parse(strVer)
+                            };
+                        }catch(Exception ex)
+                        {
+                            OnError?.Invoke("Fehler bei Hard2ProgID: " + ex.Message);
+                        }
+
+                        device.ProductRef = xele.Attribute("ProductRefId").Value;
                         flagHasItem = true;
                     }
                 } else
                 {
-                    bool hasItem = await GetSubItems(xele, xele.Attribute("Id").Value, devicesList);
-                    if (!_context.Sections.Any(s => s.Id == xele.Attribute("Id").Value))
+                    string key = GetAttributeAsString(xele, "Id");
+                    key = key.Substring(key.LastIndexOf("CS-") + 3);
+                    CatalogViewModel section = null;
+
+                    if (!_context.Sections.Any(s => s.Key == key))
                     {
-                        CatalogViewModel section = new CatalogViewModel
+                        section = new CatalogViewModel
                         {
-                            Id = xele.Attribute("Id").Value,
+                            ImportType = ImportTypes.ETS,
+                            Key = key,
                             Name = xele.Attribute("Name")?.Value,
-                            ParentId = parentSub
+                            ParentId = parent.Id
                         };
                         _context.Sections.Add(section);
+                        _context.SaveChanges();
                     }
-                    if (hasItem) flagHasItem = true;
+                    else
+                    {
+                        section = _context.Sections.Single(s => s.Key == key);
+                    }
+                     
+                    bool hasItem = await GetSubItems(xele, section, devicesList);
+                    
+                    if (hasItem)
+                    {
+                        flagHasItem = true;
+                    } else
+                    {
+                        _context.Sections.Remove(section);
+                    }
                 }
             }
             return flagHasItem;
@@ -549,20 +601,49 @@ namespace Kaenx.Classes.Helper
         public void ImportHardware(XElement hardXML, DeviceImportInfo deviceInfo)
         {
             currentNamespace = hardXML.Name.NamespaceName;
+
+            XElement productXml = hardXML.Descendants(GetXName("Product")).Single(p => p.Attribute("Id").Value == deviceInfo.ProductRef);
+            XElement hardwareXml = productXml.Parent.Parent;
+            XElement hardware2ProgXml = hardXML.Descendants(GetXName("Hardware2Program")).Single(p => p.Attribute("Id").Value == deviceInfo.HardwareRef.Additional);
+
+            int snum = GetAttributeAsInt(hardwareXml, "SerialNumber");
+            int vnum = GetAttributeAsInt(hardwareXml, "VersionNumber");
+            Hardware2AppModel hard = null;
+            if (_context.Hardware2App.Any(h => h.ManuId == deviceInfo.ManuId && h.Number == snum && h.Version == vnum))
+            {
+                hard = _context.Hardware2App.Single(h => h.ManuId == deviceInfo.ManuId && h.Number == snum && h.Version == vnum);
+            } else
+            {
+                hard = new Hardware2AppModel()
+                {
+                    ManuId = deviceInfo.ManuId,
+                    Number = snum,
+                    Version = vnum
+                };
+                _context.Hardware2App.Add(hard);
+                _context.SaveChanges();
+            }
+
+            foreach(XElement xapp in hardwareXml.Descendants(GetXName("ApplicationProgramRef")))
+            {
+                string appidstr = GetItemIdAsString(xapp.Attribute("RefId").Value);
+                int appid = int.Parse(appidstr, System.Globalization.NumberStyles.HexNumber);
+                app2hard.Add(appid, hard.Id);
+            }
+
+
             DeviceViewModel device;
-            bool existed = _context.Devices.Any(d => d.Id == deviceInfo.ProductRefId);
+            string prodId = GetAttributeAsString(productXml, "Id");
+            prodId = prodId.Substring(prodId.LastIndexOf("-") + 1);
+
+            bool existed = _context.Devices.Any(d => d.ImportType == ImportTypes.ETS && d.Key == prodId);
 
             if (existed)
-                device = _context.Devices.Single(d => d.Id == deviceInfo.ProductRefId);
+                device = _context.Devices.Single(d => d.ImportType == ImportTypes.ETS && d.Key == prodId);
             else
-                device = new DeviceViewModel() { Id = deviceInfo.ProductRefId };
+                device = new DeviceViewModel() { ManufacturerId = deviceInfo.ManuId, Key = prodId, ImportType = ImportTypes.ETS };
 
 
-            XElement productXml = hardXML.Descendants(GetXName("Product")).Single(p => p.Attribute("Id").Value == deviceInfo.ProductRefId);
-            XElement hardwareXml = productXml.Parent.Parent;
-            XElement hardware2ProgXml = hardXML.Descendants(GetXName("Hardware2Program")).Single(p => p.Attribute("Id").Value == deviceInfo.HardwareRefId);
-
-            device.ManufacturerId = hardwareXml.Attribute("Id").Value.Substring(0,6);
             device.Name = deviceInfo.Name;
             device.VisibleDescription = deviceInfo.Description;
             device.OrderNumber = productXml.Attribute("OrderNumber").Value;
@@ -572,22 +653,31 @@ namespace Kaenx.Classes.Helper
             device.IsCoupler = GetAttributeAsBool(hardwareXml, "IsCoupler");
             device.HasApplicationProgram = GetAttributeAsBool(hardwareXml, "HasApplicationProgram");
             device.HasIndividualAddress = GetAttributeAsBool(hardwareXml, "HasIndividualAddress");
-            device.HardwareId = hardwareXml.Attribute("Id").Value;
             device.CatalogId = deviceInfo.CatalogId;
+            device.HardwareId = hard.Id;
+
+            if (device.BusCurrent == 0 && device.HasApplicationProgram)
+                device.BusCurrent = 10;
+
+            if (device.HasApplicationProgram)
+            {
+                string strId = hardware2ProgXml.Element(GetXName("ApplicationProgramRef")).Attribute("RefId").Value;
+                strId = strId.Substring(strId.IndexOf("_A-") + 3);
+                string strVer = strId.Split("-")[1];
+                strId = strId.Substring(0, strId.IndexOf("-"));
+
+                deviceInfo.ApplicationRef = new Reference()
+                {
+                    Additional = hardware2ProgXml.Element(GetXName("ApplicationProgramRef")).Attribute("RefId").Value,
+                    Id = int.Parse(strId, System.Globalization.NumberStyles.HexNumber),
+                    Version = int.Parse(strVer, System.Globalization.NumberStyles.HexNumber)
+                };
+            }
 
             if (existed)
                 _context.Devices.Update(device);
             else
                 _context.Devices.Add(device);
-
-            if (device.HasApplicationProgram)
-            {
-                deviceInfo.ApplicationId = hardware2ProgXml.Element(GetXName("ApplicationProgramRef")).Attribute("RefId").Value;
-                deviceInfo.HardwareId = device.HardwareId;
-
-                if (!_context.Hardware2App.Any(h => h.HardwareId == device.HardwareId && h.ApplicationId == deviceInfo.ApplicationId.Substring(0, 16)))
-                    _context.Hardware2App.Add(new Hardware2AppModel { HardwareId = device.HardwareId, ApplicationId = deviceInfo.ApplicationId.Substring(0, 16) });
-            }
 
             _context.SaveChanges();
         }
@@ -596,20 +686,29 @@ namespace Kaenx.Classes.Helper
         {
             currentNamespace = appXml.Name.NamespaceName;
             Log.Information("---- Applikation wird importiert");
-            Log.Information(device.ApplicationId);
+            Log.Information(device.ApplicationRef.Additional);
 
             ApplicationViewModel app;
-            if (_context.Applications.Any(a => a.Id == device.ApplicationId.Substring(0, 16)))
-                app = _context.Applications.Single(a => a.Id == device.ApplicationId.Substring(0, 16));
+            //Todo ändern
+            bool appExisted = _context.Applications.Any(a => a.Hash == device.ApplicationRef.Additional);
+            if (appExisted)
+                app = _context.Applications.Single(a => a.Hash == device.ApplicationRef.Additional);
             else
-                app = new ApplicationViewModel() { Id = device.ApplicationId.Substring(0,16) };
+                app = new ApplicationViewModel() { Hash = device.ApplicationRef.Additional };
 
+
+            string appidstr = GetItemIdAsString(appXml.Attribute("Id").Value);
+            int appid = int.Parse(appidstr, System.Globalization.NumberStyles.HexNumber);
 
             app.Number = int.Parse(appXml.Attribute("ApplicationNumber").Value);
             app.Version = int.Parse(appXml.Attribute("ApplicationVersion").Value);
             app.Mask = appXml.Attribute("MaskVersion").Value;
             app.Name = appXml.Attribute("Name").Value;
-            app.Manufacturer = int.Parse(appXml.Parent.Parent.Attribute("RefId").Value.Substring(2), System.Globalization.NumberStyles.HexNumber);
+            app.HardwareId = app2hard[appid];
+
+            int manuid = int.Parse(appXml.Attribute("Id").Value.Substring(2, 4), System.Globalization.NumberStyles.HexNumber);
+            ManufacturerViewModel manu = _context.Manufacturers.Single(m => m.ImportType == ImportTypes.ETS && m.ManuId == manuid);
+            app.Manufacturer = manu.Id;
 
             switch (appXml.Attribute("LoadProcedureStyle").Value)
             {
@@ -630,11 +729,11 @@ namespace Kaenx.Classes.Helper
                     break;
             }
 
-            Hardware2AppModel hard2App = _context.Hardware2App.Single(h => h.ApplicationId == app.Id && h.HardwareId == device.HardwareId);
-            hard2App.Name = app.Name;
-            hard2App.Version = app.Version;
-            hard2App.Number = app.Number;
-            _context.Hardware2App.Update(hard2App);
+
+            if (appExisted)
+                _context.Applications.Update(app);
+            else
+                _context.Applications.Add(app);
             _context.SaveChanges();
 
 
@@ -675,28 +774,33 @@ namespace Kaenx.Classes.Helper
 
         public void UpdateManufacturers(XElement manXML)
         {
-            tempManus = new List<ManufacturerViewModel>();
             currentNamespace = manXML.Attribute("xmlns").Value;
             XElement mans = manXML.Element(GetXName("MasterData")).Element(GetXName("Manufacturers"));
 
             foreach (XElement manEle in mans.Elements())
             {
-                ManufacturerViewModel man = new ManufacturerViewModel
+                int manuId = int.Parse(manEle.Attribute("Id").Value.Substring(2), System.Globalization.NumberStyles.HexNumber);
+                if (!_context.Manufacturers.Any(m => m.ImportType == DataContext.Import.ImportTypes.ETS && m.ManuId == manuId))
                 {
-                    Id = manEle.Attribute("Id").Value,
-                    Name = manEle.Attribute("Name").Value,
-                    KnxManufacturerId = int.Parse(manEle.Attribute("KnxManufacturerId").Value)
-                };
-
-                tempManus.Add(man);
+                    ManufacturerViewModel man = new ManufacturerViewModel
+                    {
+                        ManuId = manuId,
+                        ImportType = DataContext.Import.ImportTypes.ETS,
+                        Name = manEle.Attribute("Name").Value,
+                    };
+                    _context.Manufacturers.Add(man);
+                }
             }
+            _context.SaveChanges();
         }
 
         public async Task<List<DeviceViewModel>> CheckDevices()
         {
 
             List<DeviceViewModel> AddedDevices = new List<DeviceViewModel>();
-            List<string> DeviceIds = new List<string>();
+            
+            //Todo wieder einfügen
+            /*List<string> DeviceIds = new List<string>();
             ProgressMaxChanged(DeviceIds.Count);
             int count = 0;
 
@@ -761,44 +865,38 @@ namespace Kaenx.Classes.Helper
                 Log.Error(e, "CheckDevices Fehler!");
             }
 
-
+            */
             return AddedDevices;
         }
 
-        //Nochmal in SaveHelper
-        private string ShortId(string id)
+        private int GetItemId(string id)
         {
-            string temp = id.Substring(0, 16);
-
-
-            if (id.Contains("_R-"))
-            {
-                temp += id.Substring(id.LastIndexOf("_"));
-            }
-            else
-            {
-                temp += id.Substring(id.IndexOf("_", 16));
-            }
-
-            return temp;
+            return int.Parse(id.Substring(id.LastIndexOf("-") + 1));
+        }
+        private string GetItemIdAsString(string id)
+        {
+            return id.Substring(id.LastIndexOf("-") + 1);
         }
 
         private async Task ReadApplication(XElement doc, ApplicationViewModel app, int maxcount)
         {
             List<string> Errors = new List<string>();
-            Dictionary<string, AppParameter> Params = new Dictionary<string, AppParameter>();
-            Dictionary<string, AppComObject> ComObjects = new Dictionary<string, AppComObject>();
+            Dictionary<int, AppParameter> Params = new Dictionary<int, AppParameter>();
+            Dictionary<int, AppComObject> ComObjects = new Dictionary<int, AppComObject>();
             currentNamespace = doc.Name.NamespaceName;
             int position = 0;
-
             List<XElement> tempList;
+
+            Dictionary<string, int> paramTypeIds = new Dictionary<string, int>();
+            Dictionary<int, int> SegmentIds = new Dictionary<int, int>();
+
 
 
             tempList = doc.Descendants(GetXName("Baggage")).ToList();
             if(tempList.Count != 0)
             {
                 Log.Information("Baggages werden gespeichert");
-                ZipArchiveEntry entryBags = Imports.Archive.GetEntry(app.Id.Substring(0, 6) + "/Baggages.xml");
+                ZipArchiveEntry entryBags = Imports.Archive.GetEntry($"M-{app.Manufacturer:X4}" + "/Baggages.xml");
                 List<XElement> baggs = XDocument.Load(entryBags.Open()).Root.Descendants(GetXName("Baggage")).ToList();
                 StorageFolder appData = await ApplicationData.Current.LocalFolder.CreateFolderAsync("Baggages", CreationCollisionOption.OpenIfExists);
                 List<string> acceptedFiles = new List<string>() { ".png", ".jpeg", ".jpg", ".bmp" };
@@ -867,40 +965,47 @@ namespace Kaenx.Classes.Helper
             CatalogContext context = new CatalogContext();
 
 
+            //TODO hardwareid einlesen
 
             List<string> contextIds = new List<string>();
-            foreach (AppSegmentViewModel x in context.AppSegments)
-                contextIds.Add(x.Id);
+            foreach (AppSegmentViewModel x in context.AppSegments.Where(s => s.ApplicationId == app.Id))
+                contextIds.Add("seg" + x.SegmentId);
 
-            foreach (AppComObject x in context.AppComObjects)
-                contextIds.Add(x.Id);
+            foreach (AppComObject x in context.AppComObjects.Where(c => c.ApplicationId == app.Id))
+                contextIds.Add("com" + x.Id);
 
-            foreach (ApplicationViewModel x in context.Applications)
-                contextIds.Add(x.Id);
+            foreach (AppParameter x in context.AppParameters.Where(p => p.ApplicationId == app.Id))
+                contextIds.Add("par" + x.ParameterId);
 
-            foreach (AppParameter x in context.AppParameters)
-                contextIds.Add(x.Id);
 
-            foreach (AppParameterTypeEnumViewModel x in context.AppParameterTypeEnums)
-                contextIds.Add(x.Id);
-
-            foreach (AppParameterTypeViewModel x in context.AppParameterTypes)
-                contextIds.Add(x.Id);
+            foreach (AppParameterTypeViewModel x in context.AppParameterTypes.Where(pt => pt.ApplicationId == app.Id))
+            {
+                contextIds.Add("typ" + x.Name);
+                foreach (AppParameterTypeEnumViewModel y in context.AppParameterTypeEnums.Where(pe => pe.TypeId == x.Id))
+                    contextIds.Add("ten" + y.ParameterId);
+            }
 
             string msg = "";
             OnDeviceChanged?.Invoke(currentAppName + " ParameterTypes");
+            Dictionary<int, int> paraType2UId = new Dictionary<int, int>();
             Log.Information("Parameter Typen werden eingelesen");
-            tempList = doc.Descendants(GetXName("ParameterType")).ToList();
+            //TODO check what happens if the application has no parametertypes
+            tempList = doc.Element(GetXName("Static")).Element(GetXName("ParameterTypes")).Elements(GetXName("ParameterType")).ToList();
+            //tempList = doc.Descendants(GetXName("ParameterType")).ToList();
             foreach(XElement type in tempList)
             {
-                bool existed = contextIds.Contains(ShortId(type.Attribute("Id").Value));
+                string typeName = GetItemIdAsString(type.Attribute("Id").Value);
+                bool existed = contextIds.Contains("typ" + typeName);
                 XElement child = type.Elements().ElementAt(0);
                 AppParameterTypeViewModel paramt;
 
                 if (existed)
-                    paramt = context.AppParameterTypes.Single(p => p.Id == ShortId(type.Attribute("Id").Value));
+                    paramt = context.AppParameterTypes.Single(p => p.ApplicationId == app.Id && p.Name == typeName);
                 else
-                    paramt = new AppParameterTypeViewModel() { Id = ShortId(type.Attribute("Id").Value) };
+                    paramt = new AppParameterTypeViewModel() { 
+                        Name = typeName, 
+                        ApplicationId = app.Id
+                    };
 
 
                 switch (child.Name.LocalName)
@@ -939,27 +1044,44 @@ namespace Kaenx.Classes.Helper
                         break;
 
                     case "TypeRestriction":
+                        if (existed)
+                            context.AppParameterTypes.Update(paramt);
+                        else
+                            context.AppParameterTypes.Add(paramt);
+                        existed = true;
+                        context.SaveChanges(); // Damit die paramt schon eine ID haben
                         paramt.Type = ParamTypes.Enum;
                         paramt.Size = int.Parse(child.Attribute("SizeInBit").Value);
                         string _base = child.Attribute("Base").Value;
                         int cenu = 0;
-                        foreach (XElement en in child.Elements())
+                        foreach (XElement en in child.Elements().ToList())
                         {
-                            AppParameterTypeEnumViewModel enu = new AppParameterTypeEnumViewModel
+                            AppParameterTypeEnumViewModel enu = null;
+
+                            int id = GetItemId(en.Attribute("Id").Value);
+                            bool enExisted = contextIds.Contains("ten" + id);
+
+
+                            if (enExisted)
+                                enu = context.AppParameterTypeEnums.Single(e => e.TypeId == paramt.Id && e.ParameterId == id);
+                            else
+                                enu = new AppParameterTypeEnumViewModel
                             {
-                                ParameterId = paramt.Id,
-                                Id = en.Attribute("Id").Value
+                                TypeId = paramt.Id,
+                                ParameterId = id
                             };
                             //TODO prüfen ob langdauernde abfrage notwendig ist
-                            if (!context.AppParameterTypeEnums.Any(p => p.Id == enu.Id))
-                            {
-                                enu.Value = en.Attribute(_base).Value;
-                                enu.Text = en.Attribute("Text").Value;
-                                enu.Order = (en.Attribute("DisplayOrder") == null) ? cenu : int.Parse(en.Attribute("DisplayOrder").Value);
+                            enu.Value = en.Attribute(_base).Value;
+                            enu.Text = en.Attribute("Text").Value;
+                            enu.Order = (en.Attribute("DisplayOrder") == null) ? cenu : int.Parse(en.Attribute("DisplayOrder").Value);
+                            cenu++;
+
+                            if (enExisted)
+                                context.AppParameterTypeEnums.Update(enu);
+                            else
                                 context.AppParameterTypeEnums.Add(enu);
-                                cenu++;
-                            }
-                            
+
+
                         }
                         break;
                     case "TypeText":
@@ -980,7 +1102,7 @@ namespace Kaenx.Classes.Helper
                         break;
                     case "TypePicture":
                         paramt.Type = ParamTypes.Picture;
-                        paramt.Tag1 = child.Attribute("RefId").Value;
+                        paramt.Tag1 = GetItemId(child.Attribute("RefId").Value).ToString();
                         break;
                     case "TypeIPAddress":
                         paramt.Type = ParamTypes.IpAdress;
@@ -1003,12 +1125,12 @@ namespace Kaenx.Classes.Helper
                         break;
                 }
 
-                paramt.ApplicationId = app.Id;
-
                 if (existed)
                     context.AppParameterTypes.Update(paramt);
                 else
+                {
                     context.AppParameterTypes.Add(paramt);
+                }
                 position++;
                 ProgressAppChanged(position);
                 //del if (position % iterationToWait == 0) await Task.Delay(1);
@@ -1016,18 +1138,98 @@ namespace Kaenx.Classes.Helper
 
 
 
+            XElement table = null;
+            tempList = null;
+            if (doc.Descendants(GetXName("Code")).Count() != 0)
+            {
+                Log.Information("Code Segmente werden eingelesen");
+                table = doc.Element(GetXName("Static")).Element(GetXName("Code"));
+
+                foreach (XElement seg in table.Elements())
+                {
+                    AppSegmentViewModel aas;
+                    bool existed = false;
+
+                    switch (seg.Name.LocalName)
+                    {
+                        case "AbsoluteSegment":
+                            app.IsRelativeSegment = false;
+                            string codesegment = seg.Attribute("Id").Value.Substring(seg.Attribute("Id").Value.LastIndexOf("-") + 1);
+                            int segId = int.Parse(codesegment, System.Globalization.NumberStyles.HexNumber);
+                            existed = contextIds.Contains("seg" + segId);
+
+                            if (existed)
+                                aas = context.AppSegments.Single(a => a.ApplicationId == app.Id && a.SegmentId == segId);
+                            else
+                                aas = new AppSegmentViewModel() { SegmentId = segId };
+
+                            aas.ApplicationId = app.Id;
+                            aas.Address = int.Parse(seg.Attribute("Address").Value);
+                            aas.Size = int.Parse(seg.Attribute("Size").Value);
+                            aas.Data = seg.Element(GetXName("Data"))?.Value;
+                            aas.Mask = seg.Element(GetXName("Mask"))?.Value;
+
+                            if (existed)
+                                context.AppSegments.Update(aas);
+                            else
+                                context.AppSegments.Add(aas);
+                            break;
+
+                        case "RelativeSegment":
+                            app.IsRelativeSegment = true;
+                            int relId = GetItemId(seg.Attribute("Id").Value);
+                            existed = contextIds.Contains("seg" + relId);
+
+                            if (existed) aas = context.AppSegments.Single(a => a.ApplicationId == app.Id && a.SegmentId == relId);
+                            else aas = new AppSegmentViewModel() { Id = relId };
+
+                            aas.ApplicationId = app.Id;
+                            aas.Offset = int.Parse(seg.Attribute("Offset").Value);
+                            aas.Size = int.Parse(seg.Attribute("Size").Value);
+                            aas.LsmId = int.Parse(seg.Attribute("LoadStateMachine").Value);
+
+                            if (existed)
+                                context.AppSegments.Update(aas);
+                            else
+                                context.AppSegments.Add(aas);
+                            break;
+
+                        default:
+                            msg = "Unbekanntes Segment: " + seg.Name.LocalName;
+                            if (!Errors.Contains(msg))
+                                Errors.Add(msg);
+                            break;
+                    }
+                }
+
+                context.SaveChanges();
+                foreach(AppSegmentViewModel seg in context.AppSegments.Where(s => s.ApplicationId == app.Id))
+                {
+                    SegmentIds.Add(seg.SegmentId, seg.Id);
+                }
+            }
+            else
+                Log.Information("Keine Code Segmente vorhanden");
+
+
+
+            context.SaveChanges();
+            foreach (AppParameterTypeViewModel para in context.AppParameterTypes.Where(p => p.ApplicationId == app.Id))
+                paramTypeIds.Add(para.Name, para.Id);
+
             OnDeviceChanged?.Invoke(currentAppName + " Parameter");
             Log.Information("Parameter werden eingelesen");
-            tempList = doc.Descendants(GetXName("Parameter")).ToList();
+            tempList = doc.Element(GetXName("Static")).Element(GetXName("Parameters")).Descendants(GetXName("Parameter")).ToList();
+            //tempList = doc.Descendants(GetXName("Parameter")).ToList();
             foreach(XElement para in tempList)
             {
                 AppParameter param = new AppParameter
                 {
-                    Id = ShortId(para.Attribute("Id").Value),
+                    ParameterId = GetItemId(para.Attribute("Id").Value),
                     Text = para.Attribute("Text").Value,
-                    ParameterTypeId = ShortId(para.Attribute("ParameterType").Value),
-                    Value = para.Attribute("Value")?.Value
+                    Value = para.Attribute("Value")?.Value,
                 };
+                param.ParameterTypeId = paramTypeIds[GetItemIdAsString(para.Attribute("ParameterType").Value)];
                 string suffix = para.Attribute("SuffixText")?.Value;
                 if (!string.IsNullOrEmpty(suffix))
                     param.SuffixText = suffix;
@@ -1048,12 +1250,15 @@ namespace Kaenx.Classes.Helper
                 if (para.Elements(GetXName("Memory")).Count() > 0)
                 {
                     XElement mem = para.Elements(GetXName("Memory")).ElementAt(0);
-                    param.SegmentId = ShortId(mem.Attribute("CodeSegment").Value);
+                    string codesegment = mem.Attribute("CodeSegment").Value.Substring(mem.Attribute("CodeSegment").Value.LastIndexOf("-") + 1);
+                    int segId = int.Parse(codesegment, System.Globalization.NumberStyles.HexNumber);
+                    param.SegmentId = SegmentIds[segId];
                     param.Offset = int.Parse(mem.Attribute("Offset").Value);
                     param.OffsetBit = int.Parse(mem.Attribute("BitOffset").Value);
                     param.SegmentType = SegmentTypes.Memory;
                 }
-                Params.Add(param.Id, param);
+                //TODO implement typeid
+                Params.Add(param.ParameterId, param);
                 position++;
                 ProgressAppChanged(position);
                 //del if (position % iterationToWait == 0) await Task.Delay(1);
@@ -1061,23 +1266,28 @@ namespace Kaenx.Classes.Helper
 
 
 
+
+
             OnDeviceChanged?.Invoke(currentAppName + " ParameterUnions");
             Log.Information("Unions werden eingelesen");
-            tempList = doc.Descendants(GetXName("Union")).ToList();
+            tempList = doc.Element(GetXName("Static")).Element(GetXName("Parameters")).Elements(GetXName("Union")).ToList();
+            //tempList = doc.Descendants(GetXName("Union")).ToList();
             int unionId = 0;
             foreach (XElement union in tempList)
             {
                 unionId++;
 
                 //TODO also check for property for parameter
-                string t1 = null;
+                int t1 = -1;
                 int t2 = 0;
                 int t3 = 0;
                 SegmentTypes segType = SegmentTypes.None;
                 XElement mem = union.Element(GetXName("Memory"));
                 if (mem != null)
                 {
-                    t1 = ShortId(mem.Attribute("CodeSegment").Value);
+                    string codesegment = mem.Attribute("CodeSegment").Value.Substring(mem.Attribute("CodeSegment").Value.LastIndexOf("-") + 1);
+                    int segId = int.Parse(codesegment, System.Globalization.NumberStyles.HexNumber);
+                    t1 = SegmentIds[segId];
                     t2 = int.Parse(mem.Attribute("Offset").Value);
                     t3 = int.Parse(mem.Attribute("BitOffset").Value);
                     segType = SegmentTypes.Memory;
@@ -1088,10 +1298,13 @@ namespace Kaenx.Classes.Helper
                     {
                         //ObjectIndex="6" PropertyId="57" Offset="17" BitOffset="0"
 
-                        t1 = "Property:" + mem.Attribute("ObjectIndex").Value + ":" + mem.Attribute("PropertyId").Value;
+                        //TODO check changed get property to work
+                        t1 = -2; // "Property:" + mem.Attribute("ObjectIndex").Value + ":" + mem.Attribute("PropertyId").Value;
                         t2 = int.Parse(mem.Attribute("Offset").Value);
                         t3 = int.Parse(mem.Attribute("BitOffset").Value);
                         segType = SegmentTypes.Property;
+                        Log.Error("Änderung nicht implementiert! Importhelper->1295 - Parameter in Property " + union.ToString());
+                        throw new Exception("Änderung nicht implementiert! Importhelper->1295 - Parameter in Property");
                     } else
                     {
                         msg = "Union hat keinen bekannten Speicher! " + union.ToString();
@@ -1105,7 +1318,7 @@ namespace Kaenx.Classes.Helper
                 mem = null;
                 foreach (XElement para in union.Elements(GetXName("Parameter")))
                 {
-                    AppParameter param = Params[ShortId(para.Attribute("Id").Value)];
+                    AppParameter param = Params[GetItemId(para.Attribute("Id").Value)];
                     param.SegmentId = t1;
                     int off = int.Parse(para.Attribute("Offset").Value);
                     int offb = int.Parse(para.Attribute("BitOffset").Value);
@@ -1115,6 +1328,8 @@ namespace Kaenx.Classes.Helper
                     param.UnionId = unionId;
                     string def = para.Attribute("DefaultUnionParameter")?.Value.ToLower();
                     param.UnionDefault = def == "true" || def == "1";
+                    param.ParameterTypeId = paramTypeIds[GetItemIdAsString(para.Attribute("ParameterType").Value)];
+                    //TODO implement parameterTypeId
                 }
                 position++;
                 ProgressAppChanged(position);
@@ -1123,29 +1338,29 @@ namespace Kaenx.Classes.Helper
 
 
             OnDeviceChanged?.Invoke(currentAppName + " ParameterRefs");
-            List<string> ParamrefIds = new List<string>();
             Log.Information("ParameterRefs werden eingelesen");
-            tempList = doc.Descendants(GetXName("ParameterRef")).ToList();
+            tempList = doc.Element(GetXName("Static")).Element(GetXName("ParameterRefs")).Elements(GetXName("ParameterRef")).ToList();
+            //tempList = doc.Descendants(GetXName("ParameterRef")).ToList();
             foreach (XElement pref in tempList)
             {
                 position++;
                 ProgressAppChanged(position);
                 //del if (position % iterationToWait == 0) await Task.Delay(1);
 
-                string pId = ShortId(pref.Attribute("Id").Value);
-                AppParameter old = Params[ShortId(pref.Attribute("RefId").Value)];
-                bool existed = contextIds.Contains(pId);
+                int pId = GetItemId(pref.Attribute("Id").Value);
+                AppParameter old = Params[GetItemId(pref.Attribute("RefId").Value)];
+                bool existed = contextIds.Contains("par" + pId);
                 AppParameter final;
                 if (existed)
                 {
-                    final = context.AppParameters.Single(p => p.Id == pId);
+                    final = context.AppParameters.Single(p => p.ParameterId == pId && p.ApplicationId == app.Id);
                 } else
                 {
                     final = new AppParameter();
                     final.LoadPara(old);
                 }
 
-                final.Id = pId;
+                final.ParameterId = pId;
                 final.ApplicationId = app.Id;
 
                 string text = pref.Attribute("Text")?.Value;
@@ -1164,29 +1379,34 @@ namespace Kaenx.Classes.Helper
                     case "Read":
                         access = AccessType.Read;
                         break;
+                    case "ReadWrite":
+                        access = AccessType.Full;
+                        break;
                 }
                 final.Access = access == AccessType.Null ? old.Access : access;
 
-                ParamrefIds.Add(final.Id);
                 if (existed)
                     context.AppParameters.Update(final);
                 else
                     context.AppParameters.Add(final);
+
             }
 
 
 
-
-            XElement table = null;
+            context.SaveChanges();
             Log.Information("ComObjectTable wird eingelesen");
             if(doc.Descendants(GetXName("ComObjectTable")).Count() != 0)
             {
-                table = doc.Descendants(GetXName("ComObjectTable")).ElementAt(0);
+                table = doc.Element(GetXName("Static")).Element(GetXName("ComObjectTable"));
+                //table = doc.Descendants(GetXName("ComObjectTable")).ElementAt(0);
 
                 if (table.Attribute("CodeSegment") != null)
                 {
                     table = doc.Descendants(GetXName("ComObjectTable")).ElementAt(0);
-                    app.Table_Object = ShortId(table.Attribute("CodeSegment").Value);
+                    string tableIdStr = GetItemIdAsString(table.Attribute("CodeSegment").Value);
+                    int tableId = int.Parse(tableIdStr, System.Globalization.NumberStyles.HexNumber);
+                    app.Table_Object = SegmentIds[tableId];
                     int.TryParse(table.Attribute("Offset").Value, out int offsetObject);
                     app.Table_Object_Offset = offsetObject;
                 }
@@ -1201,7 +1421,7 @@ namespace Kaenx.Classes.Helper
                 {
                     AppComObject cobj = new AppComObject
                     {
-                        Id = ShortId(com.Attribute("Id").Value),
+                        Id = GetItemId(com.Attribute("Id").Value),
                         Text = com.Attribute("Text")?.Value,
                         FunctionText = com.Attribute("FunctionText")?.Value,
                         Number = int.Parse(com.Attribute("Number").Value),
@@ -1228,7 +1448,8 @@ namespace Kaenx.Classes.Helper
 
             OnDeviceChanged?.Invoke(currentAppName + " ComObjectRefs");
             Log.Information("ComObjectRefs werden eingelesen");
-            tempList = doc.Descendants(GetXName("ComObjectRef")).ToList();
+            tempList = doc.Element(GetXName("Static")).Element(GetXName("ComObjectRefs")).Elements(GetXName("ComObjectRef")).ToList();
+            //tempList = doc.Descendants(GetXName("ComObjectRef")).ToList();
             foreach (XElement cref in tempList)
             {
                 position++;
@@ -1237,8 +1458,8 @@ namespace Kaenx.Classes.Helper
 
                 AppComObjectRef cobjr = new AppComObjectRef
                 {
-                    Id = ShortId(cref.Attribute("Id").Value),
-                    RefId = ShortId(cref.Attribute("RefId").Value),
+                    Id = GetItemId(cref.Attribute("Id").Value),
+                    RefId = GetItemId(cref.Attribute("RefId").Value),
                     Number = cref.Attribute("Number") == null ? -1 : int.Parse(cref.Attribute("Number").Value),
                     Text = cref.Attribute("Text")?.Value,
                     FunctionText = cref.Attribute("FunctionText")?.Value
@@ -1272,11 +1493,11 @@ namespace Kaenx.Classes.Helper
                     cobjr.Flag_Write = false;
 
                 AppComObject obj = null;
-                bool existed = contextIds.Contains(cobjr.Id);
+                bool existed = contextIds.Contains("com" + cobjr.Id);
                 try
                 {
                     if (existed)
-                        obj = context.AppComObjects.Single(c => c.Id == cobjr.Id);
+                        obj = context.AppComObjects.Single(c => c.ApplicationId == app.Id && c.Id == cobjr.Id);
                     else
                     {
                         obj = new AppComObject();
@@ -1285,7 +1506,7 @@ namespace Kaenx.Classes.Helper
                     }
                 } catch(Exception ex)
                 {
-
+                    Log.Error("Something went wrong!", ex);
                 }
 
 
@@ -1331,12 +1552,13 @@ namespace Kaenx.Classes.Helper
                     {
                         if(m.Groups[2].Value == "0")
                         {
-                            obj.BindedId = "parent";
+                            //TODO check changed what to to when Binded is parent
+                            obj.BindedId = -1;
                         } else
                         {
                             try
                             {
-                                obj.BindedId = app.Id + "_R-" + m.Groups[2].Value;
+                                obj.BindedId = int.Parse(m.Groups[2].Value);
                             } catch(Exception e)
                             {
                                 throw new Exception("Kein ParameterRef zum Binden gefunden", e);
@@ -1351,13 +1573,13 @@ namespace Kaenx.Classes.Helper
                         {
                             if (m.Groups[2].Value == "0")
                             {
-                                obj.BindedId = "parent";
+                                obj.BindedId = -1;
                             }
                             else
                             {
                                 try
                                 {
-                                    obj.BindedId = app.Id + "_R-" + m.Groups[2].Value;
+                                    obj.BindedId = int.Parse(m.Groups[2].Value);
                                 }
                                 catch (Exception e)
                                 {
@@ -1374,8 +1596,6 @@ namespace Kaenx.Classes.Helper
                 else
                     context.AppComObjects.Add(obj);
             }
-            ParamrefIds.Clear();
-            ParamrefIds = null;
 
             if (doc.Descendants(GetXName("AddressTable")).Count() != 0)
             {
@@ -1383,7 +1603,9 @@ namespace Kaenx.Classes.Helper
                 table = doc.Descendants(GetXName("AddressTable")).ElementAt(0);
                 if(table.Attribute("CodeSegment") != null)
                 {
-                    app.Table_Group = ShortId(table.Attribute("CodeSegment").Value);
+                    string tableIdStr = GetItemIdAsString(table.Attribute("CodeSegment").Value);
+                    int tableId = int.Parse(tableIdStr, System.Globalization.NumberStyles.HexNumber);
+                    app.Table_Group = SegmentIds[tableId];
                     int.TryParse(table.Attribute("Offset")?.Value, out int offsetGroup);
                     app.Table_Group_Offset = offsetGroup;
                 }
@@ -1403,7 +1625,9 @@ namespace Kaenx.Classes.Helper
                 table = doc.Descendants(GetXName("AssociationTable")).ElementAt(0);
                 if (table.Attribute("CodeSegment") != null)
                 {
-                    app.Table_Assosiations = ShortId(table.Attribute("CodeSegment").Value);
+                    string tableIdStr = GetItemIdAsString(table.Attribute("CodeSegment").Value);
+                    int tableId = int.Parse(tableIdStr, System.Globalization.NumberStyles.HexNumber);
+                    app.Table_Assosiations = SegmentIds[tableId];
                     int.TryParse(table.Attribute("Offset")?.Value, out int offsetAssoc);
                     app.Table_Assosiations_Offset = offsetAssoc;
                 }
@@ -1417,69 +1641,7 @@ namespace Kaenx.Classes.Helper
                 Log.Information("Kein AssociationTable vorhanden");
 
 
-            if (doc.Descendants(GetXName("Code")).Count() != 0)
-            {
-                Log.Information("Code Segmente werden eingelesen");
-                table = doc.Descendants(GetXName("Code")).ElementAt(0);
-
-                foreach(XElement seg in table.Elements())
-                {
-                    AppSegmentViewModel aas;
-                    bool existed = false ;
-
-                    switch (seg.Name.LocalName)
-                    {
-                        case "AbsoluteSegment":
-                            app.IsRelativeSegment = false;
-                            string segId = ShortId(seg.Attribute("Id").Value);
-                            existed = contextIds.Contains(segId);
-
-                            if (existed)
-                                aas = context.AppSegments.Single(a => a.Id == segId);
-                            else
-                                aas = new AppSegmentViewModel() { Id = segId };
-                            
-                            aas.ApplicationId = app.Id;
-                            aas.Address = int.Parse(seg.Attribute("Address").Value);
-                            aas.Size = int.Parse(seg.Attribute("Size").Value);
-                            aas.Data = seg.Element(GetXName("Data"))?.Value;
-                            aas.Mask = seg.Element(GetXName("Mask"))?.Value;
-
-                            if (existed)
-                                context.AppSegments.Update(aas);
-                            else
-                                context.AppSegments.Add(aas);
-                            break;
-
-                        case "RelativeSegment":
-                            app.IsRelativeSegment = true;
-                            string relId = ShortId(seg.Attribute("Id").Value);
-                            existed = contextIds.Contains(relId);
-
-                            if (existed) aas = context.AppSegments.Single(a => a.Id == relId);
-                            else aas = new AppSegmentViewModel() { Id = relId };
-
-                            aas.ApplicationId = app.Id;
-                            aas.Offset = int.Parse(seg.Attribute("Offset").Value);
-                            aas.Size = int.Parse(seg.Attribute("Size").Value);
-                            aas.LsmId = int.Parse(seg.Attribute("LoadStateMachine").Value);
-
-                            if (existed)
-                                context.AppSegments.Update(aas);
-                            else
-                                context.AppSegments.Add(aas);
-                            break;
-
-                        default:
-                            msg = "Unbekanntes Segment: " + seg.Name.LocalName;
-                            if (!Errors.Contains(msg))
-                                Errors.Add(msg);
-                            break;
-                    }
-                }
-            }
-            else
-                Log.Information("Keine Code Segmente vorhanden");
+            
 
 
 
@@ -1496,17 +1658,7 @@ namespace Kaenx.Classes.Helper
 
 
             Log.Information("Applikation in Datenbank speichern");
-            try
-            {
-                if (!contextIds.Contains(app.Id))
-                    context.Applications.Add(app);
-                else
-                    context.Applications.Update(app);
-            } catch
-            {
-                context.SaveChanges();
-                context.Applications.Update(app);
-            }
+            context.Applications.Update(app);
 
             try
             {
@@ -1520,12 +1672,12 @@ namespace Kaenx.Classes.Helper
 
 
             AppAdditional adds;
-            bool existedAdds = context.AppAdditionals.Any(a => a.Id == app.Id);
+            bool existedAdds = context.AppAdditionals.Any(a => a.ApplicationId == app.Id);
             if (existedAdds)
-                adds = context.AppAdditionals.Single(a => a.Id == app.Id);
+                adds = context.AppAdditionals.Single(a => a.ApplicationId == app.Id);
             else
             {
-                adds = new AppAdditional() { Id = app.Id };
+                adds = new AppAdditional() { ApplicationId = app.Id };
             }
 
             Log.Information("LoadProcedures werden gespeichert");
@@ -1551,7 +1703,7 @@ namespace Kaenx.Classes.Helper
             await Task.Delay(10);
             Stopwatch sw = new Stopwatch();
             sw.Start();
-            Dictionary<string, Dynamic.ViewParamModel> Id2Param = SaveHelper.GenerateDynamic(adds);
+            Dictionary<int, Dynamic.ViewParamModel> Id2Param = SaveHelper.GenerateDynamic(adds);
             sw.Stop();
             Debug.WriteLine("Generate Dyn: " + sw.Elapsed.TotalSeconds);
 
@@ -1586,6 +1738,17 @@ namespace Kaenx.Classes.Helper
         {
             string val = ele.Attribute(attr)?.Value;
             return (val == "1" || val == "true");
+        }
+
+        private int GetAttributeAsInt(XElement ele, string attr)
+        {
+            string val = ele.Attribute(attr)?.Value;
+            return int.Parse(val);
+        }
+
+        private string GetAttributeAsString(XElement ele, string attr)
+        {
+            return (ele.Attribute(attr) == null) ? "" : ele.Attribute(attr).Value;
         }
 
         public bool CheckApplication(XmlReader reader, List<string> errs)

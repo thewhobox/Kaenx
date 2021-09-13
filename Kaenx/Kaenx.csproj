@@ -21,7 +21,7 @@
     <GenerateAppInstallerFile>True</GenerateAppInstallerFile>
     <AppxAutoIncrementPackageRevision>False</AppxAutoIncrementPackageRevision>
     <AppxBundle>Always</AppxBundle>
-    <AppxBundlePlatforms>x86|x64</AppxBundlePlatforms>
+    <AppxBundlePlatforms>x64</AppxBundlePlatforms>
     <AppInstallerUpdateFrequency>0</AppInstallerUpdateFrequency>
     <AppInstallerCheckForUpdateFrequency>OnApplicationRun</AppInstallerCheckForUpdateFrequency>
     <AppxPackageSigningTimestampDigestAlgorithm>SHA256</AppxPackageSigningTimestampDigestAlgorithm>
@@ -163,6 +163,7 @@
     <Compile Include="Classes\Dynamic\IDynParameter.cs" />
     <Compile Include="Classes\Dynamic\ParamBinding.cs" />
     <Compile Include="Classes\Dynamic\ParamCondition.cs" />
+    <Compile Include="Classes\Dynamic\ParameterTable.cs" />
     <Compile Include="Classes\Dynamic\ParamNone.cs" />
     <Compile Include="Classes\Dynamic\ParamEnum.cs" />
     <Compile Include="Classes\Dynamic\ParamEnumOption.cs" />
@@ -259,8 +260,14 @@
     <Compile Include="View\Controls\NumberBox.xaml.cs">
       <DependentUpon>NumberBox.xaml</DependentUpon>
     </Compile>
+    <Compile Include="View\Controls\Parameter\TemplateTable.xaml.cs">
+      <DependentUpon>TemplateTable.xaml</DependentUpon>
+    </Compile>
     <Compile Include="View\Controls\Settings\SBusConnections.xaml.cs">
       <DependentUpon>SBusConnections.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="View\Controls\Settings\SCredits.xaml.cs">
+      <DependentUpon>SCredits.xaml</DependentUpon>
     </Compile>
     <Compile Include="View\Controls\SlideListItemBase.cs" />
     <Compile Include="Classes\Converter\Checked2VisibilityConverter.cs" />
@@ -321,7 +328,6 @@
     <AppxManifest Include="Package.appxmanifest">
       <SubType>Designer</SubType>
     </AppxManifest>
-    <None Include="Data\Logos\kænx.odg" />
     <PRIResource Include="Strings\en\Bus.resw" />
     <PRIResource Include="Strings\de-de\Bus.resw" />
     <PRIResource Include="Strings\en\Topologie.resw" />
@@ -398,12 +404,6 @@
     <Content Include="Data\knx_dps.xml" />
     <EmbeddedResource Include="Data\knx_interfaces.xml" />
     <Content Include="Data\knx_master.xml" />
-    <Content Include="Data\Logos\full.svg">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Data\Logos\house.svg" />
-    <Content Include="Data\Logos\small2.svg" />
-    <Content Include="Data\Logos\small3.svg" />
     <None Include="Kaenx_TemporaryKey.pfx" />
     <None Include="Package.StoreAssociation.xml" />
     <Content Include="Properties\Default.rd.xml" />
@@ -515,7 +515,15 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
+    <Page Include="View\Controls\Parameter\TemplateTable.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="View\Controls\Settings\SBusConnections.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="View\Controls\Settings\SCredits.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

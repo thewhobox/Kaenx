@@ -86,26 +86,22 @@
                         <MenuFlyoutItem x:Uid="/Bus/TabsInfoMenInfo" Icon="BrowsePhotos" Click="ReadInfo" />
                         <MenuFlyoutItem x:Uid="/Bus/TabsInfoMenMemory" Icon="Save" Click="ReadMem" />
                         <MenuFlyoutItem Text="MaxAPDU" Icon="Save" Click="ReadMax" />
-                        <MenuFlyoutItem Icon="ClearSelection" Text="Test" Click="SetTest" />
+                        <!--<MenuFlyoutItem Icon="ClearSelection" Text="Test" Click="SetTest" />
                         <MenuFlyoutItem Icon="ClearSelection" Text="Test2" Click="SetTest2" />
-                        <!--<MenuFlyoutItem Icon="Find" Text="Konfiguration" Click="ReadConf" />-->
+                        <MenuFlyoutItem Icon="Find" Text="ApplikationsId" Click="SetTest3" />-->
                     </MenuFlyout>
                 </DropDownButton.Flyout>
             </DropDownButton>
         </StackPanel>
 
-        <toolkit:DataGrid x:Name="GridReads" Grid.Row="1" ItemsSource="{Binding}" IsReadOnly="True" LoadingRow="GridReads_LoadingRow" AutoGenerateColumns="False" AreRowDetailsFrozen="False" LoadingRowDetails="GridReads_LoadingRowDetails" RowDetailsVisibilityMode="Collapsed">
-            <toolkit:DataGrid.RowDetailsTemplate>
-                <DataTemplate>
-                    <ContentPresenter Content="{Binding}" />
-                </DataTemplate>
-            </toolkit:DataGrid.RowDetailsTemplate>
+        <toolkit:DataGrid x:Name="GridReads" Grid.Row="1" LoadingRow="GridReads_LoadingRow" ItemsSource="{Binding}" IsReadOnly="True" AutoGenerateColumns="False" AreRowDetailsFrozen="False">
             <toolkit:DataGrid.Columns>
                 <toolkit:DataGridTextColumn Header="Adresse" Width="SizeToCells" Binding="{Binding Device.LineName}" />
                 <toolkit:DataGridTextColumn Header="Typ" Binding="{Binding Type}" />
                 <toolkit:DataGridTextColumn Header="Hersteller" Binding="{Binding Manufacturer}" />
                 <toolkit:DataGridTextColumn Header="Seriennummer" Binding="{Binding SerialNumber}" />
                 <toolkit:DataGridTextColumn Header="Applikation" Binding="{Binding ApplicationName}" />
+                <toolkit:DataGridTextColumn Header="Notiz" Binding="{Binding Additional}" />
             </toolkit:DataGrid.Columns>
         </toolkit:DataGrid>
     </Grid>

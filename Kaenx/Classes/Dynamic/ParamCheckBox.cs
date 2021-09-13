@@ -10,7 +10,7 @@ namespace Kaenx.Classes.Dynamic
 {
     public class ParamCheckBox : IDynParameter
     {
-        public string Id { get; set; }
+        public int Id { get; set; }
         public string Text { get; set; }
         public string Hash { get; set; }
         public string SuffixText { get; set; }

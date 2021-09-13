@@ -65,30 +65,14 @@ namespace Kaenx.View.Controls
             Load();
         }
 
-        private async void Load()
+        private void Load()
         {
             this.DataContext = this;
 
-            Dictionary<string, string> manus = new Dictionary<string, string>();
-            StorageFile file = null;
-
-            try
-            {
-               file = await ApplicationData.Current.LocalFolder.GetFileAsync("knx_master.xml");
-            }
-            catch { }
-
-            if (file == null) return;
-
-            XDocument master = XDocument.Load(await file.OpenStreamForReadAsync());
-
-            foreach (XElement ele in master.Descendants(XName.Get("Manufacturer", master.Root.Name.NamespaceName)))
-                manus.Add(ele.Attribute("Id").Value, ele.Attribute("Name").Value);
-
             foreach (DeviceViewModel model in _context.Devices)
             {
-                if (manus.ContainsKey(model.ManufacturerId))
-                    model.ManufacturerName = manus[model.ManufacturerId];
+                if (_context.Manufacturers.Any(m => m.Id == model.ManufacturerId))
+                    model.ManufacturerName = _context.Manufacturers.Single(m => m.Id == model.ManufacturerId).Name;
                 else
                     model.ManufacturerName = loader.GetString("AddDeviceNoManu");
                 Devices.Add(model);

@@ -12,6 +12,7 @@ using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices.WindowsRuntime;
+using System.Threading.Tasks;
 using Windows.Foundation;
 using Windows.Foundation.Collections;
 using Windows.UI.Xaml;
@@ -88,24 +89,6 @@ namespace Kaenx.View.Controls.Bus
             });
         }
 
-        private void GridReads_LoadingRowDetails(object sender, Microsoft.Toolkit.Uwp.UI.Controls.DataGridRowDetailsEventArgs e)
-        {
-            switch (e.Row.DataContext)
-            {
-                case DeviceInfoData info:
-                    e.Row.DetailsTemplate = Resources["RowDetailsInfoTemplate"] as DataTemplate;
-                    CurrentDetailsView = info.OtherRessources;
-                    break;
-
-                case DeviceConfigData conf:
-                    e.Row.DetailsTemplate = Resources["RowDetailsConfigTemplate"] as DataTemplate;
-                    break;
-
-                case ErrorData err:
-                    e.Row.DetailsTemplate = Resources["RowDetailsErrorTemplate"] as DataTemplate;
-                    break;
-            }
-        }
         private void ClickOpenConfig(object sender, RoutedEventArgs e)
         {
             ViewHelper.Instance.ShowNotification("main", "Nichts passiert");
@@ -207,8 +190,7 @@ namespace Kaenx.View.Controls.Bus
             await dev.Connect(true);
             int resp = await dev.PropertyRead<int>(0, 56);
             ViewHelper.Instance.ShowNotification("main", "MaxAPDU: " + resp, 3000, Microsoft.UI.Xaml.Controls.InfoBarSeverity.Informational);
-            dev.Disconnect();
-            await System.Threading.Tasks.Task.Delay(200);
+            await dev.Disconnect();
             await conn.Disconnect();
         }
 
@@ -222,6 +204,25 @@ namespace Kaenx.View.Controls.Bus
             //ViewHelper.Instance.ShowNotification("main", "Doppelklick gemacht!", 3000, Microsoft.UI.Xaml.Controls.InfoBarSeverity.Informational);
             IBusData data = (sender as Microsoft.Toolkit.Uwp.UI.Controls.DataGridRow).DataContext as IBusData;
             OnAddTabItem?.Invoke("Info", data);//data.Device.LineName + " Info", data);
+        }
+
+        private async void SetTest3(object sender, RoutedEventArgs e)
+        {
+
+            LineDevice ldev = GetDevice();
+            IKnxConnection conn = await KnxInterfaceHelper.GetConnection(BusConnection.Instance.SelectedInterface, BusRemoteConnection.Instance.Remote, BusConnection.Instance.GetDevice);
+            await conn.Connect();
+            await System.Threading.Tasks.Task.Delay(2000);
+            Konnect.Classes.BusDevice dev = new Konnect.Classes.BusDevice(ldev.LineName, conn);
+            await dev.Connect();
+            
+            await dev.ResourceWrite("ApplicationId", new byte[] { 0x00, 0x83, 0x10, 0x3C, 0x00 });
+            await Task.Delay(2000);
+            string appId = await dev.ResourceRead<string>("ApplicationId");
+
+            await dev.Disconnect();
+            await conn.Disconnect();
+
         }
     }
 }

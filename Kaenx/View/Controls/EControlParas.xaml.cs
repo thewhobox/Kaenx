@@ -62,7 +62,7 @@ namespace Kaenx.Views.Easy.Controls
         private CatalogContext _context = new CatalogContext();
         private ProjectContext _contextP = new ProjectContext(SaveHelper.connProject);
 
-        private Dictionary<string, ChangeParamModel> ParaChanges = new Dictionary<string, ChangeParamModel>();
+        private Dictionary<int, ChangeParamModel> ParaChanges = new Dictionary<int, ChangeParamModel>();
         private Dictionary<string, AppParameterTypeViewModel> AppParaTypess = new Dictionary<string, AppParameterTypeViewModel>();
         Stopwatch watch = new Stopwatch();
 
@@ -80,7 +80,7 @@ namespace Kaenx.Views.Easy.Controls
         }
 
 
-        Dictionary<string, ViewParamModel> Id2Param = new Dictionary<string, ViewParamModel>();
+        Dictionary<int, ViewParamModel> Id2Param = new Dictionary<int, ViewParamModel>();
         Dictionary<string, IDynParameter> Hash2Param = new Dictionary<string, IDynParameter>();
         List<ParamBinding> Bindings;
         List<AssignParameter> Assignments;
@@ -108,7 +108,10 @@ namespace Kaenx.Views.Easy.Controls
             Device = data.Device;
             this.DataContext = this;
 
-            Device.ApplicationId = data.ApplicationId;
+            //TODO check change
+            ApplicationViewModel app = _context.Applications.Single(a => a.Hash == data.ApplicationId);
+
+            Device.ApplicationId = app.Id;
 
             this.SizeChanged += EControlParas2_SizeChanged;
         }
@@ -156,7 +159,7 @@ namespace Kaenx.Views.Easy.Controls
             {
 
                 await Task.Delay(1);
-                AppAdditional adds = _context.AppAdditionals.Single(a => a.Id == Device.ApplicationId);
+                AppAdditional adds = _context.AppAdditionals.Single(a => a.ApplicationId == Device.ApplicationId);
                 comObjects = SaveHelper.ByteArrayToObject<List<DeviceComObject>>(adds.ComsAll);
                 Channels = SaveHelper.ByteArrayToObject<List<IDynChannel>>(adds.ParamsHelper, true);
                 Bindings = SaveHelper.ByteArrayToObject<List<ParamBinding>>(adds.Bindings);
@@ -225,7 +228,7 @@ namespace Kaenx.Views.Easy.Controls
                     }
                 }
 
-                List<string> testL = new List<string>();
+                List<int> testL = new List<int>();
                 foreach (ChangeParamModel change in ParaChanges.Values)
                 {
                     Id2Param[change.ParamId].Value = change.Value;
@@ -234,7 +237,7 @@ namespace Kaenx.Views.Easy.Controls
 
 
                 CatalogContext co = new CatalogContext();
-                foreach (AppParameter para in co.AppParameters.Where(p => p.ApplicationId == adds.Id))
+                foreach (AppParameter para in co.AppParameters.Where(p => p.ApplicationId == adds.ApplicationId))
                 {
                     if (!Id2Param.ContainsKey(para.Id))
                     {
@@ -251,7 +254,7 @@ namespace Kaenx.Views.Easy.Controls
 
                 foreach (AssignParameter assign in Assignments)
                 {
-                    bool test = SaveHelper.CheckConditions(assign.Conditions, Id2Param);
+                    bool test = SaveHelper.CheckConditions(Device.ApplicationId, assign.Conditions, Id2Param);
                     try
                     {
                         Id2Param[assign.Target].Assign = test ? assign : null;
@@ -264,7 +267,7 @@ namespace Kaenx.Views.Easy.Controls
                 }
 
 
-                foreach (string id in testL)
+                foreach (int id in testL)
                 {
                     Id2Param[id].Parameters[0].Value = Id2Param[id].Value;
                     Para_PropertyChanged(Id2Param[id].Parameters[0]);
@@ -292,9 +295,10 @@ namespace Kaenx.Views.Easy.Controls
                 ViewHelper.Instance.ShowNotification("main", "Geladen nach: " + watch.Elapsed.TotalSeconds + "s", 3000);
 
             }
-            catch
+            catch (Exception ex)
             {
-
+                Log.Error(ex, "Laden der Parameter fehlgeschlagen!");
+                ViewHelper.Instance.ShowNotification("main", ex.Message, 4000, Microsoft.UI.Xaml.Controls.InfoBarSeverity.Error);
             }
         }
 
@@ -382,12 +386,12 @@ namespace Kaenx.Views.Easy.Controls
         {
             List<ChannelBlock> list = new List<ChannelBlock>();
             List<ParameterBlock> list2 = new List<ParameterBlock>();
-            List<string> list5 = new List<string>();
+            List<int> list5 = new List<int>();
 
 
             foreach (AssignParameter assign in Assignments)
             {
-                bool test = SaveHelper.CheckConditions(assign.Conditions, Id2Param);
+                bool test = SaveHelper.CheckConditions(Device.ApplicationId, assign.Conditions, Id2Param);
                 if (test)
                 {
                     Id2Param[assign.Target].Assign = assign;
@@ -401,16 +405,16 @@ namespace Kaenx.Views.Easy.Controls
             IEnumerable<IDynParameter> list3 = Hash2Param.Values.Where(p => p.Conditions.Any(c => c.SourceId == para.Id || list5.Contains(c.SourceId)));
             foreach (IDynParameter par in list3)
                 if(par.HasAccess)
-                    par.Visible = SaveHelper.CheckConditions(par.Conditions, Id2Param) ? Visibility.Visible : Visibility.Collapsed;
+                    par.Visible = SaveHelper.CheckConditions(Device.ApplicationId, par.Conditions, Id2Param) ? Visibility.Visible : Visibility.Collapsed;
 
             foreach (IDynChannel ch in Channels)
             {
                 if(ch.HasAccess)
-                    ch.Visible = SaveHelper.CheckConditions(ch.Conditions, Id2Param) ? Visibility.Visible : Visibility.Collapsed;
+                    ch.Visible = SaveHelper.CheckConditions(Device.ApplicationId, ch.Conditions, Id2Param) ? Visibility.Visible : Visibility.Collapsed;
 
                 foreach (ParameterBlock block in ch.Blocks)
                     if (block.HasAccess)
-                        block.Visible = SaveHelper.CheckConditions(block.Conditions, Id2Param) ? Visibility.Visible : Visibility.Collapsed;
+                        block.Visible = SaveHelper.CheckConditions(Device.ApplicationId, block.Conditions, Id2Param) ? Visibility.Visible : Visibility.Collapsed;
                     else
                         block.Visible = Visibility.Collapsed;
             }
@@ -420,11 +424,12 @@ namespace Kaenx.Views.Easy.Controls
             foreach (ParamBinding bind in list4)
             {
                 string[] ids = bind.Hash.Split(":");
+                int id1 = int.Parse(ids[1]);
 
                 switch (ids[0])
                 {
                     case "CB":
-                        IDynChannel ch = Channels.Single(c => c.Id == ids[1]);
+                        IDynChannel ch = Channels.Single(c => c.Id == id1);
                         if (ch is ChannelBlock)
                         {
                             ChannelBlock chb = ch as ChannelBlock;
@@ -438,9 +443,9 @@ namespace Kaenx.Views.Easy.Controls
                     case "PB":
                         foreach (IDynChannel ch2 in Channels)
                         {
-                            if (ch2.Blocks.Any(b => b.Id == ids[1]))
+                            if (ch2.Blocks.Any(b => b.Id == id1))
                             {
-                                ParameterBlock bl = ch2.Blocks.Single(b => b.Id == ids[1]);
+                                ParameterBlock bl = ch2.Blocks.Single(b => b.Id == id1);
                                 if (string.IsNullOrEmpty(para.Value) || string.IsNullOrWhiteSpace(para.Value))
                                     bl.DisplayText = bl.Text.Replace("{{dyn}}", bind.DefaultText);
                                 else
@@ -452,7 +457,7 @@ namespace Kaenx.Views.Easy.Controls
                     case "CO":
                         try
                         {
-                            DeviceComObject com = Device.ComObjects.Single(c => c.Id == ids[1]);
+                            DeviceComObject com = Device.ComObjects.Single(c => c.Id == id1);
                             if (string.IsNullOrEmpty(para.Value))
                                 com.DisplayName = com.Name.Replace("{{dyn}}", bind.DefaultText);
                             else
@@ -501,7 +506,7 @@ namespace Kaenx.Views.Easy.Controls
                     continue;
                 }
 
-                bool flag = SaveHelper.CheckConditions(obj.Conditions, Id2Param);
+                bool flag = SaveHelper.CheckConditions(Device.ApplicationId, obj.Conditions, Id2Param);
                 if (flag)
                     newObjs.Add(obj);
             }
@@ -530,7 +535,7 @@ namespace Kaenx.Views.Easy.Controls
                         continue;
                     }
 
-                    bool flag = SaveHelper.CheckConditions(obj.Conditions, Id2Param);
+                    bool flag = SaveHelper.CheckConditions(Device.ApplicationId, obj.Conditions, Id2Param);
                     if (flag)
                         newObjs.Add(obj);
                 }
@@ -559,7 +564,7 @@ namespace Kaenx.Views.Easy.Controls
                     toDelete.Add(cobj);
             }
 
-            Dictionary<string, ComObject> coms = new Dictionary<string, ComObject>();
+            Dictionary<int, ComObject> coms = new Dictionary<int, ComObject>();
             foreach (ComObject com in _contextP.ComObjects)
                 if (!coms.ContainsKey(com.ComId))
                     coms.Add(com.ComId, com);

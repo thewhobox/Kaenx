@@ -13,7 +13,8 @@ namespace Kaenx.Classes.Project
         public event PropertyChangedEventHandler PropertyChanged;
 
         private int _count = 0;
-        public int Count { 
+        public int Count
+        {
             get { return _count; }
             set { _count = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Count")); }
         }
@@ -62,7 +63,7 @@ namespace Kaenx.Classes.Project
 
         private bool CheckDevice(LineDevice device)
         {
-            Hardware2AppModel model = null;
+            /*Hardware2AppModel model = null;
             try
             {
                 model = _context.Hardware2App.Single(h => h.ApplicationId == device.ApplicationId);
@@ -76,8 +77,9 @@ namespace Kaenx.Classes.Project
                 return true;
             else
                 return false;
+            */
+            return false;
+
         }
-
-
     }
 }

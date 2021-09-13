@@ -10,9 +10,9 @@ namespace Kaenx.Classes
 {
     public class AssignParameter { 
         [JsonProperty("t")]
-        public string Target { get; set; }
+        public int Target { get; set; }
         [JsonProperty("s")]
-        public string Source { get; set; }
+        public int Source { get; set; }
         [JsonProperty("v")]
         public string Value { get; set; }
 

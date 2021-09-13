@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Kaenx.DataContext.Import;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -9,6 +10,7 @@ namespace Kaenx.Classes
 {
     public class TVNode : TreeViewNode
     {
-        public string SectionId { get; set; }
+        public int SectionId { get; set; }
+        public ImportTypes ImportType { get; set; }
     }
 }

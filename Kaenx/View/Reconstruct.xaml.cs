@@ -164,10 +164,11 @@ namespace Kaenx.View
                         {
                             dev.StateId = 3;
                             dev.Status = "In Projekt";
+                            dev.CanRead = true;
                         }
 
                         dev.LineDevice = ldev;
-                        dev.Manufacturer = manus[dev.ApplicationId.Substring(0, 6)];
+                        //dev.Manufacturer = manus[dev.ApplicationId.Substring(0, 6)];
                         Devices.Add(dev);
                     }
                 }
@@ -323,26 +324,38 @@ namespace Kaenx.View
             BusDevice dev = new BusDevice(device.Address, _conn);
             await dev.Connect(true);
 
-            string appId = await dev.RessourceRead<string>("ApplicationId");
+            string appId = await dev.ResourceRead<string>("ApplicationId");
 
             if (appId.Length == 8)
             {
                 appId = "00" + appId;
-                device.Manufacturer = manus["M-" + appId.Substring(0, 4)];
             }
-            else
-                device.Manufacturer = manus["M-" + appId.Substring(0, 4)];
+            device.Manufacturer = manus["M-" + appId.Substring(0, 4)];
 
             appId = $"M-{appId.Substring(0, 4)}_A-{appId.Substring(4, 4)}-{appId.Substring(8, 2)}";
 
             try
             {
-                Hardware2AppModel h2a = _context.Hardware2App.First(h => h.ApplicationId == appId);
-                device.ApplicationName = h2a.Name;
-                device.ApplicationId = h2a.ApplicationId;
-                DeviceViewModel devm = _context.Devices.First(d => d.HardwareId == h2a.HardwareId);
-                device.DeviceName = devm.Name;
-                device.CanRead = true;
+                ApplicationViewModel app = null;
+
+                try
+                {
+                    int manu = int.Parse(appId.Substring(0, 4), System.Globalization.NumberStyles.HexNumber);
+                    int number = int.Parse(appId.Substring(4, 4), System.Globalization.NumberStyles.HexNumber);
+                    int version = int.Parse(appId.Substring(8, 2), System.Globalization.NumberStyles.HexNumber);
+                    app = _context.Applications.Single(a => a.Manufacturer == manu && a.Number == number && a.Version == version);
+                }
+                catch { }
+                if(app != null)
+                {
+                    Hardware2AppModel h2a = _context.Hardware2App.First(h => h.Id == app.HardwareId);
+                    device.ApplicationName = h2a.Name;
+                    //TODO change it
+                    //device.ApplicationId = h2a.ApplicationId;
+                    DeviceViewModel devm = _context.Devices.First(d => d.HardwareId == h2a.Id);
+                    device.DeviceName = devm.Name;
+                    device.CanRead = true;
+                }
             }
             catch
             {
@@ -350,7 +363,8 @@ namespace Kaenx.View
                 if (string.IsNullOrEmpty(device.ApplicationName))
                 {
                     device.ApplicationName = appId;
-                    device.ApplicationId = appId;
+                    //TODO check change
+                    //device.ApplicationId = appId;
                 }
                 device.DeviceName = "Applikation nicht im Katalog";
             }
@@ -359,7 +373,7 @@ namespace Kaenx.View
 
             try
             {
-                device.SerialBytes = await dev.RessourceRead("DeviceSerialNumber");
+                device.SerialBytes = await dev.ResourceRead("DeviceSerialNumber");
                 device.Serial = BitConverter.ToString(device.SerialBytes).Replace("-", "");
             }
             catch (NotSupportedException ex)
@@ -552,9 +566,9 @@ namespace Kaenx.View
         private BusDevice _currentBusDevice { get; set; }
         private ReconstructDevice _currentDevice { get; set; }
         private List<int> connectedCOs = new List<int>();
-        private Dictionary<string, string> defParas = new Dictionary<string, string>();
+        private Dictionary<int, string> defParas = new Dictionary<int, string>();
         private Dictionary<int, List<string>> CO2GA = new Dictionary<int, List<string>>();
-        private Dictionary<string, byte[]> mems = new Dictionary<string, byte[]>();
+        private Dictionary<int, byte[]> mems = new Dictionary<int, byte[]>();
 
 
         private async Task StartReadConfig(ReconstructDevice device, IKnxConnection _conn)
@@ -585,7 +599,7 @@ namespace Kaenx.View
             if (appModel != null)
             {
                 List<string> addresses = new List<string>();
-                if (!string.IsNullOrEmpty(appModel.Table_Group))
+                if (appModel.Table_Group != -1)
                 {
                     AppSegmentViewModel segmentModel = context.AppSegments.Single(s => s.Id == appModel.Table_Group);
                     int groupAddr = segmentModel.Address;
@@ -601,7 +615,7 @@ namespace Kaenx.View
                     }
                 }
 
-                if (!string.IsNullOrEmpty(appModel.Table_Assosiations))
+                if (appModel.Table_Assosiations != -1)
                 {
                     AppSegmentViewModel segmentModel = context.AppSegments.Single(s => s.Id == appModel.Table_Assosiations);
                     int assoAddr = segmentModel.Address;
@@ -639,13 +653,15 @@ namespace Kaenx.View
             await GetConfig(device.ApplicationId);
         }
 
-        private async Task GetConfig(string appId)
+        private async Task GetConfig(int appId)
         {
             defParas.Clear();
-            Dictionary<string, AppParameter> paras = new Dictionary<string, AppParameter>();
-            Dictionary<string, AppParameterTypeViewModel> types = new Dictionary<string, AppParameterTypeViewModel>();
+            Dictionary<int, AppParameter> paras = new Dictionary<int, AppParameter>();
+            Dictionary<int, AppParameterTypeViewModel> types = new Dictionary<int, AppParameterTypeViewModel>();
 
-            foreach (AppParameter param in _context.AppParameters.Where(p => p.ApplicationId == appId))
+
+            //TODO check change
+            foreach (AppParameter param in _context.AppParameters.Where(p => true)) //p.ApplicationId == appId))
             {
                 paras.Add(param.Id, param);
                 defParas.Add(param.Id, param.Value);
@@ -690,7 +706,7 @@ namespace Kaenx.View
             XDocument dynamic = XDocument.Parse(System.Text.Encoding.UTF8.GetString(adds.Dynamic));
 
             string ns = dynamic.Root.Name.NamespaceName;
-            IEnumerable<XElement> chooses = dynamic.Descendants(XName.Get("choose", ns)).Where(c => c.Attribute("ParamRefId") != null && SaveHelper.ShortId(c.Attribute("ParamRefId").Value) == para.Id);
+            IEnumerable<XElement> chooses = dynamic.Descendants(XName.Get("choose", ns)).Where(c => c.Attribute("ParamRefId") != null && SaveHelper.GetItemId(c.Attribute("ParamRefId").Value) == para.Id);
 
             foreach (XElement choose in chooses)
             {
@@ -708,7 +724,8 @@ namespace Kaenx.View
                     IEnumerable<XElement> tlist = when.Descendants(XName.Get("ComObjectRefRef", ns));
                     foreach (XElement comx in tlist)
                     {
-                        string id = SaveHelper.ShortId(comx.Attribute("RefId").Value);
+                        //TODO check changed Kontext auch mit AppID
+                        int id = SaveHelper.GetItemId(comx.Attribute("RefId").Value);
                         AppComObject com = _context.AppComObjects.Single(c => c.Id == id);
 
                         if (!value2Coms[val].Contains(com.Number))
@@ -776,8 +793,8 @@ namespace Kaenx.View
         private async Task HandleParamGhost2(AppParameter para, AppParameterTypeViewModel paraT, AppAdditional adds, XElement choose)
         {
             string ns = choose.Name.NamespaceName;
-            Dictionary<string, List<string>> value2Paras = new Dictionary<string, List<string>>();
-            Dictionary<string, string> test = new Dictionary<string, string>();
+            Dictionary<string, List<int>> value2Paras = new Dictionary<string, List<int>>();
+            Dictionary<int, string> test = new Dictionary<int, string>();
 
             #region Get ParaIds and remove duplicates
             foreach (XElement when in choose.Elements())
@@ -786,12 +803,13 @@ namespace Kaenx.View
                 string val = when.Attribute("test").Value;
 
                 if (val.Contains(">") || val.Contains("<") || val.Contains("=") || val.Contains(" ")) continue;
-                if (!value2Paras.ContainsKey(val)) value2Paras[val] = new List<string>();
+                if (!value2Paras.ContainsKey(val)) value2Paras[val] = new List<int>();
 
                 IEnumerable<XElement> tlist = when.Descendants(XName.Get("ParameterRefRef", ns));
                 foreach (XElement comx in tlist)
                 {
-                    string id = SaveHelper.ShortId(comx.Attribute("RefId").Value);
+                    //TODO check changed Kontext auch nach AppID!
+                    int id = SaveHelper.GetItemId(comx.Attribute("RefId").Value);
                     AppParameter par = _context.AppParameters.Single(c => c.Id == id);
                     if (par.Access != AccessType.Full || par.SegmentId == null) continue;
 
@@ -810,17 +828,17 @@ namespace Kaenx.View
                 }
             }
 
-            List<string> toDelete = new List<string>();
+            List<int> toDelete = new List<int>();
             foreach (string keyval in value2Paras.Keys)
             {
-                List<string> xids = value2Paras[keyval];
+                List<int> xids = value2Paras[keyval];
 
 
-                foreach (string xid in xids)
+                foreach (int xid in xids)
                 {
                     bool flag = false;
 
-                    foreach (KeyValuePair<string, List<string>> otherids in value2Paras.Where(x => x.Key != keyval))
+                    foreach (KeyValuePair<string, List<int>> otherids in value2Paras.Where(x => x.Key != keyval))
                         if (otherids.Value.Contains(xid))
                             flag = true;
 
@@ -829,9 +847,9 @@ namespace Kaenx.View
             }
 
 
-            foreach (string xid in toDelete)
+            foreach (int xid in toDelete)
             {
-                foreach (KeyValuePair<string, List<string>> otherids in value2Paras)
+                foreach (KeyValuePair<string, List<int>> otherids in value2Paras)
                     otherids.Value.Remove(xid);
             }
             #endregion
@@ -839,7 +857,7 @@ namespace Kaenx.View
 
             Dictionary<string, bool> val2success = new Dictionary<string, bool>();
 
-            foreach (KeyValuePair<string, List<string>> coms in value2Paras)
+            foreach (KeyValuePair<string, List<int>> coms in value2Paras)
             {
                 val2success[coms.Key] = coms.Value.Count > 0;
             }
@@ -929,12 +947,12 @@ namespace Kaenx.View
         }
 
 
-        private async Task SaveConfig(AppAdditional adds, Dictionary<string, AppParameter> paras)
+        private async Task SaveConfig(AppAdditional adds, Dictionary<int, AppParameter> paras)
         {
             _currentDevice.Status = "Speichere Konfiguration...";
 
             Dictionary<string, ViewParamModel> Id2Param = new Dictionary<string, ViewParamModel>();
-            Dictionary<string, ChangeParamModel> ParaChanges = new Dictionary<string, ChangeParamModel>();
+            Dictionary<int, ChangeParamModel> ParaChanges = new Dictionary<int, ChangeParamModel>();
             Dictionary<string, ViewParamModel> VisibleParams = new Dictionary<string, ViewParamModel>();
             List<IDynChannel> Channels = SaveHelper.ByteArrayToObject<List<IDynChannel>>(adds.ParamsHelper, true);
             ProjectContext _c = new ProjectContext(SaveHelper.connProject);
@@ -949,6 +967,8 @@ namespace Kaenx.View
                 }
             }
 
+            //TODO check changed uncomment and fix
+            /*
             Dictionary<string, List<List<ParamCondition>>> para2Conds = new Dictionary<string, List<List<ParamCondition>>>();
             foreach (IDynChannel ch in Channels)
             {
@@ -1038,6 +1058,7 @@ namespace Kaenx.View
             _currentDevice.LineDevice.LoadedGroup = true;
             _currentDevice.LineDevice.LoadedPA = true;
             //Finish();
+            */
         }
 
         
@@ -1045,7 +1066,7 @@ namespace Kaenx.View
         
 
         
-        private async Task GenerateComs(Dictionary<string, ViewParamModel> Id2Param)
+        private async Task GenerateComs(Dictionary<int, ViewParamModel> Id2Param)
         {
             AppAdditional adds = _context.AppAdditionals.Single(a => a.Id == _currentDevice.ApplicationId);
             List<DeviceComObject> comObjects = SaveHelper.ByteArrayToObject<List<DeviceComObject>>(adds.ComsAll);
@@ -1061,7 +1082,7 @@ namespace Kaenx.View
                     continue;
                 }
 
-                bool flag = SaveHelper.CheckConditions(obj.Conditions, Id2Param);
+                bool flag = SaveHelper.CheckConditions(_currentDevice.ApplicationId, obj.Conditions, Id2Param);
                 if (flag)
                     newObjs.Add(obj);
             }
@@ -1074,7 +1095,7 @@ namespace Kaenx.View
                     toAdd.Add(cobj);
             }
 
-            Dictionary<string, ComObject> coms = new Dictionary<string, ComObject>();
+            Dictionary<int, ComObject> coms = new Dictionary<int, ComObject>();
             foreach (ComObject com in _contextP.ComObjects)
                 if (!coms.ContainsKey(com.ComId))
                     coms.Add(com.ComId, com);

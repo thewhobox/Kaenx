@@ -48,7 +48,7 @@ namespace Kaenx.Classes.Controls
             Devices.Clear();
             foreach (LineDevice device in UpdateManager.Instance.GetDevices())
             {
-                Hardware2AppModel model = _context.Hardware2App.Single(h => h.ApplicationId == device.ApplicationId);
+                /*Hardware2AppModel model = _context.Hardware2App.Single(h => h.ApplicationId == device.ApplicationId);
                 Hardware2AppModel latestModel = _context.Hardware2App.Where(h => h.HardwareId == model.HardwareId && h.Number == model.Number).OrderByDescending(h => h.Version).First();
 
                 DeviceUpdate update = new DeviceUpdate() { Name = device.LineName + " " + device.Name };
@@ -58,6 +58,7 @@ namespace Kaenx.Classes.Controls
                 update.Device = device;
                 update.NewApplicationId = latestModel.ApplicationId;
                 Devices.Add(update);
+                */
             }
         }
 

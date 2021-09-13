@@ -41,9 +41,12 @@ namespace Kaenx.Classes.Bus.Actions
         private List<byte> dataGroupTable = new List<byte>();
         private bool useLongAssociations = false;
         private List<byte> dataAssoTable = new List<byte>();
-        private Dictionary<string, AppSegmentViewModel> dataSegs = new Dictionary<string, AppSegmentViewModel>();
-        private Dictionary<string, byte[]> dataMems = new Dictionary<string, byte[]>();
-        private Dictionary<string, int> dataAddresses = new Dictionary<string, int>();
+        private Dictionary<int, AppSegmentViewModel> dataSegs = new Dictionary<int, AppSegmentViewModel>();
+        private Dictionary<int, byte[]> dataMems = new Dictionary<int, byte[]>();
+        private Dictionary<int, int> dataAddresses = new Dictionary<int, int>();
+        private ApplicationViewModel app;
+        private BusDevice dev;
+        private int ManuId;
 
         /// <summary>
         /// Temporary for Unit test. If not null overrides ApplicationParams
@@ -82,9 +85,6 @@ namespace Kaenx.Classes.Bus.Actions
         public IKnxConnection Connection { get; set; }
         public CatalogContext Context { get => _context; set => _context = value; }
 
-        private ApplicationViewModel app;
-
-        private BusDevice dev;
         public event ActionFinishedHandler Finished;
         public event PropertyChangedEventHandler PropertyChanged;
 
@@ -107,11 +107,13 @@ namespace Kaenx.Classes.Bus.Actions
             dev = new BusDevice(Device.LineName, Connection);
             TodoText = ProcedureType == ProcedureTypes.Load ? "Applikation schreiben" : "Gerät entladen";
 
+            //CatalogContext _context = new CatalogContext();
+            AppAdditional adds = _context.AppAdditionals.Single(a => a.Id == Device.ApplicationId);
+            app = _context.Applications.Single(a => a.Id == Device.ApplicationId);
+            ManuId = _context.Manufacturers.Single(m => m.Id == app.Manufacturer).ManuId;
 
             if (ProcedureType == ProcedureTypes.Load || (Helper != null && (Helper.UnloadApplication || Helper.UnloadBoth)))
             {
-                AppAdditional adds = _context.AppAdditionals.Single(a => a.Id == Device.ApplicationId);
-                app = _context.Applications.Single(a => a.Id == Device.ApplicationId);
 
                 XElement temp;
                 XElement procedure = null;
@@ -202,7 +204,7 @@ namespace Kaenx.Classes.Bus.Actions
                     .Elements(procedure.GetDefaultNamespace() + "LdCtrlWriteProp")
                     .Where(ctrl => ctrl.Attribute("ObjIdx").Value == "4" && ctrl.Attribute("PropId").Value == "13"))
                 {
-                    ctrl.Attribute("InlineData").Value = $"{app.Manufacturer:X4}{app.Number:X4}{app.Version:X2}";
+                    ctrl.Attribute("InlineData").Value = $"{ManuId:X4}{app.Number:X4}{app.Version:X2}";
                 }
 
 
@@ -211,12 +213,13 @@ namespace Kaenx.Classes.Bus.Actions
                 double currentProg = 0;
                 Debug.WriteLine("StepSize: " + stepSize + " - " + procedure.Elements().Count());
 
-
+                XElement ctrlOuter;
                 try
                 {
 
                     foreach (XElement ctrl in procedure.Elements())
                     {
+                        ctrlOuter = ctrl;
                         if (_token.IsCancellationRequested)
                             return;
 
@@ -312,6 +315,7 @@ namespace Kaenx.Classes.Bus.Actions
 
                             default:
                                 Debug.WriteLine("Unbekanntes Element: " + ctrl.Name.LocalName);
+                                Log.Warning("Unbekanntes Element in Prozedur: " + ctrl.Name.LocalName);
                                 break;
                         }
                     }
@@ -326,6 +330,10 @@ namespace Kaenx.Classes.Bus.Actions
                         Finished?.Invoke(this, null);
                     }
                 }
+                catch (Exception ex)
+                {
+                    Log.Error("Fehler bei Applikation prgrammieren: " + ex.Message);
+                }
             }
 
 
@@ -336,11 +344,10 @@ namespace Kaenx.Classes.Bus.Actions
                 await dev.Connect(true);
                 string mask = await dev.DeviceDescriptorRead();
                 mask = "MV-" + mask;
-                await dev.RessourceWrite("ProgrammingMode", new byte[] { 0x01 });
+                await dev.ResourceWrite("ProgrammingMode", new byte[] { 0x01 });
                 await dev.Disconnect();
                 BusCommon comm = new BusCommon(Connection);
-                comm.IndividualAddressWrite(UnicastAddress.FromString("15.15.255"));
-                await Task.Delay(200);
+                await comm.IndividualAddressWrite(UnicastAddress.FromString("15.15.255"));
                 BusDevice dev2 = new BusDevice("15.15.255", Connection);
                 await dev2.Connect();
                 await dev2.Restart();
@@ -402,12 +409,8 @@ namespace Kaenx.Classes.Bus.Actions
             dataGroupTable.CopyTo(dataMems[app.Table_Group], app.Table_Group_Offset);
             dataAssoTable.CopyTo(dataMems[app.Table_Assosiations], app.Table_Assosiations_Offset);
 
-            TodoText = "Schreibe Speicher...";
-
             byte[] value;
             int address = int.Parse(ctrl.Attribute("Address").Value);
-            int offset = dataAddresses.ElementAt(0).Value;
-
             if (ctrl.Attribute("InlineData") != null)
             {
                 value = StringToByteArray(ctrl.Attribute("InlineData").Value);
@@ -415,6 +418,7 @@ namespace Kaenx.Classes.Bus.Actions
             else
             {
                 int size = int.Parse(ctrl.Attribute("Size").Value);
+                int offset = dataAddresses.ElementAt(0).Value;
                 value = new byte[size];
                 for (int i = 0; i < size; i++)
                 {
@@ -422,15 +426,37 @@ namespace Kaenx.Classes.Bus.Actions
                     {
                         value[i] = dataMems.Values.ElementAt(0)[address - offset + i];
                     }
-                    catch
+                    catch (Exception ex)
                     {
-
+                        Log.Error(ex, "Fehler beim zusammenstellen des Speichers");
                     }
                 }
-            }
 
+            }
+            TodoText = "Schreibe in den Speicher...";
             Debug.WriteLine($"Schreibe Addresse: {address} mit {value.Count()} Bytes");
             await dev.MemoryWrite(address, value);
+        }
+
+        private async Task WriteApplication()
+        {
+            TodoText = "Schreibe Speicher...";
+
+            switch (_type)
+            {
+                case ProgAppType.Komplett:
+                    foreach (AppSegmentViewModel seg in dataSegs.Values)
+                    {
+                        await dev.MemoryWrite(seg.Address, dataMems[seg.Id]);
+                    }
+                    break;
+
+                case ProgAppType.Minimal:
+                    break;
+
+                case ProgAppType.Partiell:
+                    break;
+            }
         }
 
         private async Task PreDownloadChecks()
@@ -443,10 +469,7 @@ namespace Kaenx.Classes.Bus.Actions
             int maskVersion = (ushort)dev.MaskVersion & 0x0fff;
             await dev.ReadMaxAPDULength();
 
-            XNamespace ns = dev.MaskXML.GetDefaultNamespace();
-            bool supportsAuthorize = dev.MaskXML.Element(ns + "HawkConfigurationData").Element(ns + "Features")
-                .Elements(ns + "Feature").Any(feature => feature.Attribute("Name").Value == "AuthorizeLevels");
-            if (supportsAuthorize)
+            if (dev.GetFeature("AuthorizeLevels") != null)
             {
                 if (await dev.Authorize(0xffffffff) != 0)
                     throw new Exception("Standardpasswort wurde vom Gerät nicht akzeptiert");
@@ -470,8 +493,8 @@ namespace Kaenx.Classes.Bus.Actions
             {
                 if (maskVersion != 0x0701 && !(0x0910 <= maskVersion && maskVersion <= 0x091f))
                 {
-                    int deviceManufacturer = await dev.RessourceRead<int>("DeviceManufacturerId");
-                    if (app.Manufacturer != deviceManufacturer)
+                    int deviceManufacturer = await dev.ResourceRead<int>("DeviceManufacturerId");
+                    if (ManuId != deviceManufacturer)
                         throw new Exception("Hersteller des Gerätes ist nicht gleich mit der Produktdatenbank");
                 }
                 //TODO: PortADDR for BCU1 (Memory: 010C) and BCU2 (PID_PORT_CONFIGURATION in device object)
@@ -525,36 +548,15 @@ namespace Kaenx.Classes.Bus.Actions
             GenerateApplication(adds);
         }
 
-        private async Task WriteApplication()
-        {
-            TodoText = "Schreibe Speicher...";
-
-            switch (_type)
-            {
-                case ProgAppType.Komplett:
-                    foreach (AppSegmentViewModel seg in dataSegs.Values)
-                    {
-                        await dev.MemoryWrite(seg.Address, dataMems[seg.Id]);
-                    }
-                    break;
-
-                case ProgAppType.Minimal:
-                    break;
-
-                case ProgAppType.Partiell:
-                    break;
-            }
-        }
-
 
         private List<AppParameter> GetVisibleParams(AppAdditional adds)
         {
-            Dictionary<string, AppParameter> AppParas = new Dictionary<string, AppParameter>();
-            Dictionary<string, ChangeParamModel> ParaChanges = new Dictionary<string, ChangeParamModel>();
+            Dictionary<int, AppParameter> AppParas = new Dictionary<int, AppParameter>();
+            Dictionary<int, ChangeParamModel> ParaChanges = new Dictionary<int, ChangeParamModel>();
             List<AppParameter> paras = new List<AppParameter>();
 
             foreach (AppParameter para in _context.AppParameters.Where(p => p.ApplicationId == Device.ApplicationId))
-                AppParas.Add(para.Id, para);
+                AppParas.Add(para.ParameterId, para);
 
             ProjectContext _c = new ProjectContext(SaveHelper.connProject);
 
@@ -568,7 +570,7 @@ namespace Kaenx.Classes.Bus.Actions
                 }
             }
 
-            Dictionary<string, ViewParamModel> Id2Param = new Dictionary<string, ViewParamModel>();
+            Dictionary<int, ViewParamModel> Id2Param = new Dictionary<int, ViewParamModel>();
             List<IDynChannel> Channels = SaveHelper.ByteArrayToObject<List<IDynChannel>>(adds.ParamsHelper, true);
 
             foreach (IDynChannel ch in Channels)
@@ -589,19 +591,19 @@ namespace Kaenx.Classes.Bus.Actions
             }
 
 
-            Dictionary<int, List<string>> unions = new Dictionary<int, List<string>>();
+            Dictionary<int, List<int>> unions = new Dictionary<int, List<int>>();
 
             foreach (IDynChannel ch in Channels)
             {
-                bool vis1 = SaveHelper.CheckConditions(ch.Conditions, Id2Param);
+                bool vis1 = SaveHelper.CheckConditions(adds.ApplicationId, ch.Conditions, Id2Param);
 
                 foreach (ParameterBlock block in ch.Blocks)
                 {
-                    bool vis2 = SaveHelper.CheckConditions(block.Conditions, Id2Param);
+                    bool vis2 = SaveHelper.CheckConditions(adds.ApplicationId, block.Conditions, Id2Param);
 
                     foreach (IDynParameter para in block.Parameters)
                     {
-                        bool vis3 = SaveHelper.CheckConditions(para.Conditions, Id2Param);
+                        bool vis3 = SaveHelper.CheckConditions(adds.ApplicationId, para.Conditions, Id2Param);
 
 
                         if (para is ParamSeperator || para is ParamSeperatorBox) continue;
@@ -621,7 +623,7 @@ namespace Kaenx.Classes.Bus.Actions
                         {
                             if (!unions.ContainsKey(xpara.UnionId))
                             {
-                                unions.Add(xpara.UnionId, new List<string>());
+                                unions.Add(xpara.UnionId, new List<int>());
                             }
 
                             if (vis1 && vis2 && vis3)
@@ -651,7 +653,7 @@ namespace Kaenx.Classes.Bus.Actions
                 }
             }
 
-            foreach (KeyValuePair<int, List<string>> union in unions.Where(x => x.Value.Count == 0))
+            foreach (KeyValuePair<int, List<int>> union in unions.Where(x => x.Value.Count == 0))
             {
                 if (AppParas.Values.Any(p => p.UnionId == union.Key && p.UnionDefault))
                 {
@@ -754,16 +756,18 @@ namespace Kaenx.Classes.Bus.Actions
                     data.AddRange(tempBytes.Reverse()); // Start Address
                     data.Add(0x01); //PEI Type //TODO check to find out
 
-                    string[] appid = Device.ApplicationId.Split('-');
-                    int version = int.Parse(appid[3], System.Globalization.NumberStyles.HexNumber);
-                    int appnr = int.Parse(appid[2], System.Globalization.NumberStyles.HexNumber);
-                    int manu = int.Parse(appid[1].Substring(0, 4), System.Globalization.NumberStyles.HexNumber);
+                    //string[] appid = "".Split(""); // Device.ApplicationId.Split('-');
+                    //int version = int.Parse(appid[3], System.Globalization.NumberStyles.HexNumber);
+                    //int appnr = int.Parse(appid[2], System.Globalization.NumberStyles.HexNumber);
+                    //int manu = int.Parse(appid[1].Substring(0, 4), System.Globalization.NumberStyles.HexNumber);
 
-                    tempBytes = BitConverter.GetBytes(Convert.ToUInt16(manu));
+
+
+                    tempBytes = BitConverter.GetBytes(Convert.ToUInt16(ManuId));
                     data.AddRange(tempBytes.Reverse());
-                    tempBytes = BitConverter.GetBytes(Convert.ToUInt16(appnr));
+                    tempBytes = BitConverter.GetBytes(Convert.ToUInt16(app.Number));
                     data.AddRange(tempBytes.Reverse());
-                    data.Add(Convert.ToByte(version));
+                    data.Add(Convert.ToByte(app.Version));
                     break;
 
                 default:
@@ -778,7 +782,7 @@ namespace Kaenx.Classes.Bus.Actions
             }
             catch (Exception ex)
             {
-
+                Log.Error(ex, "AllocSegment Failed to write memory: " + ctrl.Attribute("Address").Value);
             }
 
             byte[] data2 = new byte[] { 0xFF };
@@ -786,8 +790,9 @@ namespace Kaenx.Classes.Bus.Actions
             {
                 data2 = await dev.MemoryRead(46825 + int.Parse(LsmId), 1);
             }
-            catch
+            catch (Exception ex)
             {
+                Log.Error(ex, "AllocSegment Failed to read memory: " + ctrl.Attribute("Address").Value);
             }
 
             Dictionary<int, byte> map = new Dictionary<int, byte>() { { 4, 0x00 }, { 3, 0x02 }, { 2, 0x02 }, { 1, 0x02 } };
@@ -853,9 +858,7 @@ namespace Kaenx.Classes.Bus.Actions
 
         private async Task LsmState(XElement ctrl, int counter = 0)
         {
-            XNamespace ns = dev.MaskXML.GetDefaultNamespace();
-            XElement propertyLsmFeature = dev.MaskXML.Element(ns + "HawkConfigurationData").Element(ns + "Features").Elements().FirstOrDefault(x => x.Attribute("Name").Value == "PropertyMappedLsms");
-            bool useProperty = propertyLsmFeature != null && propertyLsmFeature.Attribute("Value").Value == "1";
+            bool useProperty = dev.GetFeature("PropertyMappedLsms") == "1";
 
             byte[] data = new byte[useProperty ? 10 : 11];
             int lsmIdx = int.Parse(ctrl.Attribute("LsmIdx").Value);
@@ -889,24 +892,34 @@ namespace Kaenx.Classes.Bus.Actions
                 data = await dev.MemoryRead(46825 + lsmIdx, 1);
             }
 
-            Dictionary<int, byte> map = new Dictionary<int, byte>() { { 4, 0x00 }, { 3, 0x02 }, { 2, 0x01 }, { 1, 0x02 } };
-            if (data != null && data[0] != map[(int)state])
+            try
             {
-                if (counter > 2)
+
+
+                Dictionary<int, byte> map = new Dictionary<int, byte>() { { 5, 0x00 }, { 4, 0x00 }, { 3, 0x02 }, { 2, 0x01 }, { 1, 0x02 } };
+                if (data != null && (data.Length == 0 || data[0] != map[(int)state]))
                 {
-                    Debug.WriteLine("Fehlgeschlagen!");
-                    Log.Error($"LsmState fehlgeschlagen: Idx = {lsmIdx}, State = {state}, Response = {Convert.ToString(data)}");
+                    if (counter > 2)
+                    {
+                        Debug.WriteLine("Fehlgeschlagen!");
+                        Log.Error($"LsmState fehlgeschlagen: Idx = {lsmIdx}, State = {state}, Response = {Convert.ToString(data)}");
+                    }
+                    else
+                    {
+                        Log.Error($"LsmState Abfrage fehlgeschlagen. Schreibe erneut: Idx = {lsmIdx}, State = {state}, Response = {Convert.ToString(data)}");
+                        await LsmState(ctrl, counter + 1);
+                    }
                 }
-                else
-                    await LsmState(ctrl, counter + 1);
+            }
+            catch
+            {
+
             }
         }
 
         private async Task SendLsmEvent(byte lsmIndex, byte loadEvent, byte requiredState, int intermediateState = -1, byte[] extraData = null)
         {
-            XNamespace ns = dev.MaskXML.GetDefaultNamespace();
-            XElement propertyLsmFeature = dev.MaskXML.Element(ns + "HawkConfigurationData").Element(ns + "Features").Elements().FirstOrDefault(x => x.Attribute("Name").Value == "PropertyMappedLsms");
-            bool useProperty = propertyLsmFeature != null && propertyLsmFeature.Attribute("Value").Value == "1";
+            bool useProperty = dev.GetFeature("PropertyMappedLsms") == "1";
 
             byte[] data = new byte[useProperty ? 10 : 11];
             data[0] = loadEvent;
@@ -1251,8 +1264,8 @@ namespace Kaenx.Classes.Bus.Actions
 
         private void GenerateApplication(AppAdditional adds)
         {
-            Dictionary<string, AppParameter> paras = new Dictionary<string, AppParameter>();
-            Dictionary<string, AppParameterTypeViewModel> types = new Dictionary<string, AppParameterTypeViewModel>();
+            Dictionary<int, AppParameter> paras = new Dictionary<int, AppParameter>();
+            Dictionary<int, AppParameterTypeViewModel> types = new Dictionary<int, AppParameterTypeViewModel>();
             List<int> changed = new List<int>();
 
             var visibleParams = OverrideVisibleParams ?? GetVisibleParams(adds);
@@ -1264,7 +1277,8 @@ namespace Kaenx.Classes.Bus.Actions
 
             foreach (AppParameter para in paras.Values)
             {
-                if (para.SegmentId == null) continue;
+                //TODO change
+                if (para.SegmentId == -1) continue;
                 if (!dataSegs.ContainsKey(para.SegmentId))
                 {
                     AppSegmentViewModel seg = _context.AppSegments.Single(a => a.Id == para.SegmentId);

@@ -19,7 +19,7 @@ namespace Kaenx.Classes.Dynamic
         }
 
         [JsonProperty("i")]
-        public string Id { get; set; }
+        public int Id { get; set; }
         [JsonProperty("t")]
         public string Text { get; set; }
         [JsonProperty("d")]

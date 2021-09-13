@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Kaenx.DataContext.Catalog;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
@@ -11,6 +12,7 @@ namespace Kaenx.Classes
 {
     public class DeviceImportInfo : INotifyPropertyChanged
     {
+        //TODO move this to view!
         private Symbol _icon = Symbol.More;
         public Symbol Icon
         {
@@ -39,13 +41,13 @@ namespace Kaenx.Classes
 
         public string Id { get; set; }
         public string Name { get; set; }
+        public int ManuId { get; set; }
         public string Description { get; set; }
-        public string HardwareRefId { get; set; }
-        public string ProductRefId { get; set; }
-        public string CatalogId { get; set; }
+        public Reference ApplicationRef { get; set; }
+        public Reference HardwareRef { get; set; }
+        public string ProductRef { get; set; }
+        public int CatalogId { get; set; }
 
-        public string ApplicationId { get; set; }
-        public string HardwareId { get; set; }
 
         public event PropertyChangedEventHandler PropertyChanged;
     }

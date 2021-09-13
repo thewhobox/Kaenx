@@ -90,7 +90,7 @@ namespace Kaenx.View
             {
                 if(obj is Kaenx.Classes.Bus.Data.ErrorData)
                 {
-                    ViewHelper.Instance.ShowNotification("main", "Konfig auslesen Fehler: " + Environment.NewLine + (obj as ErrorData).Message, 5000, Microsoft.UI.Xaml.Controls.InfoBarSeverity.Error);
+                    ViewHelper.Instance.ShowNotification("main", "Konfig auslesen Fehler: " + Environment.NewLine + (obj as ErrorData).Additional, 5000, Microsoft.UI.Xaml.Controls.InfoBarSeverity.Error);
                 }
                 else
                 {
@@ -344,17 +344,17 @@ namespace Kaenx.View
 
             if (model.HasApplicationProgram)
             {
-                int apps = _context.Hardware2App.Count(h => h.HardwareId == model.HardwareId);
+                int apps = _context.Applications.Count(h => h.HardwareId == model.HardwareId);
                 if (apps == 1)
                 {
-                    Hardware2AppModel app = _context.Hardware2App.First(h => h.HardwareId == model.HardwareId);
-                    device.ApplicationId = app.ApplicationId;
+                    ApplicationViewModel app = _context.Applications.Single(h => h.HardwareId == model.HardwareId);
+                    device.ApplicationId = app.Id;
                 }
                 else
                 {
-                    DiagSelectApp diag = new DiagSelectApp(model.HardwareId);
+                    DiagSelectApp diag = new DiagSelectApp(model.Id);
                     await diag.ShowAsync();
-                    if (diag.ApplicationId == null) return;
+                    if (diag.ApplicationId == -1) return;
                     device.ApplicationId = diag.ApplicationId;
                 }
             }

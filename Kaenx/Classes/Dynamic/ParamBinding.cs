@@ -10,7 +10,7 @@ namespace Kaenx.Classes.Dynamic
     public class ParamBinding
     {
         [JsonProperty("s")]
-        public string SourceId { get; set; }
+        public int SourceId { get; set; } = -2;
         [JsonProperty("t")]
         public string DefaultText { get; set; }
         [JsonProperty("h")]

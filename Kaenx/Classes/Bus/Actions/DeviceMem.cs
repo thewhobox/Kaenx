@@ -67,12 +67,13 @@ namespace Kaenx.Classes.Bus.Actions
             CatalogContext context = new CatalogContext();
             ApplicationViewModel appModel = null;
 
-            if (context.Applications.Any(a => a.Id == Device.ApplicationId))
+            //TODO check change
+            if (context.Applications.Any(a => true)) //a.Id == Device.ApplicationId))
             {
-                appModel = context.Applications.Single(a => a.Id == Device.ApplicationId);
+                appModel = context.Applications.Single(a => true); // a.Id == Device.ApplicationId);
             }
 
-            Dictionary<string, byte[]> segments = new Dictionary<string, byte[]>();
+            Dictionary<int, byte[]> segments = new Dictionary<int, byte[]>();
 
             foreach(AppSegmentViewModel seg in context.AppSegments.Where(s => s.ApplicationId == Device.ApplicationId))
             {

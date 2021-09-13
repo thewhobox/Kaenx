@@ -41,7 +41,7 @@ namespace Kaenx.View
     /// </summary>
     public sealed partial class Bus : Page
     {
-
+        private string viewName = "bus";
 
         public Bus()
         {
@@ -54,13 +54,14 @@ namespace Kaenx.View
             base.OnNavigatedTo(e);
             if (e.Parameter is string && e.Parameter.ToString() == "main")
             {
+                viewName = "main";
                 this.DataContext = BusConnection.Instance;
                 var currentView = SystemNavigationManager.GetForCurrentView();
                 currentView.AppViewBackButtonVisibility = AppViewBackButtonVisibility.Visible;
                 currentView.BackRequested += CurrentView_BackRequested;
                 ApplicationView.GetForCurrentView().Title = "Bus";
-                ViewHelper.Instance.OnShowNotification += Instance_OnShowNotification;
             }
+            ViewHelper.Instance.OnShowNotification += Instance_OnShowNotification;
         }
 
         protected override void OnNavigatedFrom(NavigationEventArgs e)
@@ -73,7 +74,7 @@ namespace Kaenx.View
 
         private void Instance_OnShowNotification(string view, string text, int duration, InfoBarSeverity type)
         {
-            if(view == "main")
+            if(view == viewName || (viewName == "main" && view == "bus"))
             {
                 InfoBar info = new InfoBar();
                 info.Message = text;
@@ -97,8 +98,8 @@ namespace Kaenx.View
 
                 info.IsOpen = true;
                 info.Closed += (a, b) => InfoPanel.Children.Remove(info);
+
                 InfoPanel.Children.Add(info);
-                //Notify.Show(text, duration);
             }
         }
 
@@ -159,11 +160,17 @@ namespace Kaenx.View
 
         private void BDeviceInfo_OnAddTabItem(string text, IBusData data)
         {
-            TabViewItem tab = new TabViewItem() { Header = text };
-            tab.CloseRequested += (sender, e) => InfoTab.TabItems.Remove(sender);
-            tab.Content = new Controls.Bus.Data.DataInfo(data);
-            InfoTab.TabItems.Add(tab);
-            InfoTab.SelectedItem = tab;
+            if(data is DeviceInfoData)
+            {
+                TabViewItem tab = new TabViewItem() { Header = text };
+                tab.CloseRequested += (sender, e) => InfoTab.TabItems.Remove(sender);
+                tab.Content = new Controls.Bus.Data.DataInfo(data);
+                InfoTab.TabItems.Add(tab);
+                InfoTab.SelectedItem = tab;
+            } else
+            {
+                ViewHelper.Instance.ShowNotification("bus", "Keine Daten zum Anzeigen.", 3000, InfoBarSeverity.Warning);
+            }
         }
     }
 }

@@ -9,8 +9,9 @@
     xmlns:controls="using:Kaenx.View.Controls"
     mc:Ignorable="d"
     Title="Neue Geräte in Projekt importieren"
-    PrimaryButtonText="Button1"
-    CloseButtonText="Button2"
+    PrimaryButtonText="Importieren"
+    CloseButtonText="Abbrechen"
+    DefaultButton="Primary"
     PrimaryButtonClick="ContentDialog_PrimaryButtonClick">
 
     <Grid>
