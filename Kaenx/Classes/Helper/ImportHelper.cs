@@ -704,7 +704,7 @@ namespace Kaenx.Classes.Helper
             app.Version = int.Parse(appXml.Attribute("ApplicationVersion").Value);
             app.Mask = appXml.Attribute("MaskVersion").Value;
             app.Name = appXml.Attribute("Name").Value;
-            app.HardwareId = app2hard[appid];
+            app.Manufacturer = int.Parse(appXml.Parent.Parent.Attribute("RefId").Value.Substring(2), System.Globalization.NumberStyles.HexNumber);
 
             int manuid = int.Parse(appXml.Attribute("Id").Value.Substring(2, 4), System.Globalization.NumberStyles.HexNumber);
             ManufacturerViewModel manu = _context.Manufacturers.Single(m => m.ImportType == ImportTypes.ETS && m.ManuId == manuid);
@@ -1703,7 +1703,7 @@ namespace Kaenx.Classes.Helper
             await Task.Delay(10);
             Stopwatch sw = new Stopwatch();
             sw.Start();
-            Dictionary<int, Dynamic.ViewParamModel> Id2Param = SaveHelper.GenerateDynamic(adds);
+            Dictionary<int, Dynamic.ViewParamModel> Id2Param = SaveHelper.GenerateDynamic(adds, table);
             sw.Stop();
             Debug.WriteLine("Generate Dyn: " + sw.Elapsed.TotalSeconds);
 
@@ -1713,7 +1713,7 @@ namespace Kaenx.Classes.Helper
             await Task.Delay(10);
             sw = new Stopwatch();
             sw.Start();
-            await SaveHelper.GenerateDefaultComs(adds, Id2Param);
+            await SaveHelper.GenerateDefaultComs(adds, Id2Param, table);
             sw.Stop();
             Debug.WriteLine("Generate Coms: " + sw.Elapsed.TotalSeconds);
 

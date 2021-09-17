@@ -149,7 +149,7 @@ namespace Kaenx.Classes.Bus.Actions
             ProgressIsIndeterminate = false;
             ProgressValue = 33;
 
-            bus.IndividualAddressWrite(UnicastAddress.FromString(Device.LineName));
+            await bus.IndividualAddressWrite(UnicastAddress.FromString(Device.LineName));
             await Task.Delay(500);
 
             CheckNewAddr();

@@ -626,9 +626,8 @@ namespace Kaenx.Classes.Helper
             return int.Parse(id.Substring(id.LastIndexOf("-") + 1));
         }
 
-        public static Dictionary<int, ViewParamModel> GenerateDynamic(AppAdditional adds)
+        public static Dictionary<int, ViewParamModel> GenerateDynamic(AppAdditional adds, XElement dynamic)
         {
-            XDocument dynamic = XDocument.Parse(Encoding.UTF8.GetString(adds.Dynamic));
             XmlReader reader = dynamic.CreateReader();
 
             updatedComs = new List<int>();
@@ -640,12 +639,12 @@ namespace Kaenx.Classes.Helper
             List<IDynChannel> Channels = new List<IDynChannel>();
             IDynChannel currentChannel = null;
 
-            foreach(XElement ele in dynamic.Root.Descendants(XName.Get("ParameterBlock", dynamic.Root.Name.NamespaceName)))
+            foreach(XElement ele in dynamic.Descendants(XName.Get("ParameterBlock", dynamic.Name.NamespaceName)))
             {
                 if(ele.Attribute("Inline")?.Value == "true") continue; //Tabellen überspringen
                 Id2Element.Add("pb" + GetItemId(ele.Attribute("Id").Value), ele);
             }
-            foreach(XElement ele in dynamic.Root.Descendants(XName.Get("Channel", dynamic.Root.Name.NamespaceName)))
+            foreach(XElement ele in dynamic.Descendants(XName.Get("Channel", dynamic.Name.NamespaceName)))
             {
                 Id2Element.Add("ch" + GetItemId(ele.Attribute("Id").Value), ele);
             }
@@ -883,12 +882,12 @@ namespace Kaenx.Classes.Helper
 
 
 
-            List<XElement> channels = dynamic.Root.Descendants(XName.Get("ChannelIndependentBlock", dynamic.Root.Name.NamespaceName)).ToList();
-            channels.AddRange(dynamic.Root.Descendants(XName.Get("Channel", dynamic.Root.Name.NamespaceName)));
+            List<XElement> channels = dynamic.Descendants(XName.Get("ChannelIndependentBlock", dynamic.Name.NamespaceName)).ToList();
+            channels.AddRange(dynamic.Descendants(XName.Get("Channel", dynamic.Name.NamespaceName)));
             foreach (XElement eleCH in channels)
             {
                 string groupText = eleCH.Attribute("Text")?.Value;
-                foreach (XElement elePB in eleCH.Descendants(XName.Get("ParameterBlock", dynamic.Root.Name.NamespaceName)))
+                foreach (XElement elePB in eleCH.Descendants(XName.Get("ParameterBlock", dynamic.Name.NamespaceName)))
                 {
                     if (elePB.Attribute("Inline")?.Value == "true") continue;
                     int textRefId = -2;
@@ -1433,11 +1432,10 @@ namespace Kaenx.Classes.Helper
         }
 
 
-        public static async Task GenerateDefaultComs(AppAdditional adds, Dictionary<int, ViewParamModel> Id2Param)
+        public static async Task GenerateDefaultComs(AppAdditional adds, Dictionary<int, ViewParamModel> Id2Param, XElement dynamic)
         {
             List<DeviceComObject> comObjects = new List<DeviceComObject>();
-            XDocument dynamic = XDocument.Parse(System.Text.Encoding.UTF8.GetString(adds.Dynamic));
-            IEnumerable<XElement> elements = dynamic.Root.Descendants(XName.Get("ComObjectRefRef", dynamic.Root.Name.NamespaceName));
+            IEnumerable<XElement> elements = dynamic.Descendants(XName.Get("ComObjectRefRef", dynamic.Name.NamespaceName));
             Dictionary<int, AppComObject> comobjects = new Dictionary<int, AppComObject>();
             Dictionary<string, Dictionary<string, DataPointSubType>> DPST = await SaveHelper.GenerateDatapoints();
 
