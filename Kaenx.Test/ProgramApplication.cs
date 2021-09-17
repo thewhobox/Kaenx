@@ -42,7 +42,7 @@ namespace Kaenx.Test
                 LineMiddle middle = new LineMiddle(3, "", main);
                 device.Parent = middle;
                 device.Id = 4;
-                device.ApplicationId = "M-0188_A-0001-01";
+                device.ApplicationId = 1;
                 DeviceComObject com1 = new DeviceComObject() { Number = 1, IsEnabled = true, Flag_Communication = true, Flag_Write = true, DataPointSubType = new Classes.DataPointSubType() { SizeInBit = 1 } };
                 com1.Groups.Add(new FunctionGroup() { Address = new MulticastAddress(7, 7, 10) });
                 device.ComObjects.Add(com1);
@@ -67,11 +67,17 @@ namespace Kaenx.Test
                     </LoadProcedures>"
                 )
             });
+            progApplication.Context.Manufacturers.Add(new ManufacturerViewModel()
+            {
+                Id = 1,
+                ManuId = 0x0188,
+                Name = "Not Assigned",
+            });
             progApplication.Context.Applications.Add(new ApplicationViewModel()
             {
                 Id = progApplication.Device.ApplicationId,
                 Mask = "MV-07B0",
-                Manufacturer = 0x0188,
+                Manufacturer = 1,
                 Number = 1,
                 Version = 1,
                 LoadProcedure = LoadProcedureTypes.Merge,
@@ -80,23 +86,23 @@ namespace Kaenx.Test
             });
             progApplication.Context.AppSegments.Add(new AppSegmentViewModel()
             {
-                Id = "Segment1",
+                Id = 1,
                 Size = 4,
                 LsmId = 4,
             });
             progApplication.Context.AppParameterTypes.Add(new AppParameterTypeViewModel()
             {
-                Id = "Type1",
+                Id = 1,
                 Type = ParamTypes.NumberInt,
                 Size = 32,
             });
             progApplication.OverrideVisibleParams = new List<AppParameter>();
             progApplication.OverrideVisibleParams.Add(new AppParameter()
             {
-                Id = "Param1",
-                ParameterTypeId = "Type1",
+                Id = 1,
+                ParameterTypeId = 1,
                 Value = 0x01020304.ToString(),
-                SegmentId = "Segment1",
+                SegmentId = 1,
                 SegmentType = SegmentTypes.Memory,
                 Offset = 0,
             });

@@ -704,7 +704,7 @@ namespace Kaenx.Classes.Helper
             app.Version = int.Parse(appXml.Attribute("ApplicationVersion").Value);
             app.Mask = appXml.Attribute("MaskVersion").Value;
             app.Name = appXml.Attribute("Name").Value;
-            app.Manufacturer = int.Parse(appXml.Parent.Parent.Attribute("RefId").Value.Substring(2), System.Globalization.NumberStyles.HexNumber);
+            app.HardwareId = app2hard[appid];
 
             int manuid = int.Parse(appXml.Attribute("Id").Value.Substring(2, 4), System.Globalization.NumberStyles.HexNumber);
             ManufacturerViewModel manu = _context.Manufacturers.Single(m => m.ImportType == ImportTypes.ETS && m.ManuId == manuid);

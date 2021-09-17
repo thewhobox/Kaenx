@@ -43,7 +43,7 @@ namespace Kaenx.Classes.Bus.Actions
         private List<byte> dataAssoTable = new List<byte>();
         private Dictionary<int, AppSegmentViewModel> dataSegs = new Dictionary<int, AppSegmentViewModel>();
         private Dictionary<int, byte[]> dataMems = new Dictionary<int, byte[]>();
-        private Dictionary<int, int> dataAddresses = new Dictionary<int , int>();
+        private Dictionary<int, int> dataAddresses = new Dictionary<int, int>();
         private ApplicationViewModel app;
         private BusDevice dev;
         private int ManuId;
@@ -107,11 +107,13 @@ namespace Kaenx.Classes.Bus.Actions
             dev = new BusDevice(Device.LineName, Connection);
             TodoText = ProcedureType == ProcedureTypes.Load ? "Applikation schreiben" : "Gerät entladen";
 
+            //CatalogContext _context = new CatalogContext();
+            AppAdditional adds = _context.AppAdditionals.Single(a => a.Id == Device.ApplicationId);
+            app = _context.Applications.Single(a => a.Id == Device.ApplicationId);
+            ManuId = _context.Manufacturers.Single(m => m.Id == app.Manufacturer).ManuId;
 
             if (ProcedureType == ProcedureTypes.Load || (Helper != null && (Helper.UnloadApplication || Helper.UnloadBoth)))
             {
-                AppAdditional adds = _context.AppAdditionals.Single(a => a.Id == Device.ApplicationId);
-                app = _context.Applications.Single(a => a.Id == Device.ApplicationId);
 
                 XElement temp;
                 XElement procedure = null;
@@ -202,7 +204,7 @@ namespace Kaenx.Classes.Bus.Actions
                     .Elements(procedure.GetDefaultNamespace() + "LdCtrlWriteProp")
                     .Where(ctrl => ctrl.Attribute("ObjIdx").Value == "4" && ctrl.Attribute("PropId").Value == "13"))
                 {
-                    ctrl.Attribute("InlineData").Value = $"{app.Manufacturer:X4}{app.Number:X4}{app.Version:X2}";
+                    ctrl.Attribute("InlineData").Value = $"{ManuId:X4}{app.Number:X4}{app.Version:X2}";
                 }
 
 
@@ -211,12 +213,13 @@ namespace Kaenx.Classes.Bus.Actions
                 double currentProg = 0;
                 Debug.WriteLine("StepSize: " + stepSize + " - " + procedure.Elements().Count());
 
-
+                XElement ctrlOuter;
                 try
                 {
 
                     foreach (XElement ctrl in procedure.Elements())
                     {
+                        ctrlOuter = ctrl;
                         if (_token.IsCancellationRequested)
                             return;
 
@@ -327,7 +330,7 @@ namespace Kaenx.Classes.Bus.Actions
                         Finished?.Invoke(this, null);
                     }
                 }
-                catch(Exception ex)
+                catch (Exception ex)
                 {
                     Log.Error("Fehler bei Applikation prgrammieren: " + ex.Message);
                 }
@@ -428,9 +431,44 @@ namespace Kaenx.Classes.Bus.Actions
                     }
                     catch
                     {
-
+                int offset = dataAddresses.ElementAt(0).Value;
+                value = new byte[size];
+                for (int i = 0; i < size; i++)
+                {
+                    try
+                    {
+                        value[i] = dataMems.Values.ElementAt(0)[address - offset + i];
+                    }
+                    catch (Exception ex)
+                    {
+                        Log.Error(ex, "Fehler beim zusammenstellen des Speichers");
                     }
                 }
+
+            }
+            TodoText = "Schreibe in den Speicher...";
+            Debug.WriteLine($"Schreibe Addresse: {address} mit {value.Count()} Bytes");
+            await dev.MemoryWrite(address, value);
+        }
+
+        private async Task WriteApplication()
+        {
+            TodoText = "Schreibe Speicher...";
+
+            switch (_type)
+            {
+                case ProgAppType.Komplett:
+                    foreach (AppSegmentViewModel seg in dataSegs.Values)
+                    {
+                        await dev.MemoryWrite(seg.Address, dataMems[seg.Id]);
+                    }
+                    break;
+
+                case ProgAppType.Minimal:
+                    break;
+
+                case ProgAppType.Partiell:
+                    break;
             }
 
             Debug.WriteLine($"Schreibe Addresse: {address} mit {value.Count()} Bytes");
@@ -525,27 +563,6 @@ namespace Kaenx.Classes.Bus.Actions
             GenerateGroupTable();
             GenerateAssoTable();
             GenerateApplication(adds);
-        }
-
-        private async Task WriteApplication()
-        {
-            TodoText = "Schreibe Speicher...";
-
-            switch (_type)
-            {
-                case ProgAppType.Komplett:
-                    foreach (AppSegmentViewModel seg in dataSegs.Values)
-                    {
-                        await dev.MemoryWrite(seg.Address, dataMems[seg.Id]);
-                    }
-                    break;
-
-                case ProgAppType.Minimal:
-                    break;
-
-                case ProgAppType.Partiell:
-                    break;
-            }
         }
 
 
