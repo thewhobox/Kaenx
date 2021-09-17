@@ -144,7 +144,7 @@ namespace Kaenx.View.Controls.Bus
                 BusDevice dev = new BusDevice(UnicastAddress.FromString("15.15.254"), conn);
                 await dev.Connect(true);
 
-                string appId = await dev.RessourceRead<string>("ApplicationId");
+                string appId = await dev.ResourceRead<string>("ApplicationId");
                 if (appId.Length == 8) appId = "00" + appId;
                 //data.ApplicationId = "M-" + appId.Substring(0, 4) + "_A-" + appId.Substring(4, 4) + "-" + appId.Substring(8, 2) ;
 

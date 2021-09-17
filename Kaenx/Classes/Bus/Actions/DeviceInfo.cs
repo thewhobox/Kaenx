@@ -106,7 +106,7 @@ namespace Kaenx.Classes.Bus.Actions
                 ProgressValue += stepsize;
                 TodoText = "Lese Applikations Id...";
                 //await Task.Delay(500);
-                string appId = await dev.RessourceRead<string>("ApplicationId");
+                string appId = await dev.ResourceRead<string>("ApplicationId");
                 if (appId.Length == 8) appId = "00" + appId;
                 appId = "M-" + appId.Substring(0, 4) + "_A-" + appId.Substring(4, 4) + "-" + appId.Substring(8, 2);
 
@@ -182,7 +182,7 @@ namespace Kaenx.Classes.Bus.Actions
 
                 if (grpAddr == -1)
                 {
-                    grpAddr = await dev.RessourceAddress("GroupAddressTable");
+                    grpAddr = await dev.ResourceAddress("GroupAddressTable");
                 }
 
 
@@ -225,7 +225,7 @@ namespace Kaenx.Classes.Bus.Actions
 
                 if (assoAddr == -1)
                 {
-                    assoAddr = await dev.RessourceAddress("GroupAssociationTable");
+                    assoAddr = await dev.ResourceAddress("GroupAssociationTable");
                     //assoAddr = await dev.PropertyRead<int>(2, 7);
                 }
 
@@ -277,7 +277,7 @@ namespace Kaenx.Classes.Bus.Actions
                 TodoText = "Lese andere Resourcen...";
                 foreach (XElement resource in xresources)
                 {
-                    byte[] value = await dev.RessourceRead(resource.Attribute("Name").Value);
+                    byte[] value = await dev.ResourceRead(resource.Attribute("Name").Value);
 
                     OtherResource resx = new OtherResource();
                     resx.Name = resource.Attribute("Name").Value;

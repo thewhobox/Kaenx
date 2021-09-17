@@ -54,12 +54,12 @@ namespace Kaenx.Classes.Bus.Actions
 
             if (Device.IsDeactivated)
             {
-                await dev.RessourceWrite("GroupAddressTable", new byte[] { (byte)Device.LastGroupCount });
+                await dev.ResourceWrite("GroupAddressTable", new byte[] { (byte)Device.LastGroupCount });
             } else
             {
-                int size = await dev.RessourceRead<int>("GroupAddressTable");
+                int size = await dev.ResourceRead<int>("GroupAddressTable");
                 Device.LastGroupCount = size;
-                await dev.RessourceWrite("GroupAddressTable", new byte[] { 0x01 });
+                await dev.ResourceWrite("GroupAddressTable", new byte[] { 0x01 });
             }
 
 

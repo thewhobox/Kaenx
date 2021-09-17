@@ -324,7 +324,7 @@ namespace Kaenx.View
             BusDevice dev = new BusDevice(device.Address, _conn);
             await dev.Connect(true);
 
-            string appId = await dev.RessourceRead<string>("ApplicationId");
+            string appId = await dev.ResourceRead<string>("ApplicationId");
 
             if (appId.Length == 8)
             {
@@ -373,7 +373,7 @@ namespace Kaenx.View
 
             try
             {
-                device.SerialBytes = await dev.RessourceRead("DeviceSerialNumber");
+                device.SerialBytes = await dev.ResourceRead("DeviceSerialNumber");
                 device.Serial = BitConverter.ToString(device.SerialBytes).Replace("-", "");
             }
             catch (NotSupportedException ex)
