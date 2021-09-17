@@ -464,7 +464,6 @@ namespace Kaenx.Classes.Bus.Actions
 
         private async Task PreDownloadChecks()
         {
-            await dev.DeviceDescriptorRead();
             string mask = await dev.DeviceDescriptorRead();
             if (mask != app.Mask)
                 throw new Exception($"Maskenversion im Gerät ({mask}) stimmt nicht mit der Produktdatenbank ({app.Mask}) überein");
@@ -496,6 +495,7 @@ namespace Kaenx.Classes.Bus.Actions
                 if (hasManuId)
                 {
                     int deviceManufacturer = await dev.ResourceRead<int>("DeviceManufacturerId");
+                    deviceManufacturer = _context.Manufacturers.Single(m => m.ImportType == DataContext.Import.ImportTypes.ETS && m.ManuId == deviceManufacturer).Id;
                     if (app.Manufacturer != deviceManufacturer)
                         throw new Exception("Hersteller des Gerätes ist nicht gleich mit der Produktdatenbank");
                 }

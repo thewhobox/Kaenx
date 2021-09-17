@@ -6,8 +6,8 @@
   IgnorableNamespaces="uap mp">
 
   <Identity Name="ca091138-a6bc-4b15-b6bc-6304291c8762"
-            Publisher="CN=phili"
-            Version="1.0.0.0" />
+            Publisher="CN=92410570-9637-4D05-BB82-BCB990CF0C1C"
+            Version="0.0.52.0" />
 
   <mp:PhoneIdentity PhoneProductId="ca091138-a6bc-4b15-b6bc-6304291c8762" PhonePublisherId="00000000-0000-0000-0000-000000000000"/>
 
