@@ -429,16 +429,6 @@ namespace Kaenx.Classes.Bus.Actions
                     {
                         value[i] = dataMems.Values.ElementAt(0)[address - offset + i];
                     }
-                    catch
-                    {
-                int offset = dataAddresses.ElementAt(0).Value;
-                value = new byte[size];
-                for (int i = 0; i < size; i++)
-                {
-                    try
-                    {
-                        value[i] = dataMems.Values.ElementAt(0)[address - offset + i];
-                    }
                     catch (Exception ex)
                     {
                         Log.Error(ex, "Fehler beim zusammenstellen des Speichers");
@@ -470,9 +460,6 @@ namespace Kaenx.Classes.Bus.Actions
                 case ProgAppType.Partiell:
                     break;
             }
-
-            Debug.WriteLine($"Schreibe Addresse: {address} mit {value.Count()} Bytes");
-            await dev.MemoryWrite(address, value);
         }
 
         private async Task PreDownloadChecks()
@@ -483,7 +470,7 @@ namespace Kaenx.Classes.Bus.Actions
                 throw new Exception($"Maskenversion im Gerät ({mask}) stimmt nicht mit der Produktdatenbank ({app.Mask}) überein");
             //Medium independant
             
-            if (!string.IsNullOrEmpty(dev.GetFeature("AuthorizeLevels"))))
+            if (!string.IsNullOrEmpty(dev.GetFeature("AuthorizeLevels")))
             {
                 if (await dev.Authorize(0xffffffff) != 0)
                     throw new Exception("Standardpasswort wurde vom Gerät nicht akzeptiert");
@@ -514,7 +501,8 @@ namespace Kaenx.Classes.Bus.Actions
                 }
                 //TODO: PortADDR for BCU1 (Memory: 010C) and BCU2 (PID_PORT_CONFIGURATION in device object)
                 // Compare to download image 010C if this address is included
-                if (maskVersion == 0x07B0)
+                //if (maskVersion == 0x07B0)
+                if (dev.ManagmentModel == ManagmentModels.SystemB)
                 {
                     const byte PID_ORDER_INFO = 15;
                     const byte PID_VERSION = 25;
