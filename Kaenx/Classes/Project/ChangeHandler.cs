@@ -64,7 +64,7 @@ namespace Kaenx.Classes.Project
                     oldVal = changeOld2.Value;
                 } catch
                 {
-                    AppParameter para = _contextC.AppParameters.Single(p => p.Id == change.ParamId);
+                    AppParameter para = _contextC.AppParameters.Single(p => p.ParameterId == change.ParamId);
                     oldVal = para.Value;
                 }
 

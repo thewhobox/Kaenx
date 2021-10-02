@@ -922,6 +922,8 @@ namespace Kaenx.Classes.Helper
                 {
                     foreach (IDynParameter para in block.Parameters)
                     {
+                        if (para is ParamSeperator || para is ParameterTable) continue;
+
                         if (!Id2Param.ContainsKey(para.Id))
                             Id2Param.Add(para.Id, new ViewParamModel(para.Value));
 
@@ -1526,86 +1528,93 @@ namespace Kaenx.Classes.Helper
                     }
                 }
 
-                switch (cond.Operation)
+                try
                 {
-                    case ConditionOperation.IsInValue:
-                        if (!cond.Values.Split(",").Contains(paraValue))
-                            flag = false;
-                        break;
 
-                    case ConditionOperation.Default:
-                        string[] defConds = cond.Values.Split(",");
-                        int paraValInt = int.Parse(paraValue);
+                    switch (cond.Operation)
+                    {
+                        case ConditionOperation.IsInValue:
+                            if (!cond.Values.Split(",").Contains(paraValue))
+                                flag = false;
+                            break;
 
-                        foreach(string defCond in defConds)
-                        {
-                            if (!flag) break;
+                        case ConditionOperation.Default:
+                            string[] defConds = cond.Values.Split(",");
+                            int paraValInt = int.Parse(paraValue);
 
-                            if (defCond.StartsWith("<="))
+                            foreach (string defCond in defConds)
                             {
-                                int def = int.Parse(defCond.Substring(2));
-                                if (paraValInt <= def) flag = false;
+                                if (!flag) break;
+
+                                if (defCond.StartsWith("<="))
+                                {
+                                    int def = int.Parse(defCond.Substring(2));
+                                    if (paraValInt <= def) flag = false;
+                                }
+                                else if (defCond.StartsWith("<"))
+                                {
+                                    int def = int.Parse(defCond.Substring(1));
+                                    if (paraValInt < def) flag = false;
+                                }
+                                else if (defCond.StartsWith(">="))
+                                {
+                                    int def = int.Parse(defCond.Substring(2));
+                                    if (paraValInt >= def) flag = false;
+                                }
+                                else if (defCond.StartsWith(">"))
+                                {
+                                    int def = int.Parse(defCond.Substring(1));
+                                    if (paraValInt > def) flag = false;
+                                }
+                                else
+                                {
+                                    int def = int.Parse(defCond);
+                                    if (paraValInt == def) flag = false;
+                                }
                             }
-                            else if (defCond.StartsWith("<"))
-                            {
-                                int def = int.Parse(defCond.Substring(1));
-                                if (paraValInt < def) flag = false;
-                            }
-                            else if (defCond.StartsWith(">="))
-                            {
-                                int def = int.Parse(defCond.Substring(2));
-                                if (paraValInt >= def) flag = false;
-                            }
-                            else if (defCond.StartsWith(">"))
-                            {
-                                int def = int.Parse(defCond.Substring(1));
-                                if (paraValInt > def) flag = false;
-                            }
-                            else
-                            {
-                                int def = int.Parse(defCond);
-                                if (paraValInt == def) flag = false;
-                            }
-                        }
-                        break;
+                            break;
 
-                    case ConditionOperation.NotEqual:
-                        if (cond.Values == paraValue)
-                            flag = false;
-                        break;
+                        case ConditionOperation.NotEqual:
+                            if (cond.Values == paraValue)
+                                flag = false;
+                            break;
 
-                    case ConditionOperation.Equal:
-                        if (cond.Values != paraValue)
-                            flag = false;
-                        break;
+                        case ConditionOperation.Equal:
+                            if (cond.Values != paraValue)
+                                flag = false;
+                            break;
 
-                    case ConditionOperation.LowerThan:
-                        int valLT = int.Parse(paraValue);
-                        int valLTo = int.Parse(cond.Values);
-                        if ((valLT < valLTo) == false)
-                            flag = false;
-                        break;
+                        case ConditionOperation.LowerThan:
+                            int valLT = int.Parse(paraValue);
+                            int valLTo = int.Parse(cond.Values);
+                            if ((valLT < valLTo) == false)
+                                flag = false;
+                            break;
 
-                    case ConditionOperation.LowerEqualThan:
-                        int valLET = int.Parse(paraValue);
-                        int valLETo = int.Parse(cond.Values);
-                        if ((valLET <= valLETo) == false)
-                            flag = false;
-                        break;
+                        case ConditionOperation.LowerEqualThan:
+                            int valLET = int.Parse(paraValue);
+                            int valLETo = int.Parse(cond.Values);
+                            if ((valLET <= valLETo) == false)
+                                flag = false;
+                            break;
 
-                    case ConditionOperation.GreatherThan:
-                        int valGT = int.Parse(paraValue);
-                        int valGTo = int.Parse(cond.Values);
-                        if ((valGT > valGTo) == false)
-                            flag = false;
-                        break;
+                        case ConditionOperation.GreatherThan:
+                            int valGT = int.Parse(paraValue);
+                            int valGTo = int.Parse(cond.Values);
+                            if ((valGT > valGTo) == false)
+                                flag = false;
+                            break;
 
-                    case ConditionOperation.GreatherEqualThan:
-                        int valGET = int.Parse(paraValue);
-                        int valGETo = int.Parse(cond.Values);
-                        if ((valGET >= valGETo) == false)
-                            flag = false;
-                        break;
+                        case ConditionOperation.GreatherEqualThan:
+                            int valGET = int.Parse(paraValue);
+                            int valGETo = int.Parse(cond.Values);
+                            if ((valGET >= valGETo) == false)
+                                flag = false;
+                            break;
+                    }
+                }catch(Exception ex)
+                {
+
                 }
             }
 

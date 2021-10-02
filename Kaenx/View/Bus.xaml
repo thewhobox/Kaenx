@@ -209,32 +209,35 @@
         </Pivot>
 
 
-        <muxc:TabView x:Name="InfoTab" IsAddTabButtonVisible="False" Grid.Column="1" Margin="5 0" TabWidthMode="SizeToContent">
-            <muxc:TabView.Background>
-                <SolidColorBrush Color="#FFE0E0E0" />
-            </muxc:TabView.Background>
+        <Grid Grid.Column="1">
+            <muxc:TabView x:Name="InfoTab" IsAddTabButtonVisible="False" Margin="5 0" TabWidthMode="SizeToContent" VerticalAlignment="Stretch">
+                <muxc:TabView.Background>
+                    <SolidColorBrush Color="#FFE0E0E0" />
+                </muxc:TabView.Background>
 
-            <muxc:TabViewItem x:Uid="/Bus/TabsMonitor" IsClosable="False">
-                <muxc:TabViewItem.IconSource>
-                    <muxc:FontIconSource Glyph="&#xE8FD;" />
-                </muxc:TabViewItem.IconSource>
-                <bus:BMonitor />
-            </muxc:TabViewItem>
+                <muxc:TabViewItem x:Uid="/Bus/TabsMonitor" IsClosable="False" VerticalAlignment="Stretch" VerticalContentAlignment="Stretch">
+                    <muxc:TabViewItem.IconSource>
+                        <muxc:FontIconSource Glyph="&#xE8FD;" />
+                    </muxc:TabViewItem.IconSource>
+                    <bus:BMonitor />
+                </muxc:TabViewItem>
 
-            <muxc:TabViewItem x:Uid="/Bus/TabsInfo" IsClosable="False">
-                <muxc:TabViewItem.IconSource>
-                    <muxc:FontIconSource Glyph="&#xE946;" />
-                </muxc:TabViewItem.IconSource>
-                <bus:BDeviceInfo OnAddTabItem="BDeviceInfo_OnAddTabItem" />
-            </muxc:TabViewItem>
+                <muxc:TabViewItem x:Uid="/Bus/TabsInfo" IsClosable="False">
+                    <muxc:TabViewItem.IconSource>
+                        <muxc:FontIconSource Glyph="&#xE946;" />
+                    </muxc:TabViewItem.IconSource>
+                    <bus:BDeviceInfo OnAddTabItem="BDeviceInfo_OnAddTabItem" />
+                </muxc:TabViewItem>
 
-            <muxc:TabViewItem x:Uid="/Bus/TabsNew" IsClosable="False">
-                <muxc:TabViewItem.IconSource>
-                    <muxc:FontIconSource Glyph="&#xE836;" />
-                </muxc:TabViewItem.IconSource>
-                <bus:BNewDevices />
-            </muxc:TabViewItem>
-        </muxc:TabView>
+                <muxc:TabViewItem x:Uid="/Bus/TabsNew" IsClosable="False">
+                    <muxc:TabViewItem.IconSource>
+                        <muxc:FontIconSource Glyph="&#xE836;" />
+                    </muxc:TabViewItem.IconSource>
+                    <bus:BNewDevices />
+                </muxc:TabViewItem>
+            </muxc:TabView>
+        </Grid>
+        
 
         <StackPanel x:Name="InfoPanel" Grid.ColumnSpan="2" VerticalAlignment="Bottom" MaxWidth="800" />
     </Grid>

@@ -218,6 +218,9 @@ namespace Kaenx.Views.Easy.Controls
                             if (ParaChanges.ContainsKey(para.Id))
                                 para.Value = ParaChanges[para.Id].Value;
 
+
+                            if (para is ParamSeperator || para is ParameterTable) continue;
+
                             if (!Id2Param.ContainsKey(para.Id))
                                 Id2Param.Add(para.Id, new ViewParamModel(para.Value));
 

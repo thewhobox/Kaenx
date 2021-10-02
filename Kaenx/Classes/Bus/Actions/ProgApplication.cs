@@ -108,9 +108,9 @@ namespace Kaenx.Classes.Bus.Actions
             TodoText = ProcedureType == ProcedureTypes.Load ? "Applikation schreiben" : "Gerät entladen";
 
             //CatalogContext _context = new CatalogContext();
-            AppAdditional adds = _context.AppAdditionals.Single(a => a.Id == Device.ApplicationId);
+            AppAdditional adds = _context.AppAdditionals.Single(a => a.ApplicationId == Device.ApplicationId);
             app = _context.Applications.Single(a => a.Id == Device.ApplicationId);
-            ManuId = _context.Manufacturers.Single(m => m.Id == app.Manufacturer).ManuId;
+            ManuId = _context.Manufacturers.Single(m => m.ImportType == DataContext.Import.ImportTypes.ETS && m.ManuId == app.Manufacturer).ManuId;
 
             if (ProcedureType == ProcedureTypes.Load || (Helper != null && (Helper.UnloadApplication || Helper.UnloadBoth)))
             {
