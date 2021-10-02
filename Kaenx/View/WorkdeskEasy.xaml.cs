@@ -117,7 +117,14 @@ namespace Kaenx.View
         {
             if(e.Handled) return;
             e.Handled = true;
-            App.Navigate(typeof(MainPage));
+
+            if(ContentFrame.Content.GetType() == typeof(Import))
+            {
+                ContentFrame.Content = _pages["catalog"];
+            } else
+            {
+                App.Navigate(typeof(MainPage));
+            }
         }
 
         private void Instance_OnShowNotification(string view, string text, int duration, InfoBarSeverity type)

@@ -216,9 +216,9 @@ namespace Kaenx.View.Controls.Bus
             Konnect.Classes.BusDevice dev = new Konnect.Classes.BusDevice(ldev.LineName, conn);
             await dev.Connect();
             
-            await dev.RessourceWrite("ApplicationId", new byte[] { 0x00, 0x83, 0x10, 0x3C, 0x00 });
+            await dev.ResourceWrite("ApplicationId", new byte[] { 0x00, 0x83, 0x10, 0x3C, 0x00 });
             await Task.Delay(2000);
-            string appId = await dev.RessourceRead<string>("ApplicationId");
+            string appId = await dev.ResourceRead<string>("ApplicationId");
 
             await dev.Disconnect();
             await conn.Disconnect();

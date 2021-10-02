@@ -298,6 +298,9 @@
     <Compile Include="View\Home.xaml.cs">
       <DependentUpon>Home.xaml</DependentUpon>
     </Compile>
+    <Compile Include="View\Import.xaml.cs">
+      <DependentUpon>Import.xaml</DependentUpon>
+    </Compile>
     <Compile Include="View\Reconstruct.xaml.cs">
       <DependentUpon>Reconstruct.xaml</DependentUpon>
     </Compile>
@@ -307,8 +310,8 @@
     <Compile Include="View\Topologie.xaml.cs">
       <DependentUpon>Topologie.xaml</DependentUpon>
     </Compile>
-    <Compile Include="View\Import.xaml.cs">
-      <DependentUpon>Import.xaml</DependentUpon>
+    <Compile Include="View\Import_old.xaml.cs">
+      <DependentUpon>Import_old.xaml</DependentUpon>
     </Compile>
     <Compile Include="View\MainPage.xaml.cs">
       <DependentUpon>MainPage.xaml</DependentUpon>
@@ -521,6 +524,10 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
+    <Page Include="View\Import.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="View\Reconstruct.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -533,7 +540,7 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="View\Import.xaml">
+    <Page Include="View\Import_old.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

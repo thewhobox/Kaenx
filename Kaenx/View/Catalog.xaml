@@ -22,7 +22,7 @@
         <Grid.BorderBrush>
             <SolidColorBrush Color="#FFE0E0E0" />
         </Grid.BorderBrush>
-        
+
         <Grid>
             <Grid.RowDefinitions>
                 <RowDefinition Height="auto" />
@@ -39,7 +39,7 @@
                 <StackPanel  Orientation="Horizontal" HorizontalAlignment="Right">
                     <TextBox Width="200" x:Uid="/Catalog/BarSearch" x:Name="BarSearchIn" VerticalAlignment="Center" BorderBrush="White" Foreground="White" TextChanged="SearchTextChanged" />
                     <AppBarSeparator Foreground="White" Margin="10 0" VerticalAlignment="Center" />
-                   
+
                     <AppBarButton x:Uid="/Catalog/BarDelete" x:Name="BarDelete" Click="ClickDelete" Icon="Delete" Foreground="White" IsEnabled="False">
                         <AppBarButton.KeyboardAccelerators>
                             <KeyboardAccelerator Modifiers="Control" Key="D" />
@@ -59,7 +59,7 @@
                     </AppBarButton>
                 </StackPanel>
             </Border>
-            
+
 
             <toolkit:DataGrid x:Name="CatalogDeviceList" Grid.Row="2" Sorting="CatalogDeviceList_Sorting" AutoGenerateColumns="False" ItemsSource="{Binding CatalogDevices}" 
                               SelectionChanged="CatalogDeviceList_SelectionChanged" IsReadOnly="True" CanUserSortColumns="True" Background="{ThemeResource BrushAccentControlBackground}">
@@ -144,68 +144,8 @@
                 </toolkit:Expander.HeaderTemplate>
                 <TreeView x:Name="TreeV" ItemsSource="{Binding SectionsList}" ItemInvoked="TreeV_ItemInvoked" Background="White" CanDragItems="False" CanReorderItems="False" />
             </toolkit:Expander>
-            
+
         </Grid>
-
-        <Border x:Name="GridImportDevices" Background="#99000000" Visibility="Collapsed">
-            <Grid MaxWidth="700" Margin="0,50" Background="{ThemeResource ApplicationPageBackgroundThemeBrush}" >
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="auto" />
-                    <RowDefinition />
-                    <RowDefinition Height="auto" />
-                </Grid.RowDefinitions>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition />
-                    <ColumnDefinition />
-                    <ColumnDefinition />
-                </Grid.ColumnDefinitions>
-
-                <StackPanel Grid.ColumnSpan="3" Margin="10" BorderBrush="{ThemeResource BrushAccentColor1}" BorderThickness="0,0,0,5">
-                    <TextBlock x:Uid="/Catalog/ImportHeader" FontSize="25" Padding="10" TextWrapping="WrapWholeWords" />
-                    <TextBlock Padding="10 0 10 10">
-                        <Run x:Uid="/Catalog/ImportSelectedLang" />
-                        <Run x:Name="OutSelectedLang" />
-                        <Hyperlink Click="HyperlinkChangeLang_Click"><Run x:Uid="/Catalog/ImportChangeLange" /></Hyperlink>
-                    </TextBlock>
-                </StackPanel>
-
-                <ListView Grid.Row="1" Grid.ColumnSpan="3" x:Name="ImportList" ItemsSource="{Binding DeviceList}" SelectionMode="None" ItemClick="ImportList_ItemClick" IsItemClickEnabled="True" >
-                    <ListView.ItemContainerStyle>
-                        <Style TargetType="ListViewItem">
-                            <Setter Property="HorizontalContentAlignment" Value="Stretch" />
-                        </Style>
-                    </ListView.ItemContainerStyle>
-                    <ListView.ItemTemplate>
-                        <DataTemplate>
-                            <Grid BorderBrush="{ThemeResource BrushAccentColor2}" BorderThickness="0 0 0 1">
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="40" />
-                                    <ColumnDefinition />
-                                </Grid.ColumnDefinitions>
-
-                                <Grid Background="#FF127C1E" Visibility="{Binding SlideSettings.IsSelected, Converter={StaticResource BoolToVisibilityConverter}}">
-                                    <SymbolIcon Foreground="White" Symbol="Accept" />
-                                </Grid>
-
-                                <StackPanel Grid.Column="1" Margin="15">
-                                    <TextBlock Text="{Binding Name}" FontSize="20" />
-                                    <TextBlock Text="{Binding Description}" Foreground="{ThemeResource SystemControlForegroundBaseMediumBrush}" />
-                                    <TextBlock Visibility="{Binding InfoVisible}" Foreground="OrangeRed">
-                                        <Run Text="Das Gerät benötigt Eigenschaften die möglicherweise nicht komplett unterstützt werden:" />
-                                        <LineBreak />
-                                        <Run Text="{Binding Info}" />
-                                    </TextBlock>
-                                </StackPanel>
-                            </Grid>
-                        </DataTemplate>
-                    </ListView.ItemTemplate>
-                </ListView>
-
-                <Button x:Uid="/Catalog/ImportAll" Grid.Row="2" Click="ClickSelectAll" HorizontalAlignment="Stretch" />
-                <Button x:Uid="/Catalog/ImportSelected" x:Name="ButtonImportSelected" Grid.Row="2" Grid.Column="1" IsEnabled="False" Click="ClickSelected" HorizontalAlignment="Stretch" />
-                <Button x:Uid="/Catalog/ImportCancel" Grid.Row="2" Grid.Column="2" Click="ClickCancel" HorizontalAlignment="Stretch" />
-            </Grid>
-        </Border>
 
         <toolkit:InAppNotification x:Name="Notifi" />
     </Grid>

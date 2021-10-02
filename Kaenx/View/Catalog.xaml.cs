@@ -101,7 +101,7 @@ namespace Kaenx.View
             base.OnNavigatedTo(e);
             if(e.Parameter is StorageFile)
             {
-                PrepareImport(e.Parameter as StorageFile);
+                //PrepareImport(e.Parameter as StorageFile);
                 wasFromMain = true;
                 ApplicationView.GetForCurrentView().Title = loader.GetString("WindowTitle");
 
@@ -136,96 +136,64 @@ namespace Kaenx.View
 
         private async void ClickImport(object sender, RoutedEventArgs e)
         {
-            FileOpenPicker picker = new FileOpenPicker();
-            picker.FileTypeFilter.Add(".knxprod");
-            picker.FileTypeFilter.Add(".xml");
-            StorageFile file = await picker.PickSingleFileAsync();
-            PrepareImport(file);
+            Frame main = this.Parent as Frame;
+            main.Navigate(typeof(Import));
         }
 
-        public async void PrepareImport(StorageFile file, bool changeLang = false)
-        {
-            if (file == null) return;
+        //public async void PrepareImport(StorageFile file, bool changeLang = false)
+        //{
+        //    if (file == null) return;
 
 
-            try
-            {
-                await file.CopyAsync(ApplicationData.Current.TemporaryFolder, file.Name, NameCollisionOption.ReplaceExisting);
-            }
-            catch (Exception ex)
-            {
-                string msg = loader.GetString("MsgNotCopied");
-                Serilog.Log.Error(ex, "Fehler beim Kopieren der KNX-Prod Datei");
-                //Add notify
-                Notifi.Show(msg + "\r\n" + ex.Message);
-                return;
-            }
+        //    try
+        //    {
+        //        await file.CopyAsync(ApplicationData.Current.TemporaryFolder, file.Name, NameCollisionOption.ReplaceExisting);
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        string msg = loader.GetString("MsgNotCopied");
+        //        Serilog.Log.Error(ex, "Fehler beim Kopieren der KNX-Prod Datei");
+        //        //Add notify
+        //        Notifi.Show(msg + "\r\n" + ex.Message);
+        //        return;
+        //    }
             
-            StorageFile file2 = await ApplicationData.Current.TemporaryFolder.GetFileAsync(file.Name);
+        //    StorageFile file2 = await ApplicationData.Current.TemporaryFolder.GetFileAsync(file.Name);
 
-            IManager manager = ImportManager.GetImportManager(file2.Path);
-            manager.Begin();
+        //    IManager manager = ImportManager.GetImportManager(file2.Path);
+        //    manager.Begin();
 
-            var x = manager.GetLanguages();
-
-
-            DeviceList.Clear();
-            foreach(ImportDevice dev in manager.GetDeviceList())
-            {
-                DeviceList.Add(new DeviceListItem()
-                {
-                    Name = dev.Name,
-                    Description = dev.Description
-                }); ;
-            }
+        //    var x = manager.GetLanguages();
 
 
-            //Import.Archive = ZipFile.Open(file2.Path, ZipArchiveMode.Read);
-            //ImportHelper helper = new ImportHelper();
-            //bool success = await helper.GetDeviceList(Import);
+        //    DeviceList.Clear();
+        //    foreach(ImportDevice dev in manager.GetDeviceList())
+        //    {
+        //        DeviceList.Add(new DeviceListItem()
+        //        {
+        //            Name = dev.Name,
+        //            Description = dev.Description
+        //        }); ;
+        //    }
 
-            //if (!success)
-            //{
-            //    //todo blabla
-            //    ViewHelper.Instance.ShowNotification("main", "Es trat ein Fehler beim auslesen der Geräte auf.", 3000, Microsoft.UI.Xaml.Controls.InfoBarSeverity.Error);
-            //    return;
-            //}
 
-            GridImportDevices.Visibility = Visibility.Visible;
+        //    //Import.Archive = ZipFile.Open(file2.Path, ZipArchiveMode.Read);
+        //    //ImportHelper helper = new ImportHelper();
+        //    //bool success = await helper.GetDeviceList(Import);
 
-            if (x.Count > 0)
-                OutSelectedLang.Text = new System.Globalization.CultureInfo(x[0]).DisplayName;
+        //    //if (!success)
+        //    //{
+        //    //    //todo blabla
+        //    //    ViewHelper.Instance.ShowNotification("main", "Es trat ein Fehler beim auslesen der Geräte auf.", 3000, Microsoft.UI.Xaml.Controls.InfoBarSeverity.Error);
+        //    //    return;
+        //    //}
 
-        }
+        //    GridImportDevices.Visibility = Visibility.Visible;
 
-        private async void ClickCancel(object sender, RoutedEventArgs e)
-        {
-            //Import.Archive.Dispose();
-            //GridImportDevices.Visibility = Visibility.Collapsed;
-            //try
-            //{
-            //    StorageFile file = await ApplicationData.Current.TemporaryFolder.GetFileAsync("temp.knxprod");
-            //    await file.DeleteAsync();
-            //}
-            //catch { }
-        }
+        //    if (x.Count > 0)
+        //        OutSelectedLang.Text = new System.Globalization.CultureInfo(x[0]).DisplayName;
 
-        private void ClickSelectAll(object sender, RoutedEventArgs e)
-        {
-            //foreach(Kaenx.Classes.Device device in Import.DeviceList)
-            //{
-            //    device.SlideSettings.IsSelected = true;
-            //}
-
-            //Frame rootFrame = this.Parent as Frame;
-            //rootFrame.Navigate(typeof(Import), Import);
-        }
-
-        private void ClickSelected(object sender, RoutedEventArgs e)
-        {
-            //Frame rootFrame = this.Parent as Frame;
-            //rootFrame.Navigate(typeof(Import), Import);
-        }
+        //}
 
         private void TreeV_ItemInvoked(TreeView sender, TreeViewItemInvokedEventArgs args)
         {
@@ -433,29 +401,6 @@ namespace Kaenx.View
                 LoadDevices(lastCategorie, lastType);
             }
             */
-        }
-
-        private async void HyperlinkChangeLang_Click(Windows.UI.Xaml.Documents.Hyperlink sender, Windows.UI.Xaml.Documents.HyperlinkClickEventArgs args)
-        {
-            //Import.SelectedLanguage = null;
-            //ImportHelper helper = new ImportHelper();
-            //await helper.GetDeviceList(Import, true);
-        }
-
-        private void ImportList_ItemClick(object sender, ItemClickEventArgs e)
-        {
-            if (e.ClickedItem is DeviceListItem)
-            {
-                DeviceListItem device = (DeviceListItem)e.ClickedItem;
-                device.SlideSettings.IsSelected = !device.SlideSettings.IsSelected;
-
-                int count = DeviceList.Where<DeviceListItem>(d => d.SlideSettings.IsSelected == true).Count();
-
-                if (count == 0)
-                    ButtonImportSelected.IsEnabled = false;
-                else
-                    ButtonImportSelected.IsEnabled = true;
-            }
         }
 
         private async void ClickExport(object sender, RoutedEventArgs e)

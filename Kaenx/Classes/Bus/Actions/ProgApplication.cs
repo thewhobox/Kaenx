@@ -272,7 +272,7 @@ namespace Kaenx.Classes.Bus.Actions
                 await dev.Connect(true);
                 string mask = await dev.DeviceDescriptorRead();
                 mask = "MV-" + mask;
-                await dev.RessourceWrite("ProgrammingMode", new byte[] { 0x01 });
+                await dev.ResourceWrite("ProgrammingMode", new byte[] { 0x01 });
                 await dev .Disconnect();
                 BusCommon comm = new BusCommon(Connection);
                 await comm.IndividualAddressWrite(UnicastAddress.FromString("15.15.255"));

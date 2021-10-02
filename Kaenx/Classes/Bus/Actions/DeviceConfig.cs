@@ -82,7 +82,7 @@ namespace Kaenx.Classes.Bus.Actions
             ProgressValue = 20;
             TodoText = "Lese Applikations Id...";
             await Task.Delay(500);
-            string appId = await dev.RessourceRead<string>("ApplicationId");
+            string appId = await dev.ResourceRead<string>("ApplicationId");
             if (appId.Length == 8) appId = "00" + appId;
             appId = "M-" + appId.Substring(0, 4) + "_A-" + appId.Substring(4, 4) + "-" + appId.Substring(8, 2);
 
