@@ -69,13 +69,14 @@ namespace Kaenx.View.Controls.Bus
 
         private void ReadConf(object sender, RoutedEventArgs e)
         {
-            DeviceConfig action = new DeviceConfig();
+            //DeviceConfig action = new DeviceConfig();
 
-            action.Device = GetDevice();
-            if (action.Device == null) return;
+            //action.Device = GetDevice();
+            //if (action.Device == null) return;
 
-            action.Finished += Action_Finished;
-            BusConnection.Instance.AddAction(action);
+            //action.Finished += Action_Finished;
+            //BusConnection.Instance.AddAction(action);
+            throw new NotImplementedException("Ist rausgeflogen");
         }
 
 

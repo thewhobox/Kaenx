@@ -137,7 +137,7 @@ namespace Kaenx.View
         private async void ClickImport(object sender, RoutedEventArgs e)
         {
             Frame main = this.Parent as Frame;
-            main.Navigate(typeof(Import));
+            main.Navigate(typeof(Import), wasFromMain);
         }
 
         //public async void PrepareImport(StorageFile file, bool changeLang = false)
@@ -336,7 +336,7 @@ namespace Kaenx.View
         {
 
             //TODO richtig machen!
-            /*foreach(DeviceViewModel device in CatalogDeviceList.SelectedItems)
+            foreach(DeviceViewModel device in CatalogDeviceList.SelectedItems)
             {
                 _context.Devices.Remove(device);
 
@@ -345,22 +345,18 @@ namespace Kaenx.View
                     int count = _context.Devices.Count(d => d != device && d.HardwareId == device.HardwareId);
                     if (count == 0)
                     {
-                        Hardware2AppModel h2a = _context.Hardware2App.Single(h => h.HardwareId == device.HardwareId);
+                        Hardware2AppModel h2a = _context.Hardware2App.Single(h => h.Id == device.HardwareId);
                         _context.Hardware2App.Remove(h2a);
-                        count = _context.Hardware2App.Count(h => h != h2a && h.ApplicationId == h2a.ApplicationId);
 
-                        if (count == 0)
+                        foreach(ApplicationViewModel app in _context.Applications.Where(a => a.HardwareId == h2a.Id).ToList())
                         {
-                            IEnumerable<object> tempList = _context.AppSegments.Where(a => a.ApplicationId == h2a.ApplicationId);
+                            IEnumerable<object> tempList = _context.AppSegments.Where(a => a.ApplicationId == app.Id);
                             _context.RemoveRange(tempList);
 
-                            tempList = _context.AppComObjects.Where(a => a.ApplicationId == h2a.ApplicationId);
+                            tempList = _context.AppComObjects.Where(a => a.ApplicationId == app.Id);
                             _context.RemoveRange(tempList);
 
-                            tempList = _context.Applications.Where(a => a.Id == h2a.ApplicationId);
-                            _context.RemoveRange(tempList);
-
-                            tempList = _context.AppParameters.Where(a => a.ApplicationId == h2a.ApplicationId);
+                            tempList = _context.AppParameters.Where(a => a.ApplicationId == app.Id);
                             _context.RemoveRange(tempList);
 
                             List<AppParameterTypeViewModel> toDelete = new List<AppParameterTypeViewModel>();
@@ -379,13 +375,15 @@ namespace Kaenx.View
 
                             try
                             {
-                                AppAdditional adds = _context.AppAdditionals.Single(a => a.Id == h2a.ApplicationId);
+                                AppAdditional adds = _context.AppAdditionals.Single(a => a.Id == app.Id);
                                 _context.AppAdditionals.Remove(adds);
                             }
                             catch
                             {
 
                             }
+
+                            _context.Applications.Remove(app);
                         }
                     }
                 }
@@ -400,7 +398,6 @@ namespace Kaenx.View
             {
                 LoadDevices(lastCategorie, lastType);
             }
-            */
         }
 
         private async void ClickExport(object sender, RoutedEventArgs e)

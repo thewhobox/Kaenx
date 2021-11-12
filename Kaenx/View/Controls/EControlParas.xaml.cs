@@ -1,9 +1,9 @@
 ﻿using Kaenx.Classes;
-using Kaenx.Classes.Dynamic;
 using Kaenx.Classes.Helper;
 using Kaenx.Classes.Project;
 using Kaenx.DataContext.Catalog;
 using Kaenx.DataContext.Import;
+using Kaenx.DataContext.Import.Dynamic;
 using Kaenx.DataContext.Project;
 using Kaenx.View.Controls;
 using Serilog;
@@ -152,9 +152,9 @@ namespace Kaenx.Views.Easy.Controls
             {
 
                 await Task.Delay(1);
-                AppAdditional adds = _context.AppAdditionals.Single(a => a.Id == Device.ApplicationId);
-                //comObjects = SaveHelper.ByteArrayToObject<List<DeviceComObject>>(adds.ComsAll);
-                Channels = FunctionHelper.ByteArrayToObject<List<IDynChannel>>(adds.ParamsHelper, "Kaenx.DataContext.Import.Dynamic");
+                AppAdditional adds = _context.AppAdditionals.Single(a => a.ApplicationId == Device.ApplicationId);
+                comObjects = SaveHelper.ByteArrayToObject<List<DeviceComObject>>(adds.ComsAll);
+                Channels = FunctionHelper.ByteArrayToObject<List<Kaenx.DataContext.Import.Dynamic.IDynChannel>>(adds.ParamsHelper, "Kaenx.DataContext.Import.Dynamic");
                 Bindings = SaveHelper.ByteArrayToObject<List<ParamBinding>>(adds.Bindings);
                 Assignments = SaveHelper.ByteArrayToObject<List<AssignParameter>>(adds.Assignments);
 
@@ -163,33 +163,17 @@ namespace Kaenx.Views.Easy.Controls
                 {
                     if (!ch.HasAccess)
                     {
-                        ch.Visible = Visibility.Collapsed;
+                        ch.IsVisible = false;
                         continue;
                     }
-
-                    if (ch is ChannelBlock)
-                    {
-                        ChannelBlock chb = ch as ChannelBlock;
-                        if (chb.Text.Contains("{{"))
-                            chb.DisplayText = chb.Text.Replace("{{dyn}}", chb.DefaultText);
-                        else
-                            chb.DisplayText = chb.Text;
-                    }
-
 
                     foreach (ParameterBlock block in ch.Blocks)
                     {
                         if (!block.HasAccess)
                         {
-                            block.Visible = Visibility.Collapsed;
+                            block.IsVisible = false;
                             continue;
                         }
-
-
-                        if (block.Text?.Contains("{{") == true)
-                            block.DisplayText = block.Text.Replace("{{dyn}}", block.DefaultText);
-                        else
-                            block.DisplayText = block.Text;
 
                         foreach (IDynParameter para in block.Parameters)
                         {
@@ -204,7 +188,7 @@ namespace Kaenx.Views.Easy.Controls
                             }
                             if (!para.HasAccess)
                             {
-                                para.Visible = Visibility.Collapsed;
+                                para.IsVisible = false;
                                 continue;
                             }
 
@@ -238,7 +222,7 @@ namespace Kaenx.Views.Easy.Controls
                         ParamText p = new ParamText();
                         p.Value = para.Value;
                         p.Id = para.Id;
-                        p.Visible = Visibility.Visible;
+                        p.IsVisible = true;
                         model.Parameters.Add(p);
                         Id2Param.Add(para.Id, model);
                     }
@@ -398,59 +382,56 @@ namespace Kaenx.Views.Easy.Controls
             IEnumerable<IDynParameter> list3 = Hash2Param.Values.Where(p => p.Conditions.Any(c => c.SourceId == para.Id || list5.Contains(c.SourceId)));
             foreach (IDynParameter par in list3)
                 if(par.HasAccess)
-                    par.Visible = SaveHelper.CheckConditions(Device.ApplicationId, par.Conditions, Id2Param) ? Visibility.Visible : Visibility.Collapsed;
+                    par.IsVisible = SaveHelper.CheckConditions(Device.ApplicationId, par.Conditions, Id2Param);
 
             foreach (IDynChannel ch in Channels)
             {
                 if(ch.HasAccess)
-                    ch.Visible = SaveHelper.CheckConditions(Device.ApplicationId, ch.Conditions, Id2Param) ? Visibility.Visible : Visibility.Collapsed;
+                    ch.IsVisible = SaveHelper.CheckConditions(Device.ApplicationId, ch.Conditions, Id2Param);
 
                 foreach (ParameterBlock block in ch.Blocks)
                     if (block.HasAccess)
-                        block.Visible = SaveHelper.CheckConditions(Device.ApplicationId, block.Conditions, Id2Param) ? Visibility.Visible : Visibility.Collapsed;
+                        block.IsVisible = SaveHelper.CheckConditions(Device.ApplicationId, block.Conditions, Id2Param);
                     else
-                        block.Visible = Visibility.Collapsed;
+                        block.IsVisible = false;
             }
 
 
             IEnumerable<ParamBinding> list4 = Bindings.Where(b => b.SourceId == para.Id);
             foreach (ParamBinding bind in list4)
             {
-                string[] ids = bind.Hash.Split(":");
-                int id1 = int.Parse(ids[1]);
-
-                switch (ids[0])
+                switch (bind.Type)
                 {
-                    case "CB":
-                        IDynChannel ch = Channels.Single(c => c.Id == id1);
+                    case BindingTypes.Channel:
+                        IDynChannel ch = Channels.Single(c => c.Id == bind.TargetId);
                         if (ch is ChannelBlock)
                         {
                             ChannelBlock chb = ch as ChannelBlock;
                             if (string.IsNullOrEmpty(para.Value))
-                                chb.DisplayText = chb.Text.Replace("{{dyn}}", bind.DefaultText);
+                                chb.Text = bind.FullText.Replace("{{dyn}}", bind.DefaultText);
                             else
-                                chb.DisplayText = chb.Text.Replace("{{dyn}}", para.Value);
+                                chb.Text = bind.FullText.Replace("{{dyn}}", para.Value);
                         }
                         break;
 
-                    case "PB":
+                    case BindingTypes.ParameterBlock:
                         foreach (IDynChannel ch2 in Channels)
                         {
-                            if (ch2.Blocks.Any(b => b.Id == id1))
+                            if (ch2.Blocks.Any(b => b.Id == bind.TargetId))
                             {
-                                ParameterBlock bl = ch2.Blocks.Single(b => b.Id == id1);
+                                ParameterBlock bl = ch2.Blocks.Single(b => b.Id == bind.TargetId);
                                 if (string.IsNullOrEmpty(para.Value) || string.IsNullOrWhiteSpace(para.Value))
-                                    bl.DisplayText = bl.Text.Replace("{{dyn}}", bind.DefaultText);
+                                    bl.Text = bind.FullText.Replace("{{dyn}}", bind.DefaultText);
                                 else
-                                    bl.DisplayText = bl.Text.Replace("{{dyn}}", para.Value);
+                                    bl.Text = bind.FullText.Replace("{{dyn}}", para.Value);
                             }
                         }
                         break;
 
-                    case "CO":
+                    case BindingTypes.ComObject:
                         try
                         {
-                            DeviceComObject com = Device.ComObjects.Single(c => c.Id == id1);
+                            DeviceComObject com = Device.ComObjects.Single(c => c.Id == bind.TargetId);
                             if (string.IsNullOrEmpty(para.Value))
                                 com.DisplayName = com.Name.Replace("{{dyn}}", bind.DefaultText);
                             else
@@ -466,9 +447,9 @@ namespace Kaenx.Views.Easy.Controls
 
             foreach (IDynChannel ch in Channels)
             {
-                if (ch.Visible == Visibility.Visible)
+                if (ch.IsVisible)
                 {
-                    ch.Visible = ch.Blocks.Any(b => b.Visible == Visibility.Visible) ? Visibility.Visible : Visibility.Collapsed;
+                    ch.IsVisible = ch.Blocks.Any(b => b.IsVisible);
                 }
             }
         }
@@ -576,12 +557,13 @@ namespace Kaenx.Views.Easy.Controls
             {
                 if (dcom.Name.Contains("{{"))
                 {
-                    ParamBinding bind = Bindings.Single(b => b.Hash == "CO:" + dcom.Id);
-                    string value = Id2Param[dcom.BindedId].Value;
-                    if (string.IsNullOrEmpty(value))
-                        dcom.DisplayName = dcom.Name.Replace("{{dyn}}", bind.DefaultText);
-                    else
-                        dcom.DisplayName = dcom.Name.Replace("{{dyn}}", value);
+                    //TODO check what to do
+                    //ParamBinding bind = Bindings.Single(b => b.Hash == "CO:" + dcom.Id);
+                    //string value = Id2Param[dcom.BindedId].Value;
+                    //if (string.IsNullOrEmpty(value))
+                    //    dcom.DisplayName = dcom.Name.Replace("{{dyn}}", bind.DefaultText);
+                    //else
+                    //    dcom.DisplayName = dcom.Name.Replace("{{dyn}}", value);
                 }
                 else
                 {

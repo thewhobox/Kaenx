@@ -84,20 +84,21 @@ namespace Kaenx.View
 
         private void ClickReadConfig(object sender, RoutedEventArgs e)
         {
-            DeviceConfig action = new DeviceConfig();
-            action.Device = (LineDevice)((MenuFlyoutItem)e.OriginalSource).DataContext;
-            action.Finished += (action, obj) =>
-            {
-                if(obj is Kaenx.Classes.Bus.Data.ErrorData)
-                {
-                    ViewHelper.Instance.ShowNotification("main", "Konfig auslesen Fehler: " + Environment.NewLine + (obj as ErrorData).Additional, 5000, Microsoft.UI.Xaml.Controls.InfoBarSeverity.Error);
-                }
-                else
-                {
-                    ViewHelper.Instance.ShowNotification("main", "Konfig auslesen Erfolgreich", 3000, Microsoft.UI.Xaml.Controls.InfoBarSeverity.Success);
-                }
-            };
-            BusConnection.Instance.AddAction(action);
+            throw new NotImplementedException("Ist rausgeflogen");
+            //DeviceConfig action = new DeviceConfig();
+            //action.Device = (LineDevice)((MenuFlyoutItem)e.OriginalSource).DataContext;
+            //action.Finished += (action, obj) =>
+            //{
+            //    if(obj is Kaenx.Classes.Bus.Data.ErrorData)
+            //    {
+            //        ViewHelper.Instance.ShowNotification("main", "Konfig auslesen Fehler: " + Environment.NewLine + (obj as ErrorData).Additional, 5000, Microsoft.UI.Xaml.Controls.InfoBarSeverity.Error);
+            //    }
+            //    else
+            //    {
+            //        ViewHelper.Instance.ShowNotification("main", "Konfig auslesen Erfolgreich", 3000, Microsoft.UI.Xaml.Controls.InfoBarSeverity.Success);
+            //    }
+            //};
+            //BusConnection.Instance.AddAction(action);
         }
 
         private void ClickReadSerial(object sender, RoutedEventArgs e)
@@ -380,13 +381,14 @@ namespace Kaenx.View
             if (_context.AppAdditionals.Any(a => a.Id == device.ApplicationId))
             {
                 AppAdditional adds = _context.AppAdditionals.Single(a => a.Id == device.ApplicationId);
-                List<int> comNumbers = SaveHelper.ByteArrayToObject<List<int>>(adds.ComsDefault);
+                //TODO import default coms
+                //List<int> comNumbers = SaveHelper.ByteArrayToObject<List<int>>(adds.ComsDefault);
 
-                foreach(AppComObject acom in _context.AppComObjects.Where(a => a.ApplicationId == adds.ApplicationId && comNumbers.Contains(a.Id)))
-                {
-                    DeviceComObject dcom = new DeviceComObject(acom) { ParentDevice = device };
-                    dcom.DisplayName = dcom.Name;
-                }
+                //foreach(AppComObject acom in _context.AppComObjects.Where(a => a.ApplicationId == adds.ApplicationId && comNumbers.Contains(a.Id)))
+                //{
+                //    DeviceComObject dcom = new DeviceComObject(acom) { ParentDevice = device };
+                //    dcom.DisplayName = dcom.Name;
+                //}
             }
             else
             {

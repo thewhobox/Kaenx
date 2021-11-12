@@ -59,12 +59,13 @@ namespace Kaenx.Classes.Project
                 ChangeParamModel changeOld = _context.ChangesParam.Single(s => s.DeviceId == change.DeviceId && s.ParamId == change.ParamId && s.StateId == _currentStateId);
                 string oldVal = "";
 
-                try {
+                if(_context.ChangesParam.Any(s => s.DeviceId == change.DeviceId && s.ParamId == change.ParamId && s.Id != changeOld.Id))
+                {
                     ChangeParamModel changeOld2 = _context.ChangesParam.Where(s => s.DeviceId == change.DeviceId && s.ParamId == change.ParamId && s.Id != changeOld.Id).OrderByDescending(c => c.StateId).First();
                     oldVal = changeOld2.Value;
-                } catch
+                } else
                 {
-                    AppParameter para = _contextC.AppParameters.Single(p => p.Id == change.ParamId);
+                    AppParameter para = _contextC.AppParameters.Single(p => p.ParameterId == change.ParamId);
                     oldVal = para.Value;
                 }
 

@@ -1,10 +1,10 @@
 ﻿using Kaenx.Classes;
 using Kaenx.Classes.Buildings;
 using Kaenx.Classes.Bus;
-using Kaenx.Classes.Dynamic;
 using Kaenx.Classes.Helper;
 using Kaenx.Classes.Project;
 using Kaenx.DataContext.Catalog;
+using Kaenx.DataContext.Import.Dynamic;
 using Kaenx.DataContext.Local;
 using Kaenx.DataContext.Project;
 using Kaenx.Konnect;
@@ -703,7 +703,7 @@ namespace Kaenx.View
 
         private async Task HandleParamGhost(AppParameter para, AppParameterTypeViewModel paraT, AppAdditional adds)
         {
-            XDocument dynamic = XDocument.Parse(System.Text.Encoding.UTF8.GetString(adds.Dynamic));
+            XDocument dynamic = null;
 
             string ns = dynamic.Root.Name.NamespaceName;
             IEnumerable<XElement> chooses = dynamic.Descendants(XName.Get("choose", ns)).Where(c => c.Attribute("ParamRefId") != null && SaveHelper.GetItemId(c.Attribute("ParamRefId").Value) == para.Id);
@@ -1119,12 +1119,13 @@ namespace Kaenx.View
 
                 if (dcom.Name.Contains("{{"))
                 {
-                    ParamBinding bind = Bindings.Single(b => b.Hash == "CO:" + dcom.Id);
-                    string value = Id2Param[dcom.BindedId].Value;
-                    if (string.IsNullOrEmpty(value))
-                        dcom.DisplayName = dcom.Name.Replace("{{dyn}}", bind.DefaultText);
-                    else
-                        dcom.DisplayName = dcom.Name.Replace("{{dyn}}", value);
+                    //TODO check 
+                    //ParamBinding bind = Bindings.Single(b => b.Hash == "CO:" + dcom.Id);
+                    //string value = Id2Param[dcom.BindedId].Value;
+                    //if (string.IsNullOrEmpty(value))
+                    //    dcom.DisplayName = dcom.Name.Replace("{{dyn}}", bind.DefaultText);
+                    //else
+                    //    dcom.DisplayName = dcom.Name.Replace("{{dyn}}", value);
                 }
                 else
                 {

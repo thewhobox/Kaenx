@@ -1,5 +1,6 @@
 ﻿using Kaenx.Classes.Buildings;
 using Kaenx.DataContext.Catalog;
+using Kaenx.DataContext.Import.Dynamic;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
@@ -23,7 +24,6 @@ namespace Kaenx.Classes.Project
         public DeviceComObject(AppComObject comObj)
         {
             Id = comObj.Id;
-            BindedId = comObj.BindedId;
             Number = comObj.Number;
             Name = comObj.Text;
             Function = comObj.FunctionText;
@@ -71,7 +71,7 @@ namespace Kaenx.Classes.Project
         [JsonProperty("f")]
         public string Function { get; set; }
         [JsonProperty("c")]
-        public List<Dynamic.ParamCondition> Conditions { get; set; }
+        public List<ParamCondition> Conditions { get; set; }
         [JsonIgnore]
         public ObservableCollection<FunctionGroup> Groups { get; set; } = new ObservableCollection<FunctionGroup>();
         [JsonIgnore]

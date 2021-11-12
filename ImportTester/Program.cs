@@ -50,7 +50,7 @@ namespace ImportTester
             CatalogContext context = new CatalogContext();
             context.Database.Migrate();
 
-            manager.StartImport(x[index].Id, context);
+            manager.StartImport(x[index], context);
         }
 
         private static void Manager_StateChanged(string newState)
