@@ -258,7 +258,6 @@ namespace Kaenx.Classes.Bus.Actions
                             if (Device.ComObjects.Any(c => c.Number == helper.ObjectIndex))
                             {
                                 Project.DeviceComObject com = Device.ComObjects.Single(c => c.Number == helper.ObjectIndex);
-                                helper.ObjectInfo = com.DisplayName;
                                 helper.ObjectFunc = com.Function;
                             }
 

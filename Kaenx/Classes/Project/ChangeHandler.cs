@@ -13,7 +13,7 @@ namespace Kaenx.Classes.Project
 {
     public class ChangeHandler : INotifyPropertyChanged
     {
-        private ProjectContext _context = new ProjectContext(Helper.SaveHelper.connProject);
+        private ProjectContext _context;
         private CatalogContext _contextC = new CatalogContext();
         private int _currentStateId = 0;
         private int _projectId;
@@ -29,12 +29,13 @@ namespace Kaenx.Classes.Project
         }
 
 
-        public ChangeHandler(int projectId)
+        public ChangeHandler(Project proj)
         {
-            _projectId = projectId;
+            _context = new ProjectContext(proj.Connection);
+            _projectId = proj.Id;
             try
             {
-                StateModel state = _context.States.Where(s => s.ProjectId == projectId).OrderByDescending(s => s.Id).First();
+                StateModel state = _context.States.Where(s => s.ProjectId == proj.Id).OrderByDescending(s => s.Id).First();
                 _currentStateId = state.Id;
             } catch(Exception e)
             {

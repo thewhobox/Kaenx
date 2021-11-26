@@ -140,61 +140,6 @@ namespace Kaenx.View
             main.Navigate(typeof(Import), wasFromMain);
         }
 
-        //public async void PrepareImport(StorageFile file, bool changeLang = false)
-        //{
-        //    if (file == null) return;
-
-
-        //    try
-        //    {
-        //        await file.CopyAsync(ApplicationData.Current.TemporaryFolder, file.Name, NameCollisionOption.ReplaceExisting);
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        string msg = loader.GetString("MsgNotCopied");
-        //        Serilog.Log.Error(ex, "Fehler beim Kopieren der KNX-Prod Datei");
-        //        //Add notify
-        //        Notifi.Show(msg + "\r\n" + ex.Message);
-        //        return;
-        //    }
-            
-        //    StorageFile file2 = await ApplicationData.Current.TemporaryFolder.GetFileAsync(file.Name);
-
-        //    IManager manager = ImportManager.GetImportManager(file2.Path);
-        //    manager.Begin();
-
-        //    var x = manager.GetLanguages();
-
-
-        //    DeviceList.Clear();
-        //    foreach(ImportDevice dev in manager.GetDeviceList())
-        //    {
-        //        DeviceList.Add(new DeviceListItem()
-        //        {
-        //            Name = dev.Name,
-        //            Description = dev.Description
-        //        }); ;
-        //    }
-
-
-        //    //Import.Archive = ZipFile.Open(file2.Path, ZipArchiveMode.Read);
-        //    //ImportHelper helper = new ImportHelper();
-        //    //bool success = await helper.GetDeviceList(Import);
-
-        //    //if (!success)
-        //    //{
-        //    //    //todo blabla
-        //    //    ViewHelper.Instance.ShowNotification("main", "Es trat ein Fehler beim auslesen der Geräte auf.", 3000, Microsoft.UI.Xaml.Controls.InfoBarSeverity.Error);
-        //    //    return;
-        //    //}
-
-        //    GridImportDevices.Visibility = Visibility.Visible;
-
-        //    if (x.Count > 0)
-        //        OutSelectedLang.Text = new System.Globalization.CultureInfo(x[0]).DisplayName;
-
-        //}
-
         private void TreeV_ItemInvoked(TreeView sender, TreeViewItemInvokedEventArgs args)
         {
             Classes.TVNode node = (Classes.TVNode)args.InvokedItem;
@@ -356,32 +301,28 @@ namespace Kaenx.View
                             tempList = _context.AppComObjects.Where(a => a.ApplicationId == app.Id);
                             _context.RemoveRange(tempList);
 
+                            tempList = _context.AppAdditionals.Where(a => a.ApplicationId == app.Id);
+                            _context.RemoveRange(tempList);
+
                             tempList = _context.AppParameters.Where(a => a.ApplicationId == app.Id);
                             _context.RemoveRange(tempList);
 
-                            List<AppParameterTypeViewModel> toDelete = new List<AppParameterTypeViewModel>();
-                            foreach (AppParameter para in tempList)
-                            {
-                                AppParameterTypeViewModel pType = _context.AppParameterTypes.Single(p => p.Id == para.ParameterTypeId);
-                                toDelete.Add(pType);
+                            //Check database so everything deletes
 
+                            List<AppParameterTypeViewModel> toDelete = new List<AppParameterTypeViewModel>();
+                            tempList = _context.AppParameterTypes.Where(p => p.ApplicationId == app.Id);
+                            foreach (AppParameterTypeViewModel pType in tempList)
+                            {
                                 if (pType.Type == ParamTypes.Enum)
                                 {
-                                    IEnumerable<AppParameterTypeEnumViewModel> tempList2 = _context.AppParameterTypeEnums.Where(e => e.ParameterId == pType.Id);
+                                    IEnumerable<AppParameterTypeEnumViewModel> tempList2 = _context.AppParameterTypeEnums.Where(e => e.TypeId == pType.Id);
                                     _context.AppParameterTypeEnums.RemoveRange(tempList2);
                                 }
+                                toDelete.Add(pType);
                             }
                             _context.AppParameterTypes.RemoveRange(toDelete);
 
-                            try
-                            {
-                                AppAdditional adds = _context.AppAdditionals.Single(a => a.Id == app.Id);
-                                _context.AppAdditionals.Remove(adds);
-                            }
-                            catch
-                            {
-
-                            }
+                            
 
                             _context.Applications.Remove(app);
                         }

@@ -119,6 +119,8 @@
     <Compile Include="App.xaml.cs">
       <DependentUpon>App.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Classes\Extension.cs" />
+    <Compile Include="Classes\ObservableRangeCollection.cs" />
     <Compile Include="Classes\Buildings\Area.cs" />
     <Compile Include="Classes\Buildings\Building.cs" />
     <Compile Include="Classes\Buildings\Floor.cs" />
@@ -245,7 +247,6 @@
     <Compile Include="View\Controls\SlideListItemBase.cs" />
     <Compile Include="Classes\Converter\Checked2VisibilityConverter.cs" />
     <Compile Include="Classes\Converter\NumberConverter.cs" />
-    <Compile Include="Classes\Extensions.cs" />
     <Compile Include="Classes\Helper\ViewHelper.cs" />
     <Compile Include="Classes\Project\ChangeHandler.cs" />
     <Compile Include="Classes\Project\DeviceUpdate.cs" />

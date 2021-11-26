@@ -2,6 +2,7 @@
 using Kaenx.Classes.Helper;
 using Kaenx.Classes.Project;
 using Kaenx.DataContext.Catalog;
+using Kaenx.DataContext.Import;
 using Kaenx.DataContext.Import.Dynamic;
 using Kaenx.DataContext.Project;
 using Kaenx.Konnect.Addresses;
@@ -476,7 +477,7 @@ namespace Kaenx.Classes.Bus.Actions
             }
 
             Dictionary<int, ViewParamModel> Id2Param = new Dictionary<int, ViewParamModel>();
-            List<IDynChannel> Channels = SaveHelper.ByteArrayToObject<List<IDynChannel>>(adds.ParamsHelper, true);
+            List<IDynChannel> Channels = FunctionHelper.ByteArrayToObject<List<IDynChannel>>(adds.ParamsHelper, true, "Kaenx.DataContext.Import.Dynamic");
 
             foreach (IDynChannel ch in Channels)
             {

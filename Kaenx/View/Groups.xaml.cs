@@ -45,7 +45,7 @@ namespace Kaenx.View
         private LineDevice _selectedDevice;
         private Project _project;
 
-        private LineDevice defaultDevice = new LineDevice(true);
+        private LineDevice defaultDevice = new LineDevice();
         private FunctionGroup defaultGroup = new FunctionGroup(new Function());
 
         public LineDevice SelectedDevice
@@ -240,22 +240,22 @@ namespace Kaenx.View
                 com.IsSelected = SelectedGroup.ComObjects.Contains(com);
                 if (!BtnToggleFilter.IsOn) continue;
 
-                if (com.DataPointSubType.Number == "..." || SelectedGroup.DataPointSubType.Number == "..." || com.DataPointSubType.TypeNumbers != SelectedGroup.DataPointSubType.TypeNumbers)
-                {
-                    if(com.DataPointSubType.SizeInBit == SelectedGroup.DataPointSubType.SizeInBit)
-                    {
-                        com.IsOk = false;
-                        com.IsEnabled = true;
-                    } else
-                    {
-                        com.IsOk = false;
-                        com.IsEnabled = false;
-                    }
-                } else
-                {
+                //if (com.DataPointSubType.Number == "..." || SelectedGroup.DataPointSubType.Number == "..." || com.DataPointSubType.TypeNumbers != SelectedGroup.DataPointSubType.TypeNumbers)
+                //{
+                //    if(com.DataPointSubType.SizeInBit == SelectedGroup.DataPointSubType.SizeInBit)
+                //    {
+                //        com.IsOk = false;
+                //        com.IsEnabled = true;
+                //    } else
+                //    {
+                //        com.IsOk = false;
+                //        com.IsEnabled = false;
+                //    }
+                //} else
+                //{
                     com.IsOk = true;
                     com.IsEnabled = true;
-                }
+                //}
             }
 
             ListComs.ItemsSource = null;

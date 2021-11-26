@@ -138,9 +138,9 @@ namespace Kaenx.View.Controls.Bus
             if (dev == null)
             {
                 ViewHelper.Instance.ShowNotification("main", "Adresse konnte keinem Gerät zugewiesen werden.", 3000, Microsoft.UI.Xaml.Controls.InfoBarSeverity.Warning);
-                Line dM = new Line { IsInit = true, Id = int.Parse(address[0]) };
-                LineMiddle dL = new LineMiddle { IsInit = true, Id = int.Parse(address[1]), Parent = dM };
-                dev = new LineDevice(true) { Name = "Unbekannt", Id = int.Parse(address[2]), Parent = dL };
+                Line dM = new Line { Id = int.Parse(address[0]) };
+                LineMiddle dL = new LineMiddle { Id = int.Parse(address[1]), Parent = dM };
+                dev = new LineDevice() { Name = "Unbekannt", Id = int.Parse(address[2]), Parent = dL };
             }
 
             return dev;

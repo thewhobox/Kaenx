@@ -1,6 +1,7 @@
 ﻿using Kaenx.Classes.Buildings;
 using Kaenx.Classes.Project;
 using Kaenx.DataContext.Catalog;
+using Kaenx.DataContext.Import;
 using Kaenx.DataContext.Import.Dynamic;
 using Kaenx.DataContext.Local;
 using Kaenx.DataContext.Project;
@@ -35,153 +36,150 @@ namespace Kaenx.Classes.Helper
         public static LocalConnectionProject connProject;
         private static CatalogContext contextC = new CatalogContext(new LocalConnectionCatalog() { DbHostname = "Catalog.db", Type = LocalConnectionCatalog.DbConnectionType.SqlLite });
 
-        private static Dictionary<int, AppParameter> AppParas;
-        private static Dictionary<int, AppParameterTypeViewModel> AppParaTypes;
-        private static Dictionary<int, AppComObject> ComObjects;
+        //public static ProjectModel SaveProject(Project.Project _pro = null)
+        //{
+        //    if (_pro != null)
+        //    {
+        //        _project = _pro;
 
-        public static ProjectModel SaveProject(Project.Project _pro = null)
-        {
-            if (_pro != null)
-            {
-                _project = _pro;
-
-                connProject = _project.Connection;
-                contextProject = new ProjectContext(_project.Connection);
-                contextProject.Database.Migrate();
-            }
-            if (_project == null)
-                return null;
+        //        connProject = _project.Connection;
+        //        contextProject = new ProjectContext(_project.Connection);
+        //        contextProject.Database.Migrate();
+        //    }
+        //    if (_project == null)
+        //        return null;
 
 
-            ProjectModel model;
+        //    ProjectModel model;
 
-            if (!contextProject.Projects.Any(p => p.Id == _project.Id))
-            { 
-                model = new ProjectModel();
-                contextProject.Projects.Add(model);
-                contextProject.SaveChanges();
-            }
-            else
-            {
-                model = contextProject.Projects.Single(p => p.Id == _project.Id);
-            }
+        //    if (!contextProject.Projects.Any(p => p.Id == _project.Id))
+        //    { 
+        //        model = new ProjectModel();
+        //        contextProject.Projects.Add(model);
+        //        contextProject.SaveChanges();
+        //    }
+        //    else
+        //    {
+        //        model = contextProject.Projects.Single(p => p.Id == _project.Id);
+        //    }
 
-            model.Name = _project.Name;
-            model.Image = _project.Image;
-            model.Area = ObjectToByteArray(_project.Area);
+        //    model.Name = _project.Name;
+        //    model.Image = _project.Image;
+        //    model.Area = FunctionHelper.ObjectToByteArray(_project.Area);
 
-            foreach (Line line in _project.Lines)
-            {
-                LineModel linemodel;
-                if (contextProject.LinesMain.Any(l => l.UId == line.UId && l.ProjectId == model.Id))
-                {
-                    linemodel = contextProject.LinesMain.Single(l => l.UId == line.UId && l.ProjectId == model.Id);
-                }
-                else
-                {
-                    linemodel = new LineModel(model.Id);
-                    contextProject.LinesMain.Add(linemodel);
-                    contextProject.SaveChanges();
-                    line.UId = linemodel.UId;
-                }
-                linemodel.Id = line.Id;
-                linemodel.Name = line.Name;
-                linemodel.IsExpanded = line.IsExpanded;
-                contextProject.LinesMain.Update(linemodel);
+        //    foreach (Line line in _project.Lines)
+        //    {
+        //        LineModel linemodel;
+        //        if (contextProject.LinesMain.Any(l => l.UId == line.UId && l.ProjectId == model.Id))
+        //        {
+        //            linemodel = contextProject.LinesMain.Single(l => l.UId == line.UId && l.ProjectId == model.Id);
+        //        }
+        //        else
+        //        {
+        //            linemodel = new LineModel(model.Id);
+        //            contextProject.LinesMain.Add(linemodel);
+        //            contextProject.SaveChanges();
+        //            line.UId = linemodel.UId;
+        //        }
+        //        linemodel.Id = line.Id;
+        //        linemodel.Name = line.Name;
+        //        linemodel.IsExpanded = line.IsExpanded;
+        //        contextProject.LinesMain.Update(linemodel);
 
-                foreach (LineMiddle linem in line.Subs)
-                {
-                    LineMiddleModel linemiddlemodel;
-                    if (contextProject.LinesMiddle.Any(l => l.UId == linem.UId && l.ProjectId == model.Id))
-                    {
-                        linemiddlemodel = contextProject.LinesMiddle.Single(l => l.UId == linem.UId && l.ProjectId == model.Id);
-                    }
-                    else
-                    {
-                        linemiddlemodel = new LineMiddleModel(model.Id);
-                        contextProject.LinesMiddle.Add(linemiddlemodel);
-                        contextProject.SaveChanges();
-                        linem.UId = linemiddlemodel.UId;
-                    }
-                    linemiddlemodel.Id = linem.Id;
-                    linemiddlemodel.Name = linem.Name;
-                    linemiddlemodel.IsExpanded = linem.IsExpanded;
-                    linemiddlemodel.ParentId = line.UId;
-                    contextProject.LinesMiddle.Update(linemiddlemodel);
-
-
-                    foreach (LineDevice linedev in linem.Subs)
-                    {
-                        LineDeviceModel linedevmodel;
-                        if (contextProject.LineDevices.Any(l => l.UId == linedev.UId && l.ProjectId == model.Id))
-                        {
-                            linedevmodel = contextProject.LineDevices.Single(l => l.UId == linedev.UId && l.ProjectId == model.Id);
-                        }
-                        else
-                        {
-                            linedevmodel = new LineDeviceModel(model.Id);
-                            contextProject.LineDevices.Add(linedevmodel);
-                            contextProject.SaveChanges();
-                            linedev.UId = linedevmodel.UId;
-                        }
-                        linedevmodel.Id = linedev.Id;
-                        linedevmodel.ParentId = linem.UId;
-                        linedevmodel.Name = linedev.Name;
-                        linedevmodel.Serial = linedev.Serial;
-                        linedevmodel.ApplicationId = linedev.ApplicationId;
-                        linedevmodel.DeviceId = linedev.DeviceId;
-
-                        IEnumerable<ComObject> removeComs = contextProject.ComObjects.Where(co => co.DeviceId == linedev.UId).ToList();
-                        contextProject.ComObjects.RemoveRange(removeComs);
-                        foreach (DeviceComObject comObj in linedev.ComObjects)
-                        {
-                            List<string> groupIds = new List<string>();
-
-                            foreach (FunctionGroup ga in comObj.Groups)
-                                groupIds.Add(ga.Address.ToString());
-
-                            ComObject com;
-                            if (contextProject.ComObjects.Any(co => co.ComId == comObj.Id && co.DeviceId == linedev.UId))
-                            {
-                                com = contextProject.ComObjects.Single(co => co.ComId == comObj.Id && co.DeviceId == linedev.UId);
-                                com.Groups = string.Join(",", groupIds);
-                                contextProject.ComObjects.Update(com);
-                            }
-                            else
-                            {
-                                com = new ComObject
-                                {
-                                    ComId = comObj.Id,
-                                    DeviceId = linedev.UId,
-                                    Groups = string.Join(",", groupIds)
-                                };
-                                contextProject.ComObjects.Add(com);
-                            }
-                        }
-
-                        contextProject.LineDevices.Update(linedevmodel);
-                    }
-
-                    //List<LineDeviceModel> dev2delete = contextProject.LineDevices.Where(d => d.ProjectId == model.Id && d.ParentId == linem.Id && !linem.Subs.Any(lm => lm.UId == d.UId)).ToList();
-                    IEnumerable<LineDeviceModel> dev2delete = contextProject.LineDevices.AsEnumerable().Where(d => d.ProjectId == model.Id && d.ParentId == linem.Id && !linem.Subs.Any(lm => lm.UId == d.UId)).AsEnumerable();
-                    contextProject.LineDevices.RemoveRange(dev2delete);
-                }
+        //        foreach (LineMiddle linem in line.Subs)
+        //        {
+        //            LineMiddleModel linemiddlemodel;
+        //            if (contextProject.LinesMiddle.Any(l => l.UId == linem.UId && l.ProjectId == model.Id))
+        //            {
+        //                linemiddlemodel = contextProject.LinesMiddle.Single(l => l.UId == linem.UId && l.ProjectId == model.Id);
+        //            }
+        //            else
+        //            {
+        //                linemiddlemodel = new LineMiddleModel(model.Id);
+        //                contextProject.LinesMiddle.Add(linemiddlemodel);
+        //                contextProject.SaveChanges();
+        //                linem.UId = linemiddlemodel.UId;
+        //            }
+        //            linemiddlemodel.Id = linem.Id;
+        //            linemiddlemodel.Name = linem.Name;
+        //            linemiddlemodel.IsExpanded = linem.IsExpanded;
+        //            linemiddlemodel.ParentId = line.UId;
+        //            contextProject.LinesMiddle.Update(linemiddlemodel);
 
 
-                IEnumerable<LineMiddleModel> linem2delete = contextProject.LinesMiddle.AsEnumerable().Where(d => d.ProjectId == model.Id && d.ParentId == line.Id && !line.Subs.Any(lm => lm.UId == d.UId)).AsEnumerable();
-                contextProject.LinesMiddle.RemoveRange(linem2delete);
-            }
+        //            foreach (LineDevice linedev in linem.Subs)
+        //            {
+        //                LineDeviceModel linedevmodel;
+        //                if (contextProject.LineDevices.Any(l => l.UId == linedev.UId && l.ProjectId == model.Id))
+        //                {
+        //                    linedevmodel = contextProject.LineDevices.Single(l => l.UId == linedev.UId && l.ProjectId == model.Id);
+        //                }
+        //                else
+        //                {
+        //                    linedevmodel = new LineDeviceModel(model.Id);
+        //                    contextProject.LineDevices.Add(linedevmodel);
+        //                    contextProject.SaveChanges();
+        //                    linedev.UId = linedevmodel.UId;
+        //                }
+        //                linedevmodel.Id = linedev.Id;
+        //                linedevmodel.ParentId = linem.UId;
+        //                linedevmodel.Name = linedev.Name;
+        //                linedevmodel.Serial = linedev.Serial;
+        //                linedevmodel.ApplicationId = linedev.ApplicationId;
+        //                linedevmodel.DeviceId = linedev.DeviceId;
+
+        //                IEnumerable<ComObject> removeComs = contextProject.ComObjects.Where(co => co.DeviceId == linedev.UId).ToList();
+        //                contextProject.ComObjects.RemoveRange(removeComs);
+        //                foreach (DeviceComObject comObj in linedev.ComObjects)
+        //                {
+        //                    List<string> groupIds = new List<string>();
+
+        //                    foreach (FunctionGroup ga in comObj.Groups)
+        //                        groupIds.Add(ga.Address.ToString());
+
+        //                    //TODO reimplement
+        //                    //ComObject com;
+        //                    //if (contextProject.ComObjects.Any(co => co.ComId == comObj.Id && co.DeviceId == linedev.UId))
+        //                    //{
+        //                    //    com = contextProject.ComObjects.Single(co => co.ComId == comObj.Id && co.DeviceId == linedev.UId);
+        //                    //    com.Groups = string.Join(",", groupIds);
+        //                    //    contextProject.ComObjects.Update(com);
+        //                    //}
+        //                    //else
+        //                    //{
+        //                    //    com = new ComObject
+        //                    //    {
+        //                    //        ComId = comObj.Id,
+        //                    //        DeviceId = linedev.UId,
+        //                    //        Groups = string.Join(",", groupIds)
+        //                    //    };
+        //                    //    contextProject.ComObjects.Add(com);
+        //                    //}
+        //                }
+
+        //                contextProject.LineDevices.Update(linedevmodel);
+        //            }
+
+        //            //List<LineDeviceModel> dev2delete = contextProject.LineDevices.Where(d => d.ProjectId == model.Id && d.ParentId == linem.Id && !linem.Subs.Any(lm => lm.UId == d.UId)).ToList();
+        //            IEnumerable<LineDeviceModel> dev2delete = contextProject.LineDevices.AsEnumerable().Where(d => d.ProjectId == model.Id && d.ParentId == linem.UId && !linem.Subs.Any(lm => lm.UId == d.UId)).AsEnumerable();
+        //            contextProject.LineDevices.RemoveRange(dev2delete);
+        //        }
 
 
-            IEnumerable<LineModel> line2delete = contextProject.LinesMain.AsEnumerable().Where(d => d.ProjectId == model.Id && !_project.Lines.Any(lm => lm.UId == d.UId)).AsEnumerable();
-            contextProject.LinesMain.RemoveRange(line2delete);
+        //        IEnumerable<LineMiddleModel> linem2delete = contextProject.LinesMiddle.AsEnumerable().Where(d => d.ProjectId == model.Id && d.ParentId == line.Id && !line.Subs.Any(lm => lm.UId == d.UId)).AsEnumerable();
+        //        contextProject.LinesMiddle.RemoveRange(linem2delete);
+        //    }
 
 
-            contextProject.Projects.Update(model);
-            contextProject.SaveChanges();
+        //    IEnumerable<LineModel> line2delete = contextProject.LinesMain.AsEnumerable().Where(d => d.ProjectId == model.Id && !_project.Lines.Any(lm => lm.UId == d.UId)).AsEnumerable();
+        //    contextProject.LinesMain.RemoveRange(line2delete);
 
-            return model;
-        }
+
+        //    contextProject.Projects.Update(model);
+        //    contextProject.SaveChanges();
+
+        //    return model;
+        //}
 
         public static void UpdateDevice(LineDevice dev)
         {
@@ -205,7 +203,7 @@ namespace Kaenx.Classes.Helper
         public static void SaveStructure()
         {
             ProjectModel model = contextProject.Projects.Single(p => p.Id == _project.Id);
-            model.Area = ObjectToByteArray(_project.Area);
+            model.Area = FunctionHelper.ObjectToByteArray(_project.Area);
             contextProject.Update(model);
             contextProject.SaveChanges();
         }
@@ -335,7 +333,7 @@ namespace Kaenx.Classes.Helper
 
             if(pm.Area != null)
             {
-                project.Area = ByteArrayToObject<Area>(pm.Area);
+                project.Area = FunctionHelper.ByteArrayToObject<Area>(pm.Area);
                 foreach (Building b in project.Area.Buildings)
                 {
                     b.ParentArea = project.Area;
@@ -439,7 +437,6 @@ namespace Kaenx.Classes.Helper
                         }
                         ld.ComObjects.Sort(co => co.Number);
                         lm.Subs.Add(ld);
-                        ld.IsInit = false;
                     }
 
                     CalculateLineCurrent(lm);
@@ -872,44 +869,6 @@ namespace Kaenx.Classes.Helper
 
 
 
-        public static byte[] ObjectToByteArray(object obj, bool full = false)
-        {
-            string text;
-
-            if (full)
-            {
-                text = Newtonsoft.Json.JsonConvert.SerializeObject(obj, Newtonsoft.Json.Formatting.None, new Newtonsoft.Json.JsonSerializerSettings
-                {
-                    TypeNameHandling = Newtonsoft.Json.TypeNameHandling.Objects,
-                    TypeNameAssemblyFormatHandling = Newtonsoft.Json.TypeNameAssemblyFormatHandling.Simple
-                });
-            }
-            else
-            {
-                text = Newtonsoft.Json.JsonConvert.SerializeObject(obj);
-            }
-            return System.Text.Encoding.UTF8.GetBytes(text);
-        }
-
-        public static T ByteArrayToObject<T>(byte[] obj, bool full = false)
-        {
-            string text = Encoding.UTF8.GetString(obj);
-
-            if (full)
-            {
-                return Newtonsoft.Json.JsonConvert.DeserializeObject<T>(text, new Newtonsoft.Json.JsonSerializerSettings
-                {
-                    TypeNameHandling = Newtonsoft.Json.TypeNameHandling.Objects,
-                    TypeNameAssemblyFormatHandling = Newtonsoft.Json.TypeNameAssemblyFormatHandling.Simple,
-                    Formatting = Newtonsoft.Json.Formatting.None
-                });
-            }
-            else
-            {
-                return Newtonsoft.Json.JsonConvert.DeserializeObject<T>(text);
-            }
-
-        }
 
         public static int StringToInt(string input, int def = 0)
         {

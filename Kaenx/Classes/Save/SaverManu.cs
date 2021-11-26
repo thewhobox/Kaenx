@@ -11,7 +11,7 @@ namespace Kaenx.Classes.Save
             throw new NotImplementedException();
         }
 
-        public void Save()
+        public void SaveLine()
         {
             throw new NotImplementedException();
         }

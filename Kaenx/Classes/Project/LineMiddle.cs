@@ -15,8 +15,6 @@ namespace Kaenx.Classes.Project
 {
     public class LineMiddle : INotifyPropertyChanged, TopologieBase
     {
-        public bool IsInit = false;
-
         private bool _isExpanded;
         private int _id;
         private string _name;
@@ -30,14 +28,14 @@ namespace Kaenx.Classes.Project
         public int Id
         {
             get { return _id; }
-            set { _id = value; Changed("Id"); Changed("LineName"); if (Parent != null) Parent.Subs.Sort(l => l.Id); if(!IsInit) SaveHelper.SaveLine(this); }
+            set { _id = value; Changed("Id"); Changed("LineName"); if (Parent != null) Parent.Subs.Sort(l => l.Id); }
         }
         public int UId { get; set; }
         public Symbol Icon { get; set; } = Symbol.AllApps;
         public string Name
         {
             get { return _name; }
-            set { _name = value; Changed("Name"); if (!IsInit) SaveHelper.SaveLine(this); }
+            set { _name = value; Changed("Name"); }
         }
         public Line Parent { get; set; }
         public bool IsExpanded
@@ -52,12 +50,10 @@ namespace Kaenx.Classes.Project
         public LineMiddle() { }
         public LineMiddle(int id, string name, Line parent)
         {
-            IsInit = true;
             Id = id;
             Name = name;
             Parent = parent;
             Parent.PropertyChanged += Parent_PropertyChanged;
-            IsInit = false;
         }
 
         private void Parent_PropertyChanged(object sender, PropertyChangedEventArgs e)
@@ -68,17 +64,15 @@ namespace Kaenx.Classes.Project
 
         public LineMiddle(LineMiddleModel model, Line line)
         {
-            IsInit = true;
             Id = model.Id;
             UId = model.UId;
             Name = model.Name;
             IsExpanded = model.IsExpanded;
             Parent = line;
             Parent.PropertyChanged += Parent_PropertyChanged;
-            IsInit = false;
         }
 
-        private void Changed(string name)
+        public void Changed(string name)
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
         }

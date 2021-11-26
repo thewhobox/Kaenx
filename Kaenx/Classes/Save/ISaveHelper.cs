@@ -9,6 +9,6 @@ namespace Kaenx.Classes.Save
     public interface ISaveHelper
     {
         public void Init(Kaenx.Classes.Project.Project project);
-        public void Save();
+        public void SaveLine();
     }
 }
