@@ -29,6 +29,8 @@ using Windows.ApplicationModel.Resources;
 using Windows.UI.ViewManagement;
 using Kaenx.DataContext.Export;
 using Kaenx.DataContext.Import;
+using Kaenx.DataContext.Import.Manager;
+using Kaenx.Classes.Catalog;
 
 // The Blank Page item template is documented at http://go.microsoft.com/fwlink/?LinkId=234238
 
@@ -39,6 +41,7 @@ namespace Kaenx.View
     /// </summary>
     public sealed partial class Catalog : Page, INotifyPropertyChanged
     {
+        private bool wasFromMain = false;
         private int lastCategorie = -1;
         private ImportTypes lastType = ImportTypes.Undefined;
         private ResourceLoader loader = ResourceLoader.GetForCurrentView("Catalog");
@@ -49,7 +52,8 @@ namespace Kaenx.View
             get { return _catalogDevices; }
             set { _catalogDevices = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("CatalogDevices")); }
         }
-        public ImportDevices Import { get; set; }
+
+        public ObservableCollection<DeviceListItem> DeviceList { get; set; } = new ObservableCollection<DeviceListItem>();
 
         private CatalogContext _context = new CatalogContext();
 
@@ -58,10 +62,6 @@ namespace Kaenx.View
         public Catalog()
         {
             this.InitializeComponent();
-
-            Import = new ImportDevices();
-
-
 
             var mainNode = new Classes.TVNode();
             mainNode.Content = loader.GetString("MansListAll");
@@ -99,19 +99,18 @@ namespace Kaenx.View
         protected override void OnNavigatedTo(NavigationEventArgs e)
         {
             base.OnNavigatedTo(e);
-            if (e.Parameter is StorageFile)
+            if(e.Parameter is StorageFile)
             {
-                PrepareImport(e.Parameter as StorageFile);
-                Import.wasFromMain = true;
+                //PrepareImport(e.Parameter as StorageFile);
+                wasFromMain = true;
                 ApplicationView.GetForCurrentView().Title = loader.GetString("WindowTitle");
 
                 var currentView = SystemNavigationManager.GetForCurrentView();
                 currentView.AppViewBackButtonVisibility = AppViewBackButtonVisibility.Visible;
                 currentView.BackRequested += CurrentView_BackRequested;
-            }
-            else if (e.Parameter is string && e.Parameter.ToString() == "main")
+            } else if(e.Parameter is string && e.Parameter.ToString() == "main") 
             {
-                Import.wasFromMain = true;
+                wasFromMain = true;
                 ApplicationView.GetForCurrentView().Title = loader.GetString("WindowTitle");
 
                 var currentView = SystemNavigationManager.GetForCurrentView();
@@ -137,75 +136,8 @@ namespace Kaenx.View
 
         private async void ClickImport(object sender, RoutedEventArgs e)
         {
-            FileOpenPicker picker = new FileOpenPicker();
-            picker.FileTypeFilter.Add(".knxprod");
-            StorageFile file = await picker.PickSingleFileAsync();
-            PrepareImport(file);
-        }
-
-        public async void PrepareImport(StorageFile file, bool changeLang = false)
-        {
-            if (file == null) return;
-
-            try
-            {
-                await file.CopyAsync(ApplicationData.Current.TemporaryFolder, "temp.knxprod", NameCollisionOption.ReplaceExisting);
-            }
-            catch (Exception ex)
-            {
-                string msg = loader.GetString("MsgNotCopied");
-                Serilog.Log.Error(ex, "Fehler beim Kopieren der KNX-Prod Datei");
-                //Add notify
-                Notifi.Show(msg + "\r\n" + ex.Message);
-                return;
-            }
-
-            StorageFile file2 = await ApplicationData.Current.TemporaryFolder.GetFileAsync("temp.knxprod");
-            Import.Archive = ZipFile.Open(file2.Path, ZipArchiveMode.Read);
-            ImportHelper helper = new ImportHelper();
-            bool success = await helper.GetDeviceList(Import);
-
-            if (!success)
-            {
-                //todo blabla
-                ViewHelper.Instance.ShowNotification("main", "Es trat ein Fehler beim auslesen der Geräte auf.", 3000, Microsoft.UI.Xaml.Controls.InfoBarSeverity.Error);
-                return;
-            }
-
-            GridImportDevices.Visibility = Visibility.Visible;
-
-            if (!string.IsNullOrEmpty(Import.SelectedLanguage))
-                OutSelectedLang.Text = new System.Globalization.CultureInfo(Import.SelectedLanguage).DisplayName;
-
-        }
-
-        private async void ClickCancel(object sender, RoutedEventArgs e)
-        {
-            Import.Archive.Dispose();
-            GridImportDevices.Visibility = Visibility.Collapsed;
-            try
-            {
-                StorageFile file = await ApplicationData.Current.TemporaryFolder.GetFileAsync("temp.knxprod");
-                await file.DeleteAsync();
-            }
-            catch { }
-        }
-
-        private void ClickSelectAll(object sender, RoutedEventArgs e)
-        {
-            foreach (Kaenx.Classes.Device device in Import.DeviceList)
-            {
-                device.SlideSettings.IsSelected = true;
-            }
-
-            Frame rootFrame = this.Parent as Frame;
-            rootFrame.Navigate(typeof(Import), Import);
-        }
-
-        private void ClickSelected(object sender, RoutedEventArgs e)
-        {
-            Frame rootFrame = this.Parent as Frame;
-            rootFrame.Navigate(typeof(Import), Import);
+            Frame main = this.Parent as Frame;
+            main.Navigate(typeof(Import), wasFromMain);
         }
 
         private void TreeV_ItemInvoked(TreeView sender, TreeViewItemInvokedEventArgs args)
@@ -227,14 +159,13 @@ namespace Kaenx.View
             {
                 GetSubSection(cats, -1, ImportTypes.ETS);
                 GetSubSection(cats, -1, ImportTypes.Konnekting);
-            }
-            else
+            } else
             {
                 GetSubSection(cats, section, type);
             }
 
 
-            foreach (DeviceViewModel model in _context.Devices.Where(dev => cats.Contains(dev.CatalogId)).ToList().OrderBy(dev => dev.Name))
+            foreach(DeviceViewModel model in _context.Devices.Where(dev => cats.Contains(dev.CatalogId)).ToList().OrderBy(dev => dev.Name))
             {
                 CatalogDevices.Add(model);
                 _items.Add(model);
@@ -255,7 +186,7 @@ namespace Kaenx.View
         {
             IEnumerable<CatalogViewModel> sections = _context.Sections.Where(sec => sec.ParentId == node.SectionId);
 
-            foreach (CatalogViewModel sec in sections)
+            foreach(CatalogViewModel sec in sections)
             {
                 var secNode = new Classes.TVNode();
                 secNode.Content = sec.Name;
@@ -268,7 +199,7 @@ namespace Kaenx.View
         private void CatalogDeviceList_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             DeviceViewModel device = (DeviceViewModel)((DataGrid)sender).SelectedItem;
-            if (device == null || !device.HasApplicationProgram)
+            if(device == null || !device.HasApplicationProgram)
             {
                 DevInfoApp.Text = "";
                 BarDelete.IsEnabled = device != null;
@@ -279,7 +210,7 @@ namespace Kaenx.View
             List<string> apps = new List<string>();
             IEnumerable<Hardware2AppModel> models = _context.Hardware2App.Where(h => h.Id == device.HardwareId).OrderByDescending(h => h.Version);
 
-            foreach (Hardware2AppModel model in models)
+            foreach(Hardware2AppModel model in models)
             {
                 apps.Add($"{model.Name} {model.VersionString}");
             }
@@ -310,7 +241,7 @@ namespace Kaenx.View
                     CatalogDevices = new ObservableCollection<DeviceViewModel>(from item in CatalogDevices orderby item.OrderNumber descending select item);
                 e.Column.SortDirection = DataGridSortDirection.Descending;
             }
-            if (previousSortedColumn != null && previousSortedColumn != e.Column)
+            if(previousSortedColumn != null && previousSortedColumn != e.Column)
                 previousSortedColumn.SortDirection = null;
             previousSortedColumn = e.Column;
         }
@@ -339,8 +270,7 @@ namespace Kaenx.View
                     BarSearchIn.BorderBrush = new SolidColorBrush(Windows.UI.Colors.Red);
                     return false;
                 }
-            }
-            else
+            } else
             {
                 BarSearchIn.BorderBrush = new SolidColorBrush(Windows.UI.Colors.Gray);
                 return input.Contains(query);
@@ -351,7 +281,7 @@ namespace Kaenx.View
         {
 
             //TODO richtig machen!
-            foreach (DeviceViewModel device in CatalogDeviceList.SelectedItems)
+            foreach(DeviceViewModel device in CatalogDeviceList.SelectedItems)
             {
                 _context.Devices.Remove(device);
 
@@ -362,87 +292,52 @@ namespace Kaenx.View
                     {
                         Hardware2AppModel h2a = _context.Hardware2App.Single(h => h.Id == device.HardwareId);
                         _context.Hardware2App.Remove(h2a);
-                        count = _context.Hardware2App.Count(h => h != h2a && h.Id == h2a.Id);
 
-                        if (count == 0)
+                        foreach(ApplicationViewModel app in _context.Applications.Where(a => a.HardwareId == h2a.Id).ToList())
                         {
-                            List<int> appIds = new List<int>();
-                            IEnumerable<object> tempList = _context.Applications.Where(a => a.HardwareId == h2a.Id);
-                            foreach (ApplicationViewModel app in tempList)
-                                appIds.Add(app.Id);
+                            IEnumerable<object> tempList = _context.AppSegments.Where(a => a.ApplicationId == app.Id);
                             _context.RemoveRange(tempList);
 
-                            tempList = _context.AppSegments.Where(a => appIds.Contains(a.ApplicationId));
+                            tempList = _context.AppComObjects.Where(a => a.ApplicationId == app.Id);
                             _context.RemoveRange(tempList);
 
-                            tempList = _context.AppComObjects.Where(a => appIds.Contains(a.ApplicationId));
+                            tempList = _context.AppAdditionals.Where(a => a.ApplicationId == app.Id);
                             _context.RemoveRange(tempList);
 
-
-                            tempList = _context.AppParameters.Where(a => appIds.Contains(a.ApplicationId));
+                            tempList = _context.AppParameters.Where(a => a.ApplicationId == app.Id);
                             _context.RemoveRange(tempList);
+
+                            //Check database so everything deletes
 
                             List<AppParameterTypeViewModel> toDelete = new List<AppParameterTypeViewModel>();
-                            foreach (AppParameter para in tempList)
+                            tempList = _context.AppParameterTypes.Where(p => p.ApplicationId == app.Id);
+                            foreach (AppParameterTypeViewModel pType in tempList)
                             {
-                                AppParameterTypeViewModel pType = _context.AppParameterTypes.Single(p => p.Id == para.ParameterTypeId);
-                                toDelete.Add(pType);
-
                                 if (pType.Type == ParamTypes.Enum)
                                 {
                                     IEnumerable<AppParameterTypeEnumViewModel> tempList2 = _context.AppParameterTypeEnums.Where(e => e.TypeId == pType.Id);
                                     _context.AppParameterTypeEnums.RemoveRange(tempList2);
                                 }
+                                toDelete.Add(pType);
                             }
                             _context.AppParameterTypes.RemoveRange(toDelete);
 
-                            try
-                            {
-                                AppAdditional adds = _context.AppAdditionals.Single(a => appIds.Contains(a.ApplicationId));
-                                _context.AppAdditionals.Remove(adds);
-                            }
-                            catch
-                            {
+                            
 
-                            }
+                            _context.Applications.Remove(app);
                         }
                     }
                 }
             }
 
             _context.SaveChanges();
-            if (lastType == ImportTypes.Undefined)
+            if(lastType == ImportTypes.Undefined)
             {
                 LoadDevices(lastCategorie, ImportTypes.ETS);
                 LoadDevices(lastCategorie, ImportTypes.Konnekting);
-            }
-            else
+            } else
             {
                 LoadDevices(lastCategorie, lastType);
-            }
-
-        }
-
-        private async void HyperlinkChangeLang_Click(Windows.UI.Xaml.Documents.Hyperlink sender, Windows.UI.Xaml.Documents.HyperlinkClickEventArgs args)
-        {
-            Import.SelectedLanguage = null;
-            ImportHelper helper = new ImportHelper();
-            await helper.GetDeviceList(Import, true);
-        }
-
-        private void ImportList_ItemClick(object sender, ItemClickEventArgs e)
-        {
-            if (e.ClickedItem is Kaenx.Classes.Device)
-            {
-                Kaenx.Classes.Device device = (Kaenx.Classes.Device)e.ClickedItem;
-                device.SlideSettings.IsSelected = !device.SlideSettings.IsSelected;
-
-                int count = Import.DeviceList.Where<Kaenx.Classes.Device>(d => d.SlideSettings.IsSelected == true).Count();
-
-                if (count == 0)
-                    ButtonImportSelected.IsEnabled = false;
-                else
-                    ButtonImportSelected.IsEnabled = true;
             }
         }
 

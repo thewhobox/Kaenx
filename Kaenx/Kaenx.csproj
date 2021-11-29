@@ -12,12 +12,12 @@
     <DefaultLanguage>de-DE</DefaultLanguage>
     <TargetPlatformIdentifier>UAP</TargetPlatformIdentifier>
     <TargetPlatformVersion>10.0.19041.0</TargetPlatformVersion>
-    <TargetPlatformMinVersion>10.0.18362.0</TargetPlatformMinVersion>
+    <TargetPlatformMinVersion>10.0.19041.0</TargetPlatformMinVersion>
     <MinimumVisualStudioVersion>14</MinimumVisualStudioVersion>
     <FileAlignment>512</FileAlignment>
     <ProjectTypeGuids>{A5A43C5B-DE2A-4C0C-9213-0A381AF9435A};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
     <PackageCertificateKeyFile>Kaenx_TemporaryKey.pfx</PackageCertificateKeyFile>
-    <RuntimeIdentifiers>win10-arm;win10-arm-aot;win10-x86;win10-x86-aot;win10-x64;win10-x64-aot</RuntimeIdentifiers>
+    <RuntimeIdentifiers>win10-x86;win10-x86-aot;win10-x64;win10-x64-aot;</RuntimeIdentifiers>
     <GenerateAppInstallerFile>True</GenerateAppInstallerFile>
     <AppxAutoIncrementPackageRevision>False</AppxAutoIncrementPackageRevision>
     <AppxBundle>Always</AppxBundle>
@@ -37,7 +37,7 @@
     <DebugSymbols>true</DebugSymbols>
     <OutputPath>bin\x86\Debug\</OutputPath>
     <DefineConstants>DEBUG;TRACE;NETFX_CORE;WINDOWS_UWP</DefineConstants>
-    <NoWarn>;2008</NoWarn>
+    <NoWarn>;2008;1201</NoWarn>
     <DebugType>full</DebugType>
     <PlatformTarget>x86</PlatformTarget>
     <UseVSHostingProcess>false</UseVSHostingProcess>
@@ -119,7 +119,8 @@
     <Compile Include="App.xaml.cs">
       <DependentUpon>App.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Classes\AssignParameter.cs" />
+    <Compile Include="Classes\Extension.cs" />
+    <Compile Include="Classes\ObservableRangeCollection.cs" />
     <Compile Include="Classes\Buildings\Area.cs" />
     <Compile Include="Classes\Buildings\Building.cs" />
     <Compile Include="Classes\Buildings\Floor.cs" />
@@ -129,7 +130,6 @@
     <Compile Include="Classes\Buildings\Room.cs" />
     <Compile Include="Classes\Bus\Actions\DeviceMem.cs" />
     <Compile Include="Classes\Bus\Actions\DeviceDeActivate.cs" />
-    <Compile Include="Classes\Bus\Actions\DeviceConfig.cs" />
     <Compile Include="Classes\Bus\Actions\DeviceSerial.cs" />
     <Compile Include="Classes\Bus\Actions\DeviceRestart.cs" />
     <Compile Include="Classes\Bus\Actions\IBusAction.cs" />
@@ -146,9 +146,11 @@
     <Compile Include="Classes\Bus\Data\IBusData.cs" />
     <Compile Include="Classes\Bus\Data\NewDeviceData.cs" />
     <Compile Include="Classes\Bus\RemoteConnection.cs" />
+    <Compile Include="Classes\Catalog\DeviceListItem.cs" />
     <Compile Include="Classes\Converter\StateBrushConverter.cs" />
     <Compile Include="Classes\Converter\InterfaceTooltipConverter.cs" />
     <Compile Include="Classes\Converter\InterfaceGlyphConverter.cs" />
+    <Compile Include="Classes\Converter\ImportStateConverter.cs" />
     <Compile Include="Classes\Converter\ValueCheckBoxConverter.cs" />
     <Compile Include="Classes\DataPointSubType.cs" />
     <Compile Include="Classes\Device.cs" />
@@ -157,27 +159,6 @@
       <DependentUpon>ControlUpdate.xaml</DependentUpon>
     </Compile>
     <Compile Include="Classes\DeviceImportInfo.cs" />
-    <Compile Include="Classes\Dynamic\ChannelBlock.cs" />
-    <Compile Include="Classes\Dynamic\ChannelIndependentBlock.cs" />
-    <Compile Include="Classes\Dynamic\IDynChannel.cs" />
-    <Compile Include="Classes\Dynamic\IDynParameter.cs" />
-    <Compile Include="Classes\Dynamic\ParamBinding.cs" />
-    <Compile Include="Classes\Dynamic\ParamCondition.cs" />
-    <Compile Include="Classes\Dynamic\ParameterTable.cs" />
-    <Compile Include="Classes\Dynamic\ParamNone.cs" />
-    <Compile Include="Classes\Dynamic\ParamEnum.cs" />
-    <Compile Include="Classes\Dynamic\ParamEnumOption.cs" />
-    <Compile Include="Classes\Dynamic\ParamEnumTwo.cs" />
-    <Compile Include="Classes\Dynamic\ParameterBlock.cs" />
-    <Compile Include="Classes\Dynamic\ParamTime.cs" />
-    <Compile Include="Classes\Dynamic\ParamNumber.cs" />
-    <Compile Include="Classes\Dynamic\ParamColor.cs" />
-    <Compile Include="Classes\Dynamic\ParamCheckBox.cs" />
-    <Compile Include="Classes\Dynamic\ParamSeperatorBox.cs" />
-    <Compile Include="Classes\Dynamic\ParamSeperator.cs" />
-    <Compile Include="Classes\Dynamic\ParamTextRead.cs" />
-    <Compile Include="Classes\Dynamic\ParamText.cs" />
-    <Compile Include="Classes\Dynamic\ViewParamModel.cs" />
     <Compile Include="Classes\Helper\BlockVisHelper.cs" />
     <Compile Include="Classes\Helper\ParamVisHelper.cs" />
     <Compile Include="Classes\Helper\ProjectViewHelper.cs" />
@@ -266,17 +247,12 @@
     <Compile Include="View\Controls\Settings\SBusConnections.xaml.cs">
       <DependentUpon>SBusConnections.xaml</DependentUpon>
     </Compile>
-    <Compile Include="View\Controls\Settings\SCredits.xaml.cs">
-      <DependentUpon>SCredits.xaml</DependentUpon>
-    </Compile>
     <Compile Include="View\Controls\SlideListItemBase.cs" />
     <Compile Include="Classes\Converter\Checked2VisibilityConverter.cs" />
     <Compile Include="Classes\Converter\NumberConverter.cs" />
-    <Compile Include="Classes\Extensions.cs" />
     <Compile Include="Classes\Helper\ViewHelper.cs" />
     <Compile Include="Classes\Project\ChangeHandler.cs" />
     <Compile Include="Classes\Project\DeviceUpdate.cs" />
-    <Compile Include="Classes\Helper\ImportHelper.cs" />
     <Compile Include="Classes\Project\LineDevice.cs" />
     <Compile Include="Classes\Project\LineMiddle.cs" />
     <Compile Include="Classes\Project\Line.cs" />
@@ -287,7 +263,6 @@
     <Compile Include="Classes\Helper\SettingsHelper.cs" />
     <Compile Include="Classes\TopologieBase.cs" />
     <Compile Include="Classes\TreeViewNode.cs" />
-    <Compile Include="MVVM\ImportDevices.cs" />
     <Compile Include="MVVM\Lines.cs" />
     <Compile Include="View\Bus.xaml.cs">
       <DependentUpon>Bus.xaml</DependentUpon>
@@ -304,6 +279,9 @@
     <Compile Include="View\Home.xaml.cs">
       <DependentUpon>Home.xaml</DependentUpon>
     </Compile>
+    <Compile Include="View\Import.xaml.cs">
+      <DependentUpon>Import.xaml</DependentUpon>
+    </Compile>
     <Compile Include="View\Reconstruct.xaml.cs">
       <DependentUpon>Reconstruct.xaml</DependentUpon>
     </Compile>
@@ -312,9 +290,6 @@
     </Compile>
     <Compile Include="View\Topologie.xaml.cs">
       <DependentUpon>Topologie.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="View\Import.xaml.cs">
-      <DependentUpon>Import.xaml</DependentUpon>
     </Compile>
     <Compile Include="View\MainPage.xaml.cs">
       <DependentUpon>MainPage.xaml</DependentUpon>
@@ -523,15 +498,15 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="View\Controls\Settings\SCredits.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
     <Page Include="View\Groups.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="View\Home.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="View\Import.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -544,10 +519,6 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="View\Topologie.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="View\Import.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

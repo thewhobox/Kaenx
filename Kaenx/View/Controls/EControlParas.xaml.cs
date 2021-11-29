@@ -1,8 +1,9 @@
 ﻿using Kaenx.Classes;
-using Kaenx.Classes.Dynamic;
 using Kaenx.Classes.Helper;
 using Kaenx.Classes.Project;
 using Kaenx.DataContext.Catalog;
+using Kaenx.DataContext.Import;
+using Kaenx.DataContext.Import.Dynamic;
 using Kaenx.DataContext.Project;
 using Kaenx.View.Controls;
 using Serilog;
@@ -54,13 +55,13 @@ namespace Kaenx.Views.Easy.Controls
             }
         }
 
-        private List<DeviceComObject> comObjects { get; set; }
+        private List<ComBinding> comObjects { get; set; }
 
 
 
         public LineDevice Device { get; }
         private CatalogContext _context = new CatalogContext();
-        private ProjectContext _contextP = new ProjectContext(SaveHelper.connProject);
+        private ProjectContext _contextP = new ProjectContext(SaveHelper._project.Connection);
 
         private Dictionary<int, ChangeParamModel> ParaChanges = new Dictionary<int, ChangeParamModel>();
         private Dictionary<string, AppParameterTypeViewModel> AppParaTypess = new Dictionary<string, AppParameterTypeViewModel>();
@@ -84,6 +85,7 @@ namespace Kaenx.Views.Easy.Controls
         Dictionary<string, IDynParameter> Hash2Param = new Dictionary<string, IDynParameter>();
         List<ParamBinding> Bindings;
         List<AssignParameter> Assignments;
+        Dictionary<int, string> values = new Dictionary<int, string>();
 
 
         public EControlParas(LineDevice dev)
@@ -102,19 +104,19 @@ namespace Kaenx.Views.Easy.Controls
             this.SizeChanged += EControlParas2_SizeChanged;
         }
 
-        public EControlParas(Classes.Bus.Data.DeviceConfigData data)
-        {
-            this.InitializeComponent();
-            Device = data.Device;
-            this.DataContext = this;
+        //public EControlParas(Classes.Bus.Data.DeviceConfigData data)
+        //{
+        //    this.InitializeComponent();
+        //    Device = data.Device;
+        //    this.DataContext = this;
 
-            //TODO check change
-            ApplicationViewModel app = _context.Applications.Single(a => a.Hash == data.ApplicationId);
+        //    //TODO check change
+        //    ApplicationViewModel app = _context.Applications.Single(a => a.Hash == data.ApplicationId);
 
-            Device.ApplicationId = app.Id;
+        //    Device.ApplicationId = app.Id;
 
-            this.SizeChanged += EControlParas2_SizeChanged;
-        }
+        //    this.SizeChanged += EControlParas2_SizeChanged;
+        //}
 
         private void EControlParas2_SizeChanged(object sender, SizeChangedEventArgs e)
         {
@@ -135,21 +137,13 @@ namespace Kaenx.Views.Easy.Controls
                 }
             }
 
-            try
-            {
-                _ = Load();
-            }
-            catch (Exception ex)
-            {
-                Log.Error(ex, "Laden der Parameter fehlgeschlagen!");
-                ViewHelper.Instance.ShowNotification("main", ex.Message, 4000, Microsoft.UI.Xaml.Controls.InfoBarSeverity.Error);
-            }
-        }
-
-        public void StartRead()
-        {
             _ = Load();
         }
+
+        //public void StartRead()
+        //{
+        //    _ = Load();
+        //}
 
 
 
@@ -160,43 +154,27 @@ namespace Kaenx.Views.Easy.Controls
 
                 await Task.Delay(1);
                 AppAdditional adds = _context.AppAdditionals.Single(a => a.ApplicationId == Device.ApplicationId);
-                comObjects = SaveHelper.ByteArrayToObject<List<DeviceComObject>>(adds.ComsAll);
-                Channels = SaveHelper.ByteArrayToObject<List<IDynChannel>>(adds.ParamsHelper, true);
-                Bindings = SaveHelper.ByteArrayToObject<List<ParamBinding>>(adds.Bindings);
-                Assignments = SaveHelper.ByteArrayToObject<List<AssignParameter>>(adds.Assignments);
+                comObjects = FunctionHelper.ByteArrayToObject<List<ComBinding>>(adds.ComsAll, true);
+                Channels = FunctionHelper.ByteArrayToObject<List<Kaenx.DataContext.Import.Dynamic.IDynChannel>>(adds.ParamsHelper, true, "Kaenx.DataContext.Import.Dynamic");
+                Bindings = FunctionHelper.ByteArrayToObject<List<ParamBinding>>(adds.Bindings, true);
+                Assignments = FunctionHelper.ByteArrayToObject<List<AssignParameter>>(adds.Assignments, true);
 
 
                 foreach (IDynChannel ch in Channels)
                 {
                     if (!ch.HasAccess)
                     {
-                        ch.Visible = Visibility.Collapsed;
+                        ch.IsVisible = false;
                         continue;
                     }
-
-                    if (ch is ChannelBlock)
-                    {
-                        ChannelBlock chb = ch as ChannelBlock;
-                        if (chb.Text.Contains("{{"))
-                            chb.DisplayText = chb.Text.Replace("{{dyn}}", chb.DefaultText);
-                        else
-                            chb.DisplayText = chb.Text;
-                    }
-
 
                     foreach (ParameterBlock block in ch.Blocks)
                     {
                         if (!block.HasAccess)
                         {
-                            block.Visible = Visibility.Collapsed;
+                            block.IsVisible = false;
                             continue;
                         }
-
-
-                        if (block.Text?.Contains("{{") == true)
-                            block.DisplayText = block.Text.Replace("{{dyn}}", block.DefaultText);
-                        else
-                            block.DisplayText = block.Text;
 
                         foreach (IDynParameter para in block.Parameters)
                         {
@@ -211,15 +189,12 @@ namespace Kaenx.Views.Easy.Controls
                             }
                             if (!para.HasAccess)
                             {
-                                para.Visible = Visibility.Collapsed;
+                                para.IsVisible = false;
                                 continue;
                             }
 
                             if (ParaChanges.ContainsKey(para.Id))
                                 para.Value = ParaChanges[para.Id].Value;
-
-
-                            if (para is ParamSeperator || para is ParameterTable) continue;
 
                             if (!Id2Param.ContainsKey(para.Id))
                                 Id2Param.Add(para.Id, new ViewParamModel(para.Value));
@@ -242,26 +217,32 @@ namespace Kaenx.Views.Easy.Controls
                 CatalogContext co = new CatalogContext();
                 foreach (AppParameter para in co.AppParameters.Where(p => p.ApplicationId == adds.ApplicationId))
                 {
-                    if (!Id2Param.ContainsKey(para.Id))
+                    if (!values.ContainsKey(para.ParameterId))
                     {
                         ViewParamModel model = new ViewParamModel(para.Value);
                         ParamText p = new ParamText();
                         p.Value = para.Value;
                         p.Id = para.Id;
-                        p.Visible = Visibility.Visible;
+                        p.IsVisible = true;
                         model.Parameters.Add(p);
-                        Id2Param.Add(para.Id, model);
+                        values.Add(para.ParameterId, para.Value);
+                        if(!Id2Param.ContainsKey(para.Id))
+                            Id2Param.Add(para.Id, model);
                     }
                 }
 
 
                 foreach (AssignParameter assign in Assignments)
                 {
-                    bool test = SaveHelper.CheckConditions(Device.ApplicationId, assign.Conditions, Id2Param);
+                    bool test = FunctionHelper.CheckConditions(assign.Conditions, values);
                     try
                     {
                         Id2Param[assign.Target].Assign = test ? assign : null;
-                        if (test) testL.Add(assign.Target);
+                        if (test)
+                        {
+                            values[assign.Target] = assign.Value;
+                            testL.Add(assign.Target);
+                        }
                     }
                     catch
                     {
@@ -290,7 +271,6 @@ namespace Kaenx.Views.Easy.Controls
                 }
 
 
-                _ = CheckComObjects();
 
 
                 LoadRing.Visibility = Visibility.Collapsed;
@@ -312,62 +292,30 @@ namespace Kaenx.Views.Easy.Controls
             IDynParameter para = sender as IDynParameter;
             Debug.WriteLine("Wert geändert! " + para.Id + " -> " + para.Value);
 
-            string oldValue = Id2Param[para.Id].Value;
-
-            Id2Param[para.Id].Value = para.Value;
-
+            string oldValue = values[para.Id];
+            values[para.Id] = para.Value;
 
 
+            List<DeviceComObject> toRemove = CheckRemovingComs(para);
 
-            CalculateVisibility(para);
-
-
-
-
-            
-
-
-
-            if (e == null) return;
-
-
-
-            (List<DeviceComObject> allNew, List<DeviceComObject> toDelete) comObjs = (null, null);
-            if (e != null)
+            if(toRemove.Count > 0)
             {
-                comObjs = CheckRemoveComObjects();
-
-                //TODO wenn welche löscht werden müssen abfragen ob das wirklich tun soll
-
-                StringBuilder sb = new StringBuilder();
-                foreach (DeviceComObject co in comObjs.allNew)
-                    sb.AppendLine(co.Number + " " + co.DisplayName + " " + co.Function);
-                Debug.WriteLine("Erstes dingens");
-                Debug.WriteLine(sb.ToString());
-
-                if (comObjs.toDelete.Count > 0)
+                DiagComsDeleted diag = new DiagComsDeleted();
+                diag.SetComs(toRemove);
+                await diag.ShowAsync();
+                if(!diag.DoDelete)
                 {
-                    Debug.WriteLine("Es müssten Sachen gelöscht werden..");
-                    DiagComsDeleted diag = new DiagComsDeleted();
-                    diag.SetComs(comObjs.toDelete);
-                    diag.XamlRoot = this.XamlRoot;
-                    await diag.ShowAsync();
-                    if (!diag.DoDelete)
-                    {
-                        Id2Param[para.Id].Value = oldValue;
-                        para.Value = oldValue;
-                        CalculateVisibility(para);
-                        return;
-                    }
+                    values[para.Id] = oldValue;
+                    para.Value = oldValue;
+                    return;
                 }
             }
 
 
+            CalculateVisibilityParas(para);
 
+            CalculateVisibilityComs(para);
 
-
-
-            _ = CheckComObjects(comObjs.allNew);
 
             ChangeParamModel change = new ChangeParamModel
             {
@@ -384,8 +332,54 @@ namespace Kaenx.Views.Easy.Controls
 
         }
 
+        private List<DeviceComObject> CheckRemovingComs(IDynParameter para)
+        {
+            IEnumerable<ComBinding> list = comObjects.Where(co => co.Conditions.Any(c => c.SourceId == para.Id));
+            List<DeviceComObject> toRemove = new List<DeviceComObject>();
 
-        private void CalculateVisibility(IDynParameter para)
+            foreach (ComBinding com in list)
+            {
+                if (!FunctionHelper.CheckConditions(com.Conditions, values))
+                {
+                    if (Device.ComObjects.Any(c => c.Id == com.ComId))
+                    {
+                        DeviceComObject dcom = Device.ComObjects.Single(co => co.Id == com.ComId);
+                        if(dcom.Groups.Count > 0)
+                             toRemove.Add(dcom);
+                    }
+                }
+            }
+            return toRemove;
+        }
+
+        private void CalculateVisibilityComs(IDynParameter para)
+        {
+            IEnumerable<ComBinding> list = comObjects.Where(co => co.Conditions.Any(c => c.SourceId == para.Id));
+
+            foreach(IGrouping<int, ComBinding> bindings in list.GroupBy(cb => cb.ComId))
+            {
+                if(bindings.Any(cond => FunctionHelper.CheckConditions(cond.Conditions, values)))
+                {
+                    if (!Device.ComObjects.Any(c => c.Id == bindings.Key))
+                    {
+                        AppComObject acom = _context.AppComObjects.Single(a => a.ApplicationId == Device.ApplicationId && a.Id == bindings.Key);
+                        Device.ComObjects.Add(new DeviceComObject(acom));
+                    }
+                } else
+                {
+                    if (Device.ComObjects.Any(c => c.Id == bindings.Key))
+                    {
+                        DeviceComObject dcom = Device.ComObjects.Single(co => co.Id == bindings.Key);
+                        Device.ComObjects.Remove(dcom);
+                    }
+                }
+            }
+
+            //TODO allow to sort for name, function, etc
+            Device.ComObjects.Sort(c => c.Number);
+        }
+
+        private void CalculateVisibilityParas(IDynParameter para)
         {
             List<ChannelBlock> list = new List<ChannelBlock>();
             List<ParameterBlock> list2 = new List<ParameterBlock>();
@@ -408,63 +402,61 @@ namespace Kaenx.Views.Easy.Controls
             IEnumerable<IDynParameter> list3 = Hash2Param.Values.Where(p => p.Conditions.Any(c => c.SourceId == para.Id || list5.Contains(c.SourceId)));
             foreach (IDynParameter par in list3)
                 if(par.HasAccess)
-                    par.Visible = SaveHelper.CheckConditions(Device.ApplicationId, par.Conditions, Id2Param) ? Visibility.Visible : Visibility.Collapsed;
+                    par.IsVisible = SaveHelper.CheckConditions(Device.ApplicationId, par.Conditions, Id2Param);
 
             foreach (IDynChannel ch in Channels)
             {
                 if(ch.HasAccess)
-                    ch.Visible = SaveHelper.CheckConditions(Device.ApplicationId, ch.Conditions, Id2Param) ? Visibility.Visible : Visibility.Collapsed;
+                    ch.IsVisible = SaveHelper.CheckConditions(Device.ApplicationId, ch.Conditions, Id2Param);
 
                 foreach (ParameterBlock block in ch.Blocks)
                     if (block.HasAccess)
-                        block.Visible = SaveHelper.CheckConditions(Device.ApplicationId, block.Conditions, Id2Param) ? Visibility.Visible : Visibility.Collapsed;
+                        block.IsVisible = SaveHelper.CheckConditions(Device.ApplicationId, block.Conditions, Id2Param);
                     else
-                        block.Visible = Visibility.Collapsed;
+                        block.IsVisible = false;
             }
 
 
             IEnumerable<ParamBinding> list4 = Bindings.Where(b => b.SourceId == para.Id);
             foreach (ParamBinding bind in list4)
             {
-                string[] ids = bind.Hash.Split(":");
-                int id1 = int.Parse(ids[1]);
-
-                switch (ids[0])
+                switch (bind.Type)
                 {
-                    case "CB":
-                        IDynChannel ch = Channels.Single(c => c.Id == id1);
+                    case BindingTypes.Channel:
+                        IDynChannel ch = Channels.Single(c => c.Id == bind.TargetId);
                         if (ch is ChannelBlock)
                         {
                             ChannelBlock chb = ch as ChannelBlock;
                             if (string.IsNullOrEmpty(para.Value))
-                                chb.DisplayText = chb.Text.Replace("{{dyn}}", bind.DefaultText);
+                                chb.Text = bind.FullText.Replace("{{dyn}}", bind.DefaultText);
                             else
-                                chb.DisplayText = chb.Text.Replace("{{dyn}}", para.Value);
+                                chb.Text = bind.FullText.Replace("{{dyn}}", para.Value);
                         }
                         break;
 
-                    case "PB":
+                    case BindingTypes.ParameterBlock:
                         foreach (IDynChannel ch2 in Channels)
                         {
-                            if (ch2.Blocks.Any(b => b.Id == id1))
+                            if (ch2.Blocks.Any(b => b.Id == bind.TargetId))
                             {
-                                ParameterBlock bl = ch2.Blocks.Single(b => b.Id == id1);
+                                ParameterBlock bl = ch2.Blocks.Single(b => b.Id == bind.TargetId);
                                 if (string.IsNullOrEmpty(para.Value) || string.IsNullOrWhiteSpace(para.Value))
-                                    bl.DisplayText = bl.Text.Replace("{{dyn}}", bind.DefaultText);
+                                    bl.Text = bind.FullText.Replace("{{dyn}}", bind.DefaultText);
                                 else
-                                    bl.DisplayText = bl.Text.Replace("{{dyn}}", para.Value);
+                                    bl.Text = bind.FullText.Replace("{{dyn}}", para.Value);
                             }
                         }
                         break;
 
-                    case "CO":
+                    case BindingTypes.ComObject:
                         try
                         {
-                            DeviceComObject com = Device.ComObjects.Single(c => c.Id == id1);
-                            if (string.IsNullOrEmpty(para.Value))
-                                com.DisplayName = com.Name.Replace("{{dyn}}", bind.DefaultText);
-                            else
-                                com.DisplayName = com.Name.Replace("{{dyn}}", para.Value);
+                            //TODO check what to do
+                            //DeviceComObject com = Device.ComObjects.Single(c => c.Id == bind.TargetId);
+                            //if (string.IsNullOrEmpty(para.Value))
+                            //    com.DisplayName = com.Name.Replace("{{dyn}}", bind.DefaultText);
+                            //else
+                            //    com.DisplayName = com.Name.Replace("{{dyn}}", para.Value);
                         }
                         catch
                         {
@@ -476,143 +468,16 @@ namespace Kaenx.Views.Easy.Controls
 
             foreach (IDynChannel ch in Channels)
             {
-                if (ch.Visible == Visibility.Visible)
+                if (ch.IsVisible)
                 {
-                    ch.Visible = ch.Blocks.Any(b => b.Visible == Visibility.Visible) ? Visibility.Visible : Visibility.Collapsed;
+                    ch.IsVisible = ch.Blocks.Any(b => b.IsVisible);
                 }
             }
         }
 
 
-        private (List<DeviceComObject> allNew, List<DeviceComObject> toDelete) CheckRemoveComObjects()
-        {
-            List<DeviceComObject> newObjs = new List<DeviceComObject>();
-
-            //foreach (DeviceComObject obj in comObjects)
-            //{
-            //    if (obj.Conditions.Count == 0)
-            //    {
-            //        newObjs.Add(obj);
-            //        continue;
-            //    }
-
-            //    bool flag = SaveHelper.CheckConditions(obj.Conditions, Id2Param);
-            //    if (flag)
-            //        newObjs.Add(obj);
-            //}
-
-            foreach (DeviceComObject obj in comObjects)
-            {
-                if (obj.Conditions.Count == 0)
-                {
-                    newObjs.Add(obj);
-                    continue;
-                }
-
-                bool flag = SaveHelper.CheckConditions(Device.ApplicationId, obj.Conditions, Id2Param);
-                if (flag)
-                    newObjs.Add(obj);
-            }
-
-            List<DeviceComObject> toDelete = new List<DeviceComObject>();
-            foreach (DeviceComObject cobj in Device.ComObjects)
-                if (!newObjs.Any(co => co.Id == cobj.Id) && cobj.Groups.Count != 0)
-                    toDelete.Add(cobj);
-
-            return (newObjs, toDelete);
-        }
 
 
-        private async Task CheckComObjects(List<DeviceComObject> newObjs = null)
-        {
-            //TODO check why it doesnt work with parameter new objs!
-            if (newObjs == null)//|| true)
-            {
-                newObjs = new List<DeviceComObject>();
-
-                foreach (DeviceComObject obj in comObjects)
-                {
-                    if (obj.Conditions.Count == 0)
-                    {
-                        newObjs.Add(obj);
-                        continue;
-                    }
-
-                    bool flag = SaveHelper.CheckConditions(Device.ApplicationId, obj.Conditions, Id2Param);
-                    if (flag)
-                        newObjs.Add(obj);
-                }
-            }
-
-
-            StringBuilder sb = new StringBuilder();
-            foreach (DeviceComObject co in newObjs)
-                sb.AppendLine(co.Number + " " + co.DisplayName + " " + co.Function);
-            Debug.WriteLine("Zweites dingens");
-            Debug.WriteLine(sb.ToString());
-
-
-
-            List<DeviceComObject> toAdd = new List<DeviceComObject>();
-            foreach (DeviceComObject cobj in newObjs)
-            {
-                if (!Device.ComObjects.Any(co => co.Id == cobj.Id))
-                    toAdd.Add(cobj);
-            }
-
-            List<DeviceComObject> toDelete = new List<DeviceComObject>();
-            foreach (DeviceComObject cobj in Device.ComObjects)
-            {
-                if (!newObjs.Any(co => co.Id == cobj.Id))
-                    toDelete.Add(cobj);
-            }
-
-            Dictionary<int, ComObject> coms = new Dictionary<int, ComObject>();
-            foreach (ComObject com in _contextP.ComObjects)
-                if (!coms.ContainsKey(com.ComId))
-                    coms.Add(com.ComId, com);
-
-
-            //TODO check why every com gets deleted on first starts
-            foreach (DeviceComObject cobj in toDelete)
-            {
-                ComObject com = coms[cobj.Id];
-                _contextP.ComObjects.Remove(com);
-                Device.ComObjects.Remove(cobj);
-            }
-
-
-            foreach (DeviceComObject dcom in toAdd)
-            {
-                if (dcom.Name.Contains("{{"))
-                {
-                    ParamBinding bind = Bindings.Single(b => b.Hash == "CO:" + dcom.Id);
-                    string value = Id2Param[dcom.BindedId].Value;
-                    if (string.IsNullOrEmpty(value))
-                        dcom.DisplayName = dcom.Name.Replace("{{dyn}}", bind.DefaultText);
-                    else
-                        dcom.DisplayName = dcom.Name.Replace("{{dyn}}", value);
-                }
-                else
-                {
-                    dcom.DisplayName = dcom.Name;
-                }
-                Device.ComObjects.Add(dcom);
-
-
-                ComObject com = new ComObject
-                {
-                    ComId = dcom.Id,
-                    DeviceId = Device.UId
-                };
-                _contextP.ComObjects.Add(com);
-            }
-
-            Device.ComObjects.Sort(s => s.Number);
-            _contextP.SaveChanges();
-
-            await Task.Delay(1);
-        }
 
         private void ShowComsToggler_Toggled(object sender, RoutedEventArgs e)
         {

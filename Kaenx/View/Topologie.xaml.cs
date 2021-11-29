@@ -62,9 +62,6 @@ namespace Kaenx.View
             if (diag.NewName != null)
             {
                 item.Name = diag.NewName;
-
-                //TODO replace for only single save
-                SaveHelper.SaveProject();
             }
         }
 
@@ -84,20 +81,21 @@ namespace Kaenx.View
 
         private void ClickReadConfig(object sender, RoutedEventArgs e)
         {
-            DeviceConfig action = new DeviceConfig();
-            action.Device = (LineDevice)((MenuFlyoutItem)e.OriginalSource).DataContext;
-            action.Finished += (action, obj) =>
-            {
-                if(obj is Kaenx.Classes.Bus.Data.ErrorData)
-                {
-                    ViewHelper.Instance.ShowNotification("main", "Konfig auslesen Fehler: " + Environment.NewLine + (obj as ErrorData).Additional, 5000, Microsoft.UI.Xaml.Controls.InfoBarSeverity.Error);
-                }
-                else
-                {
-                    ViewHelper.Instance.ShowNotification("main", "Konfig auslesen Erfolgreich", 3000, Microsoft.UI.Xaml.Controls.InfoBarSeverity.Success);
-                }
-            };
-            BusConnection.Instance.AddAction(action);
+            throw new NotImplementedException("Ist rausgeflogen");
+            //DeviceConfig action = new DeviceConfig();
+            //action.Device = (LineDevice)((MenuFlyoutItem)e.OriginalSource).DataContext;
+            //action.Finished += (action, obj) =>
+            //{
+            //    if(obj is Kaenx.Classes.Bus.Data.ErrorData)
+            //    {
+            //        ViewHelper.Instance.ShowNotification("main", "Konfig auslesen Fehler: " + Environment.NewLine + (obj as ErrorData).Additional, 5000, Microsoft.UI.Xaml.Controls.InfoBarSeverity.Error);
+            //    }
+            //    else
+            //    {
+            //        ViewHelper.Instance.ShowNotification("main", "Konfig auslesen Erfolgreich", 3000, Microsoft.UI.Xaml.Controls.InfoBarSeverity.Success);
+            //    }
+            //};
+            //BusConnection.Instance.AddAction(action);
         }
 
         private void ClickReadSerial(object sender, RoutedEventArgs e)
@@ -131,7 +129,6 @@ namespace Kaenx.View
                 if (Window.Current.CoreWindow.GetKeyState(VirtualKey.Shift).HasFlag(CoreVirtualKeyStates.Down))
                 {
                     LineMiddle newLine = new LineMiddle(getFirstFreeIdSub(line), loader.GetString("NewLineMiddle"), line);
-                    SaveHelper.SaveLine(newLine);
                     line.Subs.Add(newLine);
                     return;
                 }
@@ -144,7 +141,6 @@ namespace Kaenx.View
                 if (Window.Current.CoreWindow.GetKeyState(VirtualKey.Shift).HasFlag(CoreVirtualKeyStates.Down))
                 {
                     Line newLine = new Line(getFirstFreeIdMain(), loader.GetString("NewLineMain"));
-                    SaveHelper.SaveLine(newLine);
                     SaveHelper._project.Lines.Add(newLine);
                     return;
                 }
@@ -152,6 +148,7 @@ namespace Kaenx.View
 
             await diag.ShowAsync();
 
+            //TODO maybe implement addrange
             foreach (TopologieBase tbase in diag.AddedLines)
             {
                 if (tbase is Line)
@@ -159,7 +156,6 @@ namespace Kaenx.View
                     Line line = tbase as Line;
                     if (line.Id == 0) continue;
 
-                    SaveHelper.SaveLine(line);
                     SaveHelper._project.Lines.Add(line);
                 }
                 else if (tbase is LineMiddle)
@@ -167,7 +163,6 @@ namespace Kaenx.View
                     LineMiddle line = tbase as LineMiddle;
                     Line parent = SaveHelper._project.Lines.Single(l => l == line.Parent);
                     parent.Subs.Add(line);
-                    SaveHelper.SaveLine(line);
                 }
             }
 
@@ -208,7 +203,6 @@ namespace Kaenx.View
                 else
                 {
                     lineToAdd = new LineMiddle(0, "Backbone", line);
-                    SaveHelper.SaveLine(lineToAdd);
                     line.Subs.Insert(0, lineToAdd);
                 }
             }
@@ -230,48 +224,65 @@ namespace Kaenx.View
             switch (item)
             {
                 case Line line:
-                    ObservableCollection<Line> coll = (ObservableCollection<Line>)this.DataContext;
-                    coll.Remove(line);
 
                     foreach(LineMiddle linem2 in line.Subs)
+                    {
                         foreach (LineDevice ldev in linem2.Subs)
+                        {
                             foreach (DeviceComObject com in ldev.ComObjects)
+                            {
                                 foreach (Kaenx.Classes.Buildings.FunctionGroup fg in com.Groups)
+                                {
                                     fg.ComObjects.Remove(com);
-
+                                }
+                            }
+                            ldev.ComObjects.Clear();
+                        }
+                        linem2.Subs.Clear();
+                    }
+                    line.Subs.Clear();
+                    ObservableCollection<Line> coll = (ObservableCollection<Line>)this.DataContext;
+                    coll.Remove(line);
                     break;
 
                 case LineMiddle linem:
-                    linem.Parent.Subs.Remove(linem);
-
                     foreach(LineDevice ldev in linem.Subs)
+                    {
                         foreach (DeviceComObject com in ldev.ComObjects)
+                        {
                             foreach (Kaenx.Classes.Buildings.FunctionGroup fg in com.Groups)
                                 fg.ComObjects.Remove(com);
+                            com.Groups.Clear();
+                        }
+                        ldev.ComObjects.Clear();
+                    }
+                    linem.Subs.Clear();
+                        
 
+                    linem.Parent.Subs.Remove(linem);
                     break;
 
                 case LineDevice dev:
-                    dev.Parent.Subs.Remove(dev);
 
                     foreach(DeviceComObject com in dev.ComObjects)
-                        foreach(Kaenx.Classes.Buildings.FunctionGroup fg in com.Groups)
+                    {
+                        foreach (Kaenx.Classes.Buildings.FunctionGroup fg in com.Groups)
                             fg.ComObjects.Remove(com);
+                        com.Groups.Clear();
+                    }
+                    dev.ComObjects.Clear();
+                        
 
                     //TODO delete coms in database and changesParam!
 
+                    dev.Parent.Subs.Remove(dev);
                     SaveHelper.CalculateLineCurrent(dev.Parent);
                     break;
             }
 
-            //TODO nicht das ganze Project speichern.
-
-            SaveHelper.SaveProject();
             CalcCounts();
         }
 
-
-        List<(UIElement ui, int id)> ParamStack = new List<(UIElement ui, int id)>();
 
         private void ClickOpenParas(object sender, RoutedEventArgs e)
         {
@@ -296,7 +307,7 @@ namespace Kaenx.View
 
         private async Task AddDeviceToLine(DeviceViewModel model, LineMiddle line)
         {
-            LineDevice device = new LineDevice(model, line, true);
+            LineDevice device = new LineDevice(model, line);
             device.DeviceId = model.Id;
 
             if (model.IsCoupler)
@@ -359,37 +370,32 @@ namespace Kaenx.View
                 }
             }
 
-            ProjectContext _contextP = new ProjectContext(SaveHelper.connProject);
-
-            LineDeviceModel linedevmodel = new LineDeviceModel();
-            linedevmodel.Id = device.Id;
-            linedevmodel.ParentId = line.UId;
-            linedevmodel.Name = device.Name;
-            linedevmodel.ApplicationId = device.ApplicationId;
-            linedevmodel.DeviceId = device.DeviceId;
-            linedevmodel.ProjectId = SaveHelper._project.Id;
-            _contextP.LineDevices.Add(linedevmodel);
-            _contextP.SaveChanges();
-            device.UId = linedevmodel.UId;
+            ProjectContext _contextP = new ProjectContext(SaveHelper._project.Connection);
 
             line.Subs.Add(device);
             line.Subs.Sort(l => l.Id);
             line.IsExpanded = true;
 
 
-            if (_context.AppAdditionals.Any(a => a.Id == device.ApplicationId))
+            if (_context.AppAdditionals.Any(a => a.ApplicationId == device.ApplicationId))
             {
-                AppAdditional adds = _context.AppAdditionals.Single(a => a.Id == device.ApplicationId);
-                device.ComObjects = SaveHelper.ByteArrayToObject<ObservableCollection<DeviceComObject>>(adds.ComsDefault);
-                foreach (DeviceComObject com in device.ComObjects)
-                    com.DisplayName = com.Name;
+                AppAdditional adds = _context.AppAdditionals.Single(a => a.ApplicationId == device.ApplicationId);
+                string[] comNumbers = System.Text.Encoding.UTF8.GetString(adds.ComsDefault).Split(",");
+
+                List<DeviceComObject> comsToAdd = new List<DeviceComObject>();
+                foreach(string comNumber in comNumbers)
+                {
+                    int number = int.Parse(comNumber);
+                    AppComObject appComObject = _context.AppComObjects.Single(c => c.UId == number);
+                    DeviceComObject deviceComObject = new DeviceComObject(appComObject);
+                    comsToAdd.Add(deviceComObject);
+                }
+                device.ComObjects.AddRange(comsToAdd);
             }
             else
             {
-                device.ComObjects = new ObservableCollection<DeviceComObject>();
+                device.ComObjects = new ObservableRangeCollection<DeviceComObject>();
             }
-
-            device.IsInit = false;
         }
 
         private void ClickRestart(object sender, RoutedEventArgs e)
@@ -600,7 +606,6 @@ namespace Kaenx.View
             {
                 item.Name = diag.NewName;
             }
-            SaveHelper.SaveProject();
         }
 
         private string InNumber_PreviewChanged(NumberBox sender, int Value)

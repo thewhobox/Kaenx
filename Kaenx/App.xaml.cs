@@ -142,11 +142,12 @@ namespace Kaenx
                     
                     if (rootFrame.Content == null || rootFrame.Content is View.MainPage)
                     {
-                        Navigate(typeof(View.Catalog), file);
+                        Navigate(typeof(View.Import), file);
                     }
-                    else if (rootFrame.Content is View.Catalog)
+                    else if (rootFrame.Content is View.Import)
                     {
-                        ((View.Catalog)rootFrame.Content).PrepareImport(file);
+                        //TODO fix this
+                        //((View.Catalog)rootFrame.Content).PrepareImport(file);
                     }
                     Log.Information("Frame Content: " + rootFrame.Content.GetType().FullName);
                     break;
@@ -174,6 +175,7 @@ namespace Kaenx
         {
             StorageFolder localState = await ApplicationData.Current.LocalFolder.CreateFolderAsync("Logs", CreationCollisionOption.OpenIfExists);
 
+            //TODO make setting to change level
             Log.Logger = new LoggerConfiguration()
                 .MinimumLevel.Debug()
                 .WriteTo.File(Path.Combine(localState.Path, "log-.txt"), rollingInterval: RollingInterval.Day)

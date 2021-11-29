@@ -4,6 +4,7 @@ using Kaenx.DataContext.Project;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Linq;
 using System.Text;
@@ -16,10 +17,10 @@ namespace Kaenx.Classes.Project
 {
     public class LineDevice : INotifyPropertyChanged, TopologieBase
     {
-        public bool IsInit = false;
+        public event NotifyCollectionChangedEventHandler ComObjectsChanged;
 
         private string _name;
-        private ObservableCollection<DeviceComObject> _comObjects = new ObservableCollection<DeviceComObject>();
+        private ObservableRangeCollection<DeviceComObject> _comObjects = new ObservableRangeCollection<DeviceComObject>();
 
         private int _id;
         private bool _loadedGroups = false;
@@ -32,8 +33,7 @@ namespace Kaenx.Classes.Project
             set {
                 if (_loadedGroups == value) return;
                 _loadedGroups = value; 
-                Changed("LoadedGroup"); 
-                if(!IsInit) SaveHelper.UpdateDevice(this); 
+                Changed("LoadedGroup");
             } 
         }
         public bool LoadedApplication { 
@@ -41,8 +41,7 @@ namespace Kaenx.Classes.Project
             set { 
                 if (_loadedApplication == value) return; 
                 _loadedApplication = value; 
-                Changed("LoadedApplication"); 
-                if (!IsInit) SaveHelper.UpdateDevice(this); 
+                Changed("LoadedApplication");
             } 
         }
         public bool LoadedPA { 
@@ -50,8 +49,7 @@ namespace Kaenx.Classes.Project
             set {
                 if (_loadedPA == value) return;
                 _loadedPA = value; 
-                Changed("LoadedPA"); 
-                if (!IsInit) SaveHelper.UpdateDevice(this); 
+                Changed("LoadedPA");
             } 
         }
         public bool IsDeactivated { 
@@ -60,7 +58,6 @@ namespace Kaenx.Classes.Project
                 if (_isDeactivated == value) return;
                 _isDeactivated = value;
                 Changed("IsDeactivated");
-                if (!IsInit) SaveHelper.UpdateDevice(this); 
             }
         }
         public int LastGroupCount
@@ -70,7 +67,6 @@ namespace Kaenx.Classes.Project
             {
                 _lastGroupCount = value;
                 Changed("LastGroupCount");
-                if (!IsInit) SaveHelper.UpdateDevice(this);
             }
         }
         public bool IsExpanded { get { return false; } }
@@ -94,15 +90,15 @@ namespace Kaenx.Classes.Project
                 Changed("LineName");
                 LoadedPA = false;
                 Parent?.Subs.Sort(x => x.Id);
-                if (!IsInit) SaveHelper.UpdateDevice(this);
+                Parent?.Changed("Subs");
             }
         }
         //TODO speichern ändern! Nicht immer das ganze Projekt!
 
-        public ObservableCollection<DeviceComObject> ComObjects
+        public ObservableRangeCollection<DeviceComObject> ComObjects
         {
             get { return _comObjects; }
-            set { _comObjects = value; Changed("ComObjects"); SaveHelper.SaveAssociations(this); }
+            set { _comObjects = value; Changed("ComObjects"); }
         }
         public int UId { get; set; }
         [XmlIgnore]
@@ -114,7 +110,6 @@ namespace Kaenx.Classes.Project
                 if (_name == value) return;
                 _name = value; 
                 Changed("Name"); 
-                if (!IsInit) SaveHelper.UpdateDevice(this); 
             }
         }
         [XmlIgnore]
@@ -132,14 +127,22 @@ namespace Kaenx.Classes.Project
         public int DeviceId { get; set; }
         public int ApplicationId { get; set; }
 
-        public LineDevice(bool isInit = false) => IsInit = isInit;
-
-        public LineDevice(DataContext.Catalog.DeviceViewModel model, LineMiddle parent, bool isInit = false)
+        public LineDevice()
         {
-            IsInit = isInit;
+            ComObjects.CollectionChanged += ComObjects_CollectionChanged;
+        }
+
+        public LineDevice(DataContext.Catalog.DeviceViewModel model, LineMiddle parent)
+        {
             Name = model.Name;
             Parent = parent;
             Parent.PropertyChanged += Parent_PropertyChanged;
+            ComObjects.CollectionChanged += ComObjects_CollectionChanged;
+        }
+
+        private void ComObjects_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
+        {
+            ComObjectsChanged?.Invoke(this, e);
         }
 
         private void Parent_PropertyChanged(object sender, PropertyChangedEventArgs e)
@@ -148,9 +151,8 @@ namespace Kaenx.Classes.Project
                 Changed("LineName");
         }
 
-        public LineDevice(LineDeviceModel model, LineMiddle line, bool isInit = false)
+        public LineDevice(LineDeviceModel model, LineMiddle line)
         {
-            IsInit = isInit;
             Id = model.Id;
             UId = model.UId;
             Name = model.Name;
@@ -163,6 +165,7 @@ namespace Kaenx.Classes.Project
             LoadedPA = model.LoadedPA;
 
             Parent.PropertyChanged += Parent_PropertyChanged;
+            ComObjects.CollectionChanged += ComObjects_CollectionChanged;
         }
 
         public void ChangedComs()

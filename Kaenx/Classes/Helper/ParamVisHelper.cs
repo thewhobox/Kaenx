@@ -1,4 +1,5 @@
 ﻿using Kaenx.DataContext.Catalog;
+using Kaenx.DataContext.Import.Dynamic;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,7 +12,7 @@ namespace Kaenx.Classes.Helper
     {
         public string ParameterId { get; set; }
         public string Hash { get; set; }
-        public List<Dynamic.ParamCondition> Conditions { get; set; }
+        public List<ParamCondition> Conditions { get; set; }
 
         public ParamVisHelper() { }
 

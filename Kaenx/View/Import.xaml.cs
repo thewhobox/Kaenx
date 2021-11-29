@@ -1,24 +1,26 @@
-﻿using Kaenx.Classes;
-using Kaenx.Classes.Helper;
-using Kaenx.DataContext.Catalog;
-using Kaenx.MVVM;
-using Microsoft.AppCenter.Analytics;
-using Serilog;
+﻿using Kaenx.DataContext.Catalog;
+using Kaenx.DataContext.Import;
+using Kaenx.DataContext.Import.Manager;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.ComponentModel;
+using System.Diagnostics;
 using System.IO;
-using System.IO.Compression;
 using System.Linq;
+using System.Runtime.InteropServices.WindowsRuntime;
+using System.Threading;
 using System.Threading.Tasks;
-using System.Xml;
-using System.Xml.Linq;
-using Windows.ApplicationModel.Resources;
+using Windows.Foundation;
+using Windows.Foundation.Collections;
 using Windows.Storage;
+using Windows.Storage.Pickers;
 using Windows.UI.Core;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
+using Windows.UI.Xaml.Controls.Primitives;
+using Windows.UI.Xaml.Data;
+using Windows.UI.Xaml.Input;
+using Windows.UI.Xaml.Media;
 using Windows.UI.Xaml.Navigation;
 
 // Die Elementvorlage "Leere Seite" wird unter https://go.microsoft.com/fwlink/?LinkId=234238 dokumentiert.
@@ -28,53 +30,37 @@ namespace Kaenx.View
     /// <summary>
     /// Eine leere Seite, die eigenständig verwendet oder zu der innerhalb eines Rahmens navigiert werden kann.
     /// </summary>
-    public sealed partial class Import : Page, INotifyPropertyChanged
+    public sealed partial class Import : Page
     {
-        public ImportDevices Imports { get; set; }
-        ResourceLoader resourceLoader = ResourceLoader.GetForCurrentView("Import");
+        public ObservableCollection<ImportDevice> ImportList { get; set; } = new ObservableCollection<ImportDevice>();
 
-        private string _importState = "Starte...";
-        public string ImportState
-        {
-            get { return _importState; }
-            set { _importState = value; Update("ImportState"); }
-        }
-
-        private string _importDevice = "";
-        public string ImportDevice
-        {
-            get { return _importDevice; }
-            set { _importDevice = value; Update("ImportDevice"); }
-        }
-
-        public ObservableCollection<string> ImportError { get; set; } = new ObservableCollection<string>();
-        public ObservableCollection<string> ImportWarning { get; set; } = new ObservableCollection<string>();
-
-        private ObservableCollection<DeviceImportInfo> _devicesList = new ObservableCollection<DeviceImportInfo>();
-        public ObservableCollection<DeviceImportInfo> DevicesList
-        {
-            get { return _devicesList; }
-            set { _devicesList = value; Update("DevicesList"); }
-        }
-
-        private ImportHelper Helper = new ImportHelper();
+        private IManager manager;
+        private CancellationTokenSource source;
+        private bool isImporting = false;
+        private bool navigatedFromMain = true;
+        private ImportDevice currentDevice;
 
         public Import()
         {
             this.InitializeComponent();
-            this.DataContext = this;
+            DataContext = this;
+        }
 
-            Helper.ProgressMaxChanged += Helper_ProgressMaxChanged;
-            Helper.ProgressChanged += Helper_ProgressChanged;
-            Helper.ProgressAppChanged += Helper_ProgressAppChanged;
-            Helper.ProgressAppMaxChanged += Helper_ProgressAppMaxChanged;
-            Helper.OnDeviceChanged += Helper_OnDeviceChanged;
-            Helper.OnError += Helper_OnError;
-            Helper.OnWarning += Helper_OnWarning;
-            Helper.OnStateChanged += Helper_OnStateChanged;
+        protected override void OnNavigatedTo(NavigationEventArgs e)
+        {
+            base.OnNavigatedTo(e);
+
+            if(e.Parameter is StorageFile)
+            {
+                CopyFile(e.Parameter as StorageFile);
+            } else if(e.Parameter is bool)
+            {
+                navigatedFromMain = (bool)e.Parameter;
+                GetFile(null, null);
+            }
 
             var currentView = SystemNavigationManager.GetForCurrentView();
-            currentView.AppViewBackButtonVisibility = AppViewBackButtonVisibility.Collapsed;
+            currentView.BackRequested += CurrentView_BackRequested;
         }
 
         private void CurrentView_BackRequested(object sender, BackRequestedEventArgs e)
@@ -82,189 +68,116 @@ namespace Kaenx.View
             if (e.Handled) return;
             e.Handled = true;
 
-            if (BtnBack.IsEnabled)
+            if (!isImporting)
             {
                 var currentView = SystemNavigationManager.GetForCurrentView();
                 currentView.BackRequested -= CurrentView_BackRequested;
-                ((Frame)this.Parent).Navigate(typeof(Catalog), Imports.wasFromMain ? "main" : null);
+                ((Frame)this.Parent).Navigate(typeof(Catalog), navigatedFromMain ? "main" : null);
             }
         }
 
-        private void Helper_OnWarning(string value)
+        private async void CopyFile(StorageFile file)
         {
-            _ = App._dispatcher.RunAsync(CoreDispatcherPriority.Normal, () => ImportWarning.Add(value));
-        }
-
-        private void Helper_ProgressChanged(int count)
-        {
-            _= App._dispatcher.RunAsync(CoreDispatcherPriority.Normal, () =>
+            try
             {
-                ProgressMain.IsIndeterminate = false;
-                ProgressMain.Value = count;
-            });
-        }
-
-        private void Helper_ProgressMaxChanged(int count)
-        {
-            _ = App._dispatcher.RunAsync(CoreDispatcherPriority.Normal, () =>
+                await file.CopyAsync(ApplicationData.Current.TemporaryFolder, file.Name, NameCollisionOption.ReplaceExisting);
+            }
+            catch (Exception ex)
             {
-                ProgressMain.IsIndeterminate = false;
-                ProgressMain.Maximum = count;
-            });
+                Serilog.Log.Error(ex, "Fehler beim Kopieren der KNX-Prod Datei");
+                return;
+            }
+            string path = Path.Combine(ApplicationData.Current.TemporaryFolder.Path, file.Name);
+            OpenFile(path);
         }
 
-        #region Helper Events
-        private void Helper_OnDeviceChanged(string value)
+        private void OpenFile(string file)
         {
-            _ = App._dispatcher.RunAsync(CoreDispatcherPriority.Normal, () => ImportDevice = value);
-        }
-
-        private void Helper_OnStateChanged(string value)
-        {
-            _ = App._dispatcher.RunAsync(CoreDispatcherPriority.Normal, () => ImportState = value);
-        }
-
-        private int itStep = 0;
-        private int itLast = 0;
-
-        private void Helper_ProgressAppMaxChanged(int count)
-        {
-            _ = App._dispatcher.RunAsync(CoreDispatcherPriority.Normal, () =>
+            manager = ImportManager.GetImportManager(file);
+            manager.Begin();
+            manager.DeviceChanged += Manager_DeviceChanged;
+            manager.StateChanged += Manager_StateChanged;
+            var x = manager.GetDeviceList();
+            ImportList.Clear();
+            foreach (ImportDevice dev in x)
             {
-                ProgressApp.Maximum = count;
-                ProgressApp.Value = 0;
-                itStep = count / 60;
-                itLast = 0;
-            });
-        }
-
-        private void Helper_ProgressAppChanged(int count)
-        {
-            if(count > itLast)
-            {
-                itLast += itStep;
-                _ = App._dispatcher.RunAsync(CoreDispatcherPriority.Normal, () => ProgressApp.Value = count);
+                ImportList.Add(dev);
             }
         }
 
-        private void Helper_OnError(string Error)
+        private void Manager_DeviceChanged(string newName)
         {
-            _ = App._dispatcher.RunAsync(CoreDispatcherPriority.Normal, () => ImportError.Add(Error));
+            Serilog.Log.Debug($"Neues Gerät: {newName}");
         }
 
-        protected override void OnNavigatedTo(NavigationEventArgs e)
+        private void Manager_StateChanged(string newName)
         {
-            base.OnNavigatedTo(e);
-            Imports = (ImportDevices)e.Parameter;
-
-            StartImport();
-
-            var currentView = SystemNavigationManager.GetForCurrentView();
-            currentView.BackRequested += CurrentView_BackRequested;
-        }
-
-        protected override void OnNavigatedFrom(NavigationEventArgs e)
-        {
-            base.OnNavigatedFrom(e);
-            var currentView = SystemNavigationManager.GetForCurrentView();
-            currentView.BackRequested -= CurrentView_BackRequested;
-        }
-        #endregion
-
-
-
-        private async void StartImport()
-        {
-            Log.Information("------------Import wurde gestartet------------");
-            Log.Information("Sprache: " + Imports.SelectedLanguage);
-            ImportState = resourceLoader.GetString("StateProj");
-            IEnumerable<Kaenx.Classes.Device> devices = from dev in Imports.DeviceList where dev.SlideSettings.IsSelected == true select dev;
-
-            foreach (Kaenx.Classes.Device device in devices)
+            _=Dispatcher.RunAsync(CoreDispatcherPriority.Low, () =>
             {
-                DevicesList.Add(new DeviceImportInfo()
+                currentDevice.Action = newName;
+            });
+            Debug.WriteLine(newName);
+            Serilog.Log.Debug($"Aktion: {newName}");
+        }
+
+        private async void GetFile(object sender, RoutedEventArgs e)
+        {
+            FileOpenPicker picker = new FileOpenPicker();
+            picker.FileTypeFilter.Add(".knxprod");
+            picker.FileTypeFilter.Add(".xml");
+            StorageFile file = await picker.PickSingleFileAsync();
+            if (file == null) return;
+            try
+            {
+                await file.CopyAsync(ApplicationData.Current.TemporaryFolder, file.Name, NameCollisionOption.ReplaceExisting);
+            }
+            catch (Exception ex)
+            {
+                Serilog.Log.Error(ex, "Fehler beim Kopieren der KNX-Prod Datei");
+                return;
+            }
+            string path = Path.Combine(ApplicationData.Current.TemporaryFolder.Path, file.Name);
+
+            OpenFile(path);
+        }
+
+        private async void Click_Start(object sender, RoutedEventArgs e)
+        {
+            //List.IsEnabled = false;
+            List.SelectedItem = null;
+            List.SelectionMode = ListViewSelectionMode.None;
+
+
+            using (CatalogContext context = new CatalogContext())
+            {
+                foreach (ImportDevice dev in ImportList)
                 {
-                    Id = device.Id,
-                    Name = device.Name,
-                    Description = device.VisibleDescription
-                });
-            }
+                    currentDevice = dev;
+                    dev.State = ImportState.Importing;
+                    try
+                    {
 
-            ProgressMain.IsIndeterminate = true;
+                        await Task.Run(() =>
+                        {
+                            manager.StartImport(dev, context);
+                        });
+                        dev.State = ImportState.Finished;
+                    }
+                    catch (Exception ex)
+                    {
+                        Serilog.Log.Error(ex, "Fehler beim Importieren");
+                        dev.State = ImportState.Error;
+                        dev.Action = ex.Message;
 
-            Helper.Imports = Imports;
-
-
-
-            //Vom Internet holen: https://update.knx.org/data/XML/project-11/knx_master.xml
-
-            bool fin = false;
-            await Task.Run(async () =>
-            {
-                try
-                {
-                    await Helper.StartImport(DevicesList);
+                        if(ex.InnerException != null)
+                        {
+                            dev.Action += " - " + ex.InnerException.Message;
+                            Serilog.Log.Error(ex.InnerException, "Fehler beim Importieren");
+                        }
+                    }
+                    
                 }
-                catch
-                {
-
-                }
-            });
-
-            BtnBack.IsEnabled = true;
-            ViewDevicesList.SelectedItem = null;
-            Analytics.TrackEvent("Gerät(e) importiert");
-
-
-            var currentView = SystemNavigationManager.GetForCurrentView();
-            currentView.AppViewBackButtonVisibility = AppViewBackButtonVisibility.Visible;
-            return;
-
-
-            ImportState = resourceLoader.GetString("StateCheck");
-            await Task.Delay(1000);
-            List<DeviceViewModel> AddedDevices = await Helper.CheckDevices();
-
-            if (AddedDevices.Count > 0)
-            {
-                Log.Information("Es wurden " + AddedDevices.Count + " Geräte hinzugefügt");
-                await Task.Delay(1000);
-                string addedString = "";
-                foreach (DeviceViewModel device in AddedDevices)
-                {
-                    addedString += device.Name + " " + device.Id + Environment.NewLine;
-                }
-                ImportError.Add(addedString);
             }
-
-        }
-
-
-        private async void ShowError(string msg)
-        {
-            ImportState = "Es trat ein Fehler auf!";
-            ImportDevice = msg;
-            BtnBack.IsEnabled = true;
-
-            Imports.Archive.Dispose();
-            StorageFile file = await ApplicationData.Current.TemporaryFolder.GetFileAsync("temp.knxprod");
-            await file.DeleteAsync();
-        }
-
-
-
-        public event PropertyChangedEventHandler PropertyChanged;
-        private void Update(string name)
-        {
-            _ = App._dispatcher.RunAsync(CoreDispatcherPriority.Normal, () =>
-             {
-                 PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
-             });
-        }
-
-        private void ClickBack(object sender, RoutedEventArgs e)
-        {
-            ((Frame)this.Parent).Navigate(typeof(Catalog), Imports.wasFromMain ? "main" : null);
         }
     }
 }

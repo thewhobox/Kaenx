@@ -18,5 +18,15 @@ namespace Kaenx.Classes
             foreach (var sortedItem in sorted)
                 collection.Add(sortedItem);
         }
+
+        public static void Sort<TSource, TKey>(this ObservableRangeCollection<TSource> collection, Func<TSource, TKey> keySelector)
+        {
+            List<TSource> sorted = collection.OrderBy(keySelector).ToList();
+            //for (int i = 0; i < sorted.Count(); i++)
+            //    collection.Move(collection.IndexOf(sorted[i]), i);
+            collection.Clear();
+            foreach (var sortedItem in sorted)
+                collection.SilentAdd(sortedItem);
+        }
     }
 }

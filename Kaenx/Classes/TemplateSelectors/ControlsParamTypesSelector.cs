@@ -1,4 +1,4 @@
-﻿using Kaenx.Classes.Dynamic;
+﻿using Kaenx.DataContext.Import.Dynamic;
 using System;
 using System.Collections.Generic;
 using System.Linq;

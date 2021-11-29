@@ -3,14 +3,13 @@
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:local="using:Kaenx.View.Controls"
-    xmlns:dyn="using:Kaenx.Classes.Dynamic"
+    xmlns:dyn="using:Kaenx.DataContext.Import.Dynamic"
     xmlns:toolkit="using:Microsoft.Toolkit.Uwp.UI.Controls"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:selectors="using:Kaenx.Classes.TemplateSelectors"
     xmlns:converter="using:Kaenx.Classes.Converter"
     xmlns:conv="using:Microsoft.Toolkit.Uwp.UI.Converters"
-    xmlns:ext="using:Microsoft.Toolkit.Uwp.UI.Extensions"
     xmlns:params="using:Kaenx.View.Controls.Parameter"
     mc:Ignorable="d"
     x:Name="ParaControl"
@@ -26,7 +25,7 @@
         <SolidColorBrush x:Key="SystemControlHighlightListAccentLowBrush" Color="{Binding Source={ThemeResource BrushAccentColor2}, Path=Color}" />
         
         <DataTemplate x:Key="ChannelTemplate">
-            <toolkit:Expander Header="{Binding DisplayText}" BorderBrush="{ThemeResource BrushAccentColor2}" BorderThickness="0 1" Visibility="{Binding Visible}" HorizontalContentAlignment="Stretch">
+            <toolkit:Expander Header="{Binding Text}" BorderBrush="{ThemeResource BrushAccentColor2}" BorderThickness="0 1" Visibility="{Binding IsVisible, Converter={StaticResource ConvertBoolToVisible}}" HorizontalContentAlignment="Stretch">
                 <ListView ItemsSource="{Binding Blocks}" SelectedItem="{Binding SelectedParaBlock, ElementName=ParaControl, Mode=TwoWay}" SelectedValue="{Binding SelectedParaBlockId, ElementName=ParaControl, Mode=TwoWay}" SelectedValuePath="Id" HorizontalAlignment="Stretch" >
                     <ListView.ItemContainerStyle>
                         <Style TargetType="ListViewItem">
@@ -39,7 +38,7 @@
                     <ListView.ItemTemplate>
                         <DataTemplate x:DataType="dyn:ParameterBlock">
                             <Border Height="40" Visibility="{Binding Visible}" >
-                                <TextBlock Text="{Binding DisplayText}" VerticalAlignment="Center" Margin="40 0 10 0" />
+                                <TextBlock Text="{Binding Text}" VerticalAlignment="Center" Margin="40 0 10 0" />
                             </Border>
                         </DataTemplate>
                     </ListView.ItemTemplate>
@@ -59,7 +58,7 @@
                 <ListView.ItemTemplate>
                     <DataTemplate x:DataType="dyn:ParameterBlock">
                         <Border Height="40" Visibility="{Binding Visible}" >
-                            <TextBlock Text="{Binding DisplayText}" VerticalAlignment="Center" Margin="40 0 10 0" />
+                            <TextBlock Text="{Binding Text}" VerticalAlignment="Center" Margin="40 0 10 0" />
                         </Border>
                     </DataTemplate>
                 </ListView.ItemTemplate>
@@ -70,11 +69,13 @@
                 <Run Text="Type nicht gefunden..." />
                 <LineBreak />
                 <Run Text="{Binding Id}" />
+                <LineBreak />
+                <Run Text="{Binding Text}" />
             </TextBlock>
         </DataTemplate>
 
         <DataTemplate x:Key="TypeNumber">
-            <Grid Visibility="{Binding Visible}" Margin="0 5">
+            <Grid Visibility="{Binding IsVisible, Converter={StaticResource ConvertBoolToVisible}}" Margin="0 5">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition MaxWidth="550" Width="9*" />
                     <ColumnDefinition MinWidth="230" MaxWidth="350" Width="3*" />
@@ -87,7 +88,7 @@
             </Grid>
         </DataTemplate>
         <DataTemplate x:Key="TypeTime">
-            <Grid Visibility="{Binding Visible}" Margin="0 5">
+            <Grid Visibility="{Binding IsVisible, Converter={StaticResource ConvertBoolToVisible}}" Margin="0 5">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition MaxWidth="550" Width="9*" />
                     <ColumnDefinition MinWidth="230" MaxWidth="350" Width="3*" />
@@ -100,7 +101,7 @@
             </Grid>
         </DataTemplate>
         <DataTemplate x:Key="TypeText">
-            <Grid Visibility="{Binding Visible}" Margin="0 5">
+            <Grid Visibility="{Binding IsVisible, Converter={StaticResource ConvertBoolToVisible}}" Margin="0 5">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition MaxWidth="550" Width="9*" />
                     <ColumnDefinition MinWidth="230" MaxWidth="350" Width="3*" />
@@ -112,12 +113,12 @@
             </Grid>
         </DataTemplate>
         <DataTemplate x:Key="TypeNone">
-            <Grid Visibility="{Binding Visible}" Margin="0 5">
+            <Grid Visibility="{Binding IsVisible, Converter={StaticResource ConvertBoolToVisible}}" Margin="0 5">
                 <TextBlock Text="{Binding Text}" Foreground="Gray" Margin="10 0" VerticalAlignment="Center" TextWrapping="WrapWholeWords" />
             </Grid>
         </DataTemplate>
         <DataTemplate x:Key="TypeTextRead">
-            <Grid Visibility="{Binding Visible}" Margin="0 5">
+            <Grid Visibility="{Binding IsVisible, Converter={StaticResource ConvertBoolToVisible}}" Margin="0 5">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition MaxWidth="550" Width="9*" />
                     <ColumnDefinition MinWidth="230" MaxWidth="350" Width="3*" />
@@ -129,7 +130,7 @@
             </Grid>
         </DataTemplate>
         <DataTemplate x:Key="TypeEnums">
-            <Grid Visibility="{Binding Visible}" Margin="0 5">
+            <Grid Visibility="{Binding IsVisible, Converter={StaticResource ConvertBoolToVisible}}" Margin="0 5">
                 <Grid.RowDefinitions>
                     <RowDefinition />
                     <RowDefinition />
@@ -145,7 +146,7 @@
             </Grid>
         </DataTemplate>
         <DataTemplate x:Key="TypeEnumsTwo" x:DataType="dyn:ParamEnumTwo">
-            <Grid Visibility="{Binding Visible}" Margin="0 5" x:Name="test">
+            <Grid Visibility="{Binding IsVisible, Converter={StaticResource ConvertBoolToVisible}}" Margin="0 5" x:Name="test">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition MaxWidth="550" Width="9*" />
                     <ColumnDefinition MinWidth="230" MaxWidth="350" Width="3*" />
@@ -161,7 +162,7 @@
             </Grid>
         </DataTemplate>
         <DataTemplate x:Key="TypeCheckBox">
-            <Grid Visibility="{Binding Visible}" Margin="0 5" >
+            <Grid Visibility="{Binding IsVisible, Converter={StaticResource ConvertBoolToVisible}}" Margin="0 5" >
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition MaxWidth="550" Width="9*" />
                     <ColumnDefinition MinWidth="230" MaxWidth="350" Width="3*" />
@@ -174,7 +175,7 @@
             </Grid>
         </DataTemplate>
         <DataTemplate x:Key="TypeSeperator">
-            <Grid Visibility="{Binding Visible}" Margin="0 5">
+            <Grid Visibility="{Binding IsVisible, Converter={StaticResource ConvertBoolToVisible}}" Margin="0 5">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition MaxWidth="550" Width="9*" />
                     <ColumnDefinition MinWidth="230" MaxWidth="350" Width="3*" />
@@ -187,7 +188,7 @@
             </Grid>
         </DataTemplate>
         <DataTemplate x:Key="TypeSeperatorBox">
-            <Border Visibility="{Binding Visible}" Margin="0 5" Padding="10" BorderThickness="1" BorderBrush="{Binding IsError, Converter={StaticResource ConvertBoolToBrush}}">
+            <Border Visibility="{Binding IsVisible, Converter={StaticResource ConvertBoolToVisible}}" Margin="0 5" Padding="10" BorderThickness="1" BorderBrush="{Binding IsError, Converter={StaticResource ConvertBoolToBrush}}">
                 <Border.Background>
                     <SolidColorBrush Color="{Binding IsError, Converter={StaticResource ConvertBoolToBrush}}" Opacity="0.2" />
                 </Border.Background>
@@ -203,7 +204,7 @@
             </Border>
         </DataTemplate>
         <DataTemplate x:Key="TypeColor">
-            <Grid Visibility="{Binding Visible}" Margin="0 5">
+            <Grid Visibility="{Binding IsVisible, Converter={StaticResource ConvertBoolToVisible}}" Margin="0 5">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition MaxWidth="550" Width="9*" />
                     <ColumnDefinition MinWidth="230" MaxWidth="350" Width="3*" />
@@ -237,7 +238,7 @@
         <DataTemplate x:Key="TypeTable">
             <params:TemplateTable Visibility="{Binding Visible}" DataContext="{Binding}" />
         </DataTemplate>
-        
+
         <selectors:BlockSelector x:Key="BlockSelector" Channel="{StaticResource ChannelTemplate}" Independent="{StaticResource IndependentTemplate}" />
         <selectors:ControlsParamTypesSelector x:Key="ParaTypeSelector" 
                                               NotFound="{StaticResource TypeNotFound}" 

@@ -1,10 +1,11 @@
 ﻿using Kaenx.Classes;
 using Kaenx.Classes.Buildings;
 using Kaenx.Classes.Bus;
-using Kaenx.Classes.Dynamic;
 using Kaenx.Classes.Helper;
 using Kaenx.Classes.Project;
 using Kaenx.DataContext.Catalog;
+using Kaenx.DataContext.Import;
+using Kaenx.DataContext.Import.Dynamic;
 using Kaenx.DataContext.Local;
 using Kaenx.DataContext.Project;
 using Kaenx.Konnect;
@@ -300,7 +301,8 @@ namespace Kaenx.View
 
             await _conn.Disconnect();
             Action = "Speichern";
-            SaveHelper.SaveProject();
+            //TODO replace
+            //SaveHelper.SaveProject();
             Action = "Fertig!";
             CanDo = true;
         }
@@ -419,7 +421,7 @@ namespace Kaenx.View
                 lined = lineM.Subs.Single(d => d.Id == device.Address.DeviceAddress);
             else
             {
-                lined = new LineDevice(true);
+                lined = new LineDevice();
                 lineM.Subs.Add(lined);
             }
 
@@ -488,8 +490,9 @@ namespace Kaenx.View
 
         private void ClickToProject(object sender, RoutedEventArgs e)
         {
-            SaveHelper.SaveProject();
-            SaveHelper.SaveStructure();
+            //TODO replace
+            //SaveHelper.SaveProject();
+            //SaveHelper.SaveStructure();
             SaveHelper._project.Local.IsReconstruct = false;
             LocalContext con = new LocalContext();
             con.Projects.Update(SaveHelper._project.Local);
@@ -703,7 +706,7 @@ namespace Kaenx.View
 
         private async Task HandleParamGhost(AppParameter para, AppParameterTypeViewModel paraT, AppAdditional adds)
         {
-            XDocument dynamic = XDocument.Parse(System.Text.Encoding.UTF8.GetString(adds.Dynamic));
+            XDocument dynamic = null;
 
             string ns = dynamic.Root.Name.NamespaceName;
             IEnumerable<XElement> chooses = dynamic.Descendants(XName.Get("choose", ns)).Where(c => c.Attribute("ParamRefId") != null && SaveHelper.GetItemId(c.Attribute("ParamRefId").Value) == para.Id);
@@ -954,8 +957,8 @@ namespace Kaenx.View
             Dictionary<string, ViewParamModel> Id2Param = new Dictionary<string, ViewParamModel>();
             Dictionary<int, ChangeParamModel> ParaChanges = new Dictionary<int, ChangeParamModel>();
             Dictionary<string, ViewParamModel> VisibleParams = new Dictionary<string, ViewParamModel>();
-            List<IDynChannel> Channels = SaveHelper.ByteArrayToObject<List<IDynChannel>>(adds.ParamsHelper, true);
-            ProjectContext _c = new ProjectContext(SaveHelper.connProject);
+            List<IDynChannel> Channels = FunctionHelper.ByteArrayToObject<List<IDynChannel>>(adds.ParamsHelper, true, "Kaenx.DataContext.Import.Dynamic");
+            ProjectContext _c = new ProjectContext(SaveHelper._project.Connection);
 
             if (_c.ChangesParam.Any(c => c.DeviceId == _currentDevice.LineDevice.UId))
             {
@@ -1069,22 +1072,22 @@ namespace Kaenx.View
         private async Task GenerateComs(Dictionary<int, ViewParamModel> Id2Param)
         {
             AppAdditional adds = _context.AppAdditionals.Single(a => a.Id == _currentDevice.ApplicationId);
-            List<DeviceComObject> comObjects = SaveHelper.ByteArrayToObject<List<DeviceComObject>>(adds.ComsAll);
-            List<ParamBinding> Bindings = SaveHelper.ByteArrayToObject<List<ParamBinding>>(adds.Bindings);
-            ProjectContext _contextP = new ProjectContext(SaveHelper.connProject);
+            List<DeviceComObject> comObjects = FunctionHelper.ByteArrayToObject<List<DeviceComObject>>(adds.ComsAll);
+            List<ParamBinding> Bindings = FunctionHelper.ByteArrayToObject<List<ParamBinding>>(adds.Bindings);
+            ProjectContext _contextP = new ProjectContext(SaveHelper._project.Connection);
 
             List<DeviceComObject> newObjs = new List<DeviceComObject>();
             foreach (DeviceComObject obj in comObjects)
             {
-                if (obj.Conditions.Count == 0)
-                {
-                    newObjs.Add(obj);
-                    continue;
-                }
+                //if (obj.Conditions.Count == 0)
+                //{
+                //    newObjs.Add(obj);
+                //    continue;
+                //}
 
-                bool flag = SaveHelper.CheckConditions(_currentDevice.ApplicationId, obj.Conditions, Id2Param);
-                if (flag)
-                    newObjs.Add(obj);
+                //bool flag = SaveHelper.CheckConditions(_currentDevice.ApplicationId, obj.Conditions, Id2Param);
+                //if (flag)
+                //    newObjs.Add(obj);
             }
 
 
@@ -1119,16 +1122,18 @@ namespace Kaenx.View
 
                 if (dcom.Name.Contains("{{"))
                 {
-                    ParamBinding bind = Bindings.Single(b => b.Hash == "CO:" + dcom.Id);
-                    string value = Id2Param[dcom.BindedId].Value;
-                    if (string.IsNullOrEmpty(value))
-                        dcom.DisplayName = dcom.Name.Replace("{{dyn}}", bind.DefaultText);
-                    else
-                        dcom.DisplayName = dcom.Name.Replace("{{dyn}}", value);
+                    //TODO check 
+                    //ParamBinding bind = Bindings.Single(b => b.Hash == "CO:" + dcom.Id);
+                    //string value = Id2Param[dcom.BindedId].Value;
+                    //if (string.IsNullOrEmpty(value))
+                    //    dcom.DisplayName = dcom.Name.Replace("{{dyn}}", bind.DefaultText);
+                    //else
+                    //    dcom.DisplayName = dcom.Name.Replace("{{dyn}}", value);
                 }
                 else
                 {
-                    dcom.DisplayName = dcom.Name;
+                    //TODO check what to do
+                    //dcom.DisplayName = dcom.Name;
                 }
 
                 await App._dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Normal, () =>

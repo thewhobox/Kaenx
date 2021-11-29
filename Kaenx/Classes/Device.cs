@@ -33,6 +33,6 @@ namespace Kaenx.Classes
                 slideSettings = value;
             }
         }
-        private SlideListItemBase slideSettings;
+        private SlideListItemBase slideSettings = new SlideListItemBase() { IsSelected = false };
     }
 }

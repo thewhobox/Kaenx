@@ -1,5 +1,4 @@
 ﻿using Kaenx.Classes.Bus.Data;
-using Kaenx.Classes.Dynamic;
 using Kaenx.Classes.Helper;
 using Kaenx.Classes.Project;
 using Kaenx.DataContext.Catalog;

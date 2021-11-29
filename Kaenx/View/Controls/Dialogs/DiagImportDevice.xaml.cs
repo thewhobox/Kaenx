@@ -5,6 +5,7 @@ using Kaenx.Classes.Bus.Data;
 using Kaenx.Classes.Helper;
 using Kaenx.Classes.Project;
 using Kaenx.DataContext.Catalog;
+using Kaenx.DataContext.Import;
 using Kaenx.DataContext.Project;
 using System;
 using System.Collections.Generic;
@@ -109,7 +110,7 @@ namespace Kaenx.View.Controls.Dialogs
         {
             CatalogContext _context = new CatalogContext();
 
-            LineDevice device = new LineDevice(model, line, true);
+            LineDevice device = new LineDevice(model, line);
             device.DeviceId = model.Id;
             device.Serial = Device.Serial;
 
@@ -150,7 +151,7 @@ namespace Kaenx.View.Controls.Dialogs
 
             device.ApplicationId = Device.ApplicationId;
 
-            ProjectContext _contextP = new ProjectContext(SaveHelper.connProject);
+            ProjectContext _contextP = new ProjectContext(SaveHelper._project.Connection);
 
             LineDeviceModel linedevmodel = new LineDeviceModel();
             linedevmodel.Id = device.Id;
@@ -171,17 +172,22 @@ namespace Kaenx.View.Controls.Dialogs
 
             if (_context.AppAdditionals.Any(a => a.Id == device.ApplicationId))
             {
-                AppAdditional adds = _context.AppAdditionals.Single(a => a.Id == device.ApplicationId);
-                device.ComObjects = SaveHelper.ByteArrayToObject<ObservableCollection<DeviceComObject>>(adds.ComsDefault);
-                foreach (DeviceComObject com in device.ComObjects)
-                    com.DisplayName = com.Name;
+                AppAdditional adds = _context.AppAdditionals.Single(a => a.ApplicationId == device.ApplicationId);
+                string[] comNumbers = System.Text.Encoding.UTF8.GetString(adds.ComsDefault).Split(",");
+
+                foreach (string comNumber in comNumbers)
+                {
+                    int number = int.Parse(comNumber);
+                    AppComObject appComObject = _context.AppComObjects.Single(c => c.UId == number);
+                    DeviceComObject deviceComObject = new DeviceComObject(appComObject);
+                    device.ComObjects.Add(deviceComObject);
+                }
             }
             else
             {
-                device.ComObjects = new ObservableCollection<DeviceComObject>();
+                device.ComObjects = new ObservableRangeCollection<DeviceComObject>();
             }
 
-            device.IsInit = false;
             return device;
         }
     }

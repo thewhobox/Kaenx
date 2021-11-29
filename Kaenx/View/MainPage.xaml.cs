@@ -1,6 +1,8 @@
 ﻿using Kaenx.Classes.Helper;
 using Kaenx.Classes.Project;
+using Kaenx.DataContext.Import;
 using Kaenx.DataContext.Local;
+using Kaenx.DataContext.Project;
 using Kaenx.Konnect;
 using Kaenx.Konnect.Classes;
 using Kaenx.Konnect.Connections;
@@ -211,12 +213,14 @@ namespace Kaenx.View
 
             helper.Local.LastOpened = DateTime.Now;
 
-            LocalContext context = new LocalContext();
-            context.Projects.Update(helper.Local);
-            context.SaveChanges();
+            using (LocalContext context = new LocalContext())
+            {
+                context.Projects.Update(helper.Local);
+                context.SaveChanges();
+            }
 
 
-            ChangeHandler.Instance = new ChangeHandler(project.Id);
+            ChangeHandler.Instance = new ChangeHandler(project);
             Serilog.Log.Information("Projekt geöffnet: " + project.Id + " - " + project.Name);
 
             if (JumpList.IsSupported())
@@ -249,6 +253,9 @@ namespace Kaenx.View
                     Log.Warning("Jumpliste konnte nicht gespeichert werden.");
                 }
             }
+
+            project.InitSaver();
+            SaveHelper._project = project;
 
             if (helper.IsReconstruct)
                 App.AppFrame.Navigate(typeof(Reconstruct), project);
@@ -302,20 +309,16 @@ namespace Kaenx.View
                 Connection = (LocalConnectionProject)InConn.SelectedItem
             };
 
+            proj.InitSaver();
+
             if (GTgas.IsChecked == true)
             {
                 proj.GroupType = Project.GroupTypes.GroupAddresses;
             }
 
-            if (tag == "new")
-            {
-                Line Backbone = new Line(1, loaderG.GetString("Area"));
-                Backbone.Subs.Add(new LineMiddle(1, loaderG.GetString("Line") + " 1", Backbone));
-                proj.Lines.Add(Backbone);
+            
 
-                //TODO Create first Area and Building
-            }
-
+            #region Icon misst
             WriteableBitmap image;
             if (Cropper.Visibility == Visibility.Visible)
             {
@@ -376,9 +379,19 @@ namespace Kaenx.View
                 await stream.ReadAsync(pixels, 0, pixels.Length);
             }
             proj.Image = pixels;
+            #endregion
 
-            proj.Id = SaveHelper.SaveProject(proj).Id;
 
+            using (ProjectContext _contextP = new ProjectContext())
+            {
+                ProjectModel model = new ProjectModel();
+                model.Name = proj.Name;
+                model.Image = proj.Image;
+                model.Area = FunctionHelper.ObjectToByteArray(proj.Area);
+                _contextP.Projects.Add(model);
+                _contextP.SaveChanges();
+                proj.Id = model.Id;
+            }
 
             LocalProject lp = new LocalProject
             {
@@ -394,11 +407,22 @@ namespace Kaenx.View
 
             proj.Local = lp;
 
-            ChangeHandler.Instance = new ChangeHandler(proj.Id);
+            ChangeHandler.Instance = new ChangeHandler(proj);
 
             Serilog.Log.Information("Projekt wird geöffnet: " + proj.Id + " - " + proj.Name + " / " + tag);
 
             Analytics.TrackEvent("Projekt erstellt");
+
+            if (tag == "new")
+            {
+                Line Backbone = new Line(1, loaderG.GetString("Area"));
+                proj.Lines.Add(Backbone);
+                Backbone.Subs.Add(new LineMiddle(1, loaderG.GetString("Line") + " 1", Backbone));
+
+                //TODO Create first Area and Building
+            }
+
+            SaveHelper._project = proj;
 
             switch (tag)
             {
