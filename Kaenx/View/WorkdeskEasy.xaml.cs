@@ -44,19 +44,16 @@ namespace Kaenx.View
 
         public WorkdeskEasy()
         {
-            Log.Information("WorkdeskEasy wird initialisiert");
             this.InitializeComponent();
             ContentFrame.Navigated += ContentFrame_Navigated;
 
             ViewBar.DataContext = Classes.Bus.BusRemoteConnection.Instance.Remote;
             InfoUpdate.DataContext = Classes.Project.UpdateManager.Instance;
             InfoChange.DataContext = Classes.Project.ChangeHandler.Instance;
-            Log.Information("WorkdeskEasy initialisierung abgeschlossen");
         }
 
         protected override void OnNavigatedTo(NavigationEventArgs e)
         {
-            Log.Information("WorkdeskEasy OnNavigatedTo");
             try
             {
                 base.OnNavigatedTo(e);
@@ -71,34 +68,19 @@ namespace Kaenx.View
                 _pages.Add("home", new Home() { DataContext = CurrentProject });
                 _pages.Add("catalog", new Catalog());
                 _pages.Add("topologie", new Topologie() { DataContext = CurrentProject.Lines, _project = CurrentProject });
-                try
-                {
-                    _pages.Add("groups", new Groups() { DataContext = CurrentProject });
-                }catch(Exception ex)
-                {
-                    Log.Information(ex.Message);
-                    Log.Information(ex.StackTrace);
-                    if(ex.InnerException != null)
-                        Log.Error(ex.InnerException, "Inner Exception");
-                }
+                _pages.Add("groups", new Groups() { DataContext = CurrentProject });
                 _pages.Add("bus", new Bus() { DataContext = Classes.Bus.BusConnection.Instance });
-                Log.Information("WorkdeskEasy Init bus");
                 _pages.Add("settings", new Settings());
-                Log.Information("WorkdeskEasy Init settings");
                 App._pages = _pages;
 
                 //InfoInterfaces.DataContext = Classes.Bus.BusConnection.Instance;
                 InfoBus.DataContext = Classes.Bus.BusConnection.Instance;
-                Log.Information("WorkdeskEasy DataContext");
 
-                Log.Information("WorkdeskEasy " + NavView.MenuItems.Count);
                 NavView.SelectedItem = NavView.MenuItems[0];
-                Log.Information("WorkdeskEasy Set Startpage");
 
                 var currentView = SystemNavigationManager.GetForCurrentView();
                 currentView.AppViewBackButtonVisibility = AppViewBackButtonVisibility.Visible;
                 currentView.BackRequested += CurrentView_BackRequested;
-                Log.Information("WorkdeskEasy Set BackButton");
             } catch(Exception ex)
             {
                 Log.Error(ex, "Fehler bei Onnavigated to");

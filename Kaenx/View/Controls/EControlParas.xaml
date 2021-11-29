@@ -10,6 +10,7 @@
     xmlns:selectors="using:Kaenx.Classes.TemplateSelectors"
     xmlns:converter="using:Kaenx.Classes.Converter"
     xmlns:conv="using:Microsoft.Toolkit.Uwp.UI.Converters"
+    xmlns:params="using:Kaenx.View.Controls.Parameter"
     mc:Ignorable="d"
     x:Name="ParaControl"
     d:DesignHeight="300"
@@ -68,6 +69,8 @@
                 <Run Text="Type nicht gefunden..." />
                 <LineBreak />
                 <Run Text="{Binding Id}" />
+                <LineBreak />
+                <Run Text="{Binding Text}" />
             </TextBlock>
         </DataTemplate>
 
@@ -232,7 +235,10 @@
                 </Grid>
             </Grid>
         </DataTemplate>
-        
+        <DataTemplate x:Key="TypeTable">
+            <params:TemplateTable Visibility="{Binding Visible}" DataContext="{Binding}" />
+        </DataTemplate>
+
         <selectors:BlockSelector x:Key="BlockSelector" Channel="{StaticResource ChannelTemplate}" Independent="{StaticResource IndependentTemplate}" />
         <selectors:ControlsParamTypesSelector x:Key="ParaTypeSelector" 
                                               NotFound="{StaticResource TypeNotFound}" 
@@ -246,6 +252,7 @@
                                               SeperatorBox="{StaticResource TypeSeperatorBox}"
                                               Color="{StaticResource TypeColor}"
                                               Time="{StaticResource TypeTime}"
+                                              Table="{StaticResource TypeTable}"
                                               None="{StaticResource TypeNone}"/>
     </UserControl.Resources>
 

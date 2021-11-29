@@ -151,7 +151,7 @@ namespace Kaenx.Classes.Project
                 Changed("LineName");
         }
 
-        public LineDevice(LineDeviceModel model, LineMiddle line, bool isInit = false)
+        public LineDevice(LineDeviceModel model, LineMiddle line)
         {
             Id = model.Id;
             UId = model.UId;
@@ -165,6 +165,7 @@ namespace Kaenx.Classes.Project
             LoadedPA = model.LoadedPA;
 
             Parent.PropertyChanged += Parent_PropertyChanged;
+            ComObjects.CollectionChanged += ComObjects_CollectionChanged;
         }
 
         public void ChangedComs()

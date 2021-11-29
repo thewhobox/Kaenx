@@ -175,6 +175,7 @@ namespace Kaenx
         {
             StorageFolder localState = await ApplicationData.Current.LocalFolder.CreateFolderAsync("Logs", CreationCollisionOption.OpenIfExists);
 
+            //TODO make setting to change level
             Log.Logger = new LoggerConfiguration()
                 .MinimumLevel.Debug()
                 .WriteTo.File(Path.Combine(localState.Path, "log-.txt"), rollingInterval: RollingInterval.Day)

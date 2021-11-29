@@ -464,7 +464,7 @@ namespace Kaenx.Classes.Bus.Actions
             foreach (AppParameter para in _context.AppParameters.Where(p => p.ApplicationId == Device.ApplicationId))
                 AppParas.Add(para.ParameterId, para);
 
-            ProjectContext _c = new ProjectContext(SaveHelper.connProject);
+            ProjectContext _c = new ProjectContext(SaveHelper._project.Connection);
 
             if (_c.ChangesParam.Any(c => c.DeviceId == Device.UId))
             {

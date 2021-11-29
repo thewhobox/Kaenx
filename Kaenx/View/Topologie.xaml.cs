@@ -370,7 +370,7 @@ namespace Kaenx.View
                 }
             }
 
-            ProjectContext _contextP = new ProjectContext(SaveHelper.connProject);
+            ProjectContext _contextP = new ProjectContext(SaveHelper._project.Connection);
 
             line.Subs.Add(device);
             line.Subs.Sort(l => l.Id);

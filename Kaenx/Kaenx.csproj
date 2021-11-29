@@ -17,7 +17,7 @@
     <FileAlignment>512</FileAlignment>
     <ProjectTypeGuids>{A5A43C5B-DE2A-4C0C-9213-0A381AF9435A};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
     <PackageCertificateKeyFile>Kaenx_TemporaryKey.pfx</PackageCertificateKeyFile>
-    <RuntimeIdentifiers>win10-x86;win10-x64;</RuntimeIdentifiers>
+    <RuntimeIdentifiers>win10-x86;win10-x86-aot;win10-x64;win10-x64-aot;</RuntimeIdentifiers>
     <GenerateAppInstallerFile>True</GenerateAppInstallerFile>
     <AppxAutoIncrementPackageRevision>False</AppxAutoIncrementPackageRevision>
     <AppxBundle>Always</AppxBundle>
@@ -240,6 +240,9 @@
     <Compile Include="View\Controls\ListChannelModel.cs" />
     <Compile Include="View\Controls\NumberBox.xaml.cs">
       <DependentUpon>NumberBox.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="View\Controls\Parameter\TemplateTable.xaml.cs">
+      <DependentUpon>TemplateTable.xaml</DependentUpon>
     </Compile>
     <Compile Include="View\Controls\Settings\SBusConnections.xaml.cs">
       <DependentUpon>SBusConnections.xaml</DependentUpon>
@@ -484,6 +487,10 @@
       <SubType>Designer</SubType>
     </Page>
     <Page Include="View\Controls\EControlBusAction.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="View\Controls\Parameter\TemplateTable.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

@@ -33,7 +33,7 @@ namespace Kaenx.Classes.Helper
     {
         public static Project.Project _project;
         private static ProjectContext contextProject;
-        public static LocalConnectionProject connProject;
+        //public static LocalConnectionProject connProject;
         private static CatalogContext contextC = new CatalogContext(new LocalConnectionCatalog() { DbHostname = "Catalog.db", Type = LocalConnectionCatalog.DbConnectionType.SqlLite });
 
         //public static ProjectModel SaveProject(Project.Project _pro = null)
@@ -312,11 +312,9 @@ namespace Kaenx.Classes.Helper
                     ViewHelper.Instance.ShowNotification("all", "Die Verbindung wo das Projekt gespeichert sein soll konnt enicht gefunden werden.", 3000, Microsoft.UI.Xaml.Controls.InfoBarSeverity.Error);
                     return null;
                 }
-                connProject = lconn;
                 contextProject = new ProjectContext(lconn);
                 contextProject.Database.Migrate();
                 project.Connection = lconn;
-                connProject = lconn;
             }
 
             //Catalog mit in das Project machen!
@@ -375,7 +373,7 @@ namespace Kaenx.Classes.Helper
 
                     foreach (LineDeviceModel ldm in contextProject.LineDevices.AsEnumerable().Where(l => l.ProjectId == helper.ProjectId && l.ParentId == lm.UId).OrderBy(l => l.Id))
                     {
-                        LineDevice ld = new LineDevice(ldm, lm, true) { DeviceId = ldm.DeviceId };
+                        LineDevice ld = new LineDevice(ldm, lm) { DeviceId = ldm.DeviceId };
 
 
                         foreach (ComObject com in contextProject.ComObjects.Where(co => co.DeviceId == ld.UId))

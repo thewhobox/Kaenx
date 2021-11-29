@@ -10,6 +10,12 @@ namespace Kaenx.Classes
 {
     public class ObservableRangeCollection<T> : ObservableCollection<T>
     {
+        public void SilentAdd(T item)
+        {
+            Items.Add(item);
+            OnCollectionChanged(new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Reset));
+        }
+
         /// <summary> 
         /// Adds the elements of the specified collection to the end of the ObservableCollection(Of T). 
         /// </summary> 

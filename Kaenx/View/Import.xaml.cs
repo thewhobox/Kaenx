@@ -38,6 +38,7 @@ namespace Kaenx.View
         private CancellationTokenSource source;
         private bool isImporting = false;
         private bool navigatedFromMain = true;
+        private ImportDevice currentDevice;
 
         public Import()
         {
@@ -94,6 +95,7 @@ namespace Kaenx.View
         {
             manager = ImportManager.GetImportManager(file);
             manager.Begin();
+            manager.DeviceChanged += Manager_DeviceChanged;
             manager.StateChanged += Manager_StateChanged;
             var x = manager.GetDeviceList();
             ImportList.Clear();
@@ -103,9 +105,19 @@ namespace Kaenx.View
             }
         }
 
+        private void Manager_DeviceChanged(string newName)
+        {
+            Serilog.Log.Debug($"Neues Gerät: {newName}");
+        }
+
         private void Manager_StateChanged(string newName)
         {
+            _=Dispatcher.RunAsync(CoreDispatcherPriority.Low, () =>
+            {
+                currentDevice.Action = newName;
+            });
             Debug.WriteLine(newName);
+            Serilog.Log.Debug($"Aktion: {newName}");
         }
 
         private async void GetFile(object sender, RoutedEventArgs e)
@@ -140,6 +152,7 @@ namespace Kaenx.View
             {
                 foreach (ImportDevice dev in ImportList)
                 {
+                    currentDevice = dev;
                     dev.State = ImportState.Importing;
                     try
                     {
@@ -150,9 +163,17 @@ namespace Kaenx.View
                         });
                         dev.State = ImportState.Finished;
                     }
-                    catch
+                    catch (Exception ex)
                     {
+                        Serilog.Log.Error(ex, "Fehler beim Importieren");
                         dev.State = ImportState.Error;
+                        dev.Action = ex.Message;
+
+                        if(ex.InnerException != null)
+                        {
+                            dev.Action += " - " + ex.InnerException.Message;
+                            Serilog.Log.Error(ex.InnerException, "Fehler beim Importieren");
+                        }
                     }
                     
                 }

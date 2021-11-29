@@ -151,7 +151,7 @@ namespace Kaenx.View.Controls.Dialogs
 
             device.ApplicationId = Device.ApplicationId;
 
-            ProjectContext _contextP = new ProjectContext(SaveHelper.connProject);
+            ProjectContext _contextP = new ProjectContext(SaveHelper._project.Connection);
 
             LineDeviceModel linedevmodel = new LineDeviceModel();
             linedevmodel.Id = device.Id;

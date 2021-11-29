@@ -38,7 +38,7 @@ namespace Kaenx.View
     /// </summary>
     public sealed partial class Groups : Page, INotifyPropertyChanged
     {
-        private ProjectContext context = new ProjectContext(SaveHelper.connProject);
+        private ProjectContext context = new ProjectContext(SaveHelper._project.Connection);
 
         private ResourceLoader loader = ResourceLoader.GetForCurrentView("Groups");
         private FunctionGroup _selectedGroup;

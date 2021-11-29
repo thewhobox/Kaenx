@@ -61,7 +61,7 @@ namespace Kaenx.Views.Easy.Controls
 
         public LineDevice Device { get; }
         private CatalogContext _context = new CatalogContext();
-        private ProjectContext _contextP = new ProjectContext(SaveHelper.connProject);
+        private ProjectContext _contextP = new ProjectContext(SaveHelper._project.Connection);
 
         private Dictionary<int, ChangeParamModel> ParaChanges = new Dictionary<int, ChangeParamModel>();
         private Dictionary<string, AppParameterTypeViewModel> AppParaTypess = new Dictionary<string, AppParameterTypeViewModel>();
@@ -104,19 +104,19 @@ namespace Kaenx.Views.Easy.Controls
             this.SizeChanged += EControlParas2_SizeChanged;
         }
 
-        public EControlParas(Classes.Bus.Data.DeviceConfigData data)
-        {
-            this.InitializeComponent();
-            Device = data.Device;
-            this.DataContext = this;
+        //public EControlParas(Classes.Bus.Data.DeviceConfigData data)
+        //{
+        //    this.InitializeComponent();
+        //    Device = data.Device;
+        //    this.DataContext = this;
 
-            //TODO check change
-            ApplicationViewModel app = _context.Applications.Single(a => a.Hash == data.ApplicationId);
+        //    //TODO check change
+        //    ApplicationViewModel app = _context.Applications.Single(a => a.Hash == data.ApplicationId);
 
-            Device.ApplicationId = app.Id;
+        //    Device.ApplicationId = app.Id;
 
-            this.SizeChanged += EControlParas2_SizeChanged;
-        }
+        //    this.SizeChanged += EControlParas2_SizeChanged;
+        //}
 
         private void EControlParas2_SizeChanged(object sender, SizeChangedEventArgs e)
         {
@@ -140,10 +140,10 @@ namespace Kaenx.Views.Easy.Controls
             _ = Load();
         }
 
-        public void StartRead()
-        {
-            _ = Load();
-        }
+        //public void StartRead()
+        //{
+        //    _ = Load();
+        //}
 
 
 
@@ -217,7 +217,7 @@ namespace Kaenx.Views.Easy.Controls
                 CatalogContext co = new CatalogContext();
                 foreach (AppParameter para in co.AppParameters.Where(p => p.ApplicationId == adds.ApplicationId))
                 {
-                    if (!Id2Param.ContainsKey(para.Id))
+                    if (!values.ContainsKey(para.ParameterId))
                     {
                         ViewParamModel model = new ViewParamModel(para.Value);
                         ParamText p = new ParamText();
@@ -225,8 +225,9 @@ namespace Kaenx.Views.Easy.Controls
                         p.Id = para.Id;
                         p.IsVisible = true;
                         model.Parameters.Add(p);
-                        Id2Param.Add(para.Id, model);
                         values.Add(para.ParameterId, para.Value);
+                        if(!Id2Param.ContainsKey(para.Id))
+                            Id2Param.Add(para.Id, model);
                     }
                 }
 

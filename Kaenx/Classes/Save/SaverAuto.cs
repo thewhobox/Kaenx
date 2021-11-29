@@ -163,7 +163,6 @@ namespace Kaenx.Classes.Save
 
                         device.PropertyChanged += PropertyChanged;
                         device.ComObjectsChanged += Device_ComObjectsChanged;
-                        //TODO add comobject changes
                     }
                 }
 
@@ -176,6 +175,12 @@ namespace Kaenx.Classes.Save
 
                         LineDeviceModel linedevmodel = context.LineDevices.Single(d => d.UId == device.UId);
                         context.LineDevices.Remove(linedevmodel);
+
+                        IEnumerable<object> todelete = context.ComObjects.Where(c => c.DeviceId == device.UId);
+                        context.RemoveRange(todelete);
+                        //todelete = context.ChangesParam.Where(c => c.DeviceId == device.UId);
+                        //context.Remove(todelete);
+                        //TODO check why it doesnt work
 
                         device.PropertyChanged -= PropertyChanged;
                         device.ComObjectsChanged -= Device_ComObjectsChanged;
@@ -201,7 +206,11 @@ namespace Kaenx.Classes.Save
             {
                 foreach (DeviceComObject com in e.NewItems)
                 {
-                    //TODO save coms
+                    context.ComObjects.Add(new ComObject()
+                    {
+                        ComId = com.Id,
+                        DeviceId = dev.UId
+                    });
                 }
             }
 
@@ -209,9 +218,12 @@ namespace Kaenx.Classes.Save
             {
                 foreach (DeviceComObject com in e.OldItems)
                 {
-
+                    ComObject oldCom = context.ComObjects.Single(c => c.DeviceId == dev.UId && c.ComId == com.Id);
+                    context.ComObjects.Remove(oldCom);
                 }
             }
+
+            context.SaveChanges();
         }
 
         public void SaveLine()
