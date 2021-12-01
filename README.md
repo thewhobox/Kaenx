@@ -1,4 +1,4 @@
-[English](Readme_en.md)
+[English](README_en.md)
 
 # Kaenx
 Kaenx ist eine Open Source Inbetriebnahme Software für KNX Geräte.  

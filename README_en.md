@@ -1,4 +1,4 @@
-[Deutsch](Readme.md)
+[Deutsch](README.md)
 
 # Kaenx
 Kaenx is an Open Source Software to configure KNX Devices.  
