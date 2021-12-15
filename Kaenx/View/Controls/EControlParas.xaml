@@ -340,7 +340,7 @@
                           ItemsSource="{Binding Device.ComObjects, Mode=OneWay}" IsReadOnly="True" Background="{ThemeResource BrushAccentControlBackground}" CornerRadius="2 2 0 0">
             <toolkit:DataGrid.Columns>
                 <toolkit:DataGridTextColumn x:Uid="/Groups/LComsNumb" FontSize="13" Tag="Number" Width="SizeToCells" Binding="{Binding Number}" />
-                <toolkit:DataGridTextColumn x:Uid="/Groups/LComsName" FontSize="13" Tag="Name" Width="SizeToCells" Binding="{Binding DisplayName}" />
+                <toolkit:DataGridTextColumn x:Uid="/Groups/LComsName" FontSize="13" Tag="Name" Width="SizeToCells" Binding="{Binding Name}" />
                 <toolkit:DataGridTextColumn x:Uid="/Groups/LComsFunc" FontSize="13" Tag="Function" Width="SizeToCells" Binding="{Binding Function}" />
                 <toolkit:DataGridTextColumn x:Uid="/Groups/LComsDpst" FontSize="13" Tag="DataPoint" Width="SizeToCells" Binding="{Binding DataPointSubType.Name}" />
                 <toolkit:DataGridTextColumn x:Uid="/Groups/LComsConn" FontSize="13" Tag="Connections" Width="SizeToCells" Binding="{Binding Connections}" />

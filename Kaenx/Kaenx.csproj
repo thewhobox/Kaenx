@@ -247,6 +247,9 @@
     <Compile Include="View\Controls\Settings\SBusConnections.xaml.cs">
       <DependentUpon>SBusConnections.xaml</DependentUpon>
     </Compile>
+    <Compile Include="View\Controls\Settings\SCredits.xaml.cs">
+      <DependentUpon>SCredits.xaml</DependentUpon>
+    </Compile>
     <Compile Include="View\Controls\SlideListItemBase.cs" />
     <Compile Include="Classes\Converter\Checked2VisibilityConverter.cs" />
     <Compile Include="Classes\Converter\NumberConverter.cs" />
@@ -497,6 +500,10 @@
     <Page Include="View\Controls\Settings\SBusConnections.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="View\Controls\Settings\SCredits.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
     </Page>
     <Page Include="View\Groups.xaml">
       <SubType>Designer</SubType>

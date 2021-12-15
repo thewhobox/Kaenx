@@ -67,7 +67,7 @@ namespace Kaenx.Classes.Bus
                 container.Values["lastUsedInterface"] = _selectedInterface.Hash;
             }
         }
-        private KnxIpTunneling searchConn;
+        private KnxIpRouting searchConn;
         private DispatcherTimer searchTimer = new DispatcherTimer() { Interval = TimeSpan.FromSeconds(10) };
         private IDeviceFactory hidFactory = new FilterDeviceDefinition(vendorId: 0x147b).CreateUwpHidDeviceFactory();
 
@@ -98,7 +98,7 @@ namespace Kaenx.Classes.Bus
 
             try
             {
-                searchConn = new KnxIpTunneling(new IPEndPoint(IPAddress.Parse("224.0.23.12"), 3671), true);
+                searchConn = new KnxIpRouting();
                 searchConn.OnSearchResponse += SearchConn_OnSearchResponse;
             }
             catch(System.Net.Sockets.SocketException ex)

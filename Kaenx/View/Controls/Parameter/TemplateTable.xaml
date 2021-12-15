@@ -7,9 +7,9 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:toolkit="using:Microsoft.Toolkit.Uwp.UI.Controls"
     xmlns:selectors="using:Kaenx.Classes.TemplateSelectors"
-    xmlns:dyn="using:Kaenx.Classes.Dynamic"
     xmlns:converter="using:Kaenx.Classes.Converter"
     xmlns:conv="using:Microsoft.Toolkit.Uwp.UI.Converters"
+    xmlns:dyn="using:Kaenx.DataContext.Import.Dynamic"
     mc:Ignorable="d"
     d:DesignHeight="300"
     d:DesignWidth="400">
