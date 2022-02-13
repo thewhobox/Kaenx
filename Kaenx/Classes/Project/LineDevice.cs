@@ -125,6 +125,7 @@ namespace Kaenx.Classes.Project
         }
 
         public int DeviceId { get; set; }
+        public int HardwareId { get; set; }
         public int ApplicationId { get; set; }
 
         public LineDevice()

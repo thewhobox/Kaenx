@@ -155,7 +155,7 @@ namespace Kaenx.Views.Easy.Controls
                 await Task.Delay(1);
                 AppAdditional adds = _context.AppAdditionals.Single(a => a.ApplicationId == Device.ApplicationId);
                 comObjects = FunctionHelper.ByteArrayToObject<List<ComBinding>>(adds.ComsAll, true);
-                Channels = FunctionHelper.ByteArrayToObject<List<Kaenx.DataContext.Import.Dynamic.IDynChannel>>(adds.ParamsHelper, true, "Kaenx.DataContext.Import.Dynamic");
+                Channels = FunctionHelper.ByteArrayToObject<List<IDynChannel>>(adds.ParamsHelper, true, "Kaenx.DataContext.Import.Dynamic");
                 Bindings = FunctionHelper.ByteArrayToObject<List<ParamBinding>>(adds.Bindings, true);
                 Assignments = FunctionHelper.ByteArrayToObject<List<AssignParameter>>(adds.Assignments, true);
 
@@ -181,7 +181,7 @@ namespace Kaenx.Views.Easy.Controls
                             try
                             {
 
-                                Hash2Param.Add(para.Hash, para);
+                                //Hash2Param.Add(para.Hash, para);
                             }
                             catch
                             {
@@ -246,7 +246,7 @@ namespace Kaenx.Views.Easy.Controls
                     }
                     catch
                     {
-
+                        Debug.WriteLine("unbeknnate ID " + assign.Target);
                     }
                 }
 

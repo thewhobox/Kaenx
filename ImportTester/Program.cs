@@ -28,7 +28,6 @@ namespace ImportTester
             Console.WriteLine();
 
             IManager manager = ImportManager.GetImportManager(files[index]);
-            manager.Begin();
             var langs = manager.GetLanguages();
             manager.SetLanguage(langs[0]);
             var x = manager.GetDeviceList();
