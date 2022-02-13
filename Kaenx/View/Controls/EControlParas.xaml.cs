@@ -181,7 +181,7 @@ namespace Kaenx.Views.Easy.Controls
                             try
                             {
 
-                                Hash2Param.Add(para.Hash, para);
+                                //Hash2Param.Add(para.Hash, para);
                             }
                             catch
                             {
@@ -246,7 +246,7 @@ namespace Kaenx.Views.Easy.Controls
                     }
                     catch
                     {
-
+                        Debug.WriteLine("unbeknnate ID " + assign.Target);
                     }
                 }
 

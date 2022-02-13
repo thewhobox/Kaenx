@@ -378,7 +378,16 @@ namespace Kaenx.Classes.Helper
 
                         foreach (ComObject com in contextProject.ComObjects.Where(co => co.DeviceId == ld.UId))
                         {
-                            AppComObject comObj = contextC.AppComObjects.Single(c => c.Id == com.ComId && c.ApplicationId == ldm.ApplicationId);
+                            AppComObject comObj;
+                            try
+                            {
+                                comObj = contextC.AppComObjects.Single(c => c.Id == com.ComId && c.ApplicationId == ldm.ApplicationId);
+                            } catch(Exception ex)
+                            {
+                                Log.Error(ex, "ComObjekt nicht gefunden");
+                                continue;
+                            }
+
                             DeviceComObject dcom = new DeviceComObject(comObj) { ParentDevice = ld };
 
                             if (!string.IsNullOrEmpty(com.Groups))
@@ -391,27 +400,6 @@ namespace Kaenx.Classes.Helper
                                     ga.ComObjects.Add(dcom);
                                 }
                             }
-
-                            //TODO check what to do if binding exists
-                            //if (dcom.BindedId != -2 && dcom.Name.Contains("{{dyn}}"))
-                            //{
-                            //    string value = "";
-                            //    try
-                            //    {
-                            //        ChangeParamModel changeB = contextProject.ChangesParam.Where(c => c.DeviceId == ld.UId && c.ParamId == dcom.BindedId).OrderByDescending(c => c.StateId).First();
-                            //        value = changeB.Value;
-                            //    }
-                            //    catch { }
-
-                            //    if (value == "")
-                            //        dcom.DisplayName = dcom.Name.Replace("{{dyn}}", comObj.BindedDefaultText);
-                            //    else
-                            //        dcom.DisplayName = dcom.Name.Replace("{{dyn}}", value);
-                            //} else
-                            //{
-                            //    dcom.DisplayName = dcom.Name;
-                            //}
-
 
                             if (comObj.Datapoint == -1)
                             {
@@ -428,8 +416,6 @@ namespace Kaenx.Classes.Helper
                                     dcom.DataPointSubType = DPSTs[comObj.Datapoint.ToString()][comObj.DatapointSub.ToString()];
                                 }
                             }
-
-                           
 
                             ld.ComObjects.Add(dcom);
                         }

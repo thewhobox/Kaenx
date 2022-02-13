@@ -156,6 +156,7 @@ namespace Kaenx.Classes.Save
                         linedevmodel.Name = device.Name;
                         linedevmodel.ApplicationId = device.ApplicationId;
                         linedevmodel.DeviceId = device.DeviceId;
+                        linedevmodel.HardwareId = device.HardwareId;
                         linedevmodel.ProjectId = SaveHelper._project.Id;
                         context.LineDevices.Add(linedevmodel);
                         context.SaveChanges();

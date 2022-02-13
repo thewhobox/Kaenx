@@ -119,6 +119,7 @@
     <Compile Include="App.xaml.cs">
       <DependentUpon>App.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Classes\Converter\SelectedToBrushConverter.cs" />
     <Compile Include="Classes\Extension.cs" />
     <Compile Include="Classes\ObservableRangeCollection.cs" />
     <Compile Include="Classes\Buildings\Area.cs" />
@@ -178,6 +179,7 @@
     <Compile Include="Classes\TemplateSelectors\ControlsParamTypesSelector.cs" />
     <Compile Include="Classes\TemplateSelectors\StructureSelector.cs" />
     <Compile Include="Classes\UnloadHelper.cs" />
+    <Compile Include="MVVM\ChangeAppModel.cs" />
     <Compile Include="MVVM\StoreItem.cs" />
     <Compile Include="View\Controls\Bus\BDeviceInfo.xaml.cs">
       <DependentUpon>BDeviceInfo.xaml</DependentUpon>
@@ -199,6 +201,9 @@
     </Compile>
     <Compile Include="View\Controls\Dialogs\DiagAddLine.xaml.cs">
       <DependentUpon>DiagAddLine.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="View\Controls\Dialogs\DiagChangeApp.xaml.cs">
+      <DependentUpon>DiagChangeApp.xaml</DependentUpon>
     </Compile>
     <Compile Include="View\Controls\Dialogs\DiagComsDeleted.xaml.cs">
       <DependentUpon>DiagComsDeleted.xaml</DependentUpon>
@@ -426,6 +431,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="View\Controls\Dialogs\DiagAddLine.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="View\Controls\Dialogs\DiagChangeApp.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

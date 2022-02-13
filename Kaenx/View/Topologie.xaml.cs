@@ -8,6 +8,7 @@ using Kaenx.Classes.Project;
 using Kaenx.DataContext.Catalog;
 using Kaenx.DataContext.Project;
 using Kaenx.View.Controls;
+using Kaenx.View.Controls.Dialogs;
 using Kaenx.Views.Easy.Controls;
 using System;
 using System.Collections.Generic;
@@ -309,6 +310,7 @@ namespace Kaenx.View
         {
             LineDevice device = new LineDevice(model, line);
             device.DeviceId = model.Id;
+            device.HardwareId = model.HardwareId;
 
             if (model.IsCoupler)
             {
@@ -540,7 +542,7 @@ namespace Kaenx.View
                 try
                 {
                     ApplicationViewModel app = _context.Applications.Single(a => a.Id == dev.ApplicationId);
-                    InfoAppName.Text = app.Name + " " + app.VersionString + Environment.NewLine + dev.ApplicationId;
+                    InfoAppName.Text = app.Name + " " + app.VersionString; // + Environment.NewLine + dev.ApplicationId;
                 }
                 catch
                 {
@@ -732,6 +734,15 @@ namespace Kaenx.View
 
             BusConnection.Instance.AddAction(action);
             _currentFlyout.Hide();
+        }
+
+        private async void ClickChangeApp(object sender, RoutedEventArgs e)
+        {
+            DiagChangeApp diag = new DiagChangeApp((sender as Button).DataContext as LineDevice);
+            await diag.ShowAsync();
+
+            if (diag.SelectedApp != null)
+                InfoAppName.Text = diag.SelectedApp.Name + " " + diag.SelectedApp.VersionString;
         }
     }
 }

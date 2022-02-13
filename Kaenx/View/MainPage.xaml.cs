@@ -9,6 +9,7 @@ using Kaenx.Konnect.Connections;
 using Kaenx.View.Controls.Dialogs;
 using Microsoft.AppCenter.Analytics;
 using Microsoft.AppCenter.Crashes;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.UI.Xaml.Controls;
 using Serilog;
 using System;
@@ -384,6 +385,7 @@ namespace Kaenx.View
 
             using (ProjectContext _contextP = new ProjectContext())
             {
+                _contextP.Database.Migrate();
                 ProjectModel model = new ProjectModel();
                 model.Name = proj.Name;
                 model.Image = proj.Image;

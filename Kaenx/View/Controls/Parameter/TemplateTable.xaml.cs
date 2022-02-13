@@ -29,12 +29,12 @@ namespace Kaenx.View.Controls.Parameter
 
         private async void CheckDataContext()
         {
-            while(this.DataContext == null)
+            while (this.DataContext == null)
                 await Task.Delay(10);
 
             ParameterTable table = (ParameterTable)DataContext;
 
-            foreach(TableColumn col in table.Columns)
+            foreach (TableColumn col in table.Columns)
             {
                 GridLength length;
                 if (col.Unit == UnitTypes.Absolute)
@@ -45,7 +45,7 @@ namespace Kaenx.View.Controls.Parameter
                 MainGrid.ColumnDefinitions.Add(new ColumnDefinition() { Width = length });
             }
 
-            foreach(TableRow row in table.Rows)
+            foreach (TableRow row in table.Rows)
             {
                 GridLength length;
                 if (row.Unit == UnitTypes.Absolute)
@@ -57,7 +57,7 @@ namespace Kaenx.View.Controls.Parameter
             }
 
             int counter = 0;
-            foreach(IDynParameter para in table.Parameters)
+            foreach (IDynParameter para in table.Parameters)
             {
                 ContentControl ctrl = new ContentControl()
                 {
@@ -67,7 +67,7 @@ namespace Kaenx.View.Controls.Parameter
                     HorizontalContentAlignment = HorizontalAlignment.Stretch
                 };
 
-                switch(para)
+                switch (para)
                 {
                     case ParamEnum pe:
                         ctrl.ContentTemplate = (DataTemplate)this.Resources["TypeEnums"];
@@ -81,8 +81,8 @@ namespace Kaenx.View.Controls.Parameter
 
                 MainGrid.Children.Add(ctrl);
                 TablePosition pos = table.Positions[counter++];
-                Grid.SetColumn(ctrl, pos.Column-1);
-                Grid.SetRow(ctrl, pos.Row-1);
+                Grid.SetColumn(ctrl, pos.Column - 1);
+                Grid.SetRow(ctrl, pos.Row - 1);
                 ctrl.DataContext = para;
             }
         }

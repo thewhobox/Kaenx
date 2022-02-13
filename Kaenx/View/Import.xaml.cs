@@ -94,7 +94,6 @@ namespace Kaenx.View
         private void OpenFile(string file)
         {
             manager = ImportManager.GetImportManager(file);
-            manager.Begin();
             manager.DeviceChanged += Manager_DeviceChanged;
             manager.StateChanged += Manager_StateChanged;
             var x = manager.GetDeviceList();
@@ -150,7 +149,7 @@ namespace Kaenx.View
 
             using (CatalogContext context = new CatalogContext())
             {
-                foreach (ImportDevice dev in ImportList)
+                foreach (ImportDevice dev in ImportList.Where(i => i.IsSelected))
                 {
                     currentDevice = dev;
                     dev.State = ImportState.Importing;
@@ -178,6 +177,12 @@ namespace Kaenx.View
                     
                 }
             }
+        }
+
+        private void ImportItemClick(object sender, ItemClickEventArgs e)
+        {
+            ImportDevice device = e.ClickedItem as ImportDevice;
+            device.IsSelected = !device.IsSelected;
         }
     }
 }

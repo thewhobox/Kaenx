@@ -9,6 +9,7 @@
     mc:Ignorable="d"
     Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
     <Page.Resources>
+        <conv:SelectedToBrushConverter x:Key="SelectedConverter" />
         <conv:ImportStateConverter x:Key="ImportStateConverter" />
     </Page.Resources>
 
@@ -37,7 +38,7 @@
         </StackPanel>
         
 
-        <ListView x:Name="List" ItemsSource="{Binding ImportList}">
+        <ListView x:Name="List" ItemsSource="{Binding ImportList}" SelectionMode="None" IsItemClickEnabled="True" ItemClick="ImportItemClick">
             <ListView.Resources>
                 <Style TargetType="ListViewItem">
                     <Setter Property="HorizontalContentAlignment" Value="Stretch" />
@@ -45,7 +46,7 @@
             </ListView.Resources>
             <ListView.ItemTemplate>
                 <DataTemplate>
-                    <Border CornerRadius="3" BorderBrush="Gray" BorderThickness="1" Margin="0 5">
+                    <Border CornerRadius="3" BorderBrush="{Binding IsSelected, Converter={StaticResource SelectedConverter}}" BorderThickness="3" Margin="0 5">
                         <Border.Background>
                             <SolidColorBrush Color="{Binding State, Converter={StaticResource ImportStateConverter}}" Opacity="0.4" />
                         </Border.Background>

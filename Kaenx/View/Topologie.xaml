@@ -269,7 +269,10 @@
                     </Grid>
 
                     <toolkit:HeaderedContentControl x:Uid="/Topologie/SidePropsApp" Grid.Row="1" HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch">
-                        <TextBlock x:Name="InfoAppName" />
+                        <StackPanel>
+                            <TextBlock x:Name="InfoAppName" TextWrapping="WrapWholeWords" />
+                            <Button Content="Ändern" Click="ClickChangeApp" />
+                        </StackPanel>
                     </toolkit:HeaderedContentControl>
 
 
