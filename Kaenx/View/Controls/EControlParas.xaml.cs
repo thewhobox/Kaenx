@@ -398,6 +398,8 @@ namespace Kaenx.Views.Easy.Controls
                     Id2Param[assign.Target].Assign = null;
             }
 
+            Id2Param[para.Id].Value = para.Value;
+
 
             IEnumerable<IDynParameter> list3 = Hash2Param.Values.Where(p => p.Conditions.Any(c => c.SourceId == para.Id || list5.Contains(c.SourceId)));
             foreach (IDynParameter par in list3)

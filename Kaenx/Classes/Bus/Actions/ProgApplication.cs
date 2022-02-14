@@ -1,4 +1,5 @@
 ﻿using Kaenx.Classes.Buildings;
+using Kaenx.Classes.Dynamic;
 using Kaenx.Classes.Helper;
 using Kaenx.Classes.Project;
 using Kaenx.DataContext.Catalog;
@@ -109,7 +110,7 @@ namespace Kaenx.Classes.Bus.Actions
             TodoText = ProcedureType == ProcedureTypes.Load ? "Applikation schreiben" : "Gerät entladen";
 
             //CatalogContext _context = new CatalogContext();
-            AppAdditional adds = _context.AppAdditionals.Single(a => a.ApplicationId == Device.ApplicationId);
+            AppAdditional adds = _context.AppAdditionals.Single(a => a.Id == Device.ApplicationId);
             app = _context.Applications.Single(a => a.Id == Device.ApplicationId);
             ManuId = _context.Manufacturers.Single(m => m.Id == app.Manufacturer).ManuId;
 
@@ -1265,159 +1266,150 @@ namespace Kaenx.Classes.Bus.Actions
 
         private void GenerateApplication(AppAdditional adds)
         {
-            try
+            Dictionary<int, AppParameter> paras = new Dictionary<int, AppParameter>();
+            Dictionary<int, AppParameterTypeViewModel> types = new Dictionary<int, AppParameterTypeViewModel>();
+            List<int> changed = new List<int>();
+
+            var visibleParams = OverrideVisibleParams ?? GetVisibleParams(adds);
+            foreach (AppParameter para in visibleParams)
+                paras.Add(para.Id, para);
+
+            foreach (AppParameterTypeViewModel type in _context.AppParameterTypes)
+                types.Add(type.Id, type);
+
+            foreach (AppParameter para in paras.Values)
             {
-
-                Dictionary<int, AppParameter> paras = new Dictionary<int, AppParameter>();
-                Dictionary<int, AppParameterTypeViewModel> types = new Dictionary<int, AppParameterTypeViewModel>();
-                List<int> changed = new List<int>();
-
-                var visibleParams = OverrideVisibleParams ?? GetVisibleParams(adds);
-                foreach (AppParameter para in visibleParams)
-                    paras.Add(para.Id, para);
-
-                foreach (AppParameterTypeViewModel type in _context.AppParameterTypes)
-                    types.Add(type.Id, type);
-
-                foreach (AppParameter para in paras.Values)
+                //TODO change
+                if (para.SegmentId == -1) continue;
+                if (!dataSegs.ContainsKey(para.SegmentId))
                 {
-                    //TODO change
-                    if (para.SegmentId == -1) continue;
-                    if (!dataSegs.ContainsKey(para.SegmentId))
+                    AppSegmentViewModel seg = _context.AppSegments.Single(a => a.Id == para.SegmentId);
+                    if (seg.Data == null)
                     {
-                        AppSegmentViewModel seg = _context.AppSegments.Single(a => a.ApplicationId == para.ApplicationId && a.SegmentId == para.SegmentId);
-                        if (seg.Data == null)
-                        {
-                            dataMems[para.SegmentId] = new byte[seg.Size];
-                        }
-                        else
-                        {
-                            dataMems[para.SegmentId] = Convert.FromBase64String(seg.Data);
-                        }
-
-                        dataSegs[para.SegmentId] = seg;
-                        dataAddresses.Add(seg.Id, seg.Address);
+                        dataMems[para.SegmentId] = new byte[seg.Size];
+                    }
+                    else
+                    {
+                        dataMems[para.SegmentId] = Convert.FromBase64String(seg.Data);
                     }
 
-                    AppParameterTypeViewModel type = types[para.ParameterTypeId];
+                    dataSegs[para.SegmentId] = seg;
+                    dataAddresses.Add(seg.Id, seg.Address);
+                }
 
-                    int paraDataLength = type.Size >= 8 ? (type.Size / 8) : 1;
-                    byte[] paraData = new byte[paraDataLength];
+                AppParameterTypeViewModel type = types[para.ParameterTypeId];
+
+                int paraDataLength = type.Size >= 8 ? (type.Size / 8) : 1;
+                byte[] paraData = new byte[paraDataLength];
+
+                switch (type.Type)
+                {
+                    case ParamTypes.Enum:
+                    case ParamTypes.NumberUInt:
+                    case ParamTypes.Time:
+                        paraData = BitConverter.GetBytes(Convert.ToUInt32(para.Value)).Take(paraDataLength).ToArray();
+                        Array.Reverse(paraData);
+                        break;
+                    case ParamTypes.NumberInt:
+                        paraData = BitConverter.GetBytes(Convert.ToInt32(para.Value)).Take(paraDataLength).ToArray();
+                        Array.Reverse(paraData);
+                        break;
+
+                    case ParamTypes.Text:
+                        Encoding.UTF8.GetBytes(para.Value).CopyTo(paraData, 0);
+                        break;
+                    default:
+                        Log.Error("Parametertyp wurde noch nicht beim Applikation schreiben eingepflegt... Typ: " + type.Type.ToString());
+                        throw new Exception("Unbekannter ParaTyp: " + type.Type.ToString());
+                }
+
+
+
+
+                if (type.Size >= 8)
+                {
+                    Debug.WriteLine(para.Offset);
+                    byte[] memory = dataMems[para.SegmentId];
+                    for (int i = 0; i < type.Size / 8; i++)
+                    {
+                        memory[para.Offset + i] = paraData[i];
+                        changed.Add(para.Offset + i);
+                    }
+                }
+                else
+                {
+                    List<int> masks = new List<int>() { 0b00000001, 0b00000011, 0b00000111, 0b00001111, 0b00011111, 0b00111111, 0b01111111 };
+                    int dataByte = paraData[0];
+
+                    int mask = masks[type.Size - 1];
+                    dataByte &= mask;
+                    dataByte = dataByte << para.OffsetBit;
+
+                    int memByte = dataMems[para.SegmentId][para.Offset];
+                    memByte = ((mask << para.OffsetBit) ^ 255) & memByte;
+                    memByte |= dataByte;
+                    dataMems[para.SegmentId][para.Offset] = Convert.ToByte(memByte);
+                }
+            }
+
+            int unionId = 1;
+            while (true)
+            {
+                if (!_context.AppParameters.Any(p => p.ApplicationId == adds.Id && p.UnionId == unionId)) break;
+
+                bool flag = false;
+                foreach (AppParameter para in _context.AppParameters.Where(p => p.ApplicationId == adds.Id && p.UnionId == unionId))
+                {
+                    if (paras.ContainsKey(para.Id))
+                    {
+                        flag = true;
+                        break;
+                    }
+                }
+
+                if (!flag && _context.AppParameters.Any(p => p.ApplicationId == adds.Id && p.UnionId == unionId && p.UnionDefault))
+                {
+                    AppParameter defPara = _context.AppParameters.First(p => p.ApplicationId == adds.Id && p.UnionId == unionId && p.UnionDefault);
+
+                    AppParameterTypeViewModel type = types[defPara.ParameterTypeId];
+
+                    byte[] paraData = type.Size >= 8 ? new byte[type.Size / 8] : new byte[1];
 
                     switch (type.Type)
                     {
                         case ParamTypes.Enum:
                         case ParamTypes.NumberUInt:
-                        case ParamTypes.Time:
-                            paraData = BitConverter.GetBytes(Convert.ToUInt32(para.Value)).Take(paraDataLength).ToArray();
+                            paraData = BitConverter.GetBytes(Convert.ToUInt32(defPara.Value)).Take(type.Size / 8).ToArray();
                             Array.Reverse(paraData);
                             break;
                         case ParamTypes.NumberInt:
-                            paraData = BitConverter.GetBytes(Convert.ToInt32(para.Value)).Take(paraDataLength).ToArray();
+                            paraData = BitConverter.GetBytes(Convert.ToInt32(defPara.Value)).Take(type.Size / 8).ToArray();
                             Array.Reverse(paraData);
                             break;
 
                         case ParamTypes.Text:
-                            Encoding.UTF8.GetBytes(para.Value).CopyTo(paraData, 0);
+                            paraData = Encoding.UTF8.GetBytes(defPara.Value);
                             break;
-                        default:
-                            Log.Error("Parametertyp wurde noch nicht beim Applikation schreiben eingepflegt... Typ: " + type.Type.ToString());
-                            throw new Exception("Unbekannter ParaTyp: " + type.Type.ToString());
                     }
-
 
 
 
                     if (type.Size >= 8)
                     {
-                        Debug.WriteLine(para.Offset);
-                        byte[] memory = dataMems[para.SegmentId];
+                        byte[] memory = dataMems[defPara.SegmentId];
                         for (int i = 0; i < type.Size / 8; i++)
                         {
-                            memory[para.Offset + i] = paraData[i];
-                            changed.Add(para.Offset + i);
+                            memory[defPara.Offset + i] = paraData[i];
+                            changed.Add(defPara.Offset + i);
                         }
                     }
                     else
                     {
-                        List<int> masks = new List<int>() { 0b00000001, 0b00000011, 0b00000111, 0b00001111, 0b00011111, 0b00111111, 0b01111111 };
-                        int dataByte = paraData[0];
 
-                        int mask = masks[type.Size - 1];
-                        dataByte &= mask;
-                        dataByte = dataByte << para.OffsetBit;
-
-                        int memByte = dataMems[para.SegmentId][para.Offset];
-                        memByte = ((mask << para.OffsetBit) ^ 255) & memByte;
-                        memByte |= dataByte;
-                        dataMems[para.SegmentId][para.Offset] = Convert.ToByte(memByte);
                     }
                 }
 
-                int unionId = 1;
-                while (true)
-                {
-                    if (!_context.AppParameters.Any(p => p.ApplicationId == adds.Id && p.UnionId == unionId)) break;
-
-                    bool flag = false;
-                    foreach (AppParameter para in _context.AppParameters.Where(p => p.ApplicationId == adds.Id && p.UnionId == unionId))
-                    {
-                        if (paras.ContainsKey(para.Id))
-                        {
-                            flag = true;
-                            break;
-                        }
-                    }
-
-                    if (!flag && _context.AppParameters.Any(p => p.ApplicationId == adds.Id && p.UnionId == unionId && p.UnionDefault))
-                    {
-                        AppParameter defPara = _context.AppParameters.First(p => p.ApplicationId == adds.Id && p.UnionId == unionId && p.UnionDefault);
-
-                        AppParameterTypeViewModel type = types[defPara.ParameterTypeId];
-
-                        byte[] paraData = type.Size >= 8 ? new byte[type.Size / 8] : new byte[1];
-
-                        switch (type.Type)
-                        {
-                            case ParamTypes.Enum:
-                            case ParamTypes.NumberUInt:
-                                paraData = BitConverter.GetBytes(Convert.ToUInt32(defPara.Value)).Take(type.Size / 8).ToArray();
-                                Array.Reverse(paraData);
-                                break;
-                            case ParamTypes.NumberInt:
-                                paraData = BitConverter.GetBytes(Convert.ToInt32(defPara.Value)).Take(type.Size / 8).ToArray();
-                                Array.Reverse(paraData);
-                                break;
-
-                            case ParamTypes.Text:
-                                paraData = Encoding.UTF8.GetBytes(defPara.Value);
-                                break;
-                        }
-
-
-
-                        if (type.Size >= 8)
-                        {
-                            byte[] memory = dataMems[defPara.SegmentId];
-                            for (int i = 0; i < type.Size / 8; i++)
-                            {
-                                memory[defPara.Offset + i] = paraData[i];
-                                changed.Add(defPara.Offset + i);
-                            }
-                        }
-                        else
-                        {
-                            //TODO do it now
-                        }
-                    }
-
-                    unionId++;
-                }
-
-            }
-            catch (Exception ex)
-            {
-
+                unionId++;
             }
         }
 
