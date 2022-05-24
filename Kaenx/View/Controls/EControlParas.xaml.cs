@@ -50,6 +50,7 @@ namespace Kaenx.Views.Easy.Controls
             get { return _selectedParaBlock; }
             set
             {
+                if(value == null) return;
                 _selectedParaBlock = value;
                 PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("SelectedParaBlock"));
             }
