@@ -11,12 +11,15 @@ After the recoding with [UNO-Platform](https://platform.uno) (or [.NET Maui](htt
 There is no timeshift for the recoding. We will start with this after we can configure all KNX Devices with the software.    
   
 # Installing
-There are two ways to install the App:  
- - [Microsoft Store](https://www.microsoft.com/store/productId/9NX69NJ80X6T)  
+~~There are two ways to install the App:  
+ - ~~Microsoft Store  
     Only major releases
- - [App Installer File](https://kaenx.mikegerst.de)  
+ - ~~App Installer File  
     Also small releases. Updates will be installed automatically.    
-    It is mandatory to install the ["Publisher Certificate"](https://kaenx.mikegerst.de/Updater/Kaenx_0.0.55.0_Test/Kaenx_0.0.55.0_x86_x64.cer) as an administrator. The path has to be "Trusted Root Certification Authorities" on the local computer.
+    It is mandatory to install the Publisher Certificate as an administrator. The path has to be "Trusted Root Certification Authorities" on the local computer.
+    
+Kaenx **wont be availible** for direct download due to the complete recode in the future.  
+If you are still interested in testing it you can compile it with Visual Studio by your own.  
 
 # Images
 [![Kaenx Ansicht Topologie](/Images/Topologie.png)](/Images/)
