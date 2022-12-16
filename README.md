@@ -10,13 +10,14 @@ Mit der Umstellung auf [UNO-Platform](https://platform.uno) (oder [.NET Maui](ht
 Die Umstellung erfolgt allerdings erst, nachdem das Programmieren der Geräte funktioniert. Somit ist hier noch kein Zeitpunkt geplant.  
   
 # Installation
-Es gibt 2 Möglichkeiten die kompilierte Anwendung zu installieren:  
- - ~~[Microsoft Store](https://www.microsoft.com/store/productId/9NX69NJ80X6T)  
-    Hier werden nur größere Releases veröffentlicht
- - [App Installer File](https://kaenx.mikegerst.de)  
-    Hier werden auch kleiner Releases veröffentlicht. Die App sucht automatisch nach neuen Updates und installiert diese.  
-    Es ist zwingend erforderlich, das ["Herausgeber Zertifikat"](https://kaenx.mikegerst.de/Updater/Kaenx_0.0.55.0_Test/Kaenx_0.0.55.0_x86_x64.cer) als Administrator zu Installieren. Als Speicherort ist der lokale Computer und "Vertrauenswürdige Stammzertifizierungsstelle" zu wählen.~~
-Die Kaenx steht aktuell aufgrund der bevorstehenden neuentwicklung nicht mehr vorerstellt zur Verfügung.  
+~~Es gibt 2 Möglichkeiten die kompilierte Anwendung zu installieren:~~  
+ - ~~Microsoft Store~~  
+    ~~Hier werden nur größere Releases veröffentlicht~~
+ - ~~App Installer File~~  
+    ~~Hier werden auch kleiner Releases veröffentlicht. Die App sucht automatisch nach neuen Updates und installiert diese.~~  
+    ~~Es ist zwingend erforderlich, das Herausgeber Zertifikat als Administrator zu Installieren. Als Speicherort ist der lokale Computer und "Vertrauenswürdige Stammzertifizierungsstelle" zu wählen.~~  
+      
+Die Kaenx steht aktuell aufgrund der bevorstehenden neuentwicklung **nicht mehr vorerstellt zur Verfügung**.  
 Um sie dennoch auszuprobieren können Sie mithilfe von Visual Studio selbst die Anwendung erstellen.
 
 # Bilder
