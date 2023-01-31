@@ -350,7 +350,9 @@ namespace Kaenx.Classes.Bus
                 {
                     await CurrentAction.Connection.Connect();
                 }
-                catch { }
+                catch {
+                
+                }
                 if(CurrentAction.Connection is KnxRemote)
                     await Task.Delay(2000);
                 else

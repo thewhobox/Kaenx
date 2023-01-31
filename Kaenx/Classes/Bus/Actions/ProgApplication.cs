@@ -1,5 +1,4 @@
 ﻿using Kaenx.Classes.Buildings;
-using Kaenx.Classes.Dynamic;
 using Kaenx.Classes.Helper;
 using Kaenx.Classes.Project;
 using Kaenx.DataContext.Catalog;
@@ -110,7 +109,15 @@ namespace Kaenx.Classes.Bus.Actions
             TodoText = ProcedureType == ProcedureTypes.Load ? "Applikation schreiben" : "Gerät entladen";
 
             //CatalogContext _context = new CatalogContext();
-            AppAdditional adds = _context.AppAdditionals.Single(a => a.Id == Device.ApplicationId);
+            AppAdditional adds = null;
+            try
+            {
+                adds = _context.AppAdditionals.Single(a => a.ApplicationId == Device.ApplicationId);
+            }
+            catch
+            {
+
+            }
             app = _context.Applications.Single(a => a.Id == Device.ApplicationId);
             ManuId = _context.Manufacturers.Single(m => m.Id == app.Manufacturer).ManuId;
 
@@ -1283,7 +1290,7 @@ namespace Kaenx.Classes.Bus.Actions
                 if (para.SegmentId == -1) continue;
                 if (!dataSegs.ContainsKey(para.SegmentId))
                 {
-                    AppSegmentViewModel seg = _context.AppSegments.Single(a => a.Id == para.SegmentId);
+                    AppSegmentViewModel seg = _context.AppSegments.Single(a => a.SegmentId == para.SegmentId);
                     if (seg.Data == null)
                     {
                         dataMems[para.SegmentId] = new byte[seg.Size];
